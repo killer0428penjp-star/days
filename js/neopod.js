@@ -1,3 +1,15 @@
+
+破線
+
+border: 2px dashed #0070ff;
+点線
+
+border: 2px dotted #ff69b4;
+二重線
+
+border: 4px double #4caf50;
+
+
 import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion } from "./firebase.js";
 // ★ 作成したカレンダー機能をインポート
 import { initCalendar } from "./calendar.js";
@@ -164,3 +176,4 @@ export function initNeoPod() {
     document.getElementById('profile-file-input').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('profile-edit-preview').src = ev.target.result; }; reader.readAsDataURL(file); };
     document.getElementById('profile-save-btn').onclick = async () => { const birthday = document.getElementById('edit-birthday').value; const bio = document.getElementById('edit-bio').value.trim(); const newIcon = document.getElementById('profile-edit-preview').src; const userRef = doc(db, "users_v11", me.id); await updateDoc(userRef, { "icon.val": newIcon, birthday, bio }); me.icon.val = newIcon; me.birthday = birthday; me.bio = bio; document.getElementById('my-profile-btn').src = newIcon; alert("プロフィールを更新しました"); window.closeModal('profile-modal'); };
 }
+
