@@ -114,8 +114,50 @@ export function initNeoPod() {
     document.getElementById('toggle-signup').onclick = () => { document.getElementById('signup-extra').classList.toggle('hidden'); document.getElementById('login-btn').classList.toggle('hidden'); document.getElementById('signup-exec-btn').classList.toggle('hidden'); document.getElementById('auth-err').innerText = ""; };
     
     // ★固定ヘッダー側のプロフィールエリアをクリックした時の処理に修正
-    document.getElementById('my-profile-btn-wrapper').onclick = () => { document.getElementById('profile-modal').classList.remove('hidden'); document.getElementById('profile-edit-preview').src = me.icon.val || DEFAULT_IMG; if(document.getElementById('edit-profile-name')) document.getElementById('edit-profile-name').innerText = me.name; if(document.getElementById('edit-profile-id')) document.getElementById('edit-profile-id').innerText = "ID: " + me.id; document.getElementById('edit-birthday').value = me.birthday || ""; document.getElementById('edit-bio').value = me.bio || ""; };
-    
+   document.getElementById('my-profile-btn-wrapper').onclick = () => {
+        document.getElementById('profile-modal').classList.remove('hidden');
+        document.getElementById('profile-edit-preview').src = me.icon.val || DEFAULT_IMG;
+        
+        // 入力欄に現在の値をセット
+        document.getElementById('edit-profile-name-input').value = me.name;
+        document.getElementById('edit-profile-id-input').value = me.id;
+        document.getElementById('edit-birthday').value = me.birthday || "";
+        document.getElementById('edit-bio').value = me.bio || "";
+    };
     document.getElementById('profile-file-input').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('profile-edit-preview').src = ev.target.result; }; reader.readAsDataURL(file); };
     document.getElementById('profile-save-btn').onclick = async () => { const birthday = document.getElementById('edit-birthday').value; const bio = document.getElementById('edit-bio').value.trim(); const newIcon = document.getElementById('profile-edit-preview').src; const userRef = doc(db, "users_v11", me.id); await updateDoc(userRef, { "icon.val": newIcon, birthday, bio }); me.icon.val = newIcon; me.birthday = birthday; me.bio = bio; document.getElementById('my-profile-btn').src = newIcon; alert("プロフィールを更新しました"); window.closeModal('profile-modal'); };
 }
+// --- プロフィール保存処理の修正 ---
+    document.getElementById('profile-save-btn').onclick = async () => {
+        const newName = document.getElementById('edit-profile-name-input').value.trim();
+        const birthday = document.getElementById('edit-birthday').value;
+        const bio = document.getElementById('edit-bio').value.trim();
+        const newIcon = document.getElementById('profile-edit-preview').src;
+
+        if(!newName) {
+            alert("名前を入力してください");
+            return;
+        }
+
+        const userRef = doc(db, "users_v11", me.id);
+        await updateDoc(userRef, {
+            name: newName,
+            "icon.val": newIcon,
+            birthday: birthday,
+            bio: bio
+        });
+
+        // ローカルのデータを更新
+        me.name = newName;
+        me.icon.val = newIcon;
+        me.birthday = birthday;
+        me.bio = bio;
+
+        // 画面上の表示を即時更新
+        document.getElementById('my-profile-btn').src = newIcon;
+        document.getElementById('my-name-display').innerText = newName;
+
+        alert("プロフィールを更新しました");
+        window.closeModal('profile-modal');
+    };
+
