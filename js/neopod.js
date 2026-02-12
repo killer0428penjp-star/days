@@ -1,43 +1,46 @@
 import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion } from "./firebase.js";
 
 let me = null;
-let currentEditRoomId = null;　
+let currentEditRoomId = null; 
 let currentRoomId = null; 
 let chatUnsubscribe = null; 
 const DEFAULT_IMG = "https://placehold.jp/24/cccccc/ffffff/200x200.png?text=NoImage";
 
 export function initNeoPod() {
     async function login(id, pw, auto = false) {
-    const s = await getDoc(doc(db, "users_v11", id));
-    if(!s.exists() || s.data().pw !== pw) {
-        if(!auto) document.getElementById('auth-err').innerText = "IDまたはパスワードが正しくありません";
-        return;
-    }
-    me = s.data(); me.id = id;
-    if(!me.icon) me.icon = { val: DEFAULT_IMG };
-    
-    // ...中略（session保存など）...
+        const s = await getDoc(doc(db, "users_v11", id));
+        if(!s.exists() || s.data().pw !== pw) {
+            if(!auto) document.getElementById('auth-err').innerText = "IDまたはパスワードが正しくありません";
+            return;
+        }
+        me = s.data(); me.id = id;
+        if(!me.icon) me.icon = { val: DEFAULT_IMG };
+        
+        // session保存
+        localStorage.setItem('np_session', JSON.stringify({ id, pw, expire: Date.now() + 1000 * 60 * 60 * 24 * 30 }));
+        const history = JSON.parse(localStorage.getItem('np_account_history') || '[]');
+        if(!history.find(a => a.id === id)) { history.push({id, pw, name: me.name, icon: me.icon.val}); localStorage.setItem('np_account_history', JSON.stringify(history)); }
 
-    // ★ここを修正：全体の固定ヘッダーを表示し、情報を入れる
-    const fixedHeader = document.getElementById('neo-fixed-header');
-    if (fixedHeader) {
-        fixedHeader.style.display = "flex"; // 非表示を解除
-        document.getElementById('my-profile-btn-fixed').src = me.icon.val;
-        document.getElementById('my-name-display-fixed').innerText = me.name;
-    }
+        // ★全体の固定ヘッダーを表示し、情報を入れる
+        const fixedHeader = document.getElementById('neo-fixed-header');
+        if (fixedHeader) {
+            fixedHeader.style.display = "flex"; // 非表示を解除
+        }
+        document.getElementById('my-profile-btn').src = me.icon.val;
+        document.getElementById('my-name-display').innerText = me.name;
 
-    // トーク画面専用の表示
-    document.getElementById('auth-screen').classList.add('hidden');
-    document.getElementById('main-content').classList.remove('hidden');
-      document.querySelectorAll(".tag").forEach(t => t.classList.remove("active"));
-      const talkTag = document.getElementById("tolk-tag"); if (talkTag) talkTag.classList.add("active");
-      document.getElementById("news-feed-container").style.display = "none";
-      document.getElementById("calendar-container").style.display = "none";
-      document.getElementById("tolk-screen").style.display = "block";
-      document.getElementById("header-bg").style.display = "flex"; 
-      document.getElementById('my-profile-btn').src = me.icon.val;
-      document.getElementById('my-name-display').innerText = me.name;
-      window.showNeoScreen('rooms');
+        // トーク画面専用の表示
+        document.getElementById('auth-screen').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        document.querySelectorAll(".tag").forEach(t => t.classList.remove("active"));
+        const talkTag = document.getElementById("tolk-tag"); if (talkTag) talkTag.classList.add("active");
+        
+        document.getElementById("news-feed-container").style.display = "none";
+        document.getElementById("calendar-container").style.display = "none";
+        document.getElementById("tolk-screen").style.display = "block";
+        document.getElementById("header-bg").style.display = "flex"; 
+        
+        window.showNeoScreen('rooms');
     }
 
     function removeFromHistory(id) { const history = JSON.parse(localStorage.getItem('np_account_history') || '[]'); const filtered = history.filter(a => a.id !== id); localStorage.setItem('np_account_history', JSON.stringify(filtered)); renderHistory(); }
@@ -50,8 +53,21 @@ export function initNeoPod() {
     document.getElementById('signup-exec-btn').onclick = async () => { const id = document.getElementById('auth-id').value.trim(); const pw = document.getElementById('auth-pw').value.trim(); const name = document.getElementById('signup-name').value.trim() || id; if(!id || !pw) return; const check = await getDoc(doc(db, "users_v11", id)); if(check.exists()) { document.getElementById('auth-err').innerText = "このIDは既に使用されています"; return; } await setDoc(doc(db, "users_v11", id), { id, pw, name, icon: {val: DEFAULT_IMG}, createdAt: serverTimestamp() }); login(id, pw); };
 
     const session = JSON.parse(localStorage.getItem('np_session'));
-    if (session && session.expire > Date.now()) { login(session.id, session.pw, true); } 
-    else { document.getElementById('main-content').classList.add('hidden'); document.getElementById('auth-screen').classList.remove('hidden'); document.querySelectorAll(".tag").forEach(t => t.classList.remove("active")); document.getElementById("tolk-tag").classList.add("active"); document.getElementById("news-feed-container").style.display = "none"; document.getElementById("calendar-container").style.display = "none"; document.getElementById("tolk-screen").style.display = "block"; }
+    if (session && session.expire > Date.now()) { 
+        login(session.id, session.pw, true); 
+    } 
+    else { 
+        document.getElementById('main-content').classList.add('hidden'); 
+        document.getElementById('auth-screen').classList.remove('hidden'); 
+        document.querySelectorAll(".tag").forEach(t => t.classList.remove("active")); 
+        document.getElementById("tolk-tag").classList.add("active"); 
+        document.getElementById("news-feed-container").style.display = "none"; 
+        document.getElementById("calendar-container").style.display = "none"; 
+        document.getElementById("tolk-screen").style.display = "block";
+        // ★未ログイン時は固定ヘッダーを隠す
+        const fixedHeader = document.getElementById('neo-fixed-header');
+        if(fixedHeader) fixedHeader.style.display = "none";
+    }
     renderHistory();
 
     window.showNeoScreen = (mode) => {
@@ -96,7 +112,10 @@ export function initNeoPod() {
     window.deleteRoom = async (rid) => { if(confirm("ルームを削除しますか？")) await deleteDoc(doc(db, "rooms_v11", rid)); };
     window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
     document.getElementById('toggle-signup').onclick = () => { document.getElementById('signup-extra').classList.toggle('hidden'); document.getElementById('login-btn').classList.toggle('hidden'); document.getElementById('signup-exec-btn').classList.toggle('hidden'); document.getElementById('auth-err').innerText = ""; };
-    document.getElementById('my-profile-btn').onclick = () => { document.getElementById('profile-modal').classList.remove('hidden'); document.getElementById('profile-edit-preview').src = me.icon.val || DEFAULT_IMG; if(document.getElementById('edit-profile-name')) document.getElementById('edit-profile-name').innerText = me.name; if(document.getElementById('edit-profile-id')) document.getElementById('edit-profile-id').innerText = "ID: " + me.id; document.getElementById('edit-birthday').value = me.birthday || ""; document.getElementById('edit-bio').value = me.bio || ""; };
+    
+    // ★固定ヘッダー側のプロフィールエリアをクリックした時の処理に修正
+    document.getElementById('my-profile-btn-wrapper').onclick = () => { document.getElementById('profile-modal').classList.remove('hidden'); document.getElementById('profile-edit-preview').src = me.icon.val || DEFAULT_IMG; if(document.getElementById('edit-profile-name')) document.getElementById('edit-profile-name').innerText = me.name; if(document.getElementById('edit-profile-id')) document.getElementById('edit-profile-id').innerText = "ID: " + me.id; document.getElementById('edit-birthday').value = me.birthday || ""; document.getElementById('edit-bio').value = me.bio || ""; };
+    
     document.getElementById('profile-file-input').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('profile-edit-preview').src = ev.target.result; }; reader.readAsDataURL(file); };
     document.getElementById('profile-save-btn').onclick = async () => { const birthday = document.getElementById('edit-birthday').value; const bio = document.getElementById('edit-bio').value.trim(); const newIcon = document.getElementById('profile-edit-preview').src; const userRef = doc(db, "users_v11", me.id); await updateDoc(userRef, { "icon.val": newIcon, birthday, bio }); me.icon.val = newIcon; me.birthday = birthday; me.bio = bio; document.getElementById('my-profile-btn').src = newIcon; alert("プロフィールを更新しました"); window.closeModal('profile-modal'); };
 }

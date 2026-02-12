@@ -12,13 +12,14 @@
     <link rel="stylesheet" href="css/neopod.css">
 </head>
 <body>
-    <header id="neo-fixed-header" style="display: none; position: fixed; top: 15px; right: 15px; z-index: 10000; align-items: center; gap: 10px; background: transparent;">
-        <div class="header-left" onclick="document.getElementById('my-profile-btn').click()" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
-            <img id="my-profile-btn-fixed" src="" style="width:42px; height:42px; border-radius:50%; border:2px solid var(--accent); object-fit:cover; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
-            <div id="my-name-display-fixed" style="color:white; font-weight:bold; text-shadow:1px 1px 4px #000; font-size:14px;"></div>
+    <header id="neo-fixed-header" style="display: none; position: fixed; top: 15px; right: 15px; z-index: 10000; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 25px; backdrop-filter: blur(5px);">
+        <div class="header-left" id="my-profile-btn-wrapper" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+            <img id="my-profile-btn" src="" style="width:38px; height:38px; border-radius:50%; border:2px solid var(--accent); object-fit:cover; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.3);">
+            <div id="my-name-display" style="color:white; font-weight:bold; text-shadow:1px 1px 2px #000; font-size:14px; margin-right: 5px;"></div>
         </div>
-        <div class="header-right">
-            <button class="btn-sub" onclick="window.np_logout()" style="background:rgba(0,0,0,0.4); color:white; border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(4px); padding:4px 8px; border-radius:10px; font-size:10px; cursor:pointer;">ログアウト</button>
+        <div class="header-right" style="display:flex; gap: 5px; align-items:center;">
+            <button class="btn-sub" onclick="window.np_logout()" style="background:rgba(255,255,255,0.2); color:white; border:none; padding:4px 8px; border-radius:10px; font-size:10px; cursor:pointer;">ログアウト</button>
+            <button class="btn-sub btn-del" onclick="window.execDeleteAccount()" style="background:rgba(255,100,100,0.8); color:white; border:none; padding:4px 8px; border-radius:10px; font-size:9px; cursor:pointer;">削除</button>
         </div>
     </header>
 
@@ -108,17 +109,6 @@
         </div>
 
         <div id="main-content" class="hidden" style="display:flex; flex-direction:column; height:100%;">
-            <header>
-                <div class="header-left">
-                    <img id="my-profile-btn" style="width:38px; height:38px; border-radius:50%; border:2px solid var(--accent); object-fit:cover; cursor:pointer;">
-                    <div id="my-name-display" style="font-weight:bold; font-size:14px;"></div>
-                </div>
-                <div>
-                    <button class="btn-sub" onclick="window.np_logout()">ログアウト</button>
-                    <button class="btn-sub btn-del" onclick="window.execDeleteAccount()" style="font-size:9px;">アカウント削除</button>
-                </div>
-            </header>
-
             <div id="nav-area" class="nav-tabs">
                 <div id="tab-rooms" class="tab active" onclick="window.showNeoScreen('rooms')">トーク</div>
                 <div id="tab-friends" class="tab" onclick="window.showNeoScreen('friends')">友達</div>
