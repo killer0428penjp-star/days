@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Cyber Clock & Neo Pod Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Montserrat:wght@400;700&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="top-space" id="header-bg">
+  <div class="weather-top">
+    <span>天気 <span id="weather-text">--</span></span>
+    <span>温度 <span id="temp">--</span>℃ <span id="temp-diff" class="diff-badge"></span></span>
+    <span>湿度 <span id="humidity">--</span>% <span id="hum-diff" class="diff-badge"></span></span>
+  </div>
+  <div class="clock-main" id="clock">--:--:<span class="seconds">--</span></div>
+</div>
+
+<div id="today-memo-top" style="display:none; background:rgba(255,255,255,0.1); backdrop-filter:blur(5px); padding:10px 20px; border-bottom:1px solid rgba(255,255,255,0.2); font-size:14px; text-align:center; color:#fff;">
+  今日の予定を確認...
+</div>
+
+<div class="tag-container">
+  <span class="tag active" id="news-tag">news</span>
+  <span class="tag" id="study-tag">study</span>
+  <span class="tag" id="tolk-tag">tolk</span>
+  <span class="tag" id="calendar-tag">calendar</span>
+  <span class="tag" id="others-tag">others</span>
+</div>
+
+<div id="news-feed-container">
+  <div class="switch-container" style="margin: 10px 20px;">
+    <label class="switch"><input type="checkbox" id="modeToggle"><span class="slider"></span></label>
+    <span style="margin-left:10px; font-size:12px; color:var(--text);">Dark Mode</span>
+  </div>
+  <div class="news-tabs">
+    <div id="tab-latest" class="n-tab active" onclick="changeNewsTab('latest')">Latest</div>
+    <div id="tab-popular" class="n-tab" onclick="changeNewsTab('popular')">Trending</div>
+    <div id="tab-likes" class="n-tab" onclick="changeNewsTab('likes')">Bookmark</div>
+  </div>
+  <div id="feed"><div style="text-align:center; padding:40px;">LOADING...</div></div>
+</div>
+
+<div id="calendar-container" style="display:none;">
+  <div class="calendar">
+    <div class="cal-header">
+      <button id="prev">←</button>
+      <div id="cal-title"></div>
+      <button id="next">→</button>
+    </div>
+    <div class="week">
+      <div>日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div>土</div>
+    </div>
+    <div class="days" id="days"></div>
+    <div class="memo">
+      <h3 id="memo-date">Select Date</h3>
+      <textarea id="memo-text" placeholder="MEMO..." spellcheck="false"></textarea>
+      <div id="status-msg"></div>
+      <div style="margin-bottom:10px;">
+        <label style="font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+           <input type="checkbox" id="repeat-checkbox"> 繰り返し(3ヶ月)
+        </label>
+        <div id="weekday-select" style="display:flex; gap:5px; margin-top:5px;"></div>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="action-btn save-btn" id="save-btn">保存</button>
+        <button class="action-btn important-btn" id="important-btn">大事な保存</button>
+        <button class="action-btn delete-btn" id="delete-btn">削除</button>
+        <button class="action-btn delete-all-btn" id="delete-all-btn" style="background:#444;">全削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tolk-screen" class="screen" style="display:none;">
+  <div id="auth-screen" class="auth-overlay">
+    <div class="auth-card">
+      <h2>Neo Pod Pro</h2>
+      <div id="acc-history-area" class="hidden">
+        <div style="font-size:12px; color:#888; margin-bottom:5px;">アカウント履歴</div>
+        <div id="acc-history-list"></div>
+        <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
+      </div>
+      <div id="auth-err" style="color:red; font-size:12px; margin-bottom:10px;"></div>
+      <input type="text" id="auth-id" class="input-field" placeholder="ID">
+      <input type="password" id="auth-pw" class="input-field" placeholder="パスワード">
+      <div id="signup-extra" class="hidden">
+        <input type="text" id="signup-name" class="input-field" placeholder="表示名">
+      </div>
+      <button id="login-btn" class="send-btn">ログイン</button>
+      <button id="toggle-signup" style="background:none; border:none; color:var(--primary); font-size:12px; margin-top:10px; cursor:pointer;">新規登録はこちら</button>
+      <button id="signup-exec-btn" class="send-btn hidden" style="background:#00b894;">登録完了</button>
+    </div>
+  </div>
+
+  <div id="main-content" class="hidden">
+    <header style="display:flex; justify-content:space-between; align-items:center; padding:10px 15px; background:#fff; border-bottom:1px solid #eee;">
+      <div class="header-left" style="display:flex; align-items:center; gap:10px; cursor:pointer;" id="my-profile-btn-wrap">
+        <img id="my-profile-btn" src="" style="width:36px; height:36px; border-radius:50%; object-fit:cover;">
+        <div id="my-name-display" style="font-weight:bold; font-size:14px;"></div>
+      </div>
+      <div>
+        <button class="btn-sub" onclick="np_logout()">ログアウト</button>
+        <button class="btn-sub btn-del" onclick="execDeleteAccount()">削除</button>
+      </div>
+    </header>
+    
+    <div id="nav-area" class="nav-tabs">
+      <div id="tab-rooms" class="tab active" onclick="showNeoScreen('rooms')">トーク</div>
+      <div id="tab-friends" class="tab" onclick="showNeoScreen('friends')">友達</div>
+    </div>
+
+    <div id="rooms-screen" class="screen">
+      <div class="room-header">
+        <span>トークルーム</span>
+        <button onclick="openRoomModal()" class="btn-new-room">+ 新規作成</button>
+      </div>
+      <table class="data-table"><tbody id="room-list-body"></tbody></table>
+    </div>
+
+    <div id="friends-screen" class="screen hidden">
+      <table class="data-table"><tbody id="friend-list-body"></tbody></table>
+    </div>
+
+    <div id="chat-screen" class="screen hidden">
+      <div class="chat-header">
+        <button onclick="showNeoScreen('rooms')">←</button>
+        <b id="chat-title" style="flex:1; text-align:center;">ルーム名</b>
+        <div style="width:30px;"></div>
+      </div>
+      <div id="chat-area"></div>
+      <footer>
+        <div class="emoji-tray">
+           <span onclick="sendEmoji('👋','wave')">👋</span>
+           <span onclick="sendEmoji('💖','bounce')">💖</span>
+           <span onclick="sendEmoji('✨','bounce')">✨</span>
+           <span onclick="sendEmoji('🔥','bounce')">🔥</span>
+        </div>
+        <div class="input-box">
+          <button onclick="document.getElementById('m-file').click()">＋</button>
+          <input type="file" id="m-file" hidden accept="image/*,video/*">
+          <textarea id="m-text" placeholder="メッセージ..."></textarea>
+          <button id="send-go" class="send-btn">送信</button>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <div id="profile-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3>プロフィール編集</h3>
+      <input type="file" id="profile-file-input" hidden accept="image/*">
+      <div onclick="document.getElementById('profile-file-input').click()" class="profile-preview-box">
+         <img id="profile-edit-preview" src="">
+      </div>
+      <h3 id="edit-profile-name-container"><span id="edit-profile-name"></span> <small id="edit-profile-id"></small></h3>
+      <input type="date" id="edit-birthday" class="input-field">
+      <textarea id="edit-bio" class="input-field" placeholder="自己紹介"></textarea>
+      <div class="modal-btns">
+        <button onclick="closeModal('profile-modal')">戻る</button>
+        <button id="profile-save-btn">保存</button>
+      </div>
+    </div>
+  </div>
+  
+  <div id="room-modal" class="modal-overlay hidden">
+     <div class="modal-card">
+       <h3>ルーム作成/編集</h3>
+       <input type="file" id="room-file-input" hidden>
+       <div onclick="document.getElementById('room-file-input').click()" class="room-preview-box">
+         <img id="room-preview" src="https://placehold.jp/150x150.png?text=PICK">
+       </div>
+       <input type="text" id="room-name-input" class="input-field" placeholder="ルーム名">
+       <div id="room-invite-list" style="max-height:150px; overflow-y:auto; text-align:left;"></div>
+       <div class="modal-btns">
+         <button onclick="closeModal('room-modal')">戻る</button>
+         <button id="room-save-btn">保存</button>
+       </div>
+     </div>
+  </div>
+
+  <div id="view-profile-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="profile-view-icon"><img id="view-profile-icon" src=""></div>
+      <h3><span id="view-profile-name"></span></h3>
+      <p id="view-profile-id" style="color:#888; font-size:12px;"></p>
+      <div class="profile-details" style="text-align:left; background:#f9f9f9; padding:10px; border-radius:8px; margin:10px 0;">
+        <div style="font-size:12px; color:#555;">誕生日: <span id="view-profile-birthday"></span></div>
+        <div style="margin-top:5px; font-size:13px; white-space:pre-wrap;" id="view-profile-bio"></div>
+      </div>
+      <button onclick="closeModal('view-profile-modal')">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
