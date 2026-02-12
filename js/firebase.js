@@ -5,3 +5,4 @@ const firebaseConfig = { apiKey: "AIzaSyBkKXKmrV-vzq3OoUrvihd4X9KGKpjoNBc", auth
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+export { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion };
