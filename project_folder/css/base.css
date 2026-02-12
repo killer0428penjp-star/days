@@ -1,0 +1,23 @@
+:root {
+  --main-bg: #f0f4f8; --card-bg: rgba(255, 255, 255, 0.8); --accent: #0070ff;
+  --text-main: #1a202c; --text-sub: #718096; --border-soft: #e2e8f0;
+  --up-color: #ff4d4d; --down-color: #0070ff;
+  --cal-bg: #ffffff; --cal-text: #1a202c; --cal-cell-bg: #f8fafc; --cal-memo-bg: #ffffff;
+  --primary: #2d3436; --danger: #ff7675; --success: #00b894; --bg: #f8f9fa; --card: #ffffff;
+}
+body.dark-mode {
+  --main-bg: #1e1e2f; --card-bg: rgba(30, 30, 47, 0.85); --accent: #00f2ff;
+  --text-main: #ffffff; --text-sub: #a0aec0; --border-soft: #2d3748;
+  --down-color: #00f2ff; --cal-bg: #111111; --cal-text: #ffffff; --cal-cell-bg: #222222; --cal-memo-bg: #1a1a1a;
+}
+body { margin: 0; font-family: 'Montserrat', sans-serif; background-color: var(--main-bg); background-image: radial-gradient(var(--border-soft) 1px, transparent 1px); background-size: 20px 20px; color: var(--text-main); transition: 0.4s; overflow-x: hidden; }
+.switch-container { position: fixed; top: 15px; left: 14px; z-index: 1000; }
+.switch { position: relative; width: 44px; height: 24px; display: block; cursor: pointer; }
+.switch input { opacity: 0; }
+.slider { position: absolute; inset: 0; background: #ccc; border-radius: 30px; transition: 0.4s; }
+.slider::before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.4s; }
+input:checked + .slider { background: var(--accent); }
+input:checked + .slider::before { transform: translateX(20px); }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+.blink { animation: blink 1s infinite; }

@@ -1,0 +1,23 @@
+#calendar-container { display: none; width: 100%; max-width: 480px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
+.calendar { background: var(--cal-bg); padding: 20px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); color: var(--cal-text); border: 1px solid var(--border-soft); transition: 0.4s; }
+.cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+.cal-header button { background: var(--accent); border:none; color:white; padding:8px 14px; font-weight:bold; border-radius:8px; cursor:pointer; }
+#cal-title { font-size:1.5em; font-weight:bold; }
+.week, .days { display:grid; grid-template-columns:repeat(7,1fr); }
+.week div { text-align:center; font-weight:bold; padding:10px 0; border-bottom:2px solid var(--border-soft); cursor:pointer; }
+.week div.selected-week { background:#2ecc71; color: white; border-radius:8px; }
+.days div { text-align:center; padding:12px 0; margin:3px; border-radius:10px; cursor:pointer; font-weight:bold; position:relative; background: var(--cal-cell-bg); }
+.saturday { background: #3498db !important; background-image: none !important; color: white !important; }
+.sunday, .holiday { background: #e74c3c !important; background-image: none !important; color: white !important; }
+.holiday-label { position:absolute; top:2px; right:2px; font-size:8px; line-height: 1; color: white !important; background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important; }
+.memo-day-important { background: #ff69b4 !important; color: white; }
+.today { background: #f1c40f !important; color: #000 !important; }
+.selected { outline: 3px solid #2ecc71; z-index: 5; }
+.memo { margin-top:20px; display:flex; flex-direction:column; align-items:center; width:100%; }
+.memo textarea { width:100%; padding:12px; border-radius:12px; background: var(--cal-memo-bg); color: var(--cal-text); border:1px solid var(--border-soft); font-size: 16px; box-sizing: border-box; min-height:100px; }
+.action-btn { margin:3px; padding:6px 12px; border-radius:6px; border:none; color:white; font-weight:bold; cursor:pointer; }
+.save-btn { background:#2ecc71; }
+.important-btn { background:#ff69b4; }
+.delete-btn { background:#e67e22; }
+.delete-all-btn { background:#8e44ad; }
+#status-msg { width:100%; padding:8px; margin:5px 0; text-align:center; font-weight:bold; border-radius:8px; background: rgba(0,0,0,0.05); color: var(--text-main); min-height:20px; font-size:12px; }

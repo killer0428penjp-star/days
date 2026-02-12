@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cyber Clock & Weather & Neo Pod</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Montserrat:wght@400;700&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/neopod.css">
+</head>
+<body>
+    <header id="neo-fixed-header" style="display: none; position: fixed; top: 15px; right: 15px; z-index: 10000; align-items: center; gap: 10px; background: transparent;">
+        <div class="header-left" onclick="document.getElementById('my-profile-btn').click()" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+            <img id="my-profile-btn-fixed" src="" style="width:42px; height:42px; border-radius:50%; border:2px solid var(--accent); object-fit:cover; background:#fff; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+            <div id="my-name-display-fixed" style="color:white; font-weight:bold; text-shadow:1px 1px 4px #000; font-size:14px;"></div>
+        </div>
+        <div class="header-right">
+            <button class="btn-sub" onclick="window.np_logout()" style="background:rgba(0,0,0,0.4); color:white; border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(4px); padding:4px 8px; border-radius:10px; font-size:10px; cursor:pointer;">ログアウト</button>
+        </div>
+    </header>
+
+    <div class="switch-container">
+        <label class="switch"><input type="checkbox" id="modeToggle"><span class="slider"></span></label>
+    </div>
+
+    <div class="top-space" id="header-bg">
+        <div class="weather-top">
+            <span>天気 <span id="weather-text">--</span></span>
+            <span>温度 <span id="temp">--</span>℃ <span id="temp-diff" class="diff-badge"></span></span>
+            <span>湿度 <span id="humidity">--</span>% <span id="hum-diff" class="diff-badge"></span></span>
+        </div>
+        <div class="clock-main" id="clock">--:--:<span class="seconds">--</span></div>
+    </div>
+
+    <div id="today-memo-top-header" class="today-bar" style="display: none;">
+        <div class="today-bar-content">
+            <span class="today-label">TODAY:</span>
+            <span class="today-bar-text"></span>
+            <button type="button" class="today-more-btn">もっと見る</button>
+        </div>
+    </div>
+
+    <div class="tag-container">
+        <span class="tag active" id="news-tag">news</span>
+        <span class="tag">study</span>
+        <span class="tag" id="tolk-tag">tolk</span>
+        <span class="tag" id="calendar-tag">calendar</span>
+        <span class="tag">others</span>
+    </div>
+
+    <div id="news-feed-container">
+        <div class="news-tabs">
+            <div id="tab-latest" class="n-tab active">Latest</div>
+            <div id="tab-popular" class="n-tab">Trending</div>
+            <div id="tab-likes" class="n-tab">Bookmark</div>
+        </div>
+        <div id="feed"><div style="text-align:center; padding:40px; font-weight:800; color:var(--accent);">INITIALIZING...</div></div>
+    </div>
+
+    <div id="calendar-container">
+        <div class="calendar">
+            <div id="today-memo-top" style="margin-bottom:15px; padding:10px; background:rgba(255,105,180,0.1); border-radius:8px; border-left:4px solid #ff69b4; font-size:0.9em; font-weight:bold; color:var(--text-main);">今日の予定: なし</div>
+            <div class="cal-header">
+                <button id="prev">←</button>
+                <div id="cal-title"></div>
+                <button id="next">→</button>
+            </div>
+            <div class="week" id="weekdays">
+                <div data-dow="0">日</div><div data-dow="1">月</div><div data-dow="2">火</div><div data-dow="3">水</div><div data-dow="4">木</div><div data-dow="5">金</div><div data-dow="6">土</div>
+            </div>
+            <div class="days" id="days"></div>
+            <div class="memo">
+                <h3 id="memo-date" style="margin: 0 0 10px 0; font-size:1.1em;">日付を選択</h3>
+                <textarea id="memo-text" placeholder="メモを書く" spellcheck="false"></textarea>
+                <div id="status-msg"></div>
+                <div style="margin-bottom: 10px; font-size:0.8em;">
+                    <label><input type="checkbox" id="repeat-checkbox"> 繰り返し3か月</label>
+                </div>
+                <div>
+                    <button class="action-btn save-btn" id="save-btn">保存</button>
+                    <button class="action-btn important-btn" id="important-btn">大事な保存</button>
+                    <button class="action-btn delete-btn" id="delete-btn">削除</button>
+                    <button class="action-btn delete-all-btn" id="delete-all-btn">全削除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tolk-screen" class="screen" style="display: block;">
+        <div id="auth-screen" class="auth-overlay">
+            <div class="auth-card">
+                <h2 style="margin-bottom:20px;">Neo Pod Pro</h2>
+                <div id="acc-history-area" class="hidden">
+                    <div id="acc-history-list" style="display: flex; gap: 15px; justify-content: center; overflow-x: auto; padding: 10px 0;"></div>
+                    <hr style="border:0; border-top:1px solid #eee; margin-bottom:15px;">
+                </div>
+                <div id="auth-err" style="color:var(--danger); font-size:12px; margin-bottom:10px; min-height: 15px;"></div>
+                <input type="text" id="auth-id" class="input-field" placeholder="ID">
+                <input type="password" id="auth-pw" class="input-field" placeholder="パスワード">
+                <div id="signup-extra" class="hidden"><input type="text" id="signup-name" class="input-field" placeholder="表示名"></div>
+                <button id="login-btn" class="send-btn">ログイン</button>
+                <button id="toggle-signup" style="background:none; border:none; color:var(--accent); margin-top:10px; cursor:pointer; font-size:13px;">新規登録</button>
+                <button id="signup-exec-btn" class="send-btn hidden" style="background:var(--accent);">登録完了</button>
+            </div>
+        </div>
+
+        <div id="main-content" class="hidden" style="display:flex; flex-direction:column; height:100%;">
+            <header>
+                <div class="header-left">
+                    <img id="my-profile-btn" style="width:38px; height:38px; border-radius:50%; border:2px solid var(--accent); object-fit:cover; cursor:pointer;">
+                    <div id="my-name-display" style="font-weight:bold; font-size:14px;"></div>
+                </div>
+                <div>
+                    <button class="btn-sub" onclick="window.np_logout()">ログアウト</button>
+                    <button class="btn-sub btn-del" onclick="window.execDeleteAccount()" style="font-size:9px;">アカウント削除</button>
+                </div>
+            </header>
+
+            <div id="nav-area" class="nav-tabs">
+                <div id="tab-rooms" class="tab active" onclick="window.showNeoScreen('rooms')">トーク</div>
+                <div id="tab-friends" class="tab" onclick="window.showNeoScreen('friends')">友達</div>
+            </div>
+
+            <div id="rooms-screen" class="screen">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <span style="font-size:12px; color:#888;">トークルーム</span>
+                    <button onclick="window.openRoomModal()" style="background:var(--accent); color:white; border:none; padding:6px 15px; border-radius:15px; font-size:12px; cursor:pointer;">+ 新規作成</button>
+                </div>
+                <table class="data-table"><tbody id="room-list-body"></tbody></table>
+            </div>
+
+            <div id="friends-screen" class="screen hidden">
+                <table class="data-table"><tbody id="friend-list-body"></tbody></table>
+            </div>
+
+            <div id="chat-screen" class="screen hidden" style="padding:0; display:flex; flex-direction:column; background:#fff;">
+                <div style="padding:10px 15px; border-bottom:1px solid var(--border-soft); display:flex; align-items:center; gap:10px;">
+                    <button onclick="window.showNeoScreen('rooms')" style="background:none; border:none; color:var(--accent); font-size:14px; cursor:pointer;">← 戻る</button>
+                    <b id="chat-title" style="font-size:15px;">ルーム名</b>
+                </div>
+                <div id="chat-area" style="flex:1; overflow-y:auto; padding:15px; background:var(--bg);"></div>
+                <footer style="padding:10px; background:#fff; border-top:1px solid var(--border-soft);">
+                    <div class="emoji-tray" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:5px;">
+                        <span onclick="window.sendEmoji('👋','wave')" style="cursor:pointer; font-size:20px;">👋</span>
+                        <span onclick="window.sendEmoji('💖','bounce')" style="cursor:pointer; font-size:20px;">💖</span>
+                        <span onclick="window.sendEmoji('✨','bounce')" style="cursor:pointer; font-size:20px;">✨</span>
+                        <span onclick="window.sendEmoji('🔥','bounce')" style="cursor:pointer; font-size:20px;">🔥</span>
+                    </div>
+                    <div class="input-box" style="display:flex; gap:8px; margin-top:5px;">
+                        <button onclick="document.getElementById('m-file').click()" style="width:40px; height:40px; border-radius:50%; border:none; background:#eee; cursor:pointer;">＋</button>
+                        <input type="file" id="m-file" hidden accept="image/*,video/*">
+                        <textarea id="m-text" style="flex:1; height:40px; border-radius:20px; border:1px solid var(--border-soft); padding:10px; outline:none; resize:none;" placeholder="メッセージを入力..."></textarea>
+                        <button id="send-go" class="send-btn" style="width:60px; height:40px;">送信</button>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        <div id="profile-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <h3>プロフィール編集</h3>
+                <input type="file" id="profile-file-input" hidden accept="image/*">
+                <div onclick="document.getElementById('profile-file-input').click()" style="width:100px; height:100px; margin:0 auto 10px; border-radius:50%; overflow:hidden; cursor:pointer; border:3px solid var(--accent);">
+                    <img id="profile-edit-preview" src="" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <p style="font-size:11px; color:#888; margin-bottom:10px;">クリックして画像を変更</p>
+                <h3 style="margin:5px 0 15px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span id="edit-profile-name"></span>
+                    <span id="edit-profile-id" style="font-size:12px; color:#888; font-weight: normal; border-left: 1px solid #ddd; padding-left: 8px;"></span>
+                </h3>
+                <div style="text-align:left; margin-bottom:10px;">
+                    <label style="font-size:11px; color:var(--accent); font-weight:bold; margin-left:5px;">誕生日</label>
+                    <input type="date" id="edit-birthday" class="input-field">
+                    <label style="font-size:11px; color:var(--accent); font-weight:bold; margin-left:5px;">自己紹介</label>
+                    <textarea id="edit-bio" class="input-field" style="height:80px; resize:none;" placeholder="自己紹介・説明欄"></textarea>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="window.closeModal('profile-modal')" style="flex:1; background:#eee; border:none; padding:10px; border-radius:15px;">戻る</button>
+                    <button id="profile-save-btn" style="flex:2; background:var(--accent); color:white; border:none; padding:10px; border-radius:15px; font-weight:bold;">保存する</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="room-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <h3 id="modal-title">ルーム作成</h3>
+                <input type="file" id="room-file-input" hidden accept="image/*">
+                <div onclick="document.getElementById('room-file-input').click()" style="width:80px; height:80px; margin:0 auto 15px; border:2px dashed #ccc; border-radius:20px; overflow:hidden; cursor:pointer;">
+                    <img id="room-preview" src="https://placehold.jp/150x150.png?text=IMG" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <input type="text" id="room-name-input" class="input-field" placeholder="名前を入力">
+                <div style="text-align:left; margin-bottom:10px;">
+                    <label style="font-size:11px; color:var(--accent); font-weight:bold;">メンバーを選択</label>
+                    <div id="room-invite-list" style="max-height: 120px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px; padding: 5px; margin-top: 5px;"></div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="window.closeModal('room-modal')" style="flex:1; background:#eee; border:none; padding:10px; border-radius:15px;">戻る</button>
+                    <button id="room-save-btn" style="flex:2; background:var(--accent); color:white; border:none; padding:10px; border-radius:15px; font-weight:bold;">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-profile-modal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <div style="width:100px; height:100px; margin:0 auto 15px; border-radius:50%; overflow:hidden; border:3px solid var(--accent);">
+                    <img id="view-profile-icon" src="" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <h3 style="margin:5px 0 15px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span id="view-profile-name"></span>
+                    <span id="view-profile-id" style="font-size:12px; color:#888; font-weight: normal; border-left: 1px solid #ddd; padding-left: 8px;"></span>
+                </h3>
+                <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:15px; margin-bottom:15px;">
+                    <div style="font-size:11px; color:var(--accent); font-weight:bold;">誕生日</div>
+                    <div id="view-profile-birthday" style="margin-bottom:10px; font-size:14px;">-</div>
+                    <div style="font-size:11px; color:var(--accent); font-weight:bold;">自己紹介</div>
+                    <div id="view-profile-bio" style="font-size:14px; white-space:pre-wrap;">-</div>
+                </div>
+                <button onclick="window.closeModal('view-profile-modal')" style="width:100%; background:#eee; border:none; padding:10px; border-radius:15px; cursor:pointer;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
