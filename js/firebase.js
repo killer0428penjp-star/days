@@ -6,24 +6,27 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 export { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion };
-function updateDate() {
-    const now = new Date();
-    const days = ['日', '月', '火', '水', '木', '金', '土'];
+function updateDisplay() {
+            const now = new Date();
+            
+            // 日付の更新
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            const year = now.getFullYear();
+            const dayNames = ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"];
+            const dayName = dayNames[now.getDay()];
 
-    // 年・月・日を取得
-    const y = now.getFullYear();
-    const m = String(now.getMonth() + 1).padStart(2, '0');
-    const d = String(now.getDate()).padStart(2, '0');
-    const w = days[now.getDay()]; // 曜日
+            document.getElementById('year-label').innerText = year;
+            document.getElementById('date-display').innerText = `${month}月 ${date}日`;
+            document.getElementById('weekday-display').innerText = dayName;
 
-    // HTMLに書き込み
-    const dateEl = document.getElementById('date-display');
-    if (dateEl) {
-        dateEl.innerText = `${y}/${m}/${d} (${w})`;
-    }
-}
+            // 時計の更新
+            const h = String(now.getHours()).padStart(2, '0');
+            const m = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock-display').innerText = `${h}:${m}:${s}`;
+        }
 
-// 初回実行
-updateDate();
-// 1時間ごとに更新（日付の切り替わり対策）
-setInterval(updateDate, 3600000);
+        // 1秒ごとに更新
+        setInterval(updateDisplay, 1000);
+        updateDisplay(); // 初回実行

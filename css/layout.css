@@ -44,3 +44,12 @@ body.dark-mode .news-content { background: #1a1a2e; color: #cbd5e0; }
 .btn-like { cursor: pointer; color: #cbd5e0; font-size: 1.4rem; border: none; background: none; }
 .btn-like.liked { color: #ff0055; }
 .full-link { display: inline-block; margin-top: 15px; padding: 10px 20px; background: var(--accent); color: #fff !important; font-weight: 700; text-decoration: none; font-size: 0.85rem; border-radius: 2px; }
+#date-display {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: sans-serif;
+            background-color: #fff;
+        }
