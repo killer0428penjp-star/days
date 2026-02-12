@@ -1,4 +1,6 @@
 import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion } from "./firebase.js";
+// ★ 作成したカレンダー機能をインポート
+import { initCalendar } from "./calendar.js";
 
 let me = null;
 let currentEditRoomId = null; 
@@ -7,6 +9,33 @@ let chatUnsubscribe = null;
 const DEFAULT_IMG = "https://placehold.jp/24/cccccc/ffffff/200x200.png?text=NoImage";
 
 export function initNeoPod() {
+
+    // --- 1. タブ切り替えシステム ---
+    // カレンダーやニュース、チャットの画面を切り替える基本機能
+    const tags = document.querySelectorAll('.tag');
+    const containers = {
+        'news-tag': document.getElementById('news-feed-container'),
+        'calendar-tag': document.getElementById('calendar-container'),
+        'tolk-tag': document.getElementById('tolk-screen')
+    };
+
+    tags.forEach(tag => {
+        tag.onclick = () => {
+            // すべての画面を非表示
+            Object.values(containers).forEach(c => { if(c) c.style.display = 'none'; });
+            // すべてのタグの選択状態を解除
+            tags.forEach(t => t.classList.remove('active'));
+            
+            // 選ばれたものを表示
+            tag.classList.add('active');
+            if (containers[tag.id]) containers[tag.id].style.display = 'block';
+
+            // NeoPodヘッダーとの干渉を防ぐ調整が必要ならここに記述
+        };
+    });
+
+
+    // --- 2. ログイン処理 ---
     async function login(id, pw, auto = false) {
         const s = await getDoc(doc(db, "users_v11", id));
         if(!s.exists() || s.data().pw !== pw) {
@@ -16,35 +45,57 @@ export function initNeoPod() {
         me = s.data(); me.id = id;
         if(!me.icon) me.icon = { val: DEFAULT_IMG };
         
-        // session保存
+        // セッション情報の保存
         localStorage.setItem('np_session', JSON.stringify({ id, pw, expire: Date.now() + 1000 * 60 * 60 * 24 * 30 }));
+        
+        // 履歴の更新
         const history = JSON.parse(localStorage.getItem('np_account_history') || '[]');
-        if(!history.find(a => a.id === id)) { history.push({id, pw, name: me.name, icon: me.icon.val}); localStorage.setItem('np_account_history', JSON.stringify(history)); }
-
-        // ★全体の固定ヘッダーを表示し、情報を入れる
-        const fixedHeader = document.getElementById('neo-fixed-header');
-        if (fixedHeader) {
-            fixedHeader.style.display = "flex"; // 非表示を解除
+        if(!history.find(a => a.id === id)) { 
+            history.push({id, pw, name: me.name, icon: me.icon.val}); 
+            localStorage.setItem('np_account_history', JSON.stringify(history)); 
         }
+
+        // --- 画面表示の更新 ---
+        const fixedHeader = document.getElementById('neo-fixed-header');
+        if (fixedHeader) fixedHeader.style.display = "flex";
+        
         document.getElementById('my-profile-btn').src = me.icon.val;
         document.getElementById('my-name-display').innerText = me.name;
 
-        // トーク画面専用の表示
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-content').classList.remove('hidden');
-        document.querySelectorAll(".tag").forEach(t => t.classList.remove("active"));
-        const talkTag = document.getElementById("tolk-tag"); if (talkTag) talkTag.classList.add("active");
-        
-        document.getElementById("news-feed-container").style.display = "none";
-        document.getElementById("calendar-container").style.display = "none";
-        document.getElementById("tolk-screen").style.display = "block";
-        document.getElementById("header-bg").style.display = "flex"; 
-        
-        window.showNeoScreen('rooms');
+        document.getElementById('header-bg').style.display = "flex"; 
+
+        // デフォルトでトーク画面を開く
+        const talkTag = document.getElementById("tolk-tag");
+        if (talkTag) talkTag.click(); 
+        else window.showNeoScreen('rooms');
+
+        // ★★★ ここでカレンダーを初期化 (ユーザーIDを渡す) ★★★
+        initCalendar(me.id);
     }
 
+    // --- 3. アカウント管理 (ログアウト・履歴・削除) ---
     function removeFromHistory(id) { const history = JSON.parse(localStorage.getItem('np_account_history') || '[]'); const filtered = history.filter(a => a.id !== id); localStorage.setItem('np_account_history', JSON.stringify(filtered)); renderHistory(); }
-    function renderHistory() { const history = JSON.parse(localStorage.getItem('np_account_history') || '[]'); const area = document.getElementById('acc-history-area'); const list = document.getElementById('acc-history-list'); list.innerHTML = ""; if(history.length > 0) { area.classList.remove('hidden'); history.forEach(acc => { const div = document.createElement('div'); div.className = 'acc-item'; div.innerHTML = `<img src="${acc.icon || DEFAULT_IMG}"><span>${acc.name}</span>`; div.onclick = () => login(acc.id, acc.pw); list.appendChild(div); }); } else { area.classList.add('hidden'); } }
+    
+    function renderHistory() { 
+        const history = JSON.parse(localStorage.getItem('np_account_history') || '[]'); 
+        const area = document.getElementById('acc-history-area'); 
+        const list = document.getElementById('acc-history-list'); 
+        list.innerHTML = ""; 
+        if(history.length > 0) { 
+            area.classList.remove('hidden'); 
+            history.forEach(acc => { 
+                const div = document.createElement('div'); 
+                div.className = 'acc-item'; 
+                div.innerHTML = `<img src="${acc.icon || DEFAULT_IMG}"><span>${acc.name}</span>`; 
+                div.onclick = () => login(acc.id, acc.pw); 
+                list.appendChild(div); 
+            }); 
+        } else { 
+            area.classList.add('hidden'); 
+        } 
+    }
 
     window.np_logout = () => { localStorage.removeItem('np_session'); location.reload(); };
     window.execDeleteAccount = async () => { if(!confirm("本当に削除しますか？")) return; const targetId = me.id; await deleteDoc(doc(db, "users_v11", targetId)); removeFromHistory(targetId); window.np_logout(); };
@@ -52,24 +103,19 @@ export function initNeoPod() {
     document.getElementById('login-btn').onclick = () => login(document.getElementById('auth-id').value.trim(), document.getElementById('auth-pw').value.trim());
     document.getElementById('signup-exec-btn').onclick = async () => { const id = document.getElementById('auth-id').value.trim(); const pw = document.getElementById('auth-pw').value.trim(); const name = document.getElementById('signup-name').value.trim() || id; if(!id || !pw) return; const check = await getDoc(doc(db, "users_v11", id)); if(check.exists()) { document.getElementById('auth-err').innerText = "このIDは既に使用されています"; return; } await setDoc(doc(db, "users_v11", id), { id, pw, name, icon: {val: DEFAULT_IMG}, createdAt: serverTimestamp() }); login(id, pw); };
 
+    // --- 自動ログイン判定 ---
     const session = JSON.parse(localStorage.getItem('np_session'));
     if (session && session.expire > Date.now()) { 
         login(session.id, session.pw, true); 
-    } 
-    else { 
+    } else { 
         document.getElementById('main-content').classList.add('hidden'); 
         document.getElementById('auth-screen').classList.remove('hidden'); 
-        document.querySelectorAll(".tag").forEach(t => t.classList.remove("active")); 
-        document.getElementById("tolk-tag").classList.add("active"); 
-        document.getElementById("news-feed-container").style.display = "none"; 
-        document.getElementById("calendar-container").style.display = "none"; 
-        document.getElementById("tolk-screen").style.display = "block";
-        // ★未ログイン時は固定ヘッダーを隠す
         const fixedHeader = document.getElementById('neo-fixed-header');
         if(fixedHeader) fixedHeader.style.display = "none";
     }
     renderHistory();
 
+    // --- 4. チャット・UIロジック (NeoPodのコア機能) ---
     window.showNeoScreen = (mode) => {
         document.getElementById('rooms-screen').classList.add('hidden'); document.getElementById('friends-screen').classList.add('hidden'); document.getElementById('chat-screen').classList.add('hidden'); document.getElementById('nav-area').classList.remove('hidden');
         if (mode === 'rooms') { document.getElementById('rooms-screen').classList.remove('hidden'); loadRooms(); } 
@@ -105,6 +151,7 @@ export function initNeoPod() {
             if(userCount === 0) { list.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#888; padding:20px;'>他のユーザーはいません</td></tr>"; }
         });
     }
+
     window.viewUserProfile = (u) => { document.getElementById('view-profile-modal').classList.remove('hidden'); document.getElementById('view-profile-icon').src = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG; document.getElementById('view-profile-name').innerText = u.name; document.getElementById('view-profile-id').innerText = "ID: " + u.id; document.getElementById('view-profile-birthday').innerText = u.birthday || "未設定"; document.getElementById('view-profile-bio').innerText = u.bio || "自己紹介はありません。"; };
     window.openRoomModal = async (rid=null, n="", i="") => { currentEditRoomId = rid; document.getElementById('room-modal').classList.remove('hidden'); document.getElementById('room-name-input').value = n; document.getElementById('room-preview').src = rid ? (i || DEFAULT_IMG) : "https://placehold.jp/150x150.png?text=PICK"; const inviteList = document.getElementById('room-invite-list'); inviteList.innerHTML = "読み込み中..."; let currentMembers = []; if (rid) { const rDoc = await getDoc(doc(db, "rooms_v11", rid)); if (rDoc.exists()) currentMembers = rDoc.data().members || []; } const snap = await getDocs(collection(db, "users_v11")); inviteList.innerHTML = ""; snap.forEach(ds => { const u = ds.data(); if(u.id === me.id) return; const isChecked = currentMembers.includes(u.id) ? "checked" : ""; const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG; const div = document.createElement('div'); div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid #f9f9f9;"; div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px;">${u.name}</span>`; inviteList.appendChild(div); }); };
     document.getElementById('room-save-btn').onclick = async () => { const name = document.getElementById('room-name-input').value.trim(); if(!name) return; const selectedIds = Array.from(document.querySelectorAll('.invite-check:checked')).map(el => el.value); selectedIds.push(me.id); const roomData = { name, img: document.getElementById('room-preview').src, owner: me.id, members: selectedIds, createdAt: serverTimestamp() }; if(currentEditRoomId) { await updateDoc(doc(db, "rooms_v11", currentEditRoomId), { name, img: roomData.img, members: selectedIds }); } else { await addDoc(collection(db, "rooms_v11"), roomData); } window.closeModal('room-modal'); };
@@ -113,51 +160,7 @@ export function initNeoPod() {
     window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
     document.getElementById('toggle-signup').onclick = () => { document.getElementById('signup-extra').classList.toggle('hidden'); document.getElementById('login-btn').classList.toggle('hidden'); document.getElementById('signup-exec-btn').classList.toggle('hidden'); document.getElementById('auth-err').innerText = ""; };
     
-    // ★固定ヘッダー側のプロフィールエリアをクリックした時の処理に修正
-   document.getElementById('my-profile-btn-wrapper').onclick = () => {
-        document.getElementById('profile-modal').classList.remove('hidden');
-        document.getElementById('profile-edit-preview').src = me.icon.val || DEFAULT_IMG;
-        
-        // 入力欄に現在の値をセット
-        document.getElementById('edit-profile-name-input').value = me.name;
-        document.getElementById('edit-profile-id-input').value = me.id;
-        document.getElementById('edit-birthday').value = me.birthday || "";
-        document.getElementById('edit-bio').value = me.bio || "";
-    };
+    document.getElementById('my-profile-btn-wrapper').onclick = () => { document.getElementById('profile-modal').classList.remove('hidden'); document.getElementById('profile-edit-preview').src = me.icon.val || DEFAULT_IMG; if(document.getElementById('edit-profile-name')) document.getElementById('edit-profile-name').innerText = me.name; if(document.getElementById('edit-profile-id')) document.getElementById('edit-profile-id').innerText = "ID: " + me.id; document.getElementById('edit-birthday').value = me.birthday || ""; document.getElementById('edit-bio').value = me.bio || ""; };
     document.getElementById('profile-file-input').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('profile-edit-preview').src = ev.target.result; }; reader.readAsDataURL(file); };
     document.getElementById('profile-save-btn').onclick = async () => { const birthday = document.getElementById('edit-birthday').value; const bio = document.getElementById('edit-bio').value.trim(); const newIcon = document.getElementById('profile-edit-preview').src; const userRef = doc(db, "users_v11", me.id); await updateDoc(userRef, { "icon.val": newIcon, birthday, bio }); me.icon.val = newIcon; me.birthday = birthday; me.bio = bio; document.getElementById('my-profile-btn').src = newIcon; alert("プロフィールを更新しました"); window.closeModal('profile-modal'); };
 }
-// --- プロフィール保存処理の修正 ---
-    document.getElementById('profile-save-btn').onclick = async () => {
-        const newName = document.getElementById('edit-profile-name-input').value.trim();
-        const birthday = document.getElementById('edit-birthday').value;
-        const bio = document.getElementById('edit-bio').value.trim();
-        const newIcon = document.getElementById('profile-edit-preview').src;
-
-        if(!newName) {
-            alert("名前を入力してください");
-            return;
-        }
-
-        const userRef = doc(db, "users_v11", me.id);
-        await updateDoc(userRef, {
-            name: newName,
-            "icon.val": newIcon,
-            birthday: birthday,
-            bio: bio
-        });
-
-        // ローカルのデータを更新
-        me.name = newName;
-        me.icon.val = newIcon;
-        me.birthday = birthday;
-        me.bio = bio;
-
-        // 画面上の表示を即時更新
-        document.getElementById('my-profile-btn').src = newIcon;
-        document.getElementById('my-name-display').innerText = newName;
-
-        alert("プロフィールを更新しました");
-        window.closeModal('profile-modal');
-    };
-
