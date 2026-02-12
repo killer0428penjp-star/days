@@ -21,28 +21,3 @@ input:checked + .slider::before { transform: translateX(20px); }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 .blink { animation: blink 1s infinite; }
-/* --- date-display のスタイル --- */
-#date-display {
-    font-family: 'Roboto Mono', monospace; /* サイバー感を出すために等幅フォント */
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--text-main);
-    letter-spacing: 0.1em;
-    margin-bottom: 5px; /* 下の天気情報との隙間 */
-    text-shadow: 0 0 10px rgba(0, 112, 255, 0.3); /* ほんのり光らせる */
-}
-
-/* ダークモード時の光り方を調整 */
-body.dark-mode #date-display {
-    text-shadow: 0 0 15px var(--accent);
-}
-
-/* .top-space 自体のレイアウト調整（中央揃え） */
-.top-space {
-    padding: 60px 20px 30px; /* 上にスイッチがあるため余白を確保 */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
