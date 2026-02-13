@@ -22,9 +22,7 @@ input:checked + .slider::before { transform: translateX(20px); }
 @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 .blink { animation: blink 1s infinite; }
 
-/* ▼▼▼ 修正済：日付と天気エリアのスタイル ▼▼▼ */
-/* HTML側に()が書いてあるので、CSSからは削除しました */
-
+/* ▼▼▼ 追加：日付と天気エリアのスタイル ▼▼▼ */
 #date-top {
   display: flex;
   justify-content: center;
@@ -38,12 +36,15 @@ input:checked + .slider::before { transform: translateX(20px); }
   letter-spacing: 0.05em;
 }
 
+#current-day::before { content: "("; }
+#current-day::after { content: ")"; }
+
 .weather-top {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 15px;            /* 項目間の間隔 */
-  font-size: 20px;      /* 日付と同じサイズに統一 */
+  font-size: 14px;      /* 日付と同じサイズに統一 */
   color: var(--text-sub);
   margin-bottom: 5px;   /* 時計との隙間 */
 }
