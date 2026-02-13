@@ -63,46 +63,46 @@ export async function initCalendar(userId) {
   
     // 画面上部の「今日の予定」バーを更新する機能
     function updateTopTodayMemo() {
-        const headerEl = document.getElementById("today-memo-top-header");
-        const innerTop = document.getElementById("today-memo-top");
-        const now = new Date();
-        const keys = [
-            `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
-            `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`
-        ];
-        
-        let memoData = null;
-        for (const k of keys) { if (memoCache[k]) { memoData = memoCache[k]; break; } }
-        
-        const rawText = memoData?.text || "なし";
-        const firstLine = rawText.split("\n")[0];
+    const headerEl = document.getElementById("today-memo-top-header");
+    if (!headerEl) return;
 
-        // メイン画面のヘッダーバー制御
-        if (headerEl) {
-            const textEl = headerEl.querySelector(".today-bar-text");
-            const btn = headerEl.querySelector(".today-more-btn");
-            if(rawText !== "なし" && rawText.trim() !== "") {
-                headerEl.style.display = "flex";
-                textEl.textContent = firstLine;
-                if(rawText.split("\n").length > 1) {
-                    btn.style.display = "inline-block";
-                    btn.onclick = (e) => { 
-                        e.preventDefault(); 
-                        const isOpen = headerEl.classList.toggle("open"); 
-                        textEl.textContent = isOpen ? rawText : firstLine; 
-                        btn.textContent = isOpen ? "元に戻す" : "もっと見る"; 
-                    };
-                } else { btn.style.display = "none"; }
-            } else {
-                headerEl.style.display = "none";
-            }
-        }
+    const now = new Date();
+    // 検索キーを作成 (YYYY-MM-DD と YYYY-M-D 両方対応)
+    const key1 = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const key2 = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
+    
+    const memoData = memoCache[key1] || memoCache[key2];
+    const rawText = memoData ? memoData.text : "";
 
-        // カレンダー内部の表示制御
-        if(innerTop) {
-            innerTop.textContent = `今日の予定: ${firstLine}`;
+    const textEl = headerEl.querySelector(".today-bar-text");
+    const btn = headerEl.querySelector(".today-more-btn");
+
+    if (rawText.trim() !== "") {
+        headerEl.style.display = "flex";
+        const lines = rawText.split("\n");
+        const firstLine = lines[0];
+
+        // 初期状態：1行目だけ表示
+        textEl.textContent = firstLine;
+
+        if (lines.length > 1) {
+            btn.style.display = "inline-block";
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                const isOpen = headerEl.classList.toggle("open");
+                textEl.textContent = isOpen ? rawText : firstLine;
+                btn.textContent = isOpen ? "閉じる" : "もっと見る";
+                // 改行を有効にする
+                textEl.style.whiteSpace = isOpen ? "pre-wrap" : "nowrap";
+            };
+        } else {
+            btn.style.display = "none";
+            textEl.style.whiteSpace = "nowrap";
         }
+    } else {
+        headerEl.style.display = "none"; // 予定がなければ隠す
     }
+}
 
     // カレンダー描画
     function renderCalendar() {
