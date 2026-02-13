@@ -1,15 +1,4 @@
 
-破線
-
-border: 2px dashed #0070ff;
-点線
-
-border: 2px dotted #ff69b4;
-二重線
-
-border: 4px double #4caf50;
-
-
 import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion } from "./firebase.js";
 // ★ 作成したカレンダー機能をインポート
 import { initCalendar } from "./calendar.js";
