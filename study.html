@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenFocus v7 | Fixed Charts with Time Scale</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root { --accent: #2563eb; --study: #2563eb; --break: #10b981; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #fff; color: #1e293b; transition: all 0.5s ease; overflow: hidden; height: 100vh; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        
+        #bg-container { position: fixed; inset: 0; z-index: -1; background: #ffffff; background-size: cover; background-position: center; }
+        #anim-layer { position: absolute; inset: 0; pointer-events: none; }
+
+        /* 背景アニメーション */
+        .waves-bg { background: linear-gradient(180deg, #fff 0%, #e0f2fe 100%); }
+        .wave-obj { position: absolute; bottom: 0; width: 200%; height: 15vh; background: rgba(37, 99, 235, 0.05); border-radius: 40%; animation: wave-anim 15s linear infinite; }
+        @keyframes wave-anim { from { transform: translateX(0) rotate(0deg); } to { transform: translateX(-50%) rotate(360deg); } }
+
+        .trees-bg { background: linear-gradient(180deg, #fff 0%, #f0fdf4 100%); }
+        .leaf-obj { position: absolute; background: #22c55e; border-radius: 50% 0 50% 0; opacity: 0.08; animation: leaf-sway 6s ease-in-out infinite; }
+        @keyframes leaf-sway { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(20deg); } }
+
+        /* 時計盤 */
+        .clock-face { width: 260px; height: 260px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); position: relative; }
+        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 10px; z-index: 10; will-change: transform; }
+        .main-hand { width: 4px; height: 110px; background: var(--accent); margin-left: -2px; }
+        .numeral { position: absolute; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #cbd5e1; margin-top: -15px; margin-left: -15px; }
+
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); }
+        .tab-active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .hidden { display: none !important; }
+        input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        
+        /* グラフ用スタイル調整 */
+        .chart-bar { transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 4px; min-height: 4px; }
+        .timeline-block { position: absolute; height: 100%; top: 0; opacity: 0.9; border-radius: 2px; min-width: 2px; transition: all 0.3s ease; z-index: 10; cursor: pointer; }
+        .timeline-block:hover { z-index: 30; transform: scaleY(1.2); opacity: 1; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+
+    <div id="bg-container"></div>
+    <div id="anim-layer"></div>
+
+    <nav class="w-full max-w-sm flex justify-around p-2 mt-8 glass rounded-2xl shadow-sm z-10">
+        <button onclick="changeMode('stopwatch')" id="btn-stopwatch" class="text-[10px] font-bold uppercase tracking-widest px-4 py-2 tab-active">計測</button>
+        <button onclick="changeMode('timer')" id="btn-timer" class="text-[10px] font-bold uppercase tracking-widest px-4 py-2 text-slate-400">タイマー</button>
+        <button onclick="changeMode('study')" id="btn-study" class="text-[10px] font-bold uppercase tracking-widest px-4 py-2 text-slate-400">勉強用</button>
+    </nav>
+
+    <main class="flex-1 flex flex-col items-center justify-center w-full z-10">
+        
+        <div id="total-study-container" class="mb-4 hidden text-center">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Total Study Time</span>
+            <div id="total-study-display" class="text-2xl mono font-bold text-blue-600">00:00:00</div>
+        </div>
+
+        <div id="analog-clock" class="clock-face mb-8 hidden">
+            <div id="numerals-container"></div>
+            <div id="main-hand" class="hand main-hand"></div>
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-blue-600 rounded-full border-2 border-white z-20"></div>
+        </div>
+
+        <div id="digital-container" class="text-center">
+            <div id="display" class="text-7xl mono font-medium tracking-tighter text-slate-900">00:00:00</div>
+            
+            <div id="timer-inputs" class="mt-4 flex gap-3 justify-center hidden">
+                <input type="number" id="in-h" value="0" class="w-16 h-16 glass rounded-2xl text-center text-2xl font-bold">
+                <input type="number" id="in-m" value="0" class="w-16 h-16 glass rounded-2xl text-center text-2xl font-bold">
+                <input type="number" id="in-s" value="0" class="w-16 h-16 glass rounded-2xl text-center text-2xl font-bold">
+            </div>
+            <div id="status-label" class="text-[10px] font-bold text-slate-300 tracking-[0.5em] uppercase mt-10">Ready</div>
+        </div>
+    </main>
+
+    <div class="mb-20 flex flex-col items-center gap-8 w-full max-w-xs z-10">
+        <div class="flex gap-4">
+            <button onclick="toggleVisual()" class="p-3 glass rounded-full text-slate-400 hover:text-blue-600 transition-colors" title="表示切り替え"><i data-lucide="clock"></i></button>
+            <button onclick="toggleStats()" class="p-3 glass rounded-full text-slate-400 hover:text-blue-600 transition-colors" title="レポート"><i data-lucide="bar-chart-2"></i></button>
+            <button onclick="toggleSettings()" class="p-3 glass rounded-full text-slate-400 hover:text-blue-600 transition-colors" title="設定"><i data-lucide="settings"></i></button>
+        </div>
+
+        <button id="start-stop-btn" class="w-20 h-20 rounded-full bg-slate-900 text-white shadow-xl flex items-center justify-center transition-transform active:scale-90">
+            <i id="play-icon" data-lucide="play" class="w-8 h-8 fill-current"></i>
+        </button>
+
+        <div class="flex justify-between w-full px-10">
+            <button onclick="handleLap()" id="lap-btn" class="flex flex-col items-center gap-2 group">
+                <div class="w-12 h-12 rounded-full glass flex items-center justify-center group-hover:bg-white"><i data-lucide="flag" class="w-5 h-5 text-slate-300 group-hover:text-slate-900"></i></div>
+                <span class="text-[9px] font-bold text-slate-400 uppercase">ラップ</span>
+            </button>
+            <button onclick="handleReset()" class="flex flex-col items-center gap-2 group">
+                <div class="w-12 h-12 rounded-full glass flex items-center justify-center group-hover:bg-white"><i data-lucide="rotate-ccw" class="w-5 h-5 text-slate-300 group-hover:text-slate-900"></i></div>
+                <span class="text-[9px] font-bold text-slate-400 uppercase">リセット</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="stats-modal" class="fixed inset-0 bg-black/10 backdrop-blur-md hidden z-50 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-6 shadow-2xl max-h-[90vh] flex flex-col">
+            
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-extrabold text-xl">Analytics</h3>
+                <button onclick="toggleStats()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
+            </div>
+
+            <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
+                <button onclick="switchStatsMode('week')" id="stats-tab-week" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all">Weekly</button>
+                <button onclick="switchStatsMode('day')" id="stats-tab-day" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition-all">Daily</button>
+            </div>
+
+            <div class="flex justify-between items-center mb-6 px-2">
+                <button onclick="moveStatsDate(-1)" class="p-2 hover:bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                <div class="text-center">
+                    <div id="stats-date-label" class="text-sm font-bold text-slate-800"></div>
+                    <div id="stats-total-label" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total: 0h 0m</div>
+                </div>
+                <button onclick="moveStatsDate(1)" class="p-2 hover:bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="flex-1 mb-4 relative min-h-[200px] max-h-[300px]">
+                <div id="chart-week" class="w-full h-48 relative"></div>
+
+                <div id="chart-day" class="w-full h-48 hidden relative flex flex-col justify-center">
+                    <div id="day-grid" class="absolute inset-0 w-full h-full flex justify-between pointer-events-none z-0"></div>
+                    <div class="relative w-full h-12 bg-slate-50/50 rounded-lg overflow-hidden border border-slate-100 z-10" id="day-timeline-track"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-[10px] font-bold text-slate-600 text-center mt-auto pt-4 border-t border-slate-50">
+                <div class="flex items-center justify-center gap-1 bg-blue-50 py-2 rounded-lg">
+                    <span class="w-2 h-2 rounded-full bg-blue-600"></span> 勉強
+                </div>
+                <div class="flex items-center justify-center gap-1 bg-sky-50 py-2 rounded-lg">
+                    <span class="w-2 h-2 rounded-full bg-sky-400"></span> タイマー
+                </div>
+                <div class="flex items-center justify-center gap-1 bg-slate-50 py-2 rounded-lg">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span> 計測
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="lap-container" class="fixed bottom-40 w-full max-w-xs opacity-0 transition-opacity pointer-events-none">
+        <div id="lap-list" class="space-y-2 max-h-32 overflow-y-auto text-xs border-t border-slate-100 pt-4 px-4 pointer-events-auto"></div>
+    </div>
+
+    <div id="settings-modal" class="fixed inset-0 bg-black/10 backdrop-blur-md hidden z-50 flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-sm rounded-[40px] p-10 shadow-2xl">
+            <h3 class="font-extrabold text-xl mb-8">背景設定</h3>
+            <div class="space-y-6">
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="setBackground('none')" class="py-3 border rounded-2xl text-[10px] font-bold">なし</button>
+                    <button onclick="setBackground('waves')" class="py-3 border rounded-2xl text-[10px] font-bold">波</button>
+                    <button onclick="setBackground('trees')" class="py-3 border rounded-2xl text-[10px] font-bold">木々</button>
+                </div>
+                <label class="block w-full py-6 border-2 border-dashed border-slate-100 rounded-2xl text-center cursor-pointer">
+                    <span class="text-xs font-bold text-slate-400">画像を貼る</span>
+                    <input type="file" id="bg-upload" accept="image/*" class="hidden">
+                </label>
+            </div>
+            <button onclick="toggleSettings()" class="mt-8 w-full py-4 bg-slate-900 text-white rounded-2xl font-bold">閉じる</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 変数定義 ---
+        let startTime, elapsedTime = 0, timerInterval, isRunning = false, lapCount = 0;
+        let appMode = 'stopwatch';
+        let isAnalog = false;
+        let countdownBase = 0;
+        let totalStudyTime = 0; 
+        let isStudyPhase = true; 
+
+        const DB_SESSIONS_KEY = 'zenfocus_sessions_v4'; // DBキー更新
+        let currentSessionStart = null;
+        let statsMode = 'week'; 
+        let statsDate = new Date(); 
+
+        // --- データ保存ロジック ---
+        function loadSessions() {
+            return JSON.parse(localStorage.getItem(DB_SESSIONS_KEY)) || [];
+        }
+
+        function saveSession(start, end, mode) {
+            if (!start || !end || end <= start) return;
+            const sessions = loadSessions();
+            sessions.push({ start: Number(start), end: Number(end), mode });
+            localStorage.setItem(DB_SESSIONS_KEY, JSON.stringify(sessions));
+        }
+
+        // --- タイマー制御 ---
+        function update() {
+            const now = Date.now();
+            const delta = now - startTime;
+
+            if (appMode === 'stopwatch') {
+                elapsedTime = delta;
+            } else if (appMode === 'timer' || appMode === 'study') {
+                elapsedTime = countdownBase - delta;
+                if (appMode === 'study' && isStudyPhase) {
+                    const sessionDur = now - currentSessionStart;
+                    document.getElementById('total-study-display').innerText = timeToString(totalStudyTime + sessionDur);
+                }
+                if (elapsedTime <= 0) {
+                    elapsedTime = 0;
+                    if (appMode === 'study') {
+                        handleSessionEnd(); 
+                        if (isStudyPhase) {
+                            alert("集中終了！5分休憩に入ります。");
+                            prepareBreakPhase();
+                        } else {
+                            alert("休憩終了！25分集中を始めます。");
+                            prepareStudyPhase();
+                        }
+                        handleSessionStart(); 
+                        startTime = Date.now();
+                    } else {
+                        handleSessionEnd();
+                        handleStartStop(); 
+                        alert("Time Up!");
+                    }
+                }
+            }
+            document.getElementById('display').innerText = timeToString(elapsedTime);
+            const deg = (elapsedTime / 60000) * 360;
+            document.getElementById('main-hand').style.transform = `rotate(${deg}deg)`;
+        }
+
+        function handleSessionStart() {
+            if (appMode === 'study' && !isStudyPhase) {
+                currentSessionStart = null;
+            } else {
+                currentSessionStart = Date.now();
+            }
+        }
+
+        function handleSessionEnd() {
+            if (currentSessionStart) {
+                const now = Date.now();
+                saveSession(currentSessionStart, now, appMode);
+                totalStudyTime += (now - currentSessionStart); 
+                currentSessionStart = null;
+            }
+        }
+
+        function handleStartStop() {
+            if (!isRunning) {
+                if (appMode === 'timer' && elapsedTime === 0) {
+                    const h = parseInt(document.getElementById('in-h').value || 0);
+                    const m = parseInt(document.getElementById('in-m').value || 0);
+                    const s = parseInt(document.getElementById('in-s').value || 0);
+                    elapsedTime = (h * 3600 + m * 60 + s) * 1000;
+                    if (elapsedTime <= 0) return;
+                }
+                startTime = Date.now();
+                if (appMode === 'stopwatch') startTime -= elapsedTime;
+                else countdownBase = elapsedTime;
+                
+                handleSessionStart(); 
+                timerInterval = setInterval(update, 100);
+                isRunning = true;
+                document.getElementById('timer-inputs').classList.add('hidden');
+                document.getElementById('display').classList.remove('hidden');
+            } else {
+                handleSessionEnd(); 
+                clearInterval(timerInterval);
+                isRunning = false;
+            }
+            updateUI();
+        }
+
+        function handleReset() {
+            handleSessionEnd(); 
+            clearInterval(timerInterval);
+            isRunning = false;
+            elapsedTime = 0;
+            lapCount = 0;
+            if (appMode === 'study') {
+                totalStudyTime = 0;
+                document.getElementById('total-study-display').innerText = "00:00:00";
+                prepareStudyPhase();
+            } else {
+                document.getElementById('display').innerText = "00:00:00";
+            }
+            document.getElementById('main-hand').style.transform = `rotate(0deg)`;
+            document.getElementById('lap-list').innerHTML = '';
+            document.getElementById('lap-container').style.opacity = "0";
+            if (appMode === 'timer') {
+                document.getElementById('timer-inputs').classList.remove('hidden');
+                document.getElementById('display').classList.add('hidden');
+            }
+            updateUI();
+        }
+
+        // --- 統計UIロジック ---
+        function toggleStats() {
+            const modal = document.getElementById('stats-modal');
+            if (modal.classList.contains('hidden')) {
+                statsDate = new Date(); 
+                renderStats();
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function switchStatsMode(mode) {
+            statsMode = mode;
+            document.getElementById('stats-tab-week').className = mode === 'week' 
+                ? "flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all"
+                : "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition-all";
+            document.getElementById('stats-tab-day').className = mode === 'day' 
+                ? "flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all"
+                : "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition-all";
+            
+            document.getElementById('chart-week').classList.toggle('hidden', mode !== 'week');
+            document.getElementById('chart-day').classList.toggle('hidden', mode !== 'day');
+            
+            renderStats();
+        }
+
+        function moveStatsDate(direction) {
+            if (statsMode === 'week') {
+                statsDate.setDate(statsDate.getDate() + (direction * 7));
+            } else {
+                statsDate.setDate(statsDate.getDate() + direction);
+            }
+            renderStats();
+        }
+
+        function renderStats() {
+            const sessions = loadSessions();
+            if (statsMode === 'week') {
+                renderWeekChart(sessions);
+            } else {
+                renderDayChart(sessions);
+            }
+        }
+
+        function getColor(mode) {
+            if (mode === 'study') return 'bg-blue-600';
+            if (mode === 'timer') return 'bg-sky-400';
+            return 'bg-slate-400'; 
+        }
+
+        function getStartOfWeek(date) {
+            const d = new Date(date);
+            const day = d.getDay(); 
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        // --- グラフ描画: 週間（時間のメモリ付き） ---
+        function renderWeekChart(sessions) {
+            const startOfWeek = getStartOfWeek(statsDate);
+            startOfWeek.setHours(0,0,0,0);
+            
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+            const endDisp = new Date(endOfWeek);
+            endDisp.setDate(endDisp.getDate() - 1);
+            document.getElementById('stats-date-label').innerText = 
+                `${startOfWeek.getMonth()+1}/${startOfWeek.getDate()} - ${endDisp.getMonth()+1}/${endDisp.getDate()}`;
+
+            const dailyTotals = Array(7).fill(null).map(() => ({ total: 0, study: 0, timer: 0, stopwatch: 0 }));
+            let weekTotalMs = 0;
+
+            sessions.forEach(s => {
+                const sStart = Number(s.start);
+                const sEnd = Number(s.end);
+                if (sStart >= startOfWeek.getTime() && sStart < endOfWeek.getTime()) {
+                    const dateObj = new Date(sStart);
+                    let dayIdx = dateObj.getDay() - 1; 
+                    if (dayIdx === -1) dayIdx = 6;     
+
+                    const duration = sEnd - sStart;
+                    if (dailyTotals[dayIdx]) {
+                        dailyTotals[dayIdx].total += duration;
+                        const modeKey = ['study', 'timer', 'stopwatch'].includes(s.mode) ? s.mode : 'stopwatch';
+                        dailyTotals[dayIdx][modeKey] += duration;
+                        weekTotalMs += duration;
+                    }
+                }
+            });
+
+            document.getElementById('stats-total-label').innerText = `Total: ${formatTimeShort(weekTotalMs)}`;
+            
+            const container = document.getElementById('chart-week');
+            container.innerHTML = '';
+            
+            // 最大時間を計算（最低でも1時間を基準とする）
+            const maxValMs = Math.max(...dailyTotals.map(d => d.total), 0); 
+            let maxHours = Math.ceil(maxValMs / 3600000); // msを時間に変換して切り上げ
+            if (maxHours < 1) maxHours = 1; // どんなに少なくても1時間は表示
+            const maxChartMs = maxHours * 3600000;
+
+            // コンテナラッパー（左にメモリ用の余白をとる）
+            const wrapper = document.createElement('div');
+            wrapper.className = "relative w-full h-full flex pl-8";
+
+            // Y軸グリッド（時間のメモリ）
+            const grid = document.createElement('div');
+            grid.className = "absolute inset-0 left-8 flex flex-col-reverse justify-between pointer-events-none border-b border-slate-200";
+            for (let i = 0; i <= maxHours; i++) {
+                const line = document.createElement('div');
+                // 一番下の線（0h）は枠線と被るので上部ボーダーを消す
+                line.className = i === 0 ? "w-full relative" : "w-full border-t border-slate-100 relative";
+                line.innerHTML = `<span class="absolute -left-8 -top-2 w-6 text-right text-[9px] text-slate-400 mono font-bold">${i}h</span>`;
+                grid.appendChild(line);
+            }
+            wrapper.appendChild(grid);
+
+            // バーの描画
+            const barsContainer = document.createElement('div');
+            barsContainer.className = "flex-1 flex items-end justify-between gap-1 z-10 pb-[1px]";
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+            dailyTotals.forEach((d, i) => {
+                const heightPercent = (d.total / maxChartMs) * 100;
+                const pStudy = d.total ? (d.study / d.total) * 100 : 0;
+                const pTimer = d.total ? (d.timer / d.total) * 100 : 0;
+                const pStop = d.total ? (d.stopwatch / d.total) * 100 : 0;
+
+                const barHtml = `
+                    <div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer relative" title="${formatTimeShort(d.total)}">
+                        <div class="w-full max-w-[20px] bg-slate-50 rounded-t-sm overflow-hidden flex flex-col-reverse relative chart-bar border border-slate-100 group-hover:bg-slate-100" 
+                             style="height: ${heightPercent}%">
+                            <div class="bg-blue-600 w-full" style="height: ${pStudy}%"></div>
+                            <div class="bg-sky-400 w-full" style="height: ${pTimer}%"></div>
+                            <div class="bg-slate-400 w-full" style="height: ${pStop}%"></div>
+                        </div>
+                        <span class="text-[9px] font-bold text-slate-400 mt-1">${days[i]}</span>
+                    </div>
+                `;
+                barsContainer.innerHTML += barHtml;
+            });
+
+            wrapper.appendChild(barsContainer);
+            container.appendChild(wrapper);
+        }
+
+        // --- グラフ描画: 1日詳細（X軸のメモリ付き） ---
+        function renderDayChart(sessions) {
+            const startOfDay = new Date(statsDate);
+            startOfDay.setHours(0,0,0,0);
+            const endOfDay = new Date(startOfDay);
+            endOfDay.setDate(endOfDay.getDate() + 1);
+
+            const daysStr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            document.getElementById('stats-date-label').innerText = 
+                `${startOfDay.getMonth()+1}/${startOfDay.getDate()} (${daysStr[startOfDay.getDay()]})`;
+
+            // グリッド線の生成 (X軸のメモリ: 0h, 3h, 6h... にラベルを表示)
+            const gridContainer = document.getElementById('day-grid');
+            gridContainer.innerHTML = '';
+            for (let i = 0; i <= 24; i++) {
+                const div = document.createElement('div');
+                const isMajor = i % 3 === 0; // 3時間ごとに数字
+                
+                div.className = `h-full w-px ${isMajor ? 'bg-slate-200' : 'bg-slate-100'} relative flex flex-col justify-end overflow-visible`;
+                
+                if (isMajor) {
+                    div.innerHTML = `<span class="absolute bottom-[-20px] -translate-x-1/2 text-[9px] text-slate-400 mono font-bold">${i}h</span>`;
+                } else {
+                    div.innerHTML = `<div class="absolute bottom-0 h-1 w-px bg-slate-200"></div>`;
+                }
+                gridContainer.appendChild(div);
+            }
+
+            const track = document.getElementById('day-timeline-track');
+            track.innerHTML = '';
+            let dayTotalMs = 0;
+
+            sessions.forEach(s => {
+                const sStart = Number(s.start);
+                const sEnd = Number(s.end);
+                if (sStart >= startOfDay.getTime() && sStart < endOfDay.getTime()) {
+                    const dateObj = new Date(sStart);
+                    const durationMs = sEnd - sStart;
+                    dayTotalMs += durationMs;
+
+                    const startMinutes = dateObj.getHours() * 60 + dateObj.getMinutes();
+                    const durationMinutes = durationMs / 1000 / 60;
+                    
+                    const leftP = (startMinutes / 1440) * 100;
+                    const widthP = (durationMinutes / 1440) * 100;
+
+                    const div = document.createElement('div');
+                    const modeLabel = s.mode === 'study' ? '勉強' : s.mode === 'timer' ? 'タイマー' : '計測';
+                    div.className = `timeline-block ${getColor(s.mode)}`;
+                    div.style.left = `${leftP}%`;
+                    div.style.width = `${Math.max(widthP, 0.4)}%`; 
+                    div.title = `${modeLabel}: ${formatTimeShort(durationMs)} (${dateObj.getHours()}:${dateObj.getMinutes().toString().padStart(2, '0')})`;
+                    track.appendChild(div);
+                }
+            });
+            document.getElementById('stats-total-label').innerText = `Total: ${formatTimeShort(dayTotalMs)}`;
+        }
+
+        // --- 共通ユーティリティ ---
+        function formatTimeShort(ms) {
+            if (!ms) return "0m";
+            const min = Math.floor(ms / 60000);
+            const h = Math.floor(min / 60);
+            const m = min % 60;
+            if (h > 0) return `${h}h ${m}m`;
+            return `${m}m`;
+        }
+
+        function changeMode(newMode) {
+            if (newMode === appMode) return;
+            if (isRunning) {
+                if (!confirm("計測中ですが、モードを切り替えますか？")) return;
+                handleStartStop(); 
+            }
+            appMode = newMode;
+            handleReset();
+            
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active', 'text-slate-900'));
+            document.getElementById('btn-' + newMode).classList.add('tab-active');
+            
+            document.getElementById('total-study-container').classList.toggle('hidden', newMode !== 'study');
+            document.getElementById('lap-btn').classList.toggle('opacity-50', newMode === 'study');
+
+            if (newMode === 'timer') {
+                document.getElementById('timer-inputs').classList.remove('hidden');
+                document.getElementById('display').classList.add('hidden');
+            } else if (newMode === 'study') {
+                prepareStudyPhase();
+            } else {
+                document.getElementById('timer-inputs').classList.add('hidden');
+                document.getElementById('display').classList.remove('hidden');
+            }
+        }
+
+        function prepareStudyPhase() {
+            isStudyPhase = true;
+            elapsedTime = 1 * 60 * 1000;
+            countdownBase = elapsedTime;
+            document.getElementById('display').innerText = timeToString(elapsedTime);
+            document.getElementById('display').classList.remove('hidden');
+            document.getElementById('timer-inputs').classList.add('hidden');
+            document.getElementById('status-label').innerText = "Focus (25m)";
+            document.documentElement.style.setProperty('--accent', 'var(--study)');
+        }
+
+        function prepareBreakPhase() {
+            isStudyPhase = false;
+            elapsedTime = 5 * 60 * 1000;
+            countdownBase = elapsedTime;
+            document.getElementById('display').innerText = timeToString(elapsedTime);
+            document.getElementById('status-label').innerText = "Break (5m)";
+            document.documentElement.style.setProperty('--accent', 'var(--break)');
+        }
+
+        function timeToString(time) {
+            let totalSec = Math.floor(Math.abs(time) / 1000);
+            let h = Math.floor(totalSec / 3600).toString().padStart(2, "0");
+            let m = Math.floor((totalSec % 3600) / 60).toString().padStart(2, "0");
+            let s = Math.floor(totalSec % 60).toString().padStart(2, "0");
+            return `${h}:${m}:${s}`;
+        }
+
+        function handleLap() {
+            if (!isRunning || appMode === 'study') return;
+            lapCount++;
+            document.getElementById('lap-container').style.opacity = "1";
+            const div = document.createElement('div');
+            div.className = "flex justify-between items-center py-2 border-b border-slate-50";
+            div.innerHTML = `<span class="font-bold text-slate-300">LAP ${lapCount}</span><span class="mono text-slate-800">${timeToString(elapsedTime)}</span>`;
+            document.getElementById('lap-list').prepend(div);
+        }
+
+        function setBackground(type) {
+            const container = document.getElementById('bg-container');
+            const anim = document.getElementById('anim-layer');
+            container.style.backgroundImage = '';
+            container.className = '';
+            anim.innerHTML = '';
+            if (type === 'waves') {
+                container.classList.add('waves-bg');
+                anim.innerHTML = '<div class="wave-obj"></div><div class="wave-obj" style="animation-delay:-5s; opacity:0.03;"></div>';
+            } else if (type === 'trees') {
+                container.classList.add('trees-bg');
+                for(let i=0; i<8; i++) {
+                    const leaf = document.createElement('div');
+                    leaf.className = 'leaf-obj';
+                    leaf.style.cssText = `width:${Math.random()*40+20}px; height:${Math.random()*40+20}px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation-delay:${Math.random()*5}s;`;
+                    anim.appendChild(leaf);
+                }
+            }
+            toggleSettings();
+        }
+
+        document.getElementById('bg-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    document.getElementById('bg-container').style.backgroundImage = `url(${ev.target.result})`;
+                    document.getElementById('anim-layer').innerHTML = '';
+                    toggleSettings();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function updateUI() {
+            const icon = isRunning ? 'pause' : 'play';
+            document.getElementById('play-icon').setAttribute('data-lucide', icon);
+            document.getElementById('start-stop-btn').className = `w-20 h-20 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 ${isRunning ? 'bg-blue-600' : 'bg-slate-900'}`;
+            if (appMode !== 'study') {
+                document.getElementById('status-label').innerText = isRunning ? "Focusing" : "Paused";
+            }
+            lucide.createIcons();
+        }
+
+        function toggleVisual() {
+            isAnalog = !isAnalog;
+            document.getElementById('analog-clock').classList.toggle('hidden', !isAnalog);
+            document.getElementById('display').classList.toggle('text-2xl', isAnalog);
+            document.getElementById('display').classList.toggle('text-7xl', !isAnalog);
+            document.getElementById('display').classList.toggle('mt-4', isAnalog);
+        }
+
+        function toggleSettings() {
+            document.getElementById('settings-modal').classList.toggle('hidden');
+        }
+
+        const numContainer = document.getElementById('numerals-container');
+        for (let i = 1; i <= 12; i++) {
+            const n = document.createElement('div');
+            n.className = 'numeral'; n.innerText = i * 5;
+            const angle = (i * 30) * (Math.PI / 180);
+            n.style.left = `${130 + 110 * Math.sin(angle)}px`;
+            n.style.top = `${130 - 110 * Math.cos(angle)}px`;
+            numContainer.appendChild(n);
+        }
+
+        document.getElementById('start-stop-btn').addEventListener('click', handleStartStop);
+        lucide.createIcons();
+    </script>
+</body>
+</html>
