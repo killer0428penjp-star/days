@@ -1,409 +1,483 @@
 /* js/study.js */
+// --- 変数定義 ---
+let startTime, elapsedTime = 0, timerInterval, isRunning = false, lapCount = 0;
+let appMode = 'stopwatch';
+let isAnalog = false;
+let countdownBase = 0;
+let totalStudyTime = 0; 
+let isStudyPhase = true; 
 
-// --- 状態管理変数 ---
-let mode = 'stopwatch'; // 'stopwatch', 'timer', 'study'
-let isRunning = false;
-let startTime = 0;
-let elapsedTime = 0;
-let timerInterval = null;
-let timerDuration = 0; // タイマー設定時間（ミリ秒）
+const DB_SESSIONS_KEY = 'zenfocus_sessions_v4'; // DBキー更新
+let currentSessionStart = null;
+let statsMode = 'week'; 
+let statsDate = new Date(); 
 
-// 勉強時間記録用（ローカルストレージに保存する想定）
-let studyStats = JSON.parse(localStorage.getItem('studyStats')) || {
-    total: 0,
-    week: [0, 0, 0, 0, 0, 0, 0], // 日〜土の勉強時間
-    today: 0
-};
-
-// --- DOM要素の取得 ---
-const display = document.getElementById('display');
-const mainHand = document.getElementById('main-hand');
-const startStopBtn = document.getElementById('start-stop-btn');
-const playIcon = document.getElementById('play-icon');
-const digitalContainer = document.getElementById('digital-container');
-const analogClock = document.getElementById('analog-clock');
-const timerInputs = document.getElementById('timer-inputs');
-const totalStudyContainer = document.getElementById('total-study-container');
-const totalStudyDisplay = document.getElementById('total-study-display');
-const statusLabel = document.getElementById('status-label');
-
-// --- 初期化処理 ---
-function initStudyApp() {
-    updateDisplay(0);
-    renderStats();
-    
-    // アイコンの初期化（Lucideが読み込まれている場合）
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
+// --- データ保存ロジック ---
+function loadSessions() {
+    return JSON.parse(localStorage.getItem(DB_SESSIONS_KEY)) || [];
 }
 
-// --- メインループ (10msごとに更新) ---
-function tick() {
+function saveSession(start, end, mode) {
+    if (!start || !end || end <= start) return;
+    const sessions = loadSessions();
+    sessions.push({ start: Number(start), end: Number(end), mode });
+    localStorage.setItem(DB_SESSIONS_KEY, JSON.stringify(sessions));
+}
+
+// --- タイマー制御 ---
+function update() {
     const now = Date.now();
-    
-    if (mode === 'timer') {
-        // タイマーモード（カウントダウン）
-        const remaining = startTime + timerDuration - now;
-        if (remaining <= 0) {
-            stopTimer();
-            updateDisplay(0);
-            alert("Time's up!");
-            return;
+    const delta = now - startTime;
+
+    if (appMode === 'stopwatch') {
+        elapsedTime = delta;
+    } else if (appMode === 'timer' || appMode === 'study') {
+        elapsedTime = countdownBase - delta;
+        if (appMode === 'study' && isStudyPhase) {
+            const sessionDur = now - currentSessionStart;
+            document.getElementById('total-study-display').innerText = timeToString(totalStudyTime + sessionDur);
         }
-        updateDisplay(remaining);
-        updateClockHands(remaining);
-    } else {
-        // ストップウォッチ & 勉強モード（カウントアップ）
-        const currentElapsed = now - startTime + elapsedTime;
-        updateDisplay(currentElapsed);
-        updateClockHands(currentElapsed);
-        
-        // 勉強モードなら合計時間も更新表示（保存は停止時）
-        if (mode === 'study') {
-            const sessionTime = now - startTime;
-            // 表示だけ更新
-            const totalSeconds = Math.floor((studyStats.total + sessionTime) / 1000);
-            const h = Math.floor(totalSeconds / 3600);
-            const m = Math.floor((totalSeconds % 3600) / 60);
-            const s = totalSeconds % 60;
-            totalStudyDisplay.textContent = 
-                `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        if (elapsedTime <= 0) {
+            elapsedTime = 0;
+            if (appMode === 'study') {
+                handleSessionEnd(); 
+                if (isStudyPhase) {
+                    alert("集中終了！5分休憩に入ります。");
+                    prepareBreakPhase();
+                } else {
+                    alert("休憩終了！25分集中を始めます。");
+                    prepareStudyPhase();
+                }
+                handleSessionStart(); 
+                startTime = Date.now();
+            } else {
+                handleSessionEnd();
+                handleStartStop(); 
+                alert("Time Up!");
+            }
         }
+    }
+    document.getElementById('display').innerText = timeToString(elapsedTime);
+    const deg = (elapsedTime / 60000) * 360;
+    if(document.getElementById('main-hand')) {
+        document.getElementById('main-hand').style.transform = `rotate(${deg}deg)`;
     }
 }
 
-// --- 操作関数 ---
-
-// スタート・ストップ切り替え
-window.toggleTimer = function() { // HTMLのonclickから呼ぶためwindowに登録
-    if (isRunning) {
-        stopTimer();
+function handleSessionStart() {
+    if (appMode === 'study' && !isStudyPhase) {
+        currentSessionStart = null;
     } else {
-        startTimer();
+        currentSessionStart = Date.now();
     }
-};
-
-// ボタンクリックイベントのリスナー登録（HTMLのonclickを上書きしないように）
-startStopBtn.addEventListener('click', window.toggleTimer);
-
-
-function startTimer() {
-    if (mode === 'timer' && elapsedTime === 0 && !isRunning) {
-        // タイマーの初期設定値を読み込む
-        const h = parseInt(document.getElementById('in-h').value) || 0;
-        const m = parseInt(document.getElementById('in-m').value) || 0;
-        const s = parseInt(document.getElementById('in-s').value) || 0;
-        timerDuration = (h * 3600 + m * 60 + s) * 1000;
-        
-        if (timerDuration === 0) {
-            alert("時間を設定してください");
-            return;
-        }
-    }
-
-    isRunning = true;
-    startTime = Date.now();
-    
-    // アイコンを一時停止に変更
-    playIcon.setAttribute('data-lucide', 'pause');
-    if(typeof lucide !== 'undefined') lucide.createIcons();
-    
-    statusLabel.textContent = (mode === 'study') ? "Studying..." : "Running";
-    statusLabel.className = "text-[10px] font-bold text-blue-500 tracking-[0.5em] uppercase mt-10 animate-pulse";
-
-    timerInterval = setInterval(tick, 10);
 }
 
-function stopTimer() {
-    isRunning = false;
-    clearInterval(timerInterval);
-    
-    // 経過時間を保存
-    if (mode === 'timer') {
+function handleSessionEnd() {
+    if (currentSessionStart) {
         const now = Date.now();
-        const done = now - startTime;
-        elapsedTime = 0; // タイマーは一時停止非対応（簡易実装）またはリセット
-        timerDuration -= done; // 残り時間を保持する場合は計算が必要
-    } else {
-        elapsedTime += Date.now() - startTime;
-        
-        // 勉強モードならデータを保存
-        if (mode === 'study') {
-            const sessionMs = Date.now() - startTime;
-            saveStudyTime(sessionMs);
-        }
+        saveSession(currentSessionStart, now, appMode);
+        totalStudyTime += (now - currentSessionStart); 
+        currentSessionStart = null;
     }
-
-    // アイコンを再生に変更
-    playIcon.setAttribute('data-lucide', 'play');
-    if(typeof lucide !== 'undefined') lucide.createIcons();
-
-    statusLabel.textContent = "Paused";
-    statusLabel.className = "text-[10px] font-bold text-slate-300 tracking-[0.5em] uppercase mt-10";
 }
 
-// 勉強時間の保存
-function saveStudyTime(ms) {
-    studyStats.total += ms;
-    studyStats.today += ms;
-    const dayIndex = new Date().getDay(); // 0:日曜日
-    studyStats.week[dayIndex] += ms;
+function handleStartStop() {
+    if (!isRunning) {
+        if (appMode === 'timer' && elapsedTime === 0) {
+            const h = parseInt(document.getElementById('in-h').value || 0);
+            const m = parseInt(document.getElementById('in-m').value || 0);
+            const s = parseInt(document.getElementById('in-s').value || 0);
+            elapsedTime = (h * 3600 + m * 60 + s) * 1000;
+            if (elapsedTime <= 0) return;
+        }
+        startTime = Date.now();
+        if (appMode === 'stopwatch') startTime -= elapsedTime;
+        else countdownBase = elapsedTime;
+        
+        handleSessionStart(); 
+        timerInterval = setInterval(update, 100);
+        isRunning = true;
+        document.getElementById('timer-inputs').classList.add('hidden');
+        document.getElementById('display').classList.remove('hidden');
+    } else {
+        handleSessionEnd(); 
+        clearInterval(timerInterval);
+        isRunning = false;
+    }
+    updateUI();
+}
+
+function handleReset() {
+    handleSessionEnd(); 
+    clearInterval(timerInterval);
+    isRunning = false;
+    elapsedTime = 0;
+    lapCount = 0;
+    if (appMode === 'study') {
+        totalStudyTime = 0;
+        document.getElementById('total-study-display').innerText = "00:00:00";
+        prepareStudyPhase();
+    } else {
+        document.getElementById('display').innerText = "00:00:00";
+    }
+    if(document.getElementById('main-hand')) {
+        document.getElementById('main-hand').style.transform = `rotate(0deg)`;
+    }
+    document.getElementById('lap-list').innerHTML = '';
+    document.getElementById('lap-container').style.opacity = "0";
+    if (appMode === 'timer') {
+        document.getElementById('timer-inputs').classList.remove('hidden');
+        document.getElementById('display').classList.add('hidden');
+    }
+    updateUI();
+}
+
+// --- 統計UIロジック ---
+function toggleStats() {
+    const modal = document.getElementById('stats-modal');
+    if (modal.classList.contains('hidden')) {
+        statsDate = new Date(); 
+        renderStats();
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+    }
+}
+
+function switchStatsMode(mode) {
+    statsMode = mode;
+    document.getElementById('stats-tab-week').className = mode === 'week' 
+        ? "flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all"
+        : "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition-all";
+    document.getElementById('stats-tab-day').className = mode === 'day' 
+        ? "flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all"
+        : "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition-all";
     
-    localStorage.setItem('studyStats', JSON.stringify(studyStats));
+    document.getElementById('chart-week').classList.toggle('hidden', mode !== 'week');
+    document.getElementById('chart-day').classList.toggle('hidden', mode !== 'day');
+    
     renderStats();
 }
 
-// リセット
-window.handleReset = function() {
-    stopTimer();
-    elapsedTime = 0;
-    updateDisplay(0);
-    statusLabel.textContent = "Ready";
-    
-    if (mode === 'study') {
-        // 表示を保存された合計値に戻す
-        const totalSeconds = Math.floor(studyStats.total / 1000);
-        const h = Math.floor(totalSeconds / 3600);
-        const m = Math.floor((totalSeconds % 3600) / 60);
-        const s = totalSeconds % 60;
-        totalStudyDisplay.textContent = 
-            `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+function moveStatsDate(direction) {
+    if (statsMode === 'week') {
+        statsDate.setDate(statsDate.getDate() + (direction * 7));
+    } else {
+        statsDate.setDate(statsDate.getDate() + direction);
     }
-};
+    renderStats();
+}
 
-// ラップ（簡易実装：コンソール出力のみ、またはHTMLに追加）
-window.handleLap = function() {
-    if (!isRunning) return;
-    
-    const lapTime = (mode === 'timer') ? (Date.now() - startTime) : (Date.now() - startTime + elapsedTime);
-    const formatted = formatTime(lapTime);
-    
-    const li = document.createElement('div');
-    li.className = "flex justify-between py-2 border-b border-slate-50 last:border-0";
-    li.innerHTML = `<span class="text-slate-400">Lap</span> <span class="font-mono font-bold">${formatted}</span>`;
-    
-    const list = document.getElementById('lap-list');
-    list.prepend(li);
-    
-    // コンテナを表示
-    const container = document.getElementById('lap-container');
-    container.style.opacity = "1";
-    container.style.pointerEvents = "auto";
-    
-    // 3秒後にフェードアウト
-    setTimeout(() => {
-        container.style.opacity = "0";
-        container.style.pointerEvents = "none";
-    }, 3000);
-};
+function renderStats() {
+    const sessions = loadSessions();
+    if (statsMode === 'week') {
+        renderWeekChart(sessions);
+    } else {
+        renderDayChart(sessions);
+    }
+}
 
-// モード切替
-window.changeMode = function(newMode) {
-    // 現在のタイマーをストップ
-    window.handleReset();
-    mode = newMode;
+function getColor(mode) {
+    if (mode === 'study') return 'bg-blue-600';
+    if (mode === 'timer') return 'bg-sky-400';
+    return 'bg-slate-400'; 
+}
+
+function getStartOfWeek(date) {
+    const d = new Date(date);
+    const day = d.getDay(); 
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+}
+
+// --- グラフ描画: 週間（時間のメモリ付き） ---
+function renderWeekChart(sessions) {
+    const startOfWeek = getStartOfWeek(statsDate);
+    startOfWeek.setHours(0,0,0,0);
     
-    // タブのスタイル更新
-    document.querySelectorAll('nav button').forEach(btn => {
-        btn.classList.remove('tab-active', 'text-slate-400', 'text-slate-900');
-        if (btn.id === `btn-${newMode}`) {
-            btn.classList.add('tab-active');
-        } else {
-            btn.classList.add('text-slate-400');
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
+
+    const endDisp = new Date(endOfWeek);
+    endDisp.setDate(endDisp.getDate() - 1);
+    document.getElementById('stats-date-label').innerText = 
+        `${startOfWeek.getMonth()+1}/${startOfWeek.getDate()} - ${endDisp.getMonth()+1}/${endDisp.getDate()}`;
+
+    const dailyTotals = Array(7).fill(null).map(() => ({ total: 0, study: 0, timer: 0, stopwatch: 0 }));
+    let weekTotalMs = 0;
+
+    sessions.forEach(s => {
+        const sStart = Number(s.start);
+        const sEnd = Number(s.end);
+        if (sStart >= startOfWeek.getTime() && sStart < endOfWeek.getTime()) {
+            const dateObj = new Date(sStart);
+            let dayIdx = dateObj.getDay() - 1; 
+            if (dayIdx === -1) dayIdx = 6;     
+
+            const duration = sEnd - sStart;
+            if (dailyTotals[dayIdx]) {
+                dailyTotals[dayIdx].total += duration;
+                const modeKey = ['study', 'timer', 'stopwatch'].includes(s.mode) ? s.mode : 'stopwatch';
+                dailyTotals[dayIdx][modeKey] += duration;
+                weekTotalMs += duration;
+            }
         }
     });
 
-    // 表示エリアの切り替え
-    if (mode === 'timer') {
-        display.classList.add('hidden');
-        timerInputs.classList.remove('hidden');
-        totalStudyContainer.classList.add('hidden');
-    } else if (mode === 'study') {
-        display.classList.remove('hidden');
-        timerInputs.classList.add('hidden');
-        totalStudyContainer.classList.remove('hidden');
+    document.getElementById('stats-total-label').innerText = `Total: ${formatTimeShort(weekTotalMs)}`;
+    
+    const container = document.getElementById('chart-week');
+    container.innerHTML = '';
+    
+    const maxValMs = Math.max(...dailyTotals.map(d => d.total), 0); 
+    let maxHours = Math.ceil(maxValMs / 3600000); 
+    if (maxHours < 1) maxHours = 1; 
+    const maxChartMs = maxHours * 3600000;
+
+    const wrapper = document.createElement('div');
+    wrapper.className = "relative w-full h-full flex pl-8";
+
+    const grid = document.createElement('div');
+    grid.className = "absolute inset-0 left-8 flex flex-col-reverse justify-between pointer-events-none border-b border-slate-200";
+    for (let i = 0; i <= maxHours; i++) {
+        const line = document.createElement('div');
+        line.className = i === 0 ? "w-full relative" : "w-full border-t border-slate-100 relative";
+        line.innerHTML = `<span class="absolute -left-8 -top-2 w-6 text-right text-[9px] text-slate-400 mono font-bold">${i}h</span>`;
+        grid.appendChild(line);
+    }
+    wrapper.appendChild(grid);
+
+    const barsContainer = document.createElement('div');
+    barsContainer.className = "flex-1 flex items-end justify-between gap-1 z-10 pb-[1px]";
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    dailyTotals.forEach((d, i) => {
+        const heightPercent = (d.total / maxChartMs) * 100;
+        const pStudy = d.total ? (d.study / d.total) * 100 : 0;
+        const pTimer = d.total ? (d.timer / d.total) * 100 : 0;
+        const pStop = d.total ? (d.stopwatch / d.total) * 100 : 0;
+
+        const barHtml = `
+            <div class="flex flex-col items-center flex-1 h-full justify-end group cursor-pointer relative" title="${formatTimeShort(d.total)}">
+                <div class="w-full max-w-[20px] bg-slate-50 rounded-t-sm overflow-hidden flex flex-col-reverse relative chart-bar border border-slate-100 group-hover:bg-slate-100" 
+                     style="height: ${heightPercent}%">
+                    <div class="bg-blue-600 w-full" style="height: ${pStudy}%"></div>
+                    <div class="bg-sky-400 w-full" style="height: ${pTimer}%"></div>
+                    <div class="bg-slate-400 w-full" style="height: ${pStop}%"></div>
+                </div>
+                <span class="text-[9px] font-bold text-slate-400 mt-1">${days[i]}</span>
+            </div>
+        `;
+        barsContainer.innerHTML += barHtml;
+    });
+
+    wrapper.appendChild(barsContainer);
+    container.appendChild(wrapper);
+}
+
+// --- グラフ描画: 1日詳細（X軸のメモリ付き） ---
+function renderDayChart(sessions) {
+    const startOfDay = new Date(statsDate);
+    startOfDay.setHours(0,0,0,0);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
+
+    const daysStr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    document.getElementById('stats-date-label').innerText = 
+        `${startOfDay.getMonth()+1}/${startOfDay.getDate()} (${daysStr[startOfDay.getDay()]})`;
+
+    const gridContainer = document.getElementById('day-grid');
+    gridContainer.innerHTML = '';
+    for (let i = 0; i <= 24; i++) {
+        const div = document.createElement('div');
+        const isMajor = i % 3 === 0; 
         
-        // 合計時間を表示
-        const totalSeconds = Math.floor(studyStats.total / 1000);
-        const h = Math.floor(totalSeconds / 3600);
-        const m = Math.floor((totalSeconds % 3600) / 60);
-        const s = totalSeconds % 60;
-        totalStudyDisplay.textContent = 
-            `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        div.className = `h-full w-px ${isMajor ? 'bg-slate-200' : 'bg-slate-100'} relative flex flex-col justify-end overflow-visible`;
+        
+        if (isMajor) {
+            div.innerHTML = `<span class="absolute bottom-[-20px] -translate-x-1/2 text-[9px] text-slate-400 mono font-bold">${i}h</span>`;
+        } else {
+            div.innerHTML = `<div class="absolute bottom-0 h-1 w-px bg-slate-200"></div>`;
+        }
+        gridContainer.appendChild(div);
+    }
+
+    const track = document.getElementById('day-timeline-track');
+    track.innerHTML = '';
+    let dayTotalMs = 0;
+
+    sessions.forEach(s => {
+        const sStart = Number(s.start);
+        const sEnd = Number(s.end);
+        if (sStart >= startOfDay.getTime() && sStart < endOfDay.getTime()) {
+            const dateObj = new Date(sStart);
+            const durationMs = sEnd - sStart;
+            dayTotalMs += durationMs;
+
+            const startMinutes = dateObj.getHours() * 60 + dateObj.getMinutes();
+            const durationMinutes = durationMs / 1000 / 60;
             
+            const leftP = (startMinutes / 1440) * 100;
+            const widthP = (durationMinutes / 1440) * 100;
+
+            const div = document.createElement('div');
+            const modeLabel = s.mode === 'study' ? '勉強' : s.mode === 'timer' ? 'タイマー' : '計測';
+            div.className = `timeline-block ${getColor(s.mode)}`;
+            div.style.left = `${leftP}%`;
+            div.style.width = `${Math.max(widthP, 0.4)}%`; 
+            div.title = `${modeLabel}: ${formatTimeShort(durationMs)} (${dateObj.getHours()}:${dateObj.getMinutes().toString().padStart(2, '0')})`;
+            track.appendChild(div);
+        }
+    });
+    document.getElementById('stats-total-label').innerText = `Total: ${formatTimeShort(dayTotalMs)}`;
+}
+
+// --- 共通ユーティリティ ---
+function formatTimeShort(ms) {
+    if (!ms) return "0m";
+    const min = Math.floor(ms / 60000);
+    const h = Math.floor(min / 60);
+    const m = min % 60;
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
+}
+
+function changeMode(newMode) {
+    if (newMode === appMode) return;
+    if (isRunning) {
+        if (!confirm("計測中ですが、モードを切り替えますか？")) return;
+        handleStartStop(); 
+    }
+    appMode = newMode;
+    handleReset();
+    
+    document.querySelectorAll('#study-screen nav button').forEach(b => b.classList.remove('tab-active', 'text-slate-900'));
+    document.getElementById('btn-' + newMode).classList.add('tab-active');
+    
+    document.getElementById('total-study-container').classList.toggle('hidden', newMode !== 'study');
+    document.getElementById('lap-btn').classList.toggle('opacity-50', newMode === 'study');
+
+    if (newMode === 'timer') {
+        document.getElementById('timer-inputs').classList.remove('hidden');
+        document.getElementById('display').classList.add('hidden');
+    } else if (newMode === 'study') {
+        prepareStudyPhase();
     } else {
-        // stopwatch
-        display.classList.remove('hidden');
-        timerInputs.classList.add('hidden');
-        totalStudyContainer.classList.add('hidden');
+        document.getElementById('timer-inputs').classList.add('hidden');
+        document.getElementById('display').classList.remove('hidden');
     }
-};
-
-// --- 表示更新系 ---
-
-function formatTime(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
-    const centi = Math.floor((ms % 1000) / 10);
-    
-    if (m > 59) {
-        const h = Math.floor(m / 60);
-        const remM = m % 60;
-        return `${String(h).padStart(2, '0')}:${String(remM).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-    
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}:${String(centi).padStart(2, '0')}`;
 }
 
-function updateDisplay(ms) {
-    display.textContent = formatTime(ms);
+function prepareStudyPhase() {
+    isStudyPhase = true;
+    elapsedTime = 25 * 60 * 1000;
+    countdownBase = elapsedTime;
+    document.getElementById('display').innerText = timeToString(elapsedTime);
+    document.getElementById('display').classList.remove('hidden');
+    document.getElementById('timer-inputs').classList.add('hidden');
+    document.getElementById('status-label').innerText = "Focus (25m)";
+    document.documentElement.style.setProperty('--accent', 'var(--study)');
 }
 
-function updateClockHands(ms) {
-    // 秒針のみ動かす簡易実装（1周60秒）
-    const totalSeconds = ms / 1000;
-    const degrees = (totalSeconds % 60) * 6; // 6度/秒
-    mainHand.style.transform = `translateX(-50%) rotate(${degrees}deg)`;
+function prepareBreakPhase() {
+    isStudyPhase = false;
+    elapsedTime = 5 * 60 * 1000;
+    countdownBase = elapsedTime;
+    document.getElementById('display').innerText = timeToString(elapsedTime);
+    document.getElementById('status-label').innerText = "Break (5m)";
+    document.documentElement.style.setProperty('--accent', 'var(--break)');
 }
 
+function timeToString(time) {
+    let totalSec = Math.floor(Math.abs(time) / 1000);
+    let h = Math.floor(totalSec / 3600).toString().padStart(2, "0");
+    let m = Math.floor((totalSec % 3600) / 60).toString().padStart(2, "0");
+    let s = Math.floor(totalSec % 60).toString().padStart(2, "0");
+    return `${h}:${m}:${s}`;
+}
 
-// --- UI切り替え機能 ---
+function handleLap() {
+    if (!isRunning || appMode === 'study') return;
+    lapCount++;
+    document.getElementById('lap-container').style.opacity = "1";
+    const div = document.createElement('div');
+    div.className = "flex justify-between items-center py-2 border-b border-slate-50";
+    div.innerHTML = `<span class="font-bold text-slate-300">LAP ${lapCount}</span><span class="mono text-slate-800">${timeToString(elapsedTime)}</span>`;
+    document.getElementById('lap-list').prepend(div);
+}
 
-window.toggleVisual = function() {
-    digitalContainer.classList.toggle('hidden');
-    analogClock.classList.toggle('hidden');
-};
-
-window.toggleStats = function() {
-    const modal = document.getElementById('stats-modal');
-    modal.classList.toggle('hidden');
-    if (!modal.classList.contains('hidden')) {
-        renderStats();
-    }
-};
-
-window.toggleSettings = function() {
-    document.getElementById('settings-modal').classList.toggle('hidden');
-};
-
-window.setBackground = function(type) {
-    const bgContainer = document.getElementById('bg-container');
-    const animLayer = document.getElementById('anim-layer');
-    
-    bgContainer.className = '';
-    animLayer.className = '';
-    bgContainer.style.backgroundImage = '';
-    animLayer.innerHTML = '';
-    
+function setBackground(type) {
+    const container = document.getElementById('bg-container');
+    const anim = document.getElementById('anim-layer');
+    container.style.backgroundImage = '';
+    container.className = '';
+    anim.innerHTML = '';
     if (type === 'waves') {
-        bgContainer.classList.add('waves-bg');
-        // 波のアニメーション要素を追加
-        const wave = document.createElement('div');
-        wave.className = 'wave-obj';
-        animLayer.appendChild(wave);
+        container.classList.add('waves-bg');
+        anim.innerHTML = '<div class="wave-obj"></div><div class="wave-obj" style="animation-delay:-5s; opacity:0.03;"></div>';
     } else if (type === 'trees') {
-        bgContainer.classList.add('trees-bg');
-        // 葉っぱのアニメーション要素を追加（簡易版）
-        for(let i=0; i<5; i++) {
+        container.classList.add('trees-bg');
+        for(let i=0; i<8; i++) {
             const leaf = document.createElement('div');
             leaf.className = 'leaf-obj';
-            leaf.style.left = Math.random() * 100 + '%';
-            leaf.style.width = (20 + Math.random() * 20) + 'px';
-            leaf.style.height = leaf.style.width;
-            leaf.style.animationDelay = Math.random() * 5 + 's';
-            leaf.style.top = Math.random() * 80 + '%';
-            animLayer.appendChild(leaf);
+            leaf.style.cssText = `width:${Math.random()*40+20}px; height:${Math.random()*40+20}px; left:${Math.random()*100}%; top:${Math.random()*100}%; animation-delay:${Math.random()*5}s;`;
+            anim.appendChild(leaf);
         }
     }
-    
-    window.toggleSettings(); // 閉じる
-};
-
-// 画像アップロード
-document.getElementById('bg-upload').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('bg-container').style.backgroundImage = `url(${e.target.result})`;
-            window.toggleSettings();
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-
-// --- 統計グラフ描画 (簡易版) ---
-function renderStats() {
-    const chartWeek = document.getElementById('chart-week');
-    chartWeek.innerHTML = '';
-    
-    const maxVal = Math.max(...studyStats.week, 1); // ゼロ除算防止
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    
-    // 棒グラフを描画
-    studyStats.week.forEach((val, i) => {
-        const heightPercent = (val / maxVal) * 100;
-        
-        const barContainer = document.createElement('div');
-        barContainer.className = "absolute bottom-0 w-8 flex flex-col items-center group";
-        barContainer.style.left = `${(i * 14) + 2}%`; // 配置調整
-        
-        const bar = document.createElement('div');
-        bar.className = "w-2 bg-blue-500 rounded-t-sm transition-all duration-500 group-hover:bg-blue-600";
-        bar.style.height = `${heightPercent}%`;
-        bar.style.minHeight = "4px";
-        
-        const label = document.createElement('div');
-        label.className = "text-[9px] mt-1 text-slate-400";
-        label.textContent = days[i];
-        
-        // ツールチップ的な時間表示
-        const tooltip = document.createElement('div');
-        tooltip.className = "absolute -top-6 bg-slate-800 text-white text-[9px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50";
-        const min = Math.floor(val / 1000 / 60);
-        tooltip.textContent = `${min}m`;
-        
-        barContainer.appendChild(tooltip);
-        barContainer.appendChild(bar);
-        barContainer.appendChild(label);
-        chartWeek.appendChild(barContainer);
-    });
-    
-    document.getElementById('stats-total-label').textContent = 
-        `Total: ${Math.floor(studyStats.total / 1000 / 3600)}h ${Math.floor((studyStats.total / 1000 % 3600) / 60)}m`;
-        
-    const today = new Date();
-    document.getElementById('stats-date-label').textContent = 
-        `${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}`;
+    toggleSettings();
 }
 
-// Statsの日付移動（ダミー機能：現在は表示のみ）
-window.moveStatsDate = function(dir) {
-    // 本来は日付を管理してデータを再取得するが、今回は簡易実装のため省略
-    console.log("Change date:", dir);
-};
+// idが存在する場合のみイベントリスナーを登録
+if(document.getElementById('bg-upload')) {
+    document.getElementById('bg-upload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                document.getElementById('bg-container').style.backgroundImage = `url(${ev.target.result})`;
+                document.getElementById('anim-layer').innerHTML = '';
+                toggleSettings();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
 
-window.switchStatsMode = function(mode) {
-    const btnWeek = document.getElementById('stats-tab-week');
-    const btnDay = document.getElementById('stats-tab-day');
-    const chartWeek = document.getElementById('chart-week');
-    const chartDay = document.getElementById('chart-day');
-    
-    if (mode === 'week') {
-        btnWeek.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all";
-        btnDay.className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition-all";
-        chartWeek.classList.remove('hidden');
-        chartDay.classList.add('hidden');
-    } else {
-        btnDay.className = "flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all";
-        btnWeek.className = "flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition-all";
-        chartWeek.classList.add('hidden');
-        chartDay.classList.remove('hidden');
+function updateUI() {
+    const icon = isRunning ? 'pause' : 'play';
+    document.getElementById('play-icon').setAttribute('data-lucide', icon);
+    document.getElementById('start-stop-btn').className = `w-20 h-20 rounded-full shadow-xl flex items-center justify-center transition-transform active:scale-90 ${isRunning ? 'bg-blue-600' : 'bg-slate-900'}`;
+    if (appMode !== 'study') {
+        document.getElementById('status-label').innerText = isRunning ? "Focusing" : "Paused";
     }
-};
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+}
 
-// 初期化実行
-initStudyApp();
+function toggleVisual() {
+    isAnalog = !isAnalog;
+    document.getElementById('analog-clock').classList.toggle('hidden', !isAnalog);
+    document.getElementById('display').classList.toggle('text-2xl', isAnalog);
+    document.getElementById('display').classList.toggle('text-7xl', !isAnalog);
+    document.getElementById('display').classList.toggle('mt-4', isAnalog);
+}
+
+function toggleSettings() {
+    document.getElementById('settings-modal').classList.toggle('hidden');
+}
+
+// アナログ時計の数字配置
+const numContainer = document.getElementById('numerals-container');
+if(numContainer) {
+    for (let i = 1; i <= 12; i++) {
+        const n = document.createElement('div');
+        n.className = 'numeral'; n.innerText = i * 5;
+        const angle = (i * 30) * (Math.PI / 180);
+        n.style.left = `${130 + 110 * Math.sin(angle)}px`;
+        n.style.top = `${130 - 110 * Math.cos(angle)}px`;
+        numContainer.appendChild(n);
+    }
+}
+
+if(document.getElementById('start-stop-btn')) {
+    document.getElementById('start-stop-btn').addEventListener('click', handleStartStop);
+}
