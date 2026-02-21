@@ -1,3 +1,4 @@
+/* js/study.js */
 // --- 変数定義 ---
 let startTime, elapsedTime = 0, timerInterval, isRunning = false, lapCount = 0;
 let appMode = 'stopwatch';
@@ -58,7 +59,9 @@ function update() {
     }
     document.getElementById('display').innerText = timeToString(elapsedTime);
     const deg = (elapsedTime / 60000) * 360;
-    document.getElementById('main-hand').style.transform = `rotate(${deg}deg)`;
+    if(document.getElementById('main-hand')) {
+        document.getElementById('main-hand').style.transform = `rotate(${deg}deg)`;
+    }
 }
 
 function handleSessionStart() {
@@ -117,7 +120,9 @@ function handleReset() {
     } else {
         document.getElementById('display').innerText = "00:00:00";
     }
-    document.getElementById('main-hand').style.transform = `rotate(0deg)`;
+    if(document.getElementById('main-hand')) {
+        document.getElementById('main-hand').style.transform = `rotate(0deg)`;
+    }
     document.getElementById('lap-list').innerHTML = '';
     document.getElementById('lap-container').style.opacity = "0";
     if (appMode === 'timer') {
@@ -224,29 +229,24 @@ function renderWeekChart(sessions) {
     const container = document.getElementById('chart-week');
     container.innerHTML = '';
     
-    // 最大時間を計算（最低でも1時間を基準とする）
     const maxValMs = Math.max(...dailyTotals.map(d => d.total), 0); 
-    let maxHours = Math.ceil(maxValMs / 3600000); // msを時間に変換して切り上げ
-    if (maxHours < 1) maxHours = 1; // どんなに少なくても1時間は表示
+    let maxHours = Math.ceil(maxValMs / 3600000); 
+    if (maxHours < 1) maxHours = 1; 
     const maxChartMs = maxHours * 3600000;
 
-    // コンテナラッパー（左にメモリ用の余白をとる）
     const wrapper = document.createElement('div');
     wrapper.className = "relative w-full h-full flex pl-8";
 
-    // Y軸グリッド（時間のメモリ）
     const grid = document.createElement('div');
     grid.className = "absolute inset-0 left-8 flex flex-col-reverse justify-between pointer-events-none border-b border-slate-200";
     for (let i = 0; i <= maxHours; i++) {
         const line = document.createElement('div');
-        // 一番下の線（0h）は枠線と被るので上部ボーダーを消す
         line.className = i === 0 ? "w-full relative" : "w-full border-t border-slate-100 relative";
         line.innerHTML = `<span class="absolute -left-8 -top-2 w-6 text-right text-[9px] text-slate-400 mono font-bold">${i}h</span>`;
         grid.appendChild(line);
     }
     wrapper.appendChild(grid);
 
-    // バーの描画
     const barsContainer = document.createElement('div');
     barsContainer.className = "flex-1 flex items-end justify-between gap-1 z-10 pb-[1px]";
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -286,12 +286,11 @@ function renderDayChart(sessions) {
     document.getElementById('stats-date-label').innerText = 
         `${startOfDay.getMonth()+1}/${startOfDay.getDate()} (${daysStr[startOfDay.getDay()]})`;
 
-    // グリッド線の生成 (X軸のメモリ: 0h, 3h, 6h... にラベルを表示)
     const gridContainer = document.getElementById('day-grid');
     gridContainer.innerHTML = '';
     for (let i = 0; i <= 24; i++) {
         const div = document.createElement('div');
-        const isMajor = i % 3 === 0; // 3時間ごとに数字
+        const isMajor = i % 3 === 0; 
         
         div.className = `h-full w-px ${isMajor ? 'bg-slate-200' : 'bg-slate-100'} relative flex flex-col justify-end overflow-visible`;
         
@@ -352,7 +351,7 @@ function changeMode(newMode) {
     appMode = newMode;
     handleReset();
     
-    document.querySelectorAll('nav button').forEach(b => b.classList.remove('tab-active', 'text-slate-900'));
+    document.querySelectorAll('#study-screen nav button').forEach(b => b.classList.remove('tab-active', 'text-slate-900'));
     document.getElementById('btn-' + newMode).classList.add('tab-active');
     
     document.getElementById('total-study-container').classList.toggle('hidden', newMode !== 'study');
@@ -371,7 +370,7 @@ function changeMode(newMode) {
 
 function prepareStudyPhase() {
     isStudyPhase = true;
-    elapsedTime = 1 * 60 * 1000;
+    elapsedTime = 25 * 60 * 1000;
     countdownBase = elapsedTime;
     document.getElementById('display').innerText = timeToString(elapsedTime);
     document.getElementById('display').classList.remove('hidden');
@@ -428,18 +427,21 @@ function setBackground(type) {
     toggleSettings();
 }
 
-document.getElementById('bg-upload').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            document.getElementById('bg-container').style.backgroundImage = `url(${ev.target.result})`;
-            document.getElementById('anim-layer').innerHTML = '';
-            toggleSettings();
-        };
-        reader.readAsDataURL(file);
-    }
-});
+// idが存在する場合のみイベントリスナーを登録
+if(document.getElementById('bg-upload')) {
+    document.getElementById('bg-upload').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                document.getElementById('bg-container').style.backgroundImage = `url(${ev.target.result})`;
+                document.getElementById('anim-layer').innerHTML = '';
+                toggleSettings();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+}
 
 function updateUI() {
     const icon = isRunning ? 'pause' : 'play';
@@ -448,7 +450,7 @@ function updateUI() {
     if (appMode !== 'study') {
         document.getElementById('status-label').innerText = isRunning ? "Focusing" : "Paused";
     }
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 function toggleVisual() {
@@ -463,15 +465,19 @@ function toggleSettings() {
     document.getElementById('settings-modal').classList.toggle('hidden');
 }
 
+// アナログ時計の数字配置
 const numContainer = document.getElementById('numerals-container');
-for (let i = 1; i <= 12; i++) {
-    const n = document.createElement('div');
-    n.className = 'numeral'; n.innerText = i * 5;
-    const angle = (i * 30) * (Math.PI / 180);
-    n.style.left = `${130 + 110 * Math.sin(angle)}px`;
-    n.style.top = `${130 - 110 * Math.cos(angle)}px`;
-    numContainer.appendChild(n);
+if(numContainer) {
+    for (let i = 1; i <= 12; i++) {
+        const n = document.createElement('div');
+        n.className = 'numeral'; n.innerText = i * 5;
+        const angle = (i * 30) * (Math.PI / 180);
+        n.style.left = `${130 + 110 * Math.sin(angle)}px`;
+        n.style.top = `${130 - 110 * Math.cos(angle)}px`;
+        numContainer.appendChild(n);
+    }
 }
 
-document.getElementById('start-stop-btn').addEventListener('click', handleStartStop);
-lucide.createIcons();
+if(document.getElementById('start-stop-btn')) {
+    document.getElementById('start-stop-btn').addEventListener('click', handleStartStop);
+}
