@@ -351,48 +351,6 @@
     <script type="module" src="js/main.js"></script>
     
     <script src="js/study.js"></script>
-
-    <script>
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-
-        // タグ切り替え用のJavaScript
-        document.addEventListener('DOMContentLoaded', () => {
-            const tags = document.querySelectorAll('#main-tags .tag');
-            const screens = {
-                'news-tag': 'news-feed-container',
-                'study-tag': 'study-screen',
-                'tolk-tag': 'tolk-screen',
-                'calendar-tag': 'calendar-container'
-            };
-
-            tags.forEach(tag => {
-                tag.addEventListener('click', () => {
-                    // 全てのタグから active クラスを外す
-                    tags.forEach(t => t.classList.remove('active'));
-                    // クリックされたタグをアクティブにする
-                    tag.classList.add('active');
-
-                    // 全ての画面を非表示にする
-                    Object.values(screens).forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) el.style.display = 'none';
-                    });
-
-                    // クリックされたタグに対応する画面を表示する
-                    const targetId = screens[tag.id];
-                    if (targetId) {
-                        const targetEl = document.getElementById(targetId);
-                        if (targetEl) {
-                            // Flexレイアウトを使用する画面は 'flex' に、それ以外は 'block' に設定
-                            targetEl.style.display = (targetId === 'study-screen' || targetId === 'tolk-screen') ? 'flex' : 'block';
-                        }
-                    }
-                });
-            });
-        });
-    </script>
     <script type="module" src="js/main.js"></script>
     <script src="js/study.js"></script>
 </body>
