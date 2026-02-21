@@ -39,15 +39,36 @@
 @keyframes leaf-sway { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(20deg); } }
 
 /* 時計盤 */
-.clock-face { width: 260px; height: 260px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); position: relative; }
+.clock-face { 
+    width: 260px; height: 260px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.05); 
+    background: rgba(255,255,255,0.8); 
+    -webkit-backdrop-filter: blur(10px); /* Safari対応 */
+    backdrop-filter: blur(10px); 
+    position: relative; 
+}
 .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 10px; z-index: 10; will-change: transform; }
 .main-hand { width: 4px; height: 110px; background: var(--accent); margin-left: -2px; }
 .numeral { position: absolute; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #cbd5e1; margin-top: -15px; margin-left: -15px; }
 
-.glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); }
+.glass { 
+    background: rgba(255, 255, 255, 0.8); 
+    -webkit-backdrop-filter: blur(20px); /* Safari対応 */
+    backdrop-filter: blur(20px); 
+    border: 1px solid rgba(255,255,255,0.5); 
+}
 .tab-active { color: var(--accent); border-bottom: 2px solid var(--accent); }
 .hidden { display: none !important; }
-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* 修正: input[type="number"]のスピナーを完全に非表示にする */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button { 
+    -webkit-appearance: none; 
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield; /* 古いFirefox対応 */
+    appearance: textfield;      /* 標準プロパティ（これを足すとエラーが消えます） */
+}
 
 /* グラフ用スタイル調整 */
 .chart-bar { transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 4px; min-height: 4px; }
