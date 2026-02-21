@@ -6,16 +6,16 @@
     <title>Cyber Clock & Weather & Neo Pod</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500;700&family=Montserrat:wght@400;700&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     
+    <!-- Lucide Icons (Source1で使用されているため追加推奨) -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/calendar.css">
     <link rel="stylesheet" href="css/neopod.css">
-    <link rel="stylesheet" href="css/study.css"> 
     <link rel="stylesheet" href="css/study.css">
+    <!-- Source1用のCSSファイルがあればここで読み込んでください -->
+    <!-- <link rel="stylesheet" href="css/study-timer.css"> -->
 </head>
 <body>
     <header id="neo-fixed-header" style="display: none; position: fixed; top: 15px; right: 15px; z-index: 10000; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 25px; backdrop-filter: blur(5px);">
@@ -36,7 +36,7 @@
     <div class="top-space" id="header-bg">
         <div id="date-top" style="text-align: center; font-size: 14px; font-weight: bold; margin-bottom: 5px; letter-spacing: 1px; color: var(--text-main);">
             <span id="current-date">----/--/--</span>
-            <span id="current-day">-</span>
+            (<span id="current-day">-</span>)
         </div>
 
         <div class="weather-top">
@@ -55,7 +55,8 @@
         </div>
     </div>
 
-    <div class="tag-container" id="main-tags">
+    <!-- タグ部分：studyにIDを追加しました -->
+    <div class="tag-container">
         <span class="tag active" id="news-tag">news</span>
         <span class="tag" id="study-tag">study</span>
         <span class="tag" id="tolk-tag">tolk</span>
@@ -63,6 +64,7 @@
         <span class="tag">others</span>
     </div>
 
+    <!-- NEWS FEED -->
     <div id="news-feed-container">
         <div class="news-tabs">
             <div id="tab-latest" class="n-tab active">Latest</div>
@@ -72,8 +74,11 @@
         <div id="feed"><div style="text-align:center; padding:40px; font-weight:800; color:var(--accent);">INITIALIZING...</div></div>
     </div>
 
+    <!-- STUDY SCREEN (ここに追加しました) -->
+    <!-- 初期状態で非表示 (style="display:none;" または class="hidden" をCSSに合わせて制御してください) -->
     <div id="study-screen" class="screen hidden" style="display: none; width: 100%; flex-direction: column; align-items: center;">
         
+        <!-- 背景・レイヤー -->
         <div id="bg-container"></div>
         <div id="anim-layer"></div>
 
@@ -131,18 +136,17 @@
             </div>
         </div>
 
+        <!-- モーダル類 (Study Screen内に配置) -->
         <div id="stats-modal" class="fixed inset-0 bg-black/10 backdrop-blur-md hidden z-50 flex items-center justify-center p-6">
             <div class="bg-white w-full max-w-sm rounded-[40px] p-6 shadow-2xl max-h-[90vh] flex flex-col">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-extrabold text-xl">Analytics</h3>
+                    <h3 class="font-extrabold text-xl" style="color:#333;">Analytics</h3>
                     <button onclick="toggleStats()" class="p-2 bg-slate-100 rounded-full"><i data-lucide="x" class="w-4 h-4"></i></button>
                 </div>
-
                 <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
                     <button onclick="switchStatsMode('week')" id="stats-tab-week" class="flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all">Weekly</button>
                     <button onclick="switchStatsMode('day')" id="stats-tab-day" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-400 transition-all">Daily</button>
                 </div>
-
                 <div class="flex justify-between items-center mb-6 px-2">
                     <button onclick="moveStatsDate(-1)" class="p-2 hover:bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
                     <div class="text-center">
@@ -151,16 +155,13 @@
                     </div>
                     <button onclick="moveStatsDate(1)" class="p-2 hover:bg-slate-100 rounded-full text-slate-400"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
                 </div>
-
                 <div class="flex-1 mb-4 relative min-h-[200px] max-h-[300px]">
                     <div id="chart-week" class="w-full h-48 relative"></div>
-
                     <div id="chart-day" class="w-full h-48 hidden relative flex flex-col justify-center">
                         <div id="day-grid" class="absolute inset-0 w-full h-full flex justify-between pointer-events-none z-0"></div>
                         <div class="relative w-full h-12 bg-slate-50/50 rounded-lg overflow-hidden border border-slate-100 z-10" id="day-timeline-track"></div>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-3 gap-2 text-[10px] font-bold text-slate-600 text-center mt-auto pt-4 border-t border-slate-50">
                     <div class="flex items-center justify-center gap-1 bg-blue-50 py-2 rounded-lg">
                         <span class="w-2 h-2 rounded-full bg-blue-600"></span> 勉強
@@ -181,7 +182,7 @@
 
         <div id="settings-modal" class="fixed inset-0 bg-black/10 backdrop-blur-md hidden z-50 flex items-center justify-center p-6">
             <div class="bg-white w-full max-w-sm rounded-[40px] p-10 shadow-2xl">
-                <h3 class="font-extrabold text-xl mb-8">背景設定</h3>
+                <h3 class="font-extrabold text-xl mb-8" style="color:#333;">背景設定</h3>
                 <div class="space-y-6">
                     <div class="grid grid-cols-3 gap-2">
                         <button onclick="setBackground('none')" class="py-3 border rounded-2xl text-[10px] font-bold">なし</button>
@@ -197,7 +198,10 @@
             </div>
         </div>
     </div>
-    <div id="calendar-container" class="hidden" style="display: none;">
+    <!-- STUDY SCREEN END -->
+
+    <!-- CALENDAR CONTAINER -->
+    <div id="calendar-container" class="hidden">
         <div class="calendar">
             <div id="today-memo-top" style="margin-bottom:15px; padding:10px; background:rgba(255,105,180,0.1); border-radius:8px; border-left:4px solid #ff69b4; font-size:0.9em; font-weight:bold; color:var(--text-main);">今日の予定: なし</div>
             <div class="cal-header">
@@ -226,6 +230,7 @@
         </div>
     </div>
 
+    <!-- NEO POD SCREEN -->
     <div id="tolk-screen" class="screen hidden" style="display: none;">
         <div id="auth-screen" class="auth-overlay">
             <div class="auth-card">
@@ -348,50 +353,12 @@
             </div>
         </div>
     </div>
-    <script type="module" src="js/main.js"></script>
-    
-    <script src="js/study.js"></script>
 
+    <!-- Source1で使われていたLucide Iconの初期化スクリプト -->
     <script>
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
         }
-
-        // タグ切り替え用のJavaScript
-        document.addEventListener('DOMContentLoaded', () => {
-            const tags = document.querySelectorAll('#main-tags .tag');
-            const screens = {
-                'news-tag': 'news-feed-container',
-                'study-tag': 'study-screen',
-                'tolk-tag': 'tolk-screen',
-                'calendar-tag': 'calendar-container'
-            };
-
-            tags.forEach(tag => {
-                tag.addEventListener('click', () => {
-                    // 全てのタグから active クラスを外す
-                    tags.forEach(t => t.classList.remove('active'));
-                    // クリックされたタグをアクティブにする
-                    tag.classList.add('active');
-
-                    // 全ての画面を非表示にする
-                    Object.values(screens).forEach(id => {
-                        const el = document.getElementById(id);
-                        if (el) el.style.display = 'none';
-                    });
-
-                    // クリックされたタグに対応する画面を表示する
-                    const targetId = screens[tag.id];
-                    if (targetId) {
-                        const targetEl = document.getElementById(targetId);
-                        if (targetEl) {
-                            // Flexレイアウトを使用する画面は 'flex' に、それ以外は 'block' に設定
-                            targetEl.style.display = (targetId === 'study-screen' || targetId === 'tolk-screen') ? 'flex' : 'block';
-                        }
-                    }
-                });
-            });
-        });
     </script>
     <script type="module" src="js/main.js"></script>
     <script src="js/study.js"></script>
