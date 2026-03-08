@@ -1,8 +1,36 @@
-export function initClockAndWeather() {
-  function updateClock() { const now = new Date(); const hours = now.getHours(); document.getElementById("clock").innerHTML = `${String(hours).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}:<span class="seconds">${String(now.getSeconds()).padStart(2,"0")}</span>`; const header = document.getElementById("header-bg"); header.style.backgroundImage = (hours >= 6 && hours < 18) ? "url('https://images.unsplash.com/photo-1470252649358-96949c751bd8?q=80&w=1000')" : "url('https://images.unsplash.com/photo-1472552947727-b59a1e809df9?q=80&w=1000')"; }
-  setInterval(updateClock, 1000); updateClock();
-  document.getElementById("modeToggle").addEventListener("change", () => document.body.classList.toggle("dark-mode"));
-  
-  async function fetchWeather() { try { const resOM = await fetch("https://api.open-meteo.com/v1/forecast?latitude=35.6895&longitude=139.6917&current=temperature_2m,relative_humidity_2m,weather_code&hourly=temperature_2m,relative_humidity_2m"); const data = await resOM.json(); const curTemp = Math.round(data.current.temperature_2m), curHum = Math.round(data.current.relative_humidity_2m); const hIdx = new Date().getHours(), prevTemp = Math.round(data.hourly.temperature_2m[hIdx-1]||curTemp), prevHum = Math.round(data.hourly.relative_humidity_2m[hIdx-1]||curHum); document.getElementById("temp").textContent = curTemp; const tD = curTemp - prevTemp, tB = document.getElementById("temp-diff"); tB.style.display = "inline-block"; tB.textContent = (tD>=0?"+":"")+tD; tB.className = "diff-badge "+(tD>=0?"diff-up":"diff-down"); const hEl = document.getElementById("humidity"); hEl.textContent = curHum; if(curHum<=40){ hEl.style.color="#ff4d4d"; hEl.classList.add("blink"); }else{ hEl.style.color="inherit"; hEl.classList.remove("blink"); } const hD = curHum - prevHum, hB = document.getElementById("hum-diff"); hB.style.display = "inline-block"; hB.textContent = (hD>=0?"+":"")+hD; hB.className = "diff-badge "+(hD>=0?"diff-up":"diff-down"); const code = data.current.weather_code; let icon = "☁️"; if(code<=1)icon="☀️"; else if(code<=3)icon="🌤️"; else if(code<=67)icon="🌧️"; else if(code<=82)icon="☔"; document.getElementById("weather-text").textContent = icon; } catch (e) { console.error(e); } }
-  fetchWeather();
-}
+document.addEventListener('DOMContentLoaded', () => {
+    // 全てのタグを取得
+    const tags = document.querySelectorAll('.tag');
+    
+    // 各タグIDと、対応する表示エリアのIDを紐付け
+    const containers = {
+        'news-tag': document.getElementById('news-feed-container'),
+        'study-tag': document.getElementById('study-container'),
+        'tolk-tag': document.getElementById('tolk-screen'),
+        'calendar-tag': document.getElementById('calendar-container'),
+    };
+
+    tags.forEach(tag => {
+        tag.addEventListener('click', () => {
+            // 1. 全てのタグから 'active' クラスを外し、クリックされたものだけ付ける（見た目の変更）
+            tags.forEach(t => t.classList.remove('active'));
+            tag.classList.add('active');
+
+            // 2. 一旦すべてのコンテナを非表示（display: none）にする
+            Object.values(containers).forEach(container => {
+                if (container) {
+                    container.style.display = 'none';
+                }
+            });
+
+            // 3. クリックされたタグに対応するコンテナだけを表示（display: block）する
+            const targetContainer = containers[tag.id];
+            if (targetContainer) {
+                targetContainer.style.display = 'block';
+            } else {
+                // othersなど、対応する画面がない場合
+                console.log('表示するコンテンツが設定されていません');
+            }
+        });
+    });
+});
