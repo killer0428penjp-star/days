@@ -8,38 +8,218 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #2563eb; --study: #2563eb; --break: #10b981; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
-        
-        #bg-container { position: fixed; inset: 0; z-index: -1; background: #ffffff; background-size: cover; background-position: center; }
-        #anim-layer { position: absolute; inset: 0; pointer-events: none; }
+        :root {
+  /* 新しいカラーパレットの適用 */
+  --main-bg: #f0f4f8;
+  --card-bg: rgba(255, 255, 255, 0.8);
+  --accent: #0070ff;
+  --text-main: #1a202c;
+  --text-sub: #718096;
+  --border-soft: #e2e8f0;
+  --up-color: #ff4d4d;
+  --down-color: #0070ff;
+  --cal-bg: #ffffff;
+  --cal-text: #1a202c;
+  --cal-cell-bg: #f8fafc;
+  --cal-memo-bg: #ffffff;
+  --primary: #2d3436;
+  --danger: #ff7675;
+  --success: #00b894;
+  --bg: #f8f9fa;
+  --card: #ffffff;
+  
+  /* 基礎の変数を統合 */
+  --study: var(--accent);
+  --break: #10b981;
+}
 
-        /* 背景アニメーション */
-        .waves-bg { background: linear-gradient(180deg, #fff 0%, #e0f2fe 100%); }
-        .wave-obj { position: absolute; bottom: 0; width: 200%; height: 15vh; background: rgba(37, 99, 235, 0.05); border-radius: 40%; animation: wave-anim 15s linear infinite; }
-        @keyframes wave-anim { from { transform: translateX(0) rotate(0deg); } to { transform: translateX(-50%) rotate(360deg); } }
+body.dark-mode {
+  --main-bg: #1e1e2f;
+  --card-bg: rgba(30, 30, 47, 0.85);
+  --accent: #00f2ff;
+  --text-main: #ffffff;
+  --text-sub: #a0aec0;
+  --border-soft: #2d3748;
+  --down-color: #00f2ff;
+  --cal-bg: #111111;
+  --cal-text: #ffffff;
+  --cal-cell-bg: #222222;
+  --cal-memo-bg: #1a1a1a;
+  --study: var(--accent);
+}
 
-        .trees-bg { background: linear-gradient(180deg, #fff 0%, #f0fdf4 100%); }
-        .leaf-obj { position: absolute; background: #22c55e; border-radius: 50% 0 50% 0; opacity: 0.08; animation: leaf-sway 6s ease-in-out infinite; }
-        @keyframes leaf-sway { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(20deg); } }
+/* 基礎設定（一切削らず統合） */
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+  background-color: var(--main-bg);
+  /* ドットパターンを統合 */
+  background-image: radial-gradient(var(--border-soft) 1px, transparent 1px);
+  background-size: 20px 20px;
+  color: var(--text-main);
+  transition: all 0.5s ease;
+  overflow: hidden;
+  height: 100vh;
+}
 
-        /* 時計盤 */
-        .clock-face { width: 260px; height: 260px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.05); background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); position: relative; }
-        .hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; border-radius: 10px; z-index: 10; will-change: transform; }
-        .main-hand { width: 4px; height: 110px; background: var(--accent); margin-left: -2px; }
-        .numeral { position: absolute; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #cbd5e1; margin-top: -15px; margin-left: -15px; }
+.mono { font-family: 'JetBrains Mono', monospace; }
 
-        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.5); }
-        .tab-active { color: var(--accent); border-bottom: 2px solid var(--accent); }
-        .hidden { display: none !important; }
-        input::-webkit-inner-spin-button { -webkit-appearance: none; }
-        
-        /* グラフ用スタイル調整 */
-        .chart-bar { transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 4px; min-height: 4px; }
-        .timeline-block { position: absolute; height: 100%; top: 0; opacity: 0.9; border-radius: 2px; min-width: 2px; transition: all 0.3s ease; z-index: 10; cursor: pointer; }
-        .timeline-block:hover { z-index: 30; transform: scaleY(1.2); opacity: 1; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+/* 背景・アニメーションレイヤー（基礎構造を維持） */
+#bg-container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-size: cover;
+  background-position: center;
+}
+
+#anim-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* 波アニメーション（グラデーションを背景色に連動） */
+.waves-bg { 
+  background: linear-gradient(180deg, var(--main-bg) 0%, #e0f2fe 100%); 
+}
+.wave-obj {
+  position: absolute;
+  bottom: 0;
+  width: 200%;
+  height: 15vh;
+  background: var(--accent);
+  opacity: 0.05; /* Snippet 1のrgba(37, 99, 235, 0.05)相当 */
+  border-radius: 40%;
+  animation: wave-anim 15s linear infinite;
+}
+
+/* 葉アニメーション（グラデーションを背景色に連動） */
+.trees-bg { 
+  background: linear-gradient(180deg, var(--main-bg) 0%, #f0fdf4 100%); 
+}
+.leaf-obj {
+  position: absolute;
+  background: var(--success);
+  border-radius: 50% 0 50% 0;
+  opacity: 0.08;
+  animation: leaf-sway 6s ease-in-out infinite;
+}
+
+/* 時計盤（基礎のサイズ・構造を維持しつつ色を変数化） */
+.clock-face {
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  border: 1px solid var(--border-soft);
+  background: var(--card-bg);
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  border-radius: 10px;
+  z-index: 10;
+  will-change: transform;
+}
+
+.main-hand {
+  width: 4px;
+  height: 110px;
+  background: var(--accent);
+  margin-left: -2px;
+}
+
+.numeral {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-sub); /* #cbd5e1から変数へ */
+  margin-top: -15px;
+  margin-left: -15px;
+}
+
+/* UIパーツ */
+.glass {
+  background: var(--card-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-soft);
+}
+
+.tab-active {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+}
+
+.hidden { display: none !important; }
+input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* スイッチコンテナ（新しいUI要素を維持） */
+.switch-container { position: fixed; top: 15px; left: 14px; z-index: 1000; }
+.switch { position: relative; width: 44px; height: 24px; display: block; cursor: pointer; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+  position: absolute;
+  inset: 0;
+  background: #ccc;
+  border-radius: 30px;
+  transition: 0.4s;
+}
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.4s;
+}
+input:checked + .slider { background: var(--accent); }
+input:checked + .slider::before { transform: translateX(20px); }
+
+/* グラフ・タイムライン（消さずに維持） */
+.chart-bar {
+  transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 4px;
+  min-height: 4px;
+}
+.timeline-block {
+  position: absolute;
+  height: 100%;
+  top: 0;
+  opacity: 0.9;
+  border-radius: 2px;
+  min-width: 2px;
+  transition: all 0.3s ease;
+  z-index: 10;
+  cursor: pointer;
+}
+.timeline-block:hover {
+  z-index: 30;
+  transform: scaleY(1.2);
+  opacity: 1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* アニメーション定義（維持） */
+@keyframes wave-anim { from { transform: translateX(0) rotate(0deg); } to { transform: translateX(-50%) rotate(360deg); } }
+@keyframes leaf-sway { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(20deg); } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+.blink { animation: blink 1s infinite; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="flex flex-col items-center">
