@@ -223,5 +223,44 @@
     </div>
 
     <script type="module" src="js/main.js"></script>
+    <script>// DOMの読み込みが完了したら実行
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. 各タグの要素を取得
+    const newsTag = document.getElementById('news-tag');
+    const studyTag = document.getElementById('study-tag');
+    const tolkTag = document.getElementById('tolk-tag');
+    const calendarTag = document.getElementById('calendar-tag');
+
+    // 2. 各コンテンツのコンテナ要素を取得
+    const newsContainer = document.getElementById('news-feed-container');
+    const studyContainer = document.getElementById('study-container');
+    const tolkContainer = document.getElementById('tolk-screen');
+    const calendarContainer = document.getElementById('calendar-container');
+
+    // タグと対応するコンテナをセットにして配列にまとめる
+    const tabs = [
+        { tag: newsTag, container: newsContainer },
+        { tag: studyTag, container: studyContainer },
+        { tag: tolkTag, container: tolkContainer },
+        { tag: calendarTag, container: calendarContainer }
+    ];
+
+    // 3. 各タグにクリックイベントを設定
+    tabs.forEach(tab => {
+        if (!tab.tag || !tab.container) return; // 要素がない場合はスキップ
+
+        tab.tag.addEventListener('click', () => {
+            // ① 一旦すべてのコンテナを非表示にし、タグの色(active)をリセットする
+            tabs.forEach(t => {
+                if (t.container) t.container.style.display = 'none';
+                if (t.tag) t.tag.classList.remove('active');
+            });
+
+            // ② クリックされたタグに 'active' クラスを付け、対応するコンテナだけを表示する
+            tab.tag.classList.add('active');
+            tab.container.style.display = 'block'; 
+        });
+    });
+});</script>
 </body>
 </html>7
