@@ -261,6 +261,25 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.container.style.display = 'block'; 
         });
     });
-});</script>
+});
+document.addEventListener('DOMContentLoaded', () => {
+    // すべてのタグ要素を取得
+    const allTags = document.querySelectorAll('.tag');
+    // studyのコンテナを取得
+    const studyContainer = document.getElementById('study-container');
+
+    // それぞれのタグにクリックイベントを設定
+    allTags.forEach(tag => {
+        tag.addEventListener('click', (event) => {
+            // クリックされたタグのIDが 'study-tag' なら表示、それ以外なら非表示
+            if (event.target.id === 'study-tag') {
+                studyContainer.style.display = 'block';
+            } else {
+                studyContainer.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
 </body>
 </html>7
