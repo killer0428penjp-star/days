@@ -27,6 +27,8 @@
   --success: #00b894;
   --bg: #f8f9fa;
   --card: #ffffff;
+
+  
   
   /* 基礎の変数を統合 */
   --study: var(--accent);
@@ -48,6 +50,20 @@ body.dark-mode {
   --study: var(--accent);
 }
 
+:root {
+  /* デフォルト：ダークモード */
+  --main-bg: #1e1e2f;
+  --card-bg: rgba(30, 30, 47, 0.85);
+  --accent: #00f2ff;
+  --text-main: #ffffff;
+  --text-sub: #a0aec0;
+  --border-soft: #2d3748;
+  --up-color: #ff4d4d;
+  --down-color: #00f2ff;
+  --success: #00b894;
+  --study: var(--accent);
+  --break: #10b981;
+}
 /* 基礎設定（一切削らず統合） */
 body {
   margin: 0;
@@ -365,7 +381,7 @@ body.light-mode {
     </div>
 
     <script>
-        // --- 変数定義 ---
+       // --- 変数定義 ---
 let startTime, elapsedTime = 0, timerInterval, isRunning = false, lapCount = 0;
 let appMode = 'stopwatch';
 let isAnalog = false;
@@ -894,7 +910,6 @@ window.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 });
-        
     </script>
 </body>
 </html>
