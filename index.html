@@ -228,69 +228,58 @@
     <script type="module" src="js/main.js"></script>
     <script>// DOMの読み込みが完了したら実行
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. 要素の取得 ---
-    const modeToggle = document.getElementById('modeToggle');
-    const studyIframe = document.querySelector('#study-container iframe');
-    
+    // 1. 各タグの要素を取得
+    const newsTag = document.getElementById('news-tag');
+    const studyTag = document.getElementById('study-tag');
+    const tolkTag = document.getElementById('tolk-tag');
+    const calendarTag = document.getElementById('calendar-tag');
+
+    // 2. 各コンテンツのコンテナ要素を取得
+    const newsContainer = document.getElementById('news-feed-container');
+    const studyContainer = document.getElementById('study-container');
+    const tolkContainer = document.getElementById('tolk-screen');
+    const calendarContainer = document.getElementById('calendar-container');
+
+    // タグと対応するコンテナをセットにして配列にまとめる
     const tabs = [
-        { tag: document.getElementById('news-tag'), container: document.getElementById('news-feed-container') },
-        { tag: document.getElementById('study-tag'), container: document.getElementById('study-container') },
-        { tag: document.getElementById('tolk-tag'), container: document.getElementById('tolk-screen') },
-        { tag: document.getElementById('calendar-tag'), container: document.getElementById('calendar-container') }
+        { tag: newsTag, container: newsContainer },
+        { tag: studyTag, container: studyContainer },
+        { tag: tolkTag, container: tolkContainer },
+        { tag: calendarTag, container: calendarContainer }
     ];
 
-    // --- 2. ダークモード管理システム ---
-
-    // 子画面(study.html)にテーマを送る関数
-    const sendThemeToIframe = (isLight) => {
-        const theme = isLight ? 'light' : 'dark';
-        if (studyIframe && studyIframe.contentWindow) {
-            studyIframe.contentWindow.postMessage({ type: 'THEME_CHANGE', theme: theme }, '*');
-        }
-    };
-
-    // 初期状態のロード
-    const savedTheme = localStorage.getItem('zenfocus-theme');
-    const isInitiallyLight = savedTheme === 'light';
-    
-    if (isInitiallyLight) {
-        document.body.classList.add('light-mode');
-        if (modeToggle) modeToggle.checked = true;
-    }
-
-    // 切替イベント
-    if (modeToggle) {
-        modeToggle.addEventListener('change', () => {
-            const isLight = modeToggle.checked;
-            document.body.classList.toggle('light-mode', isLight);
-            localStorage.setItem('zenfocus-theme', isLight ? 'light' : 'dark');
-            
-            // iframeへ送信
-            sendThemeToIframe(isLight);
-        });
-    }
-
-    // iframeが読み込まれたら現在の状態を即座に同期
-    if (studyIframe) {
-        studyIframe.addEventListener('load', () => {
-            sendThemeToIframe(modeToggle ? modeToggle.checked : isInitiallyLight);
-        });
-    }
-
-    // --- 3. タブ切り替えシステム ---
+    // 3. 各タグにクリックイベントを設定
     tabs.forEach(tab => {
-        if (!tab.tag || !tab.container) return;
+        if (!tab.tag || !tab.container) return; // 要素がない場合はスキップ
 
         tab.tag.addEventListener('click', () => {
-            // すべてリセット
+            // ① 一旦すべてのコンテナを非表示にし、タグの色(active)をリセットする
             tabs.forEach(t => {
                 if (t.container) t.container.style.display = 'none';
                 if (t.tag) t.tag.classList.remove('active');
             });
 
-            // クリックされたものだけ表示
+            // ② クリックされたタグに 'active' クラスを付け、対応するコンテナだけを表示する
             tab.tag.classList.add('active');
-            tab.container.style.display = 'block';
+            tab.container.style.display = 'block'; 
+        });
+    });
+});
+document.addEventListener('DOMContentLoaded', () => {
+    // すべてのタグ要素を取得
+    const allTags = document.querySelectorAll('.tag');
+    // studyのコンテナを取得
+    const studyContainer = document.getElementById('study-container');
+
+    // それぞれのタグにクリックイベントを設定
+    allTags.forEach(tag => {
+        tag.addEventListener('click', (event) => {
+            // クリックされたタグのIDが 'study-tag' なら表示、それ以外なら非表示
+            if (event.target.id === 'study-tag') {
+                studyContainer.style.display = 'block';
+            } else {
+                studyContainer.style.display = 'none';
+            }
         });
     });
 });
