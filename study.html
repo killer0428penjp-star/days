@@ -27,8 +27,6 @@
   --success: #00b894;
   --bg: #f8f9fa;
   --card: #ffffff;
-
-  
   
   /* 基礎の変数を統合 */
   --study: var(--accent);
@@ -50,20 +48,6 @@ body.dark-mode {
   --study: var(--accent);
 }
 
-:root {
-  /* デフォルト：ダークモード */
-  --main-bg: #1e1e2f;
-  --card-bg: rgba(30, 30, 47, 0.85);
-  --accent: #00f2ff;
-  --text-main: #ffffff;
-  --text-sub: #a0aec0;
-  --border-soft: #2d3748;
-  --up-color: #ff4d4d;
-  --down-color: #00f2ff;
-  --success: #00b894;
-  --study: var(--accent);
-  --break: #10b981;
-}
 /* 基礎設定（一切削らず統合） */
 body {
   margin: 0;
@@ -236,25 +220,10 @@ input:checked + .slider::before { transform: translateX(20px); }
 
 .blink { animation: blink 1s infinite; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
-body.light-mode {
-  --main-bg: #f0f4f8;
-  --card-bg: rgba(255, 255, 255, 0.8);
-  --accent: #0070ff;
-  --text-main: #1a202c;
-  --text-sub: #718096;
-  --border-soft: #e2e8f0;
-  --down-color: #0070ff;
-}
     </style>
 </head>
 <body class="flex flex-col items-center">
-<div class="switch-container">
-    <label class="switch">
-        <input type="checkbox" id="theme-toggle" onclick="toggleTheme()">
-        <span class="slider"></span>
-    </label>
-    <span class="text-[10px] font-bold ml-12 text-slate-400 uppercase tracking-tighter">Mode</span>
-</div>
+
     <div id="bg-container"></div>
     <div id="anim-layer"></div>
 
@@ -858,23 +827,6 @@ body.light-mode {
 
         document.getElementById('start-stop-btn').addEventListener('click', handleStartStop);
         lucide.createIcons();
-        // テーマ切り替え関数
-function toggleTheme() {
-    const isLight = document.body.classList.toggle('light-mode');
-    localStorage.setItem('zenfocus-theme', isLight ? 'light' : 'dark');
-    
-    // アイコンや色の微調整が必要な場合はここに追加
-    updateUI(); 
-}
-
-// ページ読み込み時に保存されたテーマを適用
-window.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('zenfocus-theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-        document.getElementById('theme-toggle').checked = true;
-    }
-});
     </script>
 </body>
 </html>
