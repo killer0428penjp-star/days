@@ -1,4 +1,4 @@
-import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion } from "./firebase.js";
+import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion, arrayRemove } from "./firebase.js";
 import { initCalendar } from "./calendar.js";
 
 let me = null;
@@ -6,6 +6,7 @@ let currentEditRoomId = null;
 let currentRoomId = null; 
 let chatUnsubscribe = null; 
 const DEFAULT_IMG = "https://placehold.jp/24/cccccc/ffffff/200x200.png?text=NoImage";
+const DEFAULT_ROOM_IMG = "https://placehold.jp/24/87ceeb/ffffff/200x200.png?text=☁";
 
 export function initNeoPod() {
 
@@ -123,9 +124,41 @@ export function initNeoPod() {
     function loadRooms() {
         onSnapshot(query(collection(db, "rooms_v11"), orderBy("createdAt", "desc")), (snap) => {
             const list = document.getElementById('room-list-body'); list.innerHTML = "";
-            snap.forEach(ds => { const r = ds.data(); if (r.members && !r.members.includes(me.id) && r.owner !== me.id && ds.id !== "official-lounge") return; const memberCount = r.members ? r.members.length : 0; const tr = document.createElement('tr'); tr.className = 'data-row'; tr.innerHTML = ` <td style="width:50px" onclick="openChat('${ds.id}', '${r.name.replace(/'/g, "\\'")}')"><img src="${r.img || DEFAULT_IMG}" class="icon-cell"></td> <td style="text-align:left" onclick="openChat('${ds.id}', '${r.name.replace(/'/g, "\\'")}')"> <b>${r.name}</b> <span style="color:#888; font-size:12px;">(${memberCount})</span> </td> <td style="text-align:right; white-space:nowrap;"> ${(r.owner === me.id && ds.id !== "official-lounge") ? ` <button class="btn-sub btn-edit" onclick="openRoomModal('${ds.id}','${r.name.replace(/'/g, "\\'")}','${r.img}')">編集</button> <button class="btn-sub btn-del" onclick="deleteRoom('${ds.id}')">削除</button> ` : ''} </td>`; list.appendChild(tr); });
+            snap.forEach(ds => {
+                const r = ds.data();
+                if (r.members && !r.members.includes(me.id) && r.owner !== me.id && ds.id !== "official-lounge") return;
+                const memberCount = r.members ? r.members.length : 0;
+                const isOwner = r.owner === me.id && ds.id !== "official-lounge";
+                const isMember = r.members && r.members.includes(me.id) && !isOwner && ds.id !== "official-lounge";
+                const tr = document.createElement('tr');
+                tr.className = 'data-row';
+                tr.innerHTML = `
+                    <td style="width:50px" onclick="openChat('${ds.id}', '${r.name.replace(/'/g, "\\'")}')">
+                        <img src="${r.img || DEFAULT_ROOM_IMG}" class="icon-cell">
+                    </td>
+                    <td style="text-align:left" onclick="openChat('${ds.id}', '${r.name.replace(/'/g, "\\'")}')">
+                        <b>${r.name}</b>
+                        <span style="color:#888; font-size:12px;">(${memberCount})</span>
+                    </td>
+                    <td style="text-align:right; white-space:nowrap;">
+                        ${isOwner ? `
+                            <button class="btn-sub btn-edit" onclick="openRoomModal('${ds.id}','${r.name.replace(/'/g, "\\'")}','${r.img || DEFAULT_ROOM_IMG}')">編集</button>
+                            <button class="btn-sub btn-del" onclick="deleteRoom('${ds.id}')">削除</button>
+                        ` : ''}
+                        ${isMember ? `
+                            <button class="btn-sub" onclick="leaveRoom('${ds.id}')" style="background:#ff9800; color:white; border:none; padding:4px 10px; border-radius:8px; font-size:12px; cursor:pointer;">退出</button>
+                        ` : ''}
+                    </td>`;
+                list.appendChild(tr);
+            });
         });
     }
+
+    // ルーム退出
+    window.leaveRoom = async (rid) => {
+        if(!confirm("このルームから退出しますか？")) return;
+        await updateDoc(doc(db, "rooms_v11", rid), { members: arrayRemove(me.id) });
+    };
 
     window.openChat = (roomId, roomName) => { currentRoomId = roomId; document.getElementById('chat-title').innerText = roomName; window.showNeoScreen('chat'); startChat(roomId); };
 
@@ -215,8 +248,51 @@ export function initNeoPod() {
     }
 
     window.viewUserProfile = (u) => { document.getElementById('view-profile-modal').classList.remove('hidden'); document.getElementById('view-profile-icon').src = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG; document.getElementById('view-profile-name').innerText = u.name; document.getElementById('view-profile-id').innerText = "ID: " + u.id; document.getElementById('view-profile-birthday').innerText = u.birthday || "未設定"; document.getElementById('view-profile-bio').innerText = u.bio || "自己紹介はありません。"; };
-    window.openRoomModal = async (rid=null, n="", i="") => { currentEditRoomId = rid; document.getElementById('room-modal').classList.remove('hidden'); document.getElementById('room-name-input').value = n; document.getElementById('room-preview').src = rid ? (i || DEFAULT_IMG) : "https://placehold.jp/150x150.png?text=PICK"; const inviteList = document.getElementById('room-invite-list'); inviteList.innerHTML = "読み込み中..."; let currentMembers = []; if (rid) { const rDoc = await getDoc(doc(db, "rooms_v11", rid)); if (rDoc.exists()) currentMembers = rDoc.data().members || []; } const snap = await getDocs(collection(db, "users_v11")); inviteList.innerHTML = ""; snap.forEach(ds => { const u = ds.data(); if(u.id === me.id) return; const isChecked = currentMembers.includes(u.id) ? "checked" : ""; const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG; const div = document.createElement('div'); div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid #f9f9f9;"; div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px;">${u.name}</span>`; inviteList.appendChild(div); }); };
-    document.getElementById('room-save-btn').onclick = async () => { const name = document.getElementById('room-name-input').value.trim(); if(!name) return; const selectedIds = Array.from(document.querySelectorAll('.invite-check:checked')).map(el => el.value); selectedIds.push(me.id); const roomData = { name, img: document.getElementById('room-preview').src, owner: me.id, members: selectedIds, createdAt: serverTimestamp() }; if(currentEditRoomId) { await updateDoc(doc(db, "rooms_v11", currentEditRoomId), { name, img: roomData.img, members: selectedIds }); } else { await addDoc(collection(db, "rooms_v11"), roomData); } window.closeModal('room-modal'); };
+
+    window.openRoomModal = async (rid=null, n="", i="") => {
+        currentEditRoomId = rid;
+        document.getElementById('room-modal').classList.remove('hidden');
+        document.getElementById('room-name-input').value = n;
+        // 画像未選択時はデフォルトの雲画像を使用
+        document.getElementById('room-preview').src = rid ? (i || DEFAULT_ROOM_IMG) : DEFAULT_ROOM_IMG;
+        const inviteList = document.getElementById('room-invite-list');
+        inviteList.innerHTML = "読み込み中...";
+        let currentMembers = [];
+        if (rid) {
+            const rDoc = await getDoc(doc(db, "rooms_v11", rid));
+            if (rDoc.exists()) currentMembers = rDoc.data().members || [];
+        }
+        const snap = await getDocs(collection(db, "users_v11"));
+        inviteList.innerHTML = "";
+        snap.forEach(ds => {
+            const u = ds.data();
+            if(u.id === me.id) return;
+            const isChecked = currentMembers.includes(u.id) ? "checked" : "";
+            const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+            const div = document.createElement('div');
+            div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid #f9f9f9;";
+            div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px;">${u.name}</span>`;
+            inviteList.appendChild(div);
+        });
+    };
+
+    document.getElementById('room-save-btn').onclick = async () => {
+        const name = document.getElementById('room-name-input').value.trim();
+        if(!name) return;
+        const selectedIds = Array.from(document.querySelectorAll('.invite-check:checked')).map(el => el.value);
+        selectedIds.push(me.id);
+        const previewSrc = document.getElementById('room-preview').src;
+        // previewがまだデフォルトのPICKプレースホルダーの場合もDEFAULT_ROOM_IMGを使用
+        const roomImg = previewSrc || DEFAULT_ROOM_IMG;
+        const roomData = { name, img: roomImg, owner: me.id, members: selectedIds, createdAt: serverTimestamp() };
+        if(currentEditRoomId) {
+            await updateDoc(doc(db, "rooms_v11", currentEditRoomId), { name, img: roomImg, members: selectedIds });
+        } else {
+            await addDoc(collection(db, "rooms_v11"), roomData);
+        }
+        window.closeModal('room-modal');
+    };
+
     document.getElementById('room-file-input').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('room-preview').src = ev.target.result; }; reader.readAsDataURL(file); };
     window.deleteRoom = async (rid) => { if(confirm("ルームを削除しますか？")) await deleteDoc(doc(db, "rooms_v11", rid)); };
     window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
