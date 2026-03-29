@@ -1,5 +1,4 @@
 import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion } from "./firebase.js";
-// ★ 作成したカレンダー機能をインポート
 import { initCalendar } from "./calendar.js";
 
 let me = null;
@@ -11,7 +10,6 @@ const DEFAULT_IMG = "https://placehold.jp/24/cccccc/ffffff/200x200.png?text=NoIm
 export function initNeoPod() {
 
     // --- 1. タブ切り替えシステム ---
-    // カレンダーやニュース、チャットの画面を切り替える基本機能
     const tags = document.querySelectorAll('.tag');
     const containers = {
         'news-tag': document.getElementById('news-feed-container'),
@@ -21,16 +19,10 @@ export function initNeoPod() {
 
     tags.forEach(tag => {
         tag.onclick = () => {
-            // すべての画面を非表示
             Object.values(containers).forEach(c => { if(c) c.style.display = 'none'; });
-            // すべてのタグの選択状態を解除
             tags.forEach(t => t.classList.remove('active'));
-            
-            // 選ばれたものを表示
             tag.classList.add('active');
             if (containers[tag.id]) containers[tag.id].style.display = 'block';
-
-            // NeoPodヘッダーとの干渉を防ぐ調整が必要ならここに記述
         };
     });
 
@@ -45,17 +37,14 @@ export function initNeoPod() {
         me = s.data(); me.id = id;
         if(!me.icon) me.icon = { val: DEFAULT_IMG };
         
-        // セッション情報の保存
         localStorage.setItem('np_session', JSON.stringify({ id, pw, expire: Date.now() + 1000 * 60 * 60 * 24 * 30 }));
         
-        // 履歴の更新
         const history = JSON.parse(localStorage.getItem('np_account_history') || '[]');
         if(!history.find(a => a.id === id)) { 
             history.push({id, pw, name: me.name, icon: me.icon.val}); 
             localStorage.setItem('np_account_history', JSON.stringify(history)); 
         }
 
-        // --- 画面表示の更新 ---
         const fixedHeader = document.getElementById('neo-fixed-header');
         if (fixedHeader) fixedHeader.style.display = "flex";
         
@@ -66,16 +55,20 @@ export function initNeoPod() {
         document.getElementById('main-content').classList.remove('hidden');
         document.getElementById('header-bg').style.display = "flex"; 
 
-        // デフォルトでトーク画面を開く
+        // ★ FIX 1: tolk-tag をアクティブにしつつ、loadRooms()が呼ばれるshowNeoScreenを直接呼ぶ
+        // talkTag.click() だけだとコンテナ表示のみでloadRooms()が呼ばれない
+        Object.values(containers).forEach(c => { if(c) c.style.display = 'none'; });
+        tags.forEach(t => t.classList.remove('active'));
         const talkTag = document.getElementById("tolk-tag");
-        if (talkTag) talkTag.click(); 
-        else window.showNeoScreen('rooms');
+        if (talkTag) talkTag.classList.add('active');
+        const tolkScreen = document.getElementById('tolk-screen');
+        if (tolkScreen) tolkScreen.style.display = 'block';
+        window.showNeoScreen('rooms'); // ← これでloadRooms()が確実に呼ばれる
 
-        // ★★★ ここでカレンダーを初期化 (ユーザーIDを渡す) ★★★
         initCalendar(me.id);
     }
 
-    // --- 3. アカウント管理 (ログアウト・履歴・削除) ---
+    // --- 3. アカウント管理 ---
     function removeFromHistory(id) { const history = JSON.parse(localStorage.getItem('np_account_history') || '[]'); const filtered = history.filter(a => a.id !== id); localStorage.setItem('np_account_history', JSON.stringify(filtered)); renderHistory(); }
     
     function renderHistory() { 
@@ -103,7 +96,6 @@ export function initNeoPod() {
     document.getElementById('login-btn').onclick = () => login(document.getElementById('auth-id').value.trim(), document.getElementById('auth-pw').value.trim());
     document.getElementById('signup-exec-btn').onclick = async () => { const id = document.getElementById('auth-id').value.trim(); const pw = document.getElementById('auth-pw').value.trim(); const name = document.getElementById('signup-name').value.trim() || id; if(!id || !pw) return; const check = await getDoc(doc(db, "users_v11", id)); if(check.exists()) { document.getElementById('auth-err').innerText = "このIDは既に使用されています"; return; } await setDoc(doc(db, "users_v11", id), { id, pw, name, icon: {val: DEFAULT_IMG}, createdAt: serverTimestamp() }); login(id, pw); };
 
-    // --- 自動ログイン判定 ---
     const session = JSON.parse(localStorage.getItem('np_session'));
     if (session && session.expire > Date.now()) { 
         login(session.id, session.pw, true); 
@@ -115,9 +107,12 @@ export function initNeoPod() {
     }
     renderHistory();
 
-    // --- 4. チャット・UIロジック (NeoPodのコア機能) ---
+    // --- 4. チャット・UIロジック ---
     window.showNeoScreen = (mode) => {
-        document.getElementById('rooms-screen').classList.add('hidden'); document.getElementById('friends-screen').classList.add('hidden'); document.getElementById('chat-screen').classList.add('hidden'); document.getElementById('nav-area').classList.remove('hidden');
+        document.getElementById('rooms-screen').classList.add('hidden');
+        document.getElementById('friends-screen').classList.add('hidden');
+        document.getElementById('chat-screen').classList.add('hidden');
+        document.getElementById('nav-area').classList.remove('hidden');
         if (mode === 'rooms') { document.getElementById('rooms-screen').classList.remove('hidden'); loadRooms(); } 
         else if (mode === 'friends') { document.getElementById('friends-screen').classList.remove('hidden'); loadFriends(); } 
         else if (mode === 'chat') { document.getElementById('chat-screen').classList.remove('hidden'); document.getElementById('nav-area').classList.add('hidden'); }
@@ -133,12 +128,79 @@ export function initNeoPod() {
     }
 
     window.openChat = (roomId, roomName) => { currentRoomId = roomId; document.getElementById('chat-title').innerText = roomName; window.showNeoScreen('chat'); startChat(roomId); };
-    function startChat(roomId) { if (chatUnsubscribe) chatUnsubscribe(); const q = query(collection(db, "rooms_v11", roomId, "messages"), orderBy("createdAt", "asc"), limit(100)); chatUnsubscribe = onSnapshot(q, (snap) => { const area = document.getElementById('chat-area'); area.innerHTML = ""; snap.forEach(dSnap => { const d = dSnap.data(); const mid = dSnap.id; const isMine = me && d.uid === me.id; if(!isMine && (!d.readBy || !d.readBy.includes(me.id))) { updateDoc(doc(db, "rooms_v11", roomId, "messages", mid), { readBy: arrayUnion(me.id) }); } const group = document.createElement('div'); group.style = `display:flex; gap:10px; margin-bottom:15px; flex-direction:${isMine ? 'row-reverse' : 'row'}; align-items:flex-start;`; const time = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ""; const readCount = d.readBy ? d.readBy.length : 0; const iconUrl = (d.icon && d.icon.val) ? d.icon.val : DEFAULT_IMG; group.innerHTML = ` <img src="${iconUrl}" style="width:38px; height:38px; border-radius:12px; object-fit:cover; cursor:pointer;" onclick="viewUserById('${d.uid}')"> <div style="max-width:70%; display:flex; flex-direction:column; align-items:${isMine ? 'flex-end' : 'flex-start'}"> <div style="font-size:10px; color:#888; margin-bottom:2px;">${d.name}</div> <div style="display:flex; align-items:center; gap:5px; flex-direction:${isMine ? 'row-reverse' : 'row'};"> <div style="padding:10px; border-radius:15px; font-size:14px; background:${isMine ? 'var(--primary)' : '#fff'}; color:${isMine ? '#fff' : '#000'}; border:${isMine ? 'none' : '1px solid #ddd'}; cursor:pointer;" onclick="toggleMsgMenu('${mid}', ${isMine})"> ${d.media ? (d.media.type.startsWith('image') ? `<img src="${d.media.val}" style="max-width:100%; border-radius:10px;">` : `<video src="${d.media.val}" style="max-width:100%;" controls></video>`) : d.text} </div> </div> <div id="menu-${mid}" class="hidden" style="margin-top:5px; display:flex; gap:5px;"> <button onclick="editMsg('${mid}','${(d.text||"").replace(/'/g, "\\'")}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:1px solid #ddd; background:#fff;">編集</button> <button onclick="deleteMsg('${mid}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:none; background:#ff7675; color:white;">削除</button> </div> <div style="font-size:9px; color:#aaa; margin-top:2px;"> ${isMine && readCount > 0 ? `<span style="color:var(--accent); font-weight:bold;">${readCount} 既読 </span>` : ''}${time} </div> </div> `; area.appendChild(group); }); area.scrollTop = area.scrollHeight; }); }
+
+    function startChat(roomId) {
+        if (chatUnsubscribe) chatUnsubscribe();
+        const q = query(collection(db, "rooms_v11", roomId, "messages"), orderBy("createdAt", "asc"), limit(100));
+        chatUnsubscribe = onSnapshot(q, (snap) => {
+            const area = document.getElementById('chat-area');
+            area.innerHTML = "";
+            snap.forEach(dSnap => {
+                const d = dSnap.data();
+                const mid = dSnap.id;
+                const isMine = me && d.uid === me.id;
+
+                if(!isMine && (!d.readBy || !d.readBy.includes(me.id))) {
+                    updateDoc(doc(db, "rooms_v11", roomId, "messages", mid), { readBy: arrayUnion(me.id) });
+                }
+
+                const group = document.createElement('div');
+                group.style = `display:flex; gap:10px; margin-bottom:15px; flex-direction:${isMine ? 'row-reverse' : 'row'}; align-items:flex-start;`;
+
+                const time = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+                const readCount = d.readBy ? d.readBy.length : 0;
+
+                // ★ FIX 2: 自分・相手どちらもアイコンを確実に表示
+                // 自分のメッセージはme.iconを、相手はd.iconを使用。どちらもnullならDEFAULT_IMG
+                let iconUrl;
+                if (isMine) {
+                    iconUrl = (me.icon && me.icon.val) ? me.icon.val : DEFAULT_IMG;
+                } else {
+                    iconUrl = (d.icon && d.icon.val) ? d.icon.val : DEFAULT_IMG;
+                }
+
+                group.innerHTML = `
+                    <img src="${iconUrl}" 
+                         style="width:38px; height:38px; border-radius:50%; object-fit:cover; cursor:pointer; flex-shrink:0; border:2px solid ${isMine ? 'var(--accent)' : '#eee'};"
+                         onclick="viewUserById('${d.uid}')"
+                         onerror="this.src='${DEFAULT_IMG}'">
+                    <div style="max-width:70%; display:flex; flex-direction:column; align-items:${isMine ? 'flex-end' : 'flex-start'}">
+                        <div style="font-size:10px; color:#888; margin-bottom:2px;">${d.name}</div>
+                        <div style="display:flex; align-items:center; gap:5px; flex-direction:${isMine ? 'row-reverse' : 'row'};">
+                            <div style="padding:10px; border-radius:15px; font-size:14px; background:${isMine ? 'var(--primary)' : '#fff'}; color:${isMine ? '#fff' : '#000'}; border:${isMine ? 'none' : '1px solid #ddd'}; cursor:pointer;"
+                                 onclick="toggleMsgMenu('${mid}', ${isMine})">
+                                ${d.media ? (d.media.type.startsWith('image') ? `<img src="${d.media.val}" style="max-width:100%; border-radius:10px;">` : `<video src="${d.media.val}" style="max-width:100%;" controls></video>`) : d.text}
+                            </div>
+                        </div>
+                        <div id="menu-${mid}" class="hidden" style="margin-top:5px; display:flex; gap:5px;">
+                            <button onclick="editMsg('${mid}','${(d.text||"").replace(/'/g, "\\'")}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:1px solid #ddd; background:#fff;">編集</button>
+                            <button onclick="deleteMsg('${mid}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:none; background:#ff7675; color:white;">削除</button>
+                        </div>
+                        <div style="font-size:9px; color:#aaa; margin-top:2px;">
+                            ${isMine && readCount > 0 ? `<span style="color:var(--accent); font-weight:bold;">${readCount} 既読 </span>` : ''}${time}
+                        </div>
+                    </div>`;
+                area.appendChild(group);
+            });
+            area.scrollTop = area.scrollHeight;
+        });
+    }
+
     window.toggleMsgMenu = (mid, isMine) => { if(isMine) document.getElementById(`menu-${mid}`).classList.toggle('hidden'); };
     window.editMsg = async (mid, old) => { const n = prompt("編集:", old); if(n !== null && n !== old) await updateDoc(doc(db, "rooms_v11", currentRoomId, "messages", mid), { text: n }); };
     window.deleteMsg = async (mid) => { if(confirm("削除しますか？")) await deleteDoc(doc(db, "rooms_v11", currentRoomId, "messages", mid)); };
     window.viewUserById = async (uid) => { const s = await getDoc(doc(db, "users_v11", uid)); if(s.exists()) viewUserProfile(s.data()); };
-    async function post(text, media = null) { if((!text && !media) || !me || !currentRoomId) return; await addDoc(collection(db, "rooms_v11", currentRoomId, "messages"), { text, media, uid: me.id, name: me.name, icon: me.icon, readBy: [], createdAt: serverTimestamp() }); document.getElementById('m-text').value = ""; }
+
+    async function post(text, media = null) {
+        if((!text && !media) || !me || !currentRoomId) return;
+        await addDoc(collection(db, "rooms_v11", currentRoomId, "messages"), {
+            text, media, uid: me.id, name: me.name,
+            icon: me.icon || { val: DEFAULT_IMG }, // ★ nullガード追加
+            readBy: [], createdAt: serverTimestamp()
+        });
+        document.getElementById('m-text').value = "";
+    }
+
     document.getElementById('send-go').onclick = () => post(document.getElementById('m-text').value.trim());
     window.sendEmoji = (emoji, anim) => post(`<span class="animated-emoji ${anim}">${emoji}</span>`);
     document.getElementById('m-file').onchange = (e) => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (v) => post("", { type: f.type, val: v.target.result }); r.readAsDataURL(f); };
