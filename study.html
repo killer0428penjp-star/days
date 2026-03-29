@@ -9,7 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
          :root {
-  /* 新しいカラーパレットの適用 */
   --main-bg: #f0f4f8;
   --card-bg: rgba(255, 255, 255, 0.8);
   --accent: #0070ff;
@@ -27,8 +26,6 @@
   --success: #00b894;
   --bg: #f8f9fa;
   --card: #ffffff;
-  
-  /* 基礎の変数を統合 */
   --study: var(--accent);
   --break: #10b981;
 }
@@ -48,12 +45,10 @@ body.dark-mode {
   --study: var(--accent);
 }
 
-/* 基礎設定（一切削らず統合） */
 body {
   margin: 0;
   font-family: 'Plus Jakarta Sans', 'Montserrat', sans-serif;
   background-color: var(--main-bg);
-  /* ドットパターンを統合 */
   background-image: radial-gradient(var(--border-soft) 1px, transparent 1px);
   background-size: 20px 20px;
   color: var(--text-main);
@@ -64,7 +59,6 @@ body {
 
 .mono { font-family: 'JetBrains Mono', monospace; }
 
-/* 背景・アニメーションレイヤー（基礎構造を維持） */
 #bg-container {
   position: fixed;
   inset: 0;
@@ -79,7 +73,6 @@ body {
   pointer-events: none;
 }
 
-/* 波アニメーション（グラデーションを背景色に連動） */
 .waves-bg { 
   background: linear-gradient(180deg, var(--main-bg) 0%, #e0f2fe 100%); 
 }
@@ -89,12 +82,11 @@ body {
   width: 200%;
   height: 15vh;
   background: var(--accent);
-  opacity: 0.05; /* Snippet 1のrgba(37, 99, 235, 0.05)相当 */
+  opacity: 0.05;
   border-radius: 40%;
   animation: wave-anim 15s linear infinite;
 }
 
-/* 葉アニメーション（グラデーションを背景色に連動） */
 .trees-bg { 
   background: linear-gradient(180deg, var(--main-bg) 0%, #f0fdf4 100%); 
 }
@@ -106,7 +98,6 @@ body {
   animation: leaf-sway 6s ease-in-out infinite;
 }
 
-/* 時計盤（基礎のサイズ・構造を維持しつつ色を変数化） */
 .clock-face {
   width: 260px;
   height: 260px;
@@ -143,12 +134,11 @@ body {
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--text-sub); /* #cbd5e1から変数へ */
+  color: var(--text-sub);
   margin-top: -15px;
   margin-left: -15px;
 }
 
-/* UIパーツ */
 .glass {
   background: var(--card-bg);
   backdrop-filter: blur(20px);
@@ -163,7 +153,6 @@ body {
 .hidden { display: none !important; }
 input::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-/* スイッチコンテナ（新しいUI要素を維持） */
 .switch-container { position: fixed; top: 15px; left: 14px; z-index: 1000; }
 .switch { position: relative; width: 44px; height: 24px; display: block; cursor: pointer; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -188,7 +177,6 @@ input::-webkit-inner-spin-button { -webkit-appearance: none; }
 input:checked + .slider { background: var(--accent); }
 input:checked + .slider::before { transform: translateX(20px); }
 
-/* グラフ・タイムライン（消さずに維持） */
 .chart-bar {
   transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   border-radius: 4px;
@@ -212,7 +200,6 @@ input:checked + .slider::before { transform: translateX(20px); }
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* アニメーション定義（維持） */
 @keyframes wave-anim { from { transform: translateX(0) rotate(0deg); } to { transform: translateX(-50%) rotate(360deg); } }
 @keyframes leaf-sway { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(20deg); } }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
@@ -358,7 +345,7 @@ input:checked + .slider::before { transform: translateX(20px); }
         let totalStudyTime = 0; 
         let isStudyPhase = true; 
 
-        const DB_SESSIONS_KEY = 'zenfocus_sessions_v4'; // DBキー更新
+        const DB_SESSIONS_KEY = 'zenfocus_sessions_v4';
         let currentSessionStart = null;
         let statsMode = 'week'; 
         let statsDate = new Date(); 
@@ -537,7 +524,7 @@ input:checked + .slider::before { transform: translateX(20px); }
             return new Date(d.setDate(diff));
         }
 
-        // --- グラフ描画: 週間（時間のメモリ付き） ---
+        // --- グラフ描画: 週間 ---
         function renderWeekChart(sessions) {
             const startOfWeek = getStartOfWeek(statsDate);
             startOfWeek.setHours(0,0,0,0);
@@ -576,29 +563,24 @@ input:checked + .slider::before { transform: translateX(20px); }
             const container = document.getElementById('chart-week');
             container.innerHTML = '';
             
-            // 最大時間を計算（最低でも1時間を基準とする）
             const maxValMs = Math.max(...dailyTotals.map(d => d.total), 0); 
-            let maxHours = Math.ceil(maxValMs / 3600000); // msを時間に変換して切り上げ
-            if (maxHours < 1) maxHours = 1; // どんなに少なくても1時間は表示
+            let maxHours = Math.ceil(maxValMs / 3600000);
+            if (maxHours < 1) maxHours = 1;
             const maxChartMs = maxHours * 3600000;
 
-            // コンテナラッパー（左にメモリ用の余白をとる）
             const wrapper = document.createElement('div');
             wrapper.className = "relative w-full h-full flex pl-8";
 
-            // Y軸グリッド（時間のメモリ）
             const grid = document.createElement('div');
             grid.className = "absolute inset-0 left-8 flex flex-col-reverse justify-between pointer-events-none border-b border-slate-200";
             for (let i = 0; i <= maxHours; i++) {
                 const line = document.createElement('div');
-                // 一番下の線（0h）は枠線と被るので上部ボーダーを消す
                 line.className = i === 0 ? "w-full relative" : "w-full border-t border-slate-100 relative";
                 line.innerHTML = `<span class="absolute -left-8 -top-2 w-6 text-right text-[9px] text-slate-400 mono font-bold">${i}h</span>`;
                 grid.appendChild(line);
             }
             wrapper.appendChild(grid);
 
-            // バーの描画
             const barsContainer = document.createElement('div');
             barsContainer.className = "flex-1 flex items-end justify-between gap-1 z-10 pb-[1px]";
             const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -627,7 +609,7 @@ input:checked + .slider::before { transform: translateX(20px); }
             container.appendChild(wrapper);
         }
 
-        // --- グラフ描画: 1日詳細（X軸のメモリ付き） ---
+        // --- グラフ描画: 1日詳細 ---
         function renderDayChart(sessions) {
             const startOfDay = new Date(statsDate);
             startOfDay.setHours(0,0,0,0);
@@ -638,12 +620,11 @@ input:checked + .slider::before { transform: translateX(20px); }
             document.getElementById('stats-date-label').innerText = 
                 `${startOfDay.getMonth()+1}/${startOfDay.getDate()} (${daysStr[startOfDay.getDay()]})`;
 
-            // グリッド線の生成 (X軸のメモリ: 0h, 3h, 6h... にラベルを表示)
             const gridContainer = document.getElementById('day-grid');
             gridContainer.innerHTML = '';
             for (let i = 0; i <= 24; i++) {
                 const div = document.createElement('div');
-                const isMajor = i % 3 === 0; // 3時間ごとに数字
+                const isMajor = i % 3 === 0;
                 
                 div.className = `h-full w-px ${isMajor ? 'bg-slate-200' : 'bg-slate-100'} relative flex flex-col justify-end overflow-visible`;
                 
@@ -827,6 +808,15 @@ input:checked + .slider::before { transform: translateX(20px); }
 
         document.getElementById('start-stop-btn').addEventListener('click', handleStartStop);
         lucide.createIcons();
+
+        // =============================================
+        // 親ページ（index.html）からダークモード切替を受け取る
+        // =============================================
+        window.addEventListener("message", (event) => {
+            if (event.data && event.data.type === "darkMode") {
+                document.body.classList.toggle("dark-mode", event.data.value);
+            }
+        });
     </script>
 </body>
 </html>
