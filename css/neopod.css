@@ -295,7 +295,7 @@ body.dark-mode #tolk-screen .tab {
 }
 body.dark-mode #tolk-screen .tab.active {
     color: var(--accent);
-    background: rgba(9, 132, 227, 0.1);
+    background: rgba(20, 20, 20, 0.644);
 }
 
 /* ルームリスト・友達リスト */
@@ -423,5 +423,5 @@ body.dark-mode #my-name-display {
 
 /* ルーム作成ボタン */
 body.dark-mode #rooms-screen > div > span {
-    color: #000000;
+    color: #aaa;
 }
