@@ -383,9 +383,19 @@ body.dark-mode #tolk-screen .modal-overlay { background: rgba(0,0,0,0.7); }
 body.dark-mode #tolk-screen .modal-card { background: var(--card-bg); color: var(--text-main); border-color: var(--border-soft); }
 body.dark-mode #tolk-screen .modal-card h3 { color: var(--text-main); }
 body.dark-mode #tolk-screen .input-field { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
-body.dark-mode #room-invite-list { background: var(--cal-cell-bg); border-color: var(--border-soft) !important; }
+
+/* ★ ダークモード: メンバー招待リスト背景を黒に */
+body.dark-mode #room-invite-list {
+    background: #111 !important;
+    border-color: var(--border-soft) !important;
+    color: var(--text-main);
+}
+body.dark-mode #room-invite-list > div {
+    background: #111 !important;
+    border-color: var(--border-soft) !important;
+}
 body.dark-mode #room-invite-list span { color: var(--text-main); }
-body.dark-mode #room-invite-list > div { border-color: var(--border-soft) !important; }
+
 body.dark-mode #tolk-screen .auth-card { background: var(--card-bg); color: var(--text-main); }
 body.dark-mode #tolk-screen .auth-card input { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
 body.dark-mode #tolk-screen .auth-card h2 { color: var(--text-main); }

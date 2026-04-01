@@ -256,7 +256,6 @@ export function initNeoPod() {
         if (!keyword) { results.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:10px;">キーワードを入力してください</div>`; return; }
         results.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:10px;">検索中...</div>`;
 
-        // 申請状況を取得
         const sentSnap = await getDocs(query(collection(db, "friend_requests"), where("from", "==", me.id)));
         const sentMap = {};
         sentSnap.forEach(d => { sentMap[d.data().to] = d.data().status; });
@@ -467,6 +466,7 @@ export function initNeoPod() {
 
     window.viewUserProfile = (u) => { document.getElementById('view-profile-modal').classList.remove('hidden'); document.getElementById('view-profile-icon').src = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG; document.getElementById('view-profile-name').innerText = u.name; document.getElementById('view-profile-id').innerText = "ID: " + u.id; document.getElementById('view-profile-birthday').innerText = u.birthday || "未設定"; document.getElementById('view-profile-bio').innerText = u.bio || "自己紹介はありません。"; };
 
+    // ★ openRoomModal: メンバー選択をフレンドのみに変更
     window.openRoomModal = async (rid=null, n="", i="") => {
         currentEditRoomId = rid;
         document.getElementById('room-modal').classList.remove('hidden');
@@ -479,24 +479,25 @@ export function initNeoPod() {
             const rDoc = await getDoc(doc(db, "rooms_v11", rid));
             if (rDoc.exists()) currentMembers = rDoc.data().members || [];
         }
+        // フレンドのみ取得
         const mySnap = await getDoc(doc(db, "users_v11", me.id));
-const myFriends = mySnap.exists() ? (mySnap.data().friends || []) : [];
-inviteList.innerHTML = "";
-if (myFriends.length === 0) {
-    inviteList.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:16px;">フレンドがいません</div>`;
-} else {
-    for (const fid of myFriends) {
-        const fs = await getDoc(doc(db, "users_v11", fid));
-        if (!fs.exists()) continue;
-        const u = fs.data();
-        const isChecked = currentMembers.includes(u.id) ? "checked" : "";
-        const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
-        const div = document.createElement('div');
-        div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid var(--border-soft);";
-        div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px; color:var(--text-main);">${u.name}</span>`;
-        inviteList.appendChild(div);
-    }
-}
+        const myFriends = mySnap.exists() ? (mySnap.data().friends || []) : [];
+        inviteList.innerHTML = "";
+        if (myFriends.length === 0) {
+            inviteList.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:16px;">フレンドがいません</div>`;
+        } else {
+            for (const fid of myFriends) {
+                const fs = await getDoc(doc(db, "users_v11", fid));
+                if (!fs.exists()) continue;
+                const u = fs.data();
+                const isChecked = currentMembers.includes(u.id) ? "checked" : "";
+                const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+                const div = document.createElement('div');
+                div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid var(--border-soft);";
+                div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px; color:var(--text-main);">${u.name}</span>`;
+                inviteList.appendChild(div);
+            }
+        }
     };
 
     document.getElementById('room-save-btn').onclick = async () => {
