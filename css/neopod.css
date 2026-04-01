@@ -423,5 +423,5 @@ body.dark-mode #my-name-display {
 
 /* ルーム作成ボタン */
 body.dark-mode #rooms-screen > div > span {
-    color: #aaa;
+    color: #000000;
 }
