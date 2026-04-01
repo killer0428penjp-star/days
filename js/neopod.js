@@ -56,15 +56,13 @@ export function initNeoPod() {
         document.getElementById('main-content').classList.remove('hidden');
         document.getElementById('header-bg').style.display = "flex"; 
 
-        // ★ FIX 1: tolk-tag をアクティブにしつつ、loadRooms()が呼ばれるshowNeoScreenを直接呼ぶ
-        // talkTag.click() だけだとコンテナ表示のみでloadRooms()が呼ばれない
         Object.values(containers).forEach(c => { if(c) c.style.display = 'none'; });
         tags.forEach(t => t.classList.remove('active'));
         const talkTag = document.getElementById("tolk-tag");
         if (talkTag) talkTag.classList.add('active');
         const tolkScreen = document.getElementById('tolk-screen');
         if (tolkScreen) tolkScreen.style.display = 'block';
-        window.showNeoScreen('rooms'); // ← これでloadRooms()が確実に呼ばれる
+        window.showNeoScreen('rooms');
 
         initCalendar(me.id);
     }
@@ -126,9 +124,11 @@ export function initNeoPod() {
             const list = document.getElementById('room-list-body'); list.innerHTML = "";
             snap.forEach(ds => {
                 const r = ds.data();
+                // 自分がメンバーでもオーナーでもなく、公式ルームでもない場合は非表示
                 if (r.members && !r.members.includes(me.id) && r.owner !== me.id && ds.id !== "official-lounge") return;
                 const memberCount = r.members ? r.members.length : 0;
                 const isOwner = r.owner === me.id && ds.id !== "official-lounge";
+                // オーナーでなく、membersに含まれている場合に退出ボタン表示
                 const isMember = r.members && r.members.includes(me.id) && !isOwner && ds.id !== "official-lounge";
                 const tr = document.createElement('tr');
                 tr.className = 'data-row';
@@ -146,7 +146,7 @@ export function initNeoPod() {
                             <button class="btn-sub btn-del" onclick="deleteRoom('${ds.id}')">削除</button>
                         ` : ''}
                         ${isMember ? `
-                            <button class="btn-sub" onclick="leaveRoom('${ds.id}')" style="background:#ff9800; color:white; border:none; padding:4px 10px; border-radius:8px; font-size:12px; cursor:pointer;">退出</button>
+                            <button class="btn-leave" onclick="leaveRoom('${ds.id}')">退出</button>
                         ` : ''}
                     </td>`;
                 list.appendChild(tr);
@@ -183,14 +183,17 @@ export function initNeoPod() {
                 const time = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
                 const readCount = d.readBy ? d.readBy.length : 0;
 
-                // ★ FIX 2: 自分・相手どちらもアイコンを確実に表示
-                // 自分のメッセージはme.iconを、相手はd.iconを使用。どちらもnullならDEFAULT_IMG
                 let iconUrl;
                 if (isMine) {
                     iconUrl = (me.icon && me.icon.val) ? me.icon.val : DEFAULT_IMG;
                 } else {
                     iconUrl = (d.icon && d.icon.val) ? d.icon.val : DEFAULT_IMG;
                 }
+
+                // 相手のメッセージバブルにクラスを付与してダークモード対応
+                const bubbleBg = isMine ? 'var(--primary)' : 'var(--card-bg, #fff)';
+                const bubbleColor = isMine ? '#fff' : 'var(--text-main)';
+                const bubbleBorder = isMine ? 'none' : '1px solid var(--border-soft)';
 
                 group.innerHTML = `
                     <img src="${iconUrl}" 
@@ -200,13 +203,14 @@ export function initNeoPod() {
                     <div style="max-width:70%; display:flex; flex-direction:column; align-items:${isMine ? 'flex-end' : 'flex-start'}">
                         <div style="font-size:10px; color:#888; margin-bottom:2px;">${d.name}</div>
                         <div style="display:flex; align-items:center; gap:5px; flex-direction:${isMine ? 'row-reverse' : 'row'};">
-                            <div style="padding:10px; border-radius:15px; font-size:14px; background:${isMine ? 'var(--primary)' : '#fff'}; color:${isMine ? '#fff' : '#000'}; border:${isMine ? 'none' : '1px solid #ddd'}; cursor:pointer;"
+                            <div class="${isMine ? '' : 'msg-bubble-other'}"
+                                 style="padding:10px; border-radius:15px; font-size:14px; background:${bubbleBg}; color:${bubbleColor}; border:${bubbleBorder}; cursor:pointer;"
                                  onclick="toggleMsgMenu('${mid}', ${isMine})">
                                 ${d.media ? (d.media.type.startsWith('image') ? `<img src="${d.media.val}" style="max-width:100%; border-radius:10px;">` : `<video src="${d.media.val}" style="max-width:100%;" controls></video>`) : d.text}
                             </div>
                         </div>
                         <div id="menu-${mid}" class="hidden" style="margin-top:5px; display:flex; gap:5px;">
-                            <button onclick="editMsg('${mid}','${(d.text||"").replace(/'/g, "\\'")}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:1px solid #ddd; background:#fff;">編集</button>
+                            <button onclick="editMsg('${mid}','${(d.text||"").replace(/'/g, "\\'")}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:1px solid #ddd; background:var(--card-bg,#fff); color:var(--text-main);">編集</button>
                             <button onclick="deleteMsg('${mid}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:none; background:#ff7675; color:white;">削除</button>
                         </div>
                         <div style="font-size:9px; color:#aaa; margin-top:2px;">
@@ -228,7 +232,7 @@ export function initNeoPod() {
         if((!text && !media) || !me || !currentRoomId) return;
         await addDoc(collection(db, "rooms_v11", currentRoomId, "messages"), {
             text, media, uid: me.id, name: me.name,
-            icon: me.icon || { val: DEFAULT_IMG }, // ★ nullガード追加
+            icon: me.icon || { val: DEFAULT_IMG },
             readBy: [], createdAt: serverTimestamp()
         });
         document.getElementById('m-text').value = "";
@@ -253,7 +257,6 @@ export function initNeoPod() {
         currentEditRoomId = rid;
         document.getElementById('room-modal').classList.remove('hidden');
         document.getElementById('room-name-input').value = n;
-        // 画像未選択時はデフォルトの雲画像を使用
         document.getElementById('room-preview').src = rid ? (i || DEFAULT_ROOM_IMG) : DEFAULT_ROOM_IMG;
         const inviteList = document.getElementById('room-invite-list');
         inviteList.innerHTML = "読み込み中...";
@@ -270,8 +273,8 @@ export function initNeoPod() {
             const isChecked = currentMembers.includes(u.id) ? "checked" : "";
             const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
             const div = document.createElement('div');
-            div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid #f9f9f9;";
-            div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px;">${u.name}</span>`;
+            div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid var(--border-soft);";
+            div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px; color:var(--text-main);">${u.name}</span>`;
             inviteList.appendChild(div);
         });
     };
@@ -282,7 +285,6 @@ export function initNeoPod() {
         const selectedIds = Array.from(document.querySelectorAll('.invite-check:checked')).map(el => el.value);
         selectedIds.push(me.id);
         const previewSrc = document.getElementById('room-preview').src;
-        // previewがまだデフォルトのPICKプレースホルダーの場合もDEFAULT_ROOM_IMGを使用
         const roomImg = previewSrc || DEFAULT_ROOM_IMG;
         const roomData = { name, img: roomImg, owner: me.id, members: selectedIds, createdAt: serverTimestamp() };
         if(currentEditRoomId) {

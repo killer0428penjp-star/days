@@ -1,6 +1,5 @@
 #tolk-screen {
     display: none;
-    /* 固定px引き算をやめ、dvh + min/max で全端末対応 */
     height: calc(100dvh - 280px);
     min-height: 300px;
     max-height: calc(100dvh - 220px);
@@ -11,7 +10,6 @@
     background: var(--bg);
     border-radius: 20px;
     border: 1px solid var(--border-soft);
-    /* flexで内部レイアウトを縦に分割 */
     display: flex;
     flex-direction: column;
 }
@@ -36,6 +34,11 @@
     box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     max-width: 400px;
     width: 90%;
+    color: var(--text-main);
+}
+#tolk-screen .auth-card input {
+    color: var(--text-main);
+    background: var(--cal-cell-bg, #f9f9f9);
 }
 #tolk-screen .acc-item {
     display: flex;
@@ -58,16 +61,16 @@
     display: flex;
     flex-direction: column;
     flex: 1;
-    overflow: hidden; /* 子要素のスクロールを管理 */
+    overflow: hidden;
     height: 100%;
 }
 
-/* nav-tabs は高さ固定 */
+/* nav-tabs */
 #tolk-screen .nav-tabs {
     display: flex;
-    background: #fff;
+    background: var(--card-bg, #fff);
     border-bottom: 1px solid var(--border-soft);
-    flex-shrink: 0; /* 縮まない */
+    flex-shrink: 0;
 }
 #tolk-screen .tab {
     flex: 1;
@@ -89,7 +92,6 @@
     flex: 1;
     overflow-y: auto;
     padding: 15px;
-    /* iOSのスクロール慣性 */
     -webkit-overflow-scrolling: touch;
 }
 
@@ -109,10 +111,31 @@
     -webkit-overflow-scrolling: touch;
 }
 #chat-screen footer {
-    flex-shrink: 0; /* フッターが縮まないように */
+    flex-shrink: 0;
     padding: 10px;
-    background: #fff;
+    background: var(--card-bg, #fff);
     border-top: 1px solid var(--border-soft);
+}
+
+/* チャット入力欄 */
+#m-text {
+    background: var(--cal-cell-bg, #f9f9f9);
+    color: var(--text-main);
+    border: 1px solid var(--border-soft);
+}
+#m-text::placeholder {
+    color: #aaa;
+}
+
+/* チャット戻るボタン行 */
+#chat-screen > div:first-child {
+    background: var(--card-bg, #fff);
+    border-bottom: 1px solid var(--border-soft);
+}
+
+/* チャットタイトル */
+#chat-title {
+    color: var(--text-main);
 }
 
 /* ========== テーブル ========== */
@@ -122,13 +145,14 @@
     border-spacing: 0 10px;
 }
 #tolk-screen .data-row {
-    background: #fff;
+    background: var(--card-bg, #fff);
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 #tolk-screen .data-row td {
     padding: 12px 15px;
     vertical-align: middle;
     border-radius: 15px;
+    color: var(--text-main);
 }
 #tolk-screen .icon-cell {
     width: 45px; height: 45px;
@@ -144,12 +168,12 @@
     padding: 12px;
     margin-bottom: 10px;
     border-radius: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-soft);
     box-sizing: border-box;
     font-size: 14px;
     outline: none;
-    background: #fff;
-    color: #333;
+    background: var(--cal-cell-bg, #fff);
+    color: var(--text-main);
 }
 #tolk-screen .send-btn {
     background: var(--primary);
@@ -162,8 +186,8 @@
     cursor: pointer;
 }
 #tolk-screen .btn-sub {
-    background: #fff;
-    border: 1px solid #ddd;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-soft);
     color: #666;
     font-size: 11px;
     padding: 5px 10px;
@@ -188,12 +212,45 @@
     backdrop-filter: blur(4px);
 }
 #tolk-screen .modal-card {
-    background: #fff;
+    background: var(--card-bg, #fff);
+    color: var(--text-main);
     padding: 25px;
     border-radius: 25px;
     width: 80%;
     max-width: 320px;
     text-align: center;
+    border: 1px solid var(--border-soft);
+}
+
+/* モーダル内ラベル */
+#tolk-screen .modal-card label {
+    color: var(--text-main);
+}
+
+/* ルーム招待リスト */
+#room-invite-list {
+    background: var(--cal-cell-bg, #fff);
+    border: 1px solid var(--border-soft) !important;
+    color: var(--text-main);
+}
+#room-invite-list span {
+    color: var(--text-main);
+}
+
+/* ========== 退出ボタン ========== */
+.btn-leave {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 5px;
+}
+.btn-leave:hover {
+    background: #e68900;
 }
 
 /* ========== 絵文字アニメ ========== */
@@ -204,25 +261,12 @@
 @keyframes wave   { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(20deg); } }
 
 /* ========== 固定ヘッダー ========== */
-#tolk-screen header {
-    position: fixed;
-    top: 15px; right: 15px;
-    z-index: 3000;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 15px;
-    background: var(--card-bg);
-    backdrop-filter: blur(8px);
-    border-radius: 50px;
+#neo-fixed-header {
+    background: var(--card-bg, rgba(0,0,0,0.5));
     border: 1px solid var(--border-soft);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    width: auto; height: auto;
 }
-#tolk-screen .header-left { display: flex; align-items: center; gap: 8px; }
-body.dark-mode #tolk-screen header {
-    background: rgba(30, 30, 47, 0.8);
-    border-color: rgba(255, 255, 255, 0.1);
+#my-name-display {
+    color: var(--text-main);
 }
 
 /* ========== 小さい画面向け調整 ========== */
@@ -236,9 +280,148 @@ body.dark-mode #tolk-screen header {
 }
 
 /* ========== ダークモード ========== */
-body.dark-mode #tolk-screen { background: var(--bg); border-color: var(--border-soft); }
-body.dark-mode #tolk-screen .nav-tabs { background: var(--card-bg); }
-body.dark-mode #tolk-screen .data-row { background: var(--card-bg); }
-body.dark-mode #tolk-screen .modal-card { background: var(--card-bg); color: var(--text-main); }
-body.dark-mode #tolk-screen .input-field { background: var(--cal-cell-bg); color: var(--cal-text); border-color: var(--border-soft); }
-body.dark-mode #chat-screen footer { background: var(--card-bg); }
+body.dark-mode #tolk-screen {
+    background: var(--bg);
+    border-color: var(--border-soft);
+}
+
+/* ナビ・タブ */
+body.dark-mode #tolk-screen .nav-tabs {
+    background: var(--card-bg);
+    border-color: var(--border-soft);
+}
+body.dark-mode #tolk-screen .tab {
+    color: #aaa;
+}
+body.dark-mode #tolk-screen .tab.active {
+    color: var(--accent);
+    background: rgba(9, 132, 227, 0.1);
+}
+
+/* ルームリスト・友達リスト */
+body.dark-mode #tolk-screen .data-row {
+    background: var(--card-bg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+body.dark-mode #tolk-screen .data-row td {
+    color: var(--text-main);
+}
+body.dark-mode #tolk-screen .data-row b {
+    color: var(--text-main);
+}
+
+/* チャット画面 */
+body.dark-mode #chat-area {
+    background: var(--bg);
+}
+body.dark-mode #chat-screen > div:first-child {
+    background: var(--card-bg);
+    border-color: var(--border-soft);
+}
+body.dark-mode #chat-title {
+    color: var(--text-main);
+}
+body.dark-mode #chat-screen footer {
+    background: var(--card-bg);
+    border-color: var(--border-soft);
+}
+body.dark-mode #m-text {
+    background: var(--cal-cell-bg);
+    color: var(--text-main);
+    border-color: var(--border-soft);
+}
+body.dark-mode #chat-screen footer button:not(#send-go) {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border-color: var(--border-soft);
+}
+
+/* 絵文字トレイ */
+body.dark-mode .emoji-tray {
+    background: var(--card-bg);
+}
+
+/* 相手のメッセージバブル */
+body.dark-mode #chat-area .msg-bubble-other {
+    background: var(--card-bg) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-soft) !important;
+}
+
+/* モーダル */
+body.dark-mode #tolk-screen .modal-overlay {
+    background: rgba(0,0,0,0.7);
+}
+body.dark-mode #tolk-screen .modal-card {
+    background: var(--card-bg);
+    color: var(--text-main);
+    border-color: var(--border-soft);
+}
+body.dark-mode #tolk-screen .modal-card h3 {
+    color: var(--text-main);
+}
+body.dark-mode #tolk-screen .input-field {
+    background: var(--cal-cell-bg);
+    color: var(--text-main);
+    border-color: var(--border-soft);
+}
+body.dark-mode #room-invite-list {
+    background: var(--cal-cell-bg);
+    border-color: var(--border-soft) !important;
+}
+body.dark-mode #room-invite-list span {
+    color: var(--text-main);
+}
+body.dark-mode #room-invite-list > div {
+    border-color: var(--border-soft) !important;
+}
+
+/* 認証カード */
+body.dark-mode #tolk-screen .auth-card {
+    background: var(--card-bg);
+    color: var(--text-main);
+}
+body.dark-mode #tolk-screen .auth-card input {
+    background: var(--cal-cell-bg);
+    color: var(--text-main);
+    border-color: var(--border-soft);
+}
+body.dark-mode #tolk-screen .auth-card h2 {
+    color: var(--text-main);
+}
+
+/* プロフィール閲覧モーダル内の情報欄 */
+body.dark-mode #view-profile-modal .modal-card > div[style*="background:#f9f9f9"] {
+    background: var(--cal-cell-bg) !important;
+    color: var(--text-main);
+}
+body.dark-mode #view-profile-birthday,
+body.dark-mode #view-profile-bio,
+body.dark-mode #view-profile-name,
+body.dark-mode #view-profile-id {
+    color: var(--text-main);
+}
+
+/* ボタン系 */
+body.dark-mode #tolk-screen .btn-sub {
+    background: var(--card-bg);
+    border-color: var(--border-soft);
+    color: #ccc;
+}
+body.dark-mode .btn-leave {
+    background: #e68900;
+}
+
+/* 固定ヘッダー */
+body.dark-mode #neo-fixed-header {
+    background: rgba(20, 20, 35, 0.85);
+    border-color: rgba(255,255,255,0.1);
+}
+body.dark-mode #my-name-display {
+    color: #fff;
+}
+
+/* ルーム作成ボタン */
+body.dark-mode #rooms-screen > div > span {
+    color: #aaa;
+}
