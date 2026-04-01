@@ -479,18 +479,24 @@ export function initNeoPod() {
             const rDoc = await getDoc(doc(db, "rooms_v11", rid));
             if (rDoc.exists()) currentMembers = rDoc.data().members || [];
         }
-        const snap = await getDocs(collection(db, "users_v11"));
-        inviteList.innerHTML = "";
-        snap.forEach(ds => {
-            const u = ds.data();
-            if(u.id === me.id) return;
-            const isChecked = currentMembers.includes(u.id) ? "checked" : "";
-            const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
-            const div = document.createElement('div');
-            div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid var(--border-soft);";
-            div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px; color:var(--text-main);">${u.name}</span>`;
-            inviteList.appendChild(div);
-        });
+        const mySnap = await getDoc(doc(db, "users_v11", me.id));
+const myFriends = mySnap.exists() ? (mySnap.data().friends || []) : [];
+inviteList.innerHTML = "";
+if (myFriends.length === 0) {
+    inviteList.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:16px;">フレンドがいません</div>`;
+} else {
+    for (const fid of myFriends) {
+        const fs = await getDoc(doc(db, "users_v11", fid));
+        if (!fs.exists()) continue;
+        const u = fs.data();
+        const isChecked = currentMembers.includes(u.id) ? "checked" : "";
+        const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+        const div = document.createElement('div');
+        div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid var(--border-soft);";
+        div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px; color:var(--text-main);">${u.name}</span>`;
+        inviteList.appendChild(div);
+    }
+}
     };
 
     document.getElementById('room-save-btn').onclick = async () => {
