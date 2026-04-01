@@ -1,4 +1,4 @@
-import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion, arrayRemove } from "./firebase.js";
+import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orderBy, onSnapshot, serverTimestamp, limit, addDoc, getDoc, arrayUnion, arrayRemove, where } from "./firebase.js";
 import { initCalendar } from "./calendar.js";
 
 let me = null;
@@ -27,7 +27,6 @@ export function initNeoPod() {
         };
     });
 
-
     // --- 2. ログイン処理 ---
     async function login(id, pw, auto = false) {
         const s = await getDoc(doc(db, "users_v11", id));
@@ -37,6 +36,7 @@ export function initNeoPod() {
         }
         me = s.data(); me.id = id;
         if(!me.icon) me.icon = { val: DEFAULT_IMG };
+        if(!me.friends) me.friends = [];
         
         localStorage.setItem('np_session', JSON.stringify({ id, pw, expire: Date.now() + 1000 * 60 * 60 * 24 * 30 }));
         
@@ -65,6 +65,7 @@ export function initNeoPod() {
         window.showNeoScreen('rooms');
 
         initCalendar(me.id);
+        watchPendingRequests();
     }
 
     // --- 3. アカウント管理 ---
@@ -93,7 +94,7 @@ export function initNeoPod() {
     window.execDeleteAccount = async () => { if(!confirm("本当に削除しますか？")) return; const targetId = me.id; await deleteDoc(doc(db, "users_v11", targetId)); removeFromHistory(targetId); window.np_logout(); };
 
     document.getElementById('login-btn').onclick = () => login(document.getElementById('auth-id').value.trim(), document.getElementById('auth-pw').value.trim());
-    document.getElementById('signup-exec-btn').onclick = async () => { const id = document.getElementById('auth-id').value.trim(); const pw = document.getElementById('auth-pw').value.trim(); const name = document.getElementById('signup-name').value.trim() || id; if(!id || !pw) return; const check = await getDoc(doc(db, "users_v11", id)); if(check.exists()) { document.getElementById('auth-err').innerText = "このIDは既に使用されています"; return; } await setDoc(doc(db, "users_v11", id), { id, pw, name, icon: {val: DEFAULT_IMG}, createdAt: serverTimestamp() }); login(id, pw); };
+    document.getElementById('signup-exec-btn').onclick = async () => { const id = document.getElementById('auth-id').value.trim(); const pw = document.getElementById('auth-pw').value.trim(); const name = document.getElementById('signup-name').value.trim() || id; if(!id || !pw) return; const check = await getDoc(doc(db, "users_v11", id)); if(check.exists()) { document.getElementById('auth-err').innerText = "このIDは既に使用されています"; return; } await setDoc(doc(db, "users_v11", id), { id, pw, name, icon: {val: DEFAULT_IMG}, friends: [], createdAt: serverTimestamp() }); login(id, pw); };
 
     const session = JSON.parse(localStorage.getItem('np_session'));
     if (session && session.expire > Date.now()) { 
@@ -106,29 +107,48 @@ export function initNeoPod() {
     }
     renderHistory();
 
-    // --- 4. チャット・UIロジック ---
+    // --- 4. 未読申請バッジ監視（リアルタイム） ---
+    function watchPendingRequests() {
+        if (!me) return;
+        const q = query(
+            collection(db, "friend_requests"),
+            where("to", "==", me.id),
+            where("status", "==", "pending")
+        );
+        onSnapshot(q, (snap) => {
+            const badge = document.getElementById('friend-badge');
+            if (!badge) return;
+            if (snap.size > 0) {
+                badge.textContent = snap.size;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+    }
+
+    // --- 5. 画面切り替え ---
     window.showNeoScreen = (mode) => {
         document.getElementById('rooms-screen').classList.add('hidden');
         document.getElementById('friends-screen').classList.add('hidden');
         document.getElementById('chat-screen').classList.add('hidden');
         document.getElementById('nav-area').classList.remove('hidden');
         if (mode === 'rooms') { document.getElementById('rooms-screen').classList.remove('hidden'); loadRooms(); } 
-        else if (mode === 'friends') { document.getElementById('friends-screen').classList.remove('hidden'); loadFriends(); } 
+        else if (mode === 'friends') { document.getElementById('friends-screen').classList.remove('hidden'); loadFriendsScreen(); } 
         else if (mode === 'chat') { document.getElementById('chat-screen').classList.remove('hidden'); document.getElementById('nav-area').classList.add('hidden'); }
         if (document.getElementById('tab-rooms')) document.getElementById('tab-rooms').classList.toggle('active', mode === 'rooms');
         if (document.getElementById('tab-friends')) document.getElementById('tab-friends').classList.toggle('active', mode === 'friends');
     };
 
+    // --- 6. ルーム ---
     function loadRooms() {
         onSnapshot(query(collection(db, "rooms_v11"), orderBy("createdAt", "desc")), (snap) => {
             const list = document.getElementById('room-list-body'); list.innerHTML = "";
             snap.forEach(ds => {
                 const r = ds.data();
-                // 自分がメンバーでもオーナーでもなく、公式ルームでもない場合は非表示
                 if (r.members && !r.members.includes(me.id) && r.owner !== me.id && ds.id !== "official-lounge") return;
                 const memberCount = r.members ? r.members.length : 0;
                 const isOwner = r.owner === me.id && ds.id !== "official-lounge";
-                // オーナーでなく、membersに含まれている場合に退出ボタン表示
                 const isMember = r.members && r.members.includes(me.id) && !isOwner && ds.id !== "official-lounge";
                 const tr = document.createElement('tr');
                 tr.className = 'data-row';
@@ -145,21 +165,228 @@ export function initNeoPod() {
                             <button class="btn-sub btn-edit" onclick="openRoomModal('${ds.id}','${r.name.replace(/'/g, "\\'")}','${r.img || DEFAULT_ROOM_IMG}')">編集</button>
                             <button class="btn-sub btn-del" onclick="deleteRoom('${ds.id}')">削除</button>
                         ` : ''}
-                        ${isMember ? `
-                            <button class="btn-leave" onclick="leaveRoom('${ds.id}')">退出</button>
-                        ` : ''}
+                        ${isMember ? `<button class="btn-leave" onclick="leaveRoom('${ds.id}')">退出</button>` : ''}
                     </td>`;
                 list.appendChild(tr);
             });
         });
     }
 
-    // ルーム退出
     window.leaveRoom = async (rid) => {
         if(!confirm("このルームから退出しますか？")) return;
         await updateDoc(doc(db, "rooms_v11", rid), { members: arrayRemove(me.id) });
     };
 
+    // --- 7. フレンド画面 ---
+    async function loadFriendsScreen() {
+        const screen = document.getElementById('friends-screen');
+        screen.innerHTML = `
+            <div class="friend-tabs">
+                <button class="f-tab active" id="ftab-friends" onclick="switchFTab('friends')">フレンド</button>
+                <button class="f-tab" id="ftab-search" onclick="switchFTab('search')">ユーザー検索</button>
+                <button class="f-tab" id="ftab-requests" onclick="switchFTab('requests')">
+                    申請
+                    <span id="friend-badge" style="display:none; background:var(--danger,#e74c3c); color:#fff; border-radius:50%; width:18px; height:18px; font-size:11px; align-items:center; justify-content:center; margin-left:4px;"></span>
+                </button>
+            </div>
+            <div id="fpanel-friends"></div>
+            <div id="fpanel-search" style="display:none">
+                <div style="display:flex; gap:8px; margin-bottom:12px; margin-top:4px;">
+                    <input type="text" id="friend-search-input" class="input-field" placeholder="IDまたは名前で検索..." style="margin:0; flex:1;">
+                    <button onclick="execFriendSearch()" style="background:var(--accent); color:#fff; border:none; padding:8px 14px; border-radius:10px; font-size:13px; cursor:pointer; white-space:nowrap;">検索</button>
+                </div>
+                <div id="friend-search-results"></div>
+            </div>
+            <div id="fpanel-requests" style="display:none">
+                <div id="requests-list"></div>
+            </div>
+        `;
+        watchPendingRequests();
+        loadMyFriends();
+    }
+
+    window.switchFTab = (tab) => {
+        ['friends','search','requests'].forEach(t => {
+            const panel = document.getElementById(`fpanel-${t}`);
+            const btn = document.getElementById(`ftab-${t}`);
+            if (panel) panel.style.display = t === tab ? 'block' : 'none';
+            if (btn) btn.classList.toggle('active', t === tab);
+        });
+        if (tab === 'requests') loadPendingRequests();
+        if (tab === 'friends') loadMyFriends();
+    };
+
+    // フレンド一覧
+    async function loadMyFriends() {
+        const panel = document.getElementById('fpanel-friends');
+        if (!panel) return;
+        const snap = await getDoc(doc(db, "users_v11", me.id));
+        const friends = snap.exists() ? (snap.data().friends || []) : [];
+        me.friends = friends;
+
+        if (friends.length === 0) {
+            panel.innerHTML = `<div style="text-align:center; padding:30px; color:#aaa; font-size:13px;">まだフレンドがいません<br>ユーザー検索から申請してみよう</div>`;
+            return;
+        }
+        panel.innerHTML = "";
+        for (const fid of friends) {
+            const fs = await getDoc(doc(db, "users_v11", fid));
+            if (!fs.exists()) continue;
+            const u = fs.data();
+            const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+            const div = document.createElement('div');
+            div.className = 'friend-item';
+            const uJson = JSON.stringify(u).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            div.innerHTML = `
+                <img src="${iconUrl}" class="friend-avatar" onclick='viewUserProfile(${uJson})'>
+                <div class="friend-info">
+                    <b style="color:var(--text-main)">${u.name}</b>
+                    <span style="color:#aaa; font-size:11px;">ID: ${u.id}</span>
+                </div>
+                <button class="btn-sub btn-del" onclick="removeFriend('${u.id}')">削除</button>
+            `;
+            panel.appendChild(div);
+        }
+    }
+
+    // ユーザー検索
+    window.execFriendSearch = async () => {
+        const keyword = document.getElementById('friend-search-input').value.trim().toLowerCase();
+        const results = document.getElementById('friend-search-results');
+        if (!keyword) { results.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:10px;">キーワードを入力してください</div>`; return; }
+        results.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:10px;">検索中...</div>`;
+
+        // 申請状況を取得
+        const sentSnap = await getDocs(query(collection(db, "friend_requests"), where("from", "==", me.id)));
+        const sentMap = {};
+        sentSnap.forEach(d => { sentMap[d.data().to] = d.data().status; });
+
+        const snap = await getDocs(collection(db, "users_v11"));
+        results.innerHTML = "";
+        let count = 0;
+        const myFriends = me.friends || [];
+
+        snap.forEach(ds => {
+            const u = ds.data();
+            if (u.id === me.id) return;
+            if (!u.name.toLowerCase().includes(keyword) && !u.id.toLowerCase().includes(keyword)) return;
+            count++;
+            const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+            const isFriend = myFriends.includes(u.id);
+            const sentStatus = sentMap[u.id];
+
+            let actionBtn = '';
+            if (isFriend || sentStatus === 'accepted') {
+                actionBtn = `<span class="friend-status-badge">フレンド ✓</span>`;
+            } else if (sentStatus === 'pending') {
+                actionBtn = `<span style="color:#aaa; font-size:12px; font-weight:bold;">申請中...</span>`;
+            } else {
+                actionBtn = `<button class="btn-send-req" onclick="sendFriendRequest('${u.id}', this)">申請する</button>`;
+            }
+
+            const uJson = JSON.stringify(u).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const div = document.createElement('div');
+            div.className = 'friend-item';
+            div.innerHTML = `
+                <img src="${iconUrl}" class="friend-avatar" onclick='viewUserProfile(${uJson})'>
+                <div class="friend-info">
+                    <b style="color:var(--text-main)">${u.name}</b>
+                    <span style="color:#aaa; font-size:11px;">ID: ${u.id}</span>
+                </div>
+                ${actionBtn}
+            `;
+            results.appendChild(div);
+        });
+
+        if (count === 0) results.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:10px;">見つかりませんでした</div>`;
+    };
+
+    // 申請送信
+    window.sendFriendRequest = async (toId, btn) => {
+        const existing = await getDocs(query(
+            collection(db, "friend_requests"),
+            where("from", "==", me.id),
+            where("to", "==", toId)
+        ));
+        if (!existing.empty) { btn.textContent = "申請済み"; btn.disabled = true; return; }
+
+        await addDoc(collection(db, "friend_requests"), {
+            from: me.id,
+            fromName: me.name,
+            fromIcon: (me.icon && me.icon.val) ? me.icon.val : DEFAULT_IMG,
+            to: toId,
+            status: "pending",
+            createdAt: serverTimestamp()
+        });
+        btn.textContent = "申請中...";
+        btn.disabled = true;
+        btn.classList.add('disabled');
+    };
+
+    // 受信申請一覧（リアルタイム）
+    function loadPendingRequests() {
+        const list = document.getElementById('requests-list');
+        if (!list) return;
+        list.innerHTML = `<div style="color:#aaa; text-align:center; padding:20px; font-size:13px;">読み込み中...</div>`;
+
+        const q = query(
+            collection(db, "friend_requests"),
+            where("to", "==", me.id),
+            where("status", "==", "pending")
+        );
+        onSnapshot(q, (snap) => {
+            if (!document.getElementById('requests-list')) return;
+            list.innerHTML = "";
+            if (snap.empty) {
+                list.innerHTML = `<div style="color:#aaa; text-align:center; padding:30px; font-size:13px;">申請はありません</div>`;
+                return;
+            }
+            snap.forEach(ds => {
+                const req = ds.data();
+                const reqId = ds.id;
+                const div = document.createElement('div');
+                div.className = 'friend-item';
+                div.id = `req-${reqId}`;
+                div.innerHTML = `
+                    <img src="${req.fromIcon || DEFAULT_IMG}" class="friend-avatar">
+                    <div class="friend-info">
+                        <b style="color:var(--text-main)">${req.fromName}</b>
+                        <span style="color:#aaa; font-size:11px;">ID: ${req.from}</span>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-accept" onclick="acceptRequest('${reqId}', '${req.from}')">承認</button>
+                        <button class="btn-reject" onclick="rejectRequest('${reqId}')">拒否</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        });
+    }
+
+    // 承認
+    window.acceptRequest = async (reqId, fromId) => {
+        await updateDoc(doc(db, "friend_requests", reqId), { status: "accepted" });
+        await updateDoc(doc(db, "users_v11", me.id), { friends: arrayUnion(fromId) });
+        await updateDoc(doc(db, "users_v11", fromId), { friends: arrayUnion(me.id) });
+        if (!me.friends) me.friends = [];
+        if (!me.friends.includes(fromId)) me.friends.push(fromId);
+    };
+
+    // 拒否
+    window.rejectRequest = async (reqId) => {
+        await updateDoc(doc(db, "friend_requests", reqId), { status: "rejected" });
+    };
+
+    // フレンド削除
+    window.removeFriend = async (fid) => {
+        if (!confirm("フレンドを削除しますか？")) return;
+        await updateDoc(doc(db, "users_v11", me.id), { friends: arrayRemove(fid) });
+        await updateDoc(doc(db, "users_v11", fid), { friends: arrayRemove(me.id) });
+        me.friends = (me.friends || []).filter(id => id !== fid);
+        loadMyFriends();
+    };
+
+    // --- 8. チャット ---
     window.openChat = (roomId, roomName) => { currentRoomId = roomId; document.getElementById('chat-title').innerText = roomName; window.showNeoScreen('chat'); startChat(roomId); };
 
     function startChat(roomId) {
@@ -183,14 +410,10 @@ export function initNeoPod() {
                 const time = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
                 const readCount = d.readBy ? d.readBy.length : 0;
 
-                let iconUrl;
-                if (isMine) {
-                    iconUrl = (me.icon && me.icon.val) ? me.icon.val : DEFAULT_IMG;
-                } else {
-                    iconUrl = (d.icon && d.icon.val) ? d.icon.val : DEFAULT_IMG;
-                }
+                let iconUrl = isMine
+                    ? ((me.icon && me.icon.val) ? me.icon.val : DEFAULT_IMG)
+                    : ((d.icon && d.icon.val) ? d.icon.val : DEFAULT_IMG);
 
-                // 相手のメッセージバブルにクラスを付与してダークモード対応
                 const bubbleBg = isMine ? 'var(--primary)' : 'var(--card-bg, #fff)';
                 const bubbleColor = isMine ? '#fff' : 'var(--text-main)';
                 const bubbleBorder = isMine ? 'none' : '1px solid var(--border-soft)';
@@ -241,15 +464,6 @@ export function initNeoPod() {
     document.getElementById('send-go').onclick = () => post(document.getElementById('m-text').value.trim());
     window.sendEmoji = (emoji, anim) => post(`<span class="animated-emoji ${anim}">${emoji}</span>`);
     document.getElementById('m-file').onchange = (e) => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (v) => post("", { type: f.type, val: v.target.result }); r.readAsDataURL(f); };
-
-    function loadFriends() {
-        const list = document.getElementById('friend-list-body'); list.innerHTML = "<tr><td colspan='2' style='text-align:center;'>読み込み中...</td></tr>";
-        onSnapshot(collection(db, "users_v11"), (snap) => {
-            list.innerHTML = ""; let userCount = 0;
-            snap.forEach(ds => { const u = ds.data(); if(u.id === me.id) return; userCount++; const tr = document.createElement('tr'); tr.className = 'data-row'; const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG; const userDataJson = JSON.stringify(u).replace(/'/g, "\\'"); tr.innerHTML = ` <td style="width:50px"> <img src="${iconUrl}" class="icon-cell friend-icon" style="cursor:pointer" onclick='viewUserProfile(${userDataJson})'> </td> <td style="text-align:left"> <b>${u.name}</b><br><small style="color:#aaa">ID: ${u.id}</small> </td> <td></td>`; list.appendChild(tr); });
-            if(userCount === 0) { list.innerHTML = "<tr><td colspan='2' style='text-align:center; color:#888; padding:20px;'>他のユーザーはいません</td></tr>"; }
-        });
-    }
 
     window.viewUserProfile = (u) => { document.getElementById('view-profile-modal').classList.remove('hidden'); document.getElementById('view-profile-icon').src = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG; document.getElementById('view-profile-name').innerText = u.name; document.getElementById('view-profile-id').innerText = "ID: " + u.id; document.getElementById('view-profile-birthday').innerText = u.birthday || "未設定"; document.getElementById('view-profile-bio').innerText = u.bio || "自己紹介はありません。"; };
 

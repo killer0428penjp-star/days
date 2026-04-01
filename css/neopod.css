@@ -65,7 +65,6 @@
     height: 100%;
 }
 
-/* nav-tabs */
 #tolk-screen .nav-tabs {
     display: flex;
     background: var(--card-bg, #fff);
@@ -116,27 +115,17 @@
     background: var(--card-bg, #fff);
     border-top: 1px solid var(--border-soft);
 }
-
-/* チャット入力欄 */
 #m-text {
     background: var(--cal-cell-bg, #f9f9f9);
     color: var(--text-main);
     border: 1px solid var(--border-soft);
 }
-#m-text::placeholder {
-    color: #aaa;
-}
-
-/* チャット戻るボタン行 */
+#m-text::placeholder { color: #aaa; }
 #chat-screen > div:first-child {
     background: var(--card-bg, #fff);
     border-bottom: 1px solid var(--border-soft);
 }
-
-/* チャットタイトル */
-#chat-title {
-    color: var(--text-main);
-}
+#chat-title { color: var(--text-main); }
 
 /* ========== テーブル ========== */
 #tolk-screen .data-table {
@@ -200,6 +189,20 @@
 #tolk-screen .btn-del  { color: var(--danger);  border-color: var(--danger);  }
 #tolk-screen .hidden   { display: none !important; }
 
+/* ========== 退出ボタン ========== */
+.btn-leave {
+    background: #ff9800;
+    color: white;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 5px;
+}
+.btn-leave:hover { background: #e68900; }
+
 /* ========== モーダル ========== */
 #tolk-screen .modal-overlay {
     position: absolute;
@@ -221,36 +224,125 @@
     text-align: center;
     border: 1px solid var(--border-soft);
 }
-
-/* モーダル内ラベル */
-#tolk-screen .modal-card label {
-    color: var(--text-main);
-}
-
-/* ルーム招待リスト */
 #room-invite-list {
     background: var(--cal-cell-bg, #fff);
     border: 1px solid var(--border-soft) !important;
     color: var(--text-main);
 }
-#room-invite-list span {
-    color: var(--text-main);
+
+/* ========== フレンド画面タブ ========== */
+.friend-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+.f-tab {
+    flex: 1;
+    padding: 10px 5px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-size: 12px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: color 0.2s, border-color 0.2s;
+}
+.f-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
 }
 
-/* ========== 退出ボタン ========== */
-.btn-leave {
-    background: #ff9800;
-    color: white;
-    border: none;
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-left: 5px;
+/* ========== フレンドアイテム ========== */
+.friend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 8px;
+    border-radius: 12px;
+    background: var(--card-bg, #fff);
+    margin-bottom: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
-.btn-leave:hover {
-    background: #e68900;
+.friend-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-soft);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.friend-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.friend-info b {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 申請するボタン */
+.btn-send-req {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.btn-send-req:disabled, .btn-send-req.disabled {
+    background: #aaa;
+    cursor: not-allowed;
+}
+
+/* 承認ボタン */
+.btn-accept {
+    background: var(--success, #00b894);
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+/* 拒否ボタン */
+.btn-reject {
+    background: none;
+    color: var(--danger, #e74c3c);
+    border: 1px solid var(--danger, #e74c3c);
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* フレンド済みバッジ */
+.friend-status-badge {
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* ========== 絵文字アニメ ========== */
@@ -265,163 +357,51 @@
     background: var(--card-bg, rgba(0,0,0,0.5));
     border: 1px solid var(--border-soft);
 }
-#my-name-display {
-    color: var(--text-main);
-}
+#my-name-display { color: var(--text-main); }
 
 /* ========== 小さい画面向け調整 ========== */
 @media (max-height: 600px) {
-    #tolk-screen {
-        height: calc(100dvh - 200px);
-        border-radius: 12px;
-    }
+    #tolk-screen { height: calc(100dvh - 200px); border-radius: 12px; }
     #tolk-screen .tab { padding: 10px; font-size: 12px; }
     #tolk-screen .data-row td { padding: 8px 10px; }
 }
 
 /* ========== ダークモード ========== */
-body.dark-mode #tolk-screen {
-    background: var(--bg);
-    border-color: var(--border-soft);
-}
+body.dark-mode #tolk-screen { background: var(--bg); border-color: var(--border-soft); }
+body.dark-mode #tolk-screen .nav-tabs { background: var(--card-bg); border-color: var(--border-soft); }
+body.dark-mode #tolk-screen .tab { color: #aaa; }
+body.dark-mode #tolk-screen .tab.active { color: var(--accent); background: rgba(9, 132, 227, 0.1); }
+body.dark-mode #tolk-screen .data-row { background: var(--card-bg); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+body.dark-mode #tolk-screen .data-row td, body.dark-mode #tolk-screen .data-row b { color: var(--text-main); }
+body.dark-mode #chat-area { background: var(--bg); }
+body.dark-mode #chat-screen > div:first-child { background: var(--card-bg); border-color: var(--border-soft); }
+body.dark-mode #chat-title { color: var(--text-main); }
+body.dark-mode #chat-screen footer { background: var(--card-bg); border-color: var(--border-soft); }
+body.dark-mode #m-text { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
+body.dark-mode #chat-screen footer button:not(#send-go) { background: var(--card-bg); color: var(--text-main); border-color: var(--border-soft); }
+body.dark-mode #tolk-screen .modal-overlay { background: rgba(0,0,0,0.7); }
+body.dark-mode #tolk-screen .modal-card { background: var(--card-bg); color: var(--text-main); border-color: var(--border-soft); }
+body.dark-mode #tolk-screen .modal-card h3 { color: var(--text-main); }
+body.dark-mode #tolk-screen .input-field { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
+body.dark-mode #room-invite-list { background: var(--cal-cell-bg); border-color: var(--border-soft) !important; }
+body.dark-mode #room-invite-list span { color: var(--text-main); }
+body.dark-mode #room-invite-list > div { border-color: var(--border-soft) !important; }
+body.dark-mode #tolk-screen .auth-card { background: var(--card-bg); color: var(--text-main); }
+body.dark-mode #tolk-screen .auth-card input { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
+body.dark-mode #tolk-screen .auth-card h2 { color: var(--text-main); }
+body.dark-mode #view-profile-birthday, body.dark-mode #view-profile-bio,
+body.dark-mode #view-profile-name, body.dark-mode #view-profile-id { color: var(--text-main); }
+body.dark-mode #tolk-screen .btn-sub { background: var(--card-bg); border-color: var(--border-soft); color: #ccc; }
+body.dark-mode .btn-leave { background: #e68900; }
+body.dark-mode #neo-fixed-header { background: rgba(20,20,35,0.85); border-color: rgba(255,255,255,0.1); }
+body.dark-mode #my-name-display { color: #fff; }
+body.dark-mode #rooms-screen > div > span { color: #aaa; }
 
-/* ナビ・タブ */
-body.dark-mode #tolk-screen .nav-tabs {
-    background: var(--card-bg);
-    border-color: var(--border-soft);
-}
-body.dark-mode #tolk-screen .tab {
-    color: #aaa;
-}
-body.dark-mode #tolk-screen .tab.active {
-    color: var(--accent);
-    background: rgba(20, 20, 20, 0.644);
-}
-
-/* ルームリスト・友達リスト */
-body.dark-mode #tolk-screen .data-row {
-    background: var(--card-bg);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-body.dark-mode #tolk-screen .data-row td {
-    color: var(--text-main);
-}
-body.dark-mode #tolk-screen .data-row b {
-    color: var(--text-main);
-}
-
-/* チャット画面 */
-body.dark-mode #chat-area {
-    background: var(--bg);
-}
-body.dark-mode #chat-screen > div:first-child {
-    background: var(--card-bg);
-    border-color: var(--border-soft);
-}
-body.dark-mode #chat-title {
-    color: var(--text-main);
-}
-body.dark-mode #chat-screen footer {
-    background: var(--card-bg);
-    border-color: var(--border-soft);
-}
-body.dark-mode #m-text {
-    background: var(--cal-cell-bg);
-    color: var(--text-main);
-    border-color: var(--border-soft);
-}
-body.dark-mode #chat-screen footer button:not(#send-go) {
-    background: var(--card-bg);
-    color: var(--text-main);
-    border-color: var(--border-soft);
-}
-
-/* 絵文字トレイ */
-body.dark-mode .emoji-tray {
-    background: var(--card-bg);
-}
-
-/* 相手のメッセージバブル */
-body.dark-mode #chat-area .msg-bubble-other {
-    background: var(--card-bg) !important;
-    color: var(--text-main) !important;
-    border-color: var(--border-soft) !important;
-}
-
-/* モーダル */
-body.dark-mode #tolk-screen .modal-overlay {
-    background: rgba(0,0,0,0.7);
-}
-body.dark-mode #tolk-screen .modal-card {
-    background: var(--card-bg);
-    color: var(--text-main);
-    border-color: var(--border-soft);
-}
-body.dark-mode #tolk-screen .modal-card h3 {
-    color: var(--text-main);
-}
-body.dark-mode #tolk-screen .input-field {
-    background: var(--cal-cell-bg);
-    color: var(--text-main);
-    border-color: var(--border-soft);
-}
-body.dark-mode #room-invite-list {
-    background: var(--cal-cell-bg);
-    border-color: var(--border-soft) !important;
-}
-body.dark-mode #room-invite-list span {
-    color: var(--text-main);
-}
-body.dark-mode #room-invite-list > div {
-    border-color: var(--border-soft) !important;
-}
-
-/* 認証カード */
-body.dark-mode #tolk-screen .auth-card {
-    background: var(--card-bg);
-    color: var(--text-main);
-}
-body.dark-mode #tolk-screen .auth-card input {
-    background: var(--cal-cell-bg);
-    color: var(--text-main);
-    border-color: var(--border-soft);
-}
-body.dark-mode #tolk-screen .auth-card h2 {
-    color: var(--text-main);
-}
-
-/* プロフィール閲覧モーダル内の情報欄 */
-body.dark-mode #view-profile-modal .modal-card > div[style*="background:#f9f9f9"] {
-    background: var(--cal-cell-bg) !important;
-    color: var(--text-main);
-}
-body.dark-mode #view-profile-birthday,
-body.dark-mode #view-profile-bio,
-body.dark-mode #view-profile-name,
-body.dark-mode #view-profile-id {
-    color: var(--text-main);
-}
-
-/* ボタン系 */
-body.dark-mode #tolk-screen .btn-sub {
-    background: var(--card-bg);
-    border-color: var(--border-soft);
-    color: #ccc;
-}
-body.dark-mode .btn-leave {
-    background: #e68900;
-}
-
-/* 固定ヘッダー */
-body.dark-mode #neo-fixed-header {
-    background: rgba(20, 20, 35, 0.85);
-    border-color: rgba(255,255,255,0.1);
-}
-body.dark-mode #my-name-display {
-    color: #fff;
-}
-
-/* ルーム作成ボタン */
-body.dark-mode #rooms-screen > div > span {
-    color: #aaa;
-}
+/* フレンドUIダークモード */
+body.dark-mode .friend-item { background: var(--card-bg); box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+body.dark-mode .friend-tabs { border-color: var(--border-soft); }
+body.dark-mode .f-tab { color: #aaa; }
+body.dark-mode .f-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+body.dark-mode .friend-avatar { border-color: var(--border-soft); }
+body.dark-mode #friend-search-input { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
+body.dark-mode .btn-reject { color: #ff7675; border-color: #ff7675; }
