@@ -380,9 +380,21 @@ body.dark-mode #chat-screen footer { background: var(--card-bg); border-color: v
 body.dark-mode #m-text { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
 body.dark-mode #chat-screen footer button:not(#send-go) { background: var(--card-bg); color: var(--text-main); border-color: var(--border-soft); }
 body.dark-mode #tolk-screen .modal-overlay { background: rgba(0,0,0,0.7); }
-body.dark-mode #tolk-screen .modal-card { background: var(--card-bg); color: var(--text-main); border-color: var(--border-soft); }
+body.dark-mode #tolk-screen .modal-card { background: #111 !important; color: var(--text-main); border-color: var(--border-soft); }
 body.dark-mode #tolk-screen .modal-card h3 { color: var(--text-main); }
 body.dark-mode #tolk-screen .input-field { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
+body.dark-mode #tolk-screen .modal-card input[type="text"],
+body.dark-mode #tolk-screen .modal-card input[type="date"],
+body.dark-mode #tolk-screen .modal-card textarea {
+    background: #1a1a1a !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-soft) !important;
+}
+body.dark-mode #tolk-screen .modal-card button:not([style*="var(--accent)"]):not(#room-save-btn):not(#profile-save-btn) {
+    background: #2a2a2a !important;
+    color: #ccc !important;
+    border-color: #444 !important;
+}
 
 /* ★ ダークモード: メンバー招待リスト背景を黒に */
 body.dark-mode #room-invite-list {
@@ -395,6 +407,23 @@ body.dark-mode #room-invite-list > div {
     border-color: var(--border-soft) !important;
 }
 body.dark-mode #room-invite-list span { color: var(--text-main); }
+
+/* ★ rooms-screen ダークモード */
+body.dark-mode #rooms-screen {
+    background: var(--bg);
+}
+body.dark-mode #rooms-screen > div {
+    background: var(--bg) !important;
+}
+body.dark-mode #tolk-screen .screen {
+    background: var(--bg);
+}
+
+/* ★ プロフィール閲覧モーダル内の情報エリア */
+body.dark-mode #view-profile-modal .modal-card > div[style*="f9f9f9"],
+body.dark-mode #view-profile-modal .modal-card > div[style*="background"] {
+    background: #1a1a1a !important;
+}
 
 body.dark-mode #tolk-screen .auth-card { background: var(--card-bg); color: var(--text-main); }
 body.dark-mode #tolk-screen .auth-card input { background: var(--cal-cell-bg); color: var(--text-main); border-color: var(--border-soft); }
