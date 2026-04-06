@@ -6,9 +6,15 @@ export function initClockAndWeather() {
   const toggle = document.getElementById("modeToggle");
 
   function sendDarkModeToIframe(isDark) {
+    // study iframe
     const studyFrame = document.querySelector("#study-container iframe");
     if (studyFrame && studyFrame.contentWindow) {
       studyFrame.contentWindow.postMessage({ type: "darkMode", value: isDark }, "*");
+    }
+    // others iframe
+    const othersFrame = document.querySelector("#others-container iframe");
+    if (othersFrame && othersFrame.contentWindow) {
+      othersFrame.contentWindow.postMessage({ type: "darkMode", value: isDark }, "*");
     }
   }
 
@@ -31,6 +37,12 @@ export function initClockAndWeather() {
     const studyFrame = document.querySelector("#study-container iframe");
     if (studyFrame) {
       studyFrame.addEventListener("load", () => {
+        sendDarkModeToIframe(localStorage.getItem("darkMode") === "true");
+      });
+    }
+    const othersFrame = document.querySelector("#others-container iframe");
+    if (othersFrame) {
+      othersFrame.addEventListener("load", () => {
         sendDarkModeToIframe(localStorage.getItem("darkMode") === "true");
       });
     }

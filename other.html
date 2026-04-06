@@ -7,17 +7,32 @@
     <style>
         :root {
             --bg-white: #ffffff;
-            /* ▼▼▼ 変更：通常時の枠線の色を少し濃くしました ▼▼▼ */
+            --bg-sub: #f5f5f5;
+            --bg-hover: #fafafa;
             --border-light: #cccccc; 
             --border-hover: #111111;
-            --text-main: #111111;
-            --text-sub: #888888;
-            --accent: #000000;
+            --text-main: #1a202c;
+            --text-sub: #718096;
+            --accent: #0070ff;
+            --accent-text: #ffffff;
             --main-bg: #f0f4f8; 
             --dot-color: #e2e8f0;
         }
 
-        /* 全要素から角丸を排除 */
+        body.dark-theme {
+            --bg-white: rgba(30, 30, 47, 0.85);
+            --bg-sub: #111111;
+            --bg-hover: #2d3748;
+            --border-light: #2d3748;
+            --border-hover: #00f2ff;
+            --text-main: #ffffff;
+            --text-sub: #a0aec0;
+            --accent: #00f2ff;
+            --accent-text: #1e1e2f;
+            --main-bg: #1e1e2f;
+            --dot-color: #2d3748;
+        }
+
         * { 
             border-radius: 0 !important; 
             box-sizing: border-box;
@@ -32,9 +47,9 @@
             color: var(--text-main);
             font-family: "Inter", "Hiragino Sans", sans-serif;
             overflow-y: scroll;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* トップバー */
         .top-navbar {
             width: 100%;
             height: 60px;
@@ -43,17 +58,16 @@
             background-size: 20px 20px;
             display: flex;
             align-items: center;
-            justify-content: flex-start; 
+            justify-content: space-between;
             padding: 0 40px;
             position: sticky;
             top: 0;
             z-index: 1000;
             border-bottom: 1px solid var(--border-light);
-            transition: border-color 0.3s ease;
+            transition: border-color 0.4s ease, background-color 0.4s ease;
         }
         .top-navbar:hover { border-bottom-color: var(--border-hover); }
 
-        /* タグ切り替え */
         .nav-tags { 
             display: flex; 
             border: 1px solid var(--border-light); 
@@ -70,10 +84,26 @@
             background: var(--bg-white);
         }
         .tag:last-child { border-right: none; }
-        .tag:hover { background-color: #f5f5f5; color: var(--text-main); }
-        .tag.active { background-color: var(--accent); color: #fff; border-color: var(--accent); }
+        .tag:hover { background-color: var(--bg-hover); color: var(--text-main); }
+        .tag.active { background-color: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 
-        /* コンテンツエリア */
+        .top-dark-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            letter-spacing: 1px;
+            text-shadow: none;
+            transition: text-shadow 0.4s;
+        }
+        
+        body.dark-theme .top-dark-toggle {
+            text-shadow: 0 0 8px rgba(0, 242, 255, 0.3);
+            color: var(--text-main);
+        }
+
         .main-container {
             max-width: 1100px;
             margin: 60px auto;
@@ -89,7 +119,6 @@
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- Settings用：スリムな行 --- */
         .setting-row {
             display: grid;
             grid-template-columns: 200px 1fr 100px;
@@ -102,13 +131,12 @@
         .setting-row:hover {
             border-color: var(--border-hover);
             z-index: 10;
-            background-color: #fafafa;
+            background-color: var(--bg-hover);
         }
         .row-label { padding: 15px 25px; font-weight: 700; font-size: 0.85rem; border-right: 1px solid var(--border-light); }
         .row-desc { padding: 15px 25px; font-size: 0.8rem; color: var(--text-sub); }
         .row-action { padding: 15px; display: flex; justify-content: center; border-left: 1px solid var(--border-light); }
 
-        /* --- Others用：大きなカード --- */
         .content-card {
             display: grid;
             grid-template-columns: 220px 1fr 2fr;
@@ -120,14 +148,14 @@
         }
         .content-card:hover {
             border-color: var(--border-hover);
-            background-color: #fafafa;
+            background-color: var(--bg-hover);
         }
         .item-img {
-            background-color: #f5f5f5;
+            background-color: var(--bg-sub);
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #bbb;
+            color: var(--text-sub);
             font-size: 0.7rem;
             letter-spacing: 2px;
             border-right: 1px solid var(--border-light);
@@ -135,7 +163,6 @@
         .item-title { padding: 30px; display: flex; align-items: center; font-weight: 700; font-size: 1rem; }
         .item-desc { padding: 30px; color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; display: flex; align-items: center; }
 
-        /* スクエア・スライドスイッチ */
         .switch {
             position: relative;
             display: inline-block;
@@ -147,8 +174,8 @@
             position: absolute;
             cursor: pointer;
             top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #f0f0f0;
-            transition: .3s;
+            background-color: var(--bg-sub);
+            transition: .4s;
             border: 1px solid var(--border-light);
         }
         .slider:before {
@@ -156,19 +183,20 @@
             content: "";
             height: 16px; width: 16px;
             left: 3px; bottom: 3px;
-            background-color: white;
-            transition: .3s;
+            background-color: #ffffff;
+            transition: .4s;
             border: 1px solid var(--border-light);
         }
         input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(26px); border-color: var(--accent); }
 
-        /* モバイル対応 */
         @media (max-width: 850px) {
+            .top-navbar { padding: 0 20px; }
             .content-card { grid-template-columns: 1fr; }
             .item-img { aspect-ratio: 16/9; border-right: none; border-bottom: 1px solid var(--border-light); }
             .setting-row { grid-template-columns: 1fr 80px; }
             .row-label { border-right: none; }
+            .row-desc { display: none; }
         }
     </style>
 </head>
@@ -179,6 +207,14 @@
             <div class="tag active" data-target="settings">Settings</div>
             <div class="tag" data-target="others">Others</div>
         </nav>
+        
+        <div class="top-dark-toggle">
+            <span>DARK</span>
+            <label class="switch">
+                <input type="checkbox" id="topThemeSwitch">
+                <span class="slider"></span>
+            </label>
+        </div>
     </header>
 
     <main class="main-container">
@@ -189,7 +225,7 @@
                 <div class="row-desc">UI全体を低照度の配色に切り替えます。</div>
                 <div class="row-action">
                     <label class="switch">
-                        <input type="checkbox">
+                        <input type="checkbox" id="mainThemeSwitch">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -228,6 +264,7 @@
     </main>
 
     <script>
+        // --- タグ切り替えの処理 ---
         const tags = document.querySelectorAll('.tag');
         const sections = document.querySelectorAll('.content-section');
 
@@ -242,6 +279,35 @@
                     if (section.id === target) section.classList.add('active');
                 });
             });
+        });
+
+        // --- ダークモード切り替えの処理（内部スイッチ） ---
+        const topSwitch = document.getElementById('topThemeSwitch');
+        const mainSwitch = document.getElementById('mainThemeSwitch');
+
+        function toggleTheme(isDark) {
+            if (isDark) {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            topSwitch.checked = isDark;
+            mainSwitch.checked = isDark;
+        }
+
+        topSwitch.addEventListener('change', (e) => {
+            toggleTheme(e.target.checked);
+        });
+
+        mainSwitch.addEventListener('change', (e) => {
+            toggleTheme(e.target.checked);
+        });
+
+        // --- 親ページ（index.html）からのpostMessageを受け取る ---
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'darkMode') {
+                toggleTheme(e.data.value);
+            }
         });
     </script>
 
