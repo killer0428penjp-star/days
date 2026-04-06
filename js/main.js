@@ -1,47 +1,65 @@
 import { initClockAndWeather } from "./clock.js";
-import { initNews } from "./news.js";
-import { initCalendar } from "./calendar.js";
-import { initNeoPod } from "./neopod.js";
+import { initNews }            from "./news.js";
+import { initCalendar }        from "./calendar.js";
+import { initNeoPod }          from "./neopod.js";
 
-// 全てのモジュールを初期化
+// ===== モジュール初期化 =====
 initClockAndWeather();
 initNews();
 initCalendar();
 initNeoPod();
 
-// タブ切り替え制御（全体共通）
-document.querySelectorAll(".tag").forEach(tag => {
-    tag.addEventListener("click", () => {
-        document.querySelectorAll(".tag").forEach(t => t.classList.remove("active"));
-        tag.classList.add("active");
-
-        document.getElementById("news-feed-container").style.display  = "none";
-        document.getElementById("calendar-container").style.display   = "none";
-        document.getElementById("tolk-screen").style.display          = "none";
-        document.getElementById("study-container").style.display      = "none";
-
-        if (tag.id === "news-tag")      document.getElementById("news-feed-container").style.display  = "block";
-        if (tag.id === "study-tag")     document.getElementById("study-container").style.display      = "block";
-        if (tag.id === "tolk-tag")      document.getElementById("tolk-screen").style.display          = "block";
-        if (tag.id === "calendar-tag")  document.getElementById("calendar-container").style.display   = "block";
-    });
-});
-
-// 日付表示
+// ===== 日付表示 =====
 function updateDateDisplay() {
-    const now = new Date();
-    const y = now.getFullYear();
-    const m = now.getMonth() + 1;
-    const d = now.getDate();
+    const now      = new Date();
+    const y        = now.getFullYear();
+    const m        = String(now.getMonth() + 1).padStart(2, "0");
+    const d        = String(now.getDate()).padStart(2, "0");
     const dayNames = ["日", "月", "火", "水", "木", "金", "土"];
-    const day = dayNames[now.getDay()];
 
     const dateEl = document.getElementById("current-date");
     const dayEl  = document.getElementById("current-day");
-
-    if (dateEl) dateEl.textContent = `${y}/${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')}`;
-    if (dayEl)  dayEl.textContent  = day;
+    if (dateEl) dateEl.textContent = `${y}/${m}/${d}`;
+    if (dayEl)  dayEl.textContent  = dayNames[now.getDay()];
 }
-
 updateDateDisplay();
 setInterval(updateDateDisplay, 60000);
+
+// ===== タブ切り替え（全体一元管理） =====
+const TAB_MAP = {
+    "news-tag":     "news-feed-container",
+    "study-tag":    "study-container",
+    "tolk-tag":     "tolk-screen",
+    "calendar-tag": "calendar-container",
+};
+
+// グローバルに公開（neopod.js のログイン後にも使う）
+window.showTab = function(activeTagId) {
+    // 全タグ active 解除
+    document.querySelectorAll(".tag").forEach(t => t.classList.remove("active"));
+
+    // 全コンテナ非表示
+    Object.values(TAB_MAP).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = "none";
+    });
+
+    // 対象タグを active に
+    const activeTag = document.getElementById(activeTagId);
+    if (activeTag) activeTag.classList.add("active");
+
+    // 対応コンテナを表示
+    const targetId = TAB_MAP[activeTagId];
+    if (targetId) {
+        const el = document.getElementById(targetId);
+        if (el) el.style.display = "block";
+    }
+};
+
+// 初期表示: news
+window.showTab("news-tag");
+
+// 各タグにクリック設定
+document.querySelectorAll(".tag").forEach(tag => {
+    tag.addEventListener("click", () => window.showTab(tag.id));
+});
