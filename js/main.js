@@ -45,22 +45,3 @@ function updateDateDisplay() {
 
 updateDateDisplay();
 setInterval(updateDateDisplay, 60000);
-// 要素の取得
-const studyTag = document.getElementById('study-tag');
-const studyContainer = document.getElementById('study-container');
-
-// studyタグがクリックされた時の処理
-studyTag.addEventListener('click', () => {
-    // 1. 全てのタグの 'active' クラスを外して、studyをアクティブにする
-    document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
-    studyTag.classList.add('active');
-
-    // 2. 他の画面（コンテナ）を非表示にする
-    document.getElementById('news-feed-container').style.display = 'none';
-    document.getElementById('calendar-container').style.display = 'none';
-    document.getElementById('tolk-screen').style.display = 'none';
-    // ※ othersコンテナがあればそれも非表示にする
-
-    // 3. studyコンテナを表示する
-    studyContainer.style.display = 'block'; 
-});
