@@ -207,17 +207,12 @@
                 <span id="edit-profile-name" style="font-weight:bold; font-size:15px; color:#333;"></span>
                 <span id="edit-profile-id"   style="font-size:12px; color:#888; border-left:1px solid #ddd; padding-left:8px;"></span>
             </div>
-            <div style="text-align:left; margin-bottom:15px;">
-                <div class="mb-3">
-  <label for="edit-birthday" class="form-label fw-bold mb-1 ms-1" style="font-size: 11px; color: var(--accent);">誕生日</label>
-  <input type="date" id="edit-birthday" class="form-control bg-light text-dark w-100">
-</div>
-
-<div class="mb-3">
-  <label for="edit-bio" class="form-label fw-bold mb-1 ms-1" style="font-size: 11px; color: var(--accent);">自己紹介</label>
-  <textarea id="edit-bio" class="form-control bg-light text-dark w-100" style="height: 80px; resize: none;" placeholder="自己紹介・説明欄"></textarea>
-</div>
-            </div>
+            <div style="text-align:left; background:#f9f9f9; padding:15px; border-radius:15px; margin-bottom:15px;">
+                    <div style="font-size:11px; color:var(--accent); font-weight:bold;">誕生日</div>
+                    <div id="view-profile-birthday" style="margin-bottom:10px; font-size:14px;">-</div>
+                    <div style="font-size:11px; color:var(--accent); font-weight:bold;">自己紹介</div>
+                    <div id="view-profile-bio" style="font-size:14px; white-space:pre-wrap;">-</div>
+                </div>
             <div style="display:flex; gap:10px;">
                 <button onclick="window.closeModal('profile-modal')" style="flex:1; background:#eee; border:none; padding:10px; border-radius:15px; cursor:pointer; color:#555;">戻る</button>
                 <button id="profile-save-btn" style="flex:2; background:var(--accent); color:white; border:none; padding:10px; border-radius:15px; font-weight:bold; cursor:pointer;">保存する</button>
