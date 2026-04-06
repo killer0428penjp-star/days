@@ -2,61 +2,83 @@ import { db, collection, getDocs, doc, setDoc, deleteDoc, updateDoc, query, orde
 import { initCalendar } from "./calendar.js";
 
 let me = null;
-let currentEditRoomId = null; 
-let currentRoomId = null; 
-let chatUnsubscribe = null; 
-const DEFAULT_IMG = "https://placehold.jp/24/cccccc/ffffff/200x200.png?text=NoImage";
+let currentEditRoomId = null;
+let currentRoomId = null;
+let chatUnsubscribe = null;
+const DEFAULT_IMG      = "https://placehold.jp/24/cccccc/ffffff/200x200.png?text=NoImage";
 const DEFAULT_ROOM_IMG = "https://placehold.jp/24/87ceeb/ffffff/200x200.png?text=☁";
 
 export function initNeoPod() {
 
-    // --- 1. タブ切り替えシステム ---
+    // --- 1. タブ切り替えシステム（neopod内タブ）---
     const tags = document.querySelectorAll('.tag');
     const containers = {
-        'news-tag': document.getElementById('news-feed-container'),
+        'news-tag':     document.getElementById('news-feed-container'),
         'calendar-tag': document.getElementById('calendar-container'),
-        'tolk-tag': document.getElementById('tolk-screen')
+        'tolk-tag':     document.getElementById('tolk-screen')
     };
 
     tags.forEach(tag => {
         tag.onclick = () => {
-            Object.values(containers).forEach(c => { if(c) c.style.display = 'none'; });
+            Object.values(containers).forEach(c => { if (c) c.style.display = 'none'; });
             tags.forEach(t => t.classList.remove('active'));
             tag.classList.add('active');
             if (containers[tag.id]) containers[tag.id].style.display = 'block';
         };
     });
 
-    // --- 2. ログイン処理 ---
+    // --- 2. モーダル開閉（グローバル） ---
+    // body直下に移動したモーダルも確実に開閉できるよう display を直接操作
+    window.closeModal = (id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add('hidden');
+        el.style.display = 'none';
+    };
+
+    window.openProfileModal = () => {
+        if (!me) return;
+        const modal = document.getElementById('profile-modal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.getElementById('profile-edit-preview').src = (me.icon && me.icon.val) ? me.icon.val : DEFAULT_IMG;
+        if (document.getElementById('edit-profile-name')) document.getElementById('edit-profile-name').innerText = me.name;
+        if (document.getElementById('edit-profile-id'))   document.getElementById('edit-profile-id').innerText   = "ID: " + me.id;
+        document.getElementById('edit-birthday').value = me.birthday || "";
+        document.getElementById('edit-bio').value      = me.bio      || "";
+    };
+
+    // --- 3. ログイン処理 ---
     async function login(id, pw, auto = false) {
         const s = await getDoc(doc(db, "users_v11", id));
-        if(!s.exists() || s.data().pw !== pw) {
-            if(!auto) document.getElementById('auth-err').innerText = "IDまたはパスワードが正しくありません";
+        if (!s.exists() || s.data().pw !== pw) {
+            if (!auto) document.getElementById('auth-err').innerText = "IDまたはパスワードが正しくありません";
             return;
         }
         me = s.data(); me.id = id;
-        if(!me.icon) me.icon = { val: DEFAULT_IMG };
-        if(!me.friends) me.friends = [];
-        
+        if (!me.icon)    me.icon    = { val: DEFAULT_IMG };
+        if (!me.friends) me.friends = [];
+
         localStorage.setItem('np_session', JSON.stringify({ id, pw, expire: Date.now() + 1000 * 60 * 60 * 24 * 30 }));
-        
+
         const history = JSON.parse(localStorage.getItem('np_account_history') || '[]');
-        if(!history.find(a => a.id === id)) { 
-            history.push({id, pw, name: me.name, icon: me.icon.val}); 
-            localStorage.setItem('np_account_history', JSON.stringify(history)); 
+        if (!history.find(a => a.id === id)) {
+            history.push({ id, pw, name: me.name, icon: me.icon.val });
+            localStorage.setItem('np_account_history', JSON.stringify(history));
         }
 
         const fixedHeader = document.getElementById('neo-fixed-header');
         if (fixedHeader) fixedHeader.style.display = "flex";
-        
-        document.getElementById('my-profile-btn').src = me.icon.val;
-        document.getElementById('my-name-display').innerText = me.name;
+
+        document.getElementById('my-profile-btn').src         = me.icon.val;
+        document.getElementById('my-name-display').innerText  = me.name;
 
         document.getElementById('auth-screen').classList.add('hidden');
         document.getElementById('main-content').classList.remove('hidden');
-        document.getElementById('header-bg').style.display = "flex"; 
+        document.getElementById('header-bg').style.display = "flex";
 
-        Object.values(containers).forEach(c => { if(c) c.style.display = 'none'; });
+        Object.values(containers).forEach(c => { if (c) c.style.display = 'none'; });
         tags.forEach(t => t.classList.remove('active'));
         const talkTag = document.getElementById("tolk-tag");
         if (talkTag) talkTag.classList.add('active');
@@ -68,46 +90,68 @@ export function initNeoPod() {
         watchPendingRequests();
     }
 
-    // --- 3. アカウント管理 ---
-    function removeFromHistory(id) { const history = JSON.parse(localStorage.getItem('np_account_history') || '[]'); const filtered = history.filter(a => a.id !== id); localStorage.setItem('np_account_history', JSON.stringify(filtered)); renderHistory(); }
-    
-    function renderHistory() { 
-        const history = JSON.parse(localStorage.getItem('np_account_history') || '[]'); 
-        const area = document.getElementById('acc-history-area'); 
-        const list = document.getElementById('acc-history-list'); 
-        list.innerHTML = ""; 
-        if(history.length > 0) { 
-            area.classList.remove('hidden'); 
-            history.forEach(acc => { 
-                const div = document.createElement('div'); 
-                div.className = 'acc-item'; 
-                div.innerHTML = `<img src="${acc.icon || DEFAULT_IMG}"><span>${acc.name}</span>`; 
-                div.onclick = () => login(acc.id, acc.pw); 
-                list.appendChild(div); 
-            }); 
-        } else { 
-            area.classList.add('hidden'); 
-        } 
+    // --- 4. アカウント管理 ---
+    function removeFromHistory(id) {
+        const history = JSON.parse(localStorage.getItem('np_account_history') || '[]');
+        const filtered = history.filter(a => a.id !== id);
+        localStorage.setItem('np_account_history', JSON.stringify(filtered));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const history = JSON.parse(localStorage.getItem('np_account_history') || '[]');
+        const area    = document.getElementById('acc-history-area');
+        const list    = document.getElementById('acc-history-list');
+        list.innerHTML = "";
+        if (history.length > 0) {
+            area.classList.remove('hidden');
+            history.forEach(acc => {
+                const div = document.createElement('div');
+                div.className = 'acc-item';
+                div.innerHTML = `<img src="${acc.icon || DEFAULT_IMG}"><span>${acc.name}</span>`;
+                div.onclick = () => login(acc.id, acc.pw);
+                list.appendChild(div);
+            });
+        } else {
+            area.classList.add('hidden');
+        }
     }
 
     window.np_logout = () => { localStorage.removeItem('np_session'); location.reload(); };
-    window.execDeleteAccount = async () => { if(!confirm("本当に削除しますか？")) return; const targetId = me.id; await deleteDoc(doc(db, "users_v11", targetId)); removeFromHistory(targetId); window.np_logout(); };
+    window.execDeleteAccount = async () => {
+        if (!confirm("本当に削除しますか？")) return;
+        const targetId = me.id;
+        await deleteDoc(doc(db, "users_v11", targetId));
+        removeFromHistory(targetId);
+        window.np_logout();
+    };
 
-    document.getElementById('login-btn').onclick = () => login(document.getElementById('auth-id').value.trim(), document.getElementById('auth-pw').value.trim());
-    document.getElementById('signup-exec-btn').onclick = async () => { const id = document.getElementById('auth-id').value.trim(); const pw = document.getElementById('auth-pw').value.trim(); const name = document.getElementById('signup-name').value.trim() || id; if(!id || !pw) return; const check = await getDoc(doc(db, "users_v11", id)); if(check.exists()) { document.getElementById('auth-err').innerText = "このIDは既に使用されています"; return; } await setDoc(doc(db, "users_v11", id), { id, pw, name, icon: {val: DEFAULT_IMG}, friends: [], createdAt: serverTimestamp() }); login(id, pw); };
+    document.getElementById('login-btn').onclick = () =>
+        login(document.getElementById('auth-id').value.trim(), document.getElementById('auth-pw').value.trim());
+
+    document.getElementById('signup-exec-btn').onclick = async () => {
+        const id   = document.getElementById('auth-id').value.trim();
+        const pw   = document.getElementById('auth-pw').value.trim();
+        const name = document.getElementById('signup-name').value.trim() || id;
+        if (!id || !pw) return;
+        const check = await getDoc(doc(db, "users_v11", id));
+        if (check.exists()) { document.getElementById('auth-err').innerText = "このIDは既に使用されています"; return; }
+        await setDoc(doc(db, "users_v11", id), { id, pw, name, icon: { val: DEFAULT_IMG }, friends: [], createdAt: serverTimestamp() });
+        login(id, pw);
+    };
 
     const session = JSON.parse(localStorage.getItem('np_session'));
-    if (session && session.expire > Date.now()) { 
-        login(session.id, session.pw, true); 
-    } else { 
-        document.getElementById('main-content').classList.add('hidden'); 
-        document.getElementById('auth-screen').classList.remove('hidden'); 
+    if (session && session.expire > Date.now()) {
+        login(session.id, session.pw, true);
+    } else {
+        document.getElementById('main-content').classList.add('hidden');
+        document.getElementById('auth-screen').classList.remove('hidden');
         const fixedHeader = document.getElementById('neo-fixed-header');
-        if(fixedHeader) fixedHeader.style.display = "none";
+        if (fixedHeader) fixedHeader.style.display = "none";
     }
     renderHistory();
 
-    // --- 4. 未読申請バッジ監視（リアルタイム） ---
+    // --- 5. 未読申請バッジ監視（リアルタイム） ---
     function watchPendingRequests() {
         if (!me) return;
         const q = query(
@@ -119,7 +163,7 @@ export function initNeoPod() {
             const badge = document.getElementById('friend-badge');
             if (!badge) return;
             if (snap.size > 0) {
-                badge.textContent = snap.size;
+                badge.textContent  = snap.size;
                 badge.style.display = 'inline-flex';
             } else {
                 badge.style.display = 'none';
@@ -127,28 +171,29 @@ export function initNeoPod() {
         });
     }
 
-    // --- 5. 画面切り替え ---
+    // --- 6. 画面切り替え ---
     window.showNeoScreen = (mode) => {
         document.getElementById('rooms-screen').classList.add('hidden');
         document.getElementById('friends-screen').classList.add('hidden');
         document.getElementById('chat-screen').classList.add('hidden');
         document.getElementById('nav-area').classList.remove('hidden');
-        if (mode === 'rooms') { document.getElementById('rooms-screen').classList.remove('hidden'); loadRooms(); } 
-        else if (mode === 'friends') { document.getElementById('friends-screen').classList.remove('hidden'); loadFriendsScreen(); } 
-        else if (mode === 'chat') { document.getElementById('chat-screen').classList.remove('hidden'); document.getElementById('nav-area').classList.add('hidden'); }
-        if (document.getElementById('tab-rooms')) document.getElementById('tab-rooms').classList.toggle('active', mode === 'rooms');
+        if (mode === 'rooms')   { document.getElementById('rooms-screen').classList.remove('hidden');   loadRooms(); }
+        else if (mode === 'friends') { document.getElementById('friends-screen').classList.remove('hidden'); loadFriendsScreen(); }
+        else if (mode === 'chat')    { document.getElementById('chat-screen').classList.remove('hidden');    document.getElementById('nav-area').classList.add('hidden'); }
+        if (document.getElementById('tab-rooms'))   document.getElementById('tab-rooms').classList.toggle('active',   mode === 'rooms');
         if (document.getElementById('tab-friends')) document.getElementById('tab-friends').classList.toggle('active', mode === 'friends');
     };
 
-    // --- 6. ルーム ---
+    // --- 7. ルーム ---
     function loadRooms() {
         onSnapshot(query(collection(db, "rooms_v11"), orderBy("createdAt", "desc")), (snap) => {
-            const list = document.getElementById('room-list-body'); list.innerHTML = "";
+            const list = document.getElementById('room-list-body');
+            list.innerHTML = "";
             snap.forEach(ds => {
                 const r = ds.data();
                 if (r.members && !r.members.includes(me.id) && r.owner !== me.id && ds.id !== "official-lounge") return;
                 const memberCount = r.members ? r.members.length : 0;
-                const isOwner = r.owner === me.id && ds.id !== "official-lounge";
+                const isOwner  = r.owner === me.id && ds.id !== "official-lounge";
                 const isMember = r.members && r.members.includes(me.id) && !isOwner && ds.id !== "official-lounge";
                 const tr = document.createElement('tr');
                 tr.className = 'data-row';
@@ -173,18 +218,18 @@ export function initNeoPod() {
     }
 
     window.leaveRoom = async (rid) => {
-        if(!confirm("このルームから退出しますか？")) return;
+        if (!confirm("このルームから退出しますか？")) return;
         await updateDoc(doc(db, "rooms_v11", rid), { members: arrayRemove(me.id) });
     };
 
-    // --- 7. フレンド画面 ---
+    // --- 8. フレンド画面 ---
     async function loadFriendsScreen() {
         const screen = document.getElementById('friends-screen');
         screen.innerHTML = `
             <div class="friend-tabs">
-                <button class="f-tab active" id="ftab-friends" onclick="switchFTab('friends')">フレンド</button>
-                <button class="f-tab" id="ftab-search" onclick="switchFTab('search')">ユーザー検索</button>
-                <button class="f-tab" id="ftab-requests" onclick="switchFTab('requests')">
+                <button class="f-tab active" id="ftab-friends"  onclick="switchFTab('friends')">フレンド</button>
+                <button class="f-tab"        id="ftab-search"   onclick="switchFTab('search')">ユーザー検索</button>
+                <button class="f-tab"        id="ftab-requests" onclick="switchFTab('requests')">
                     申請
                     <span id="friend-badge" style="display:none; background:var(--danger,#e74c3c); color:#fff; border-radius:50%; width:18px; height:18px; font-size:11px; align-items:center; justify-content:center; margin-left:4px;"></span>
                 </button>
@@ -206,21 +251,21 @@ export function initNeoPod() {
     }
 
     window.switchFTab = (tab) => {
-        ['friends','search','requests'].forEach(t => {
+        ['friends', 'search', 'requests'].forEach(t => {
             const panel = document.getElementById(`fpanel-${t}`);
-            const btn = document.getElementById(`ftab-${t}`);
+            const btn   = document.getElementById(`ftab-${t}`);
             if (panel) panel.style.display = t === tab ? 'block' : 'none';
-            if (btn) btn.classList.toggle('active', t === tab);
+            if (btn)   btn.classList.toggle('active', t === tab);
         });
         if (tab === 'requests') loadPendingRequests();
-        if (tab === 'friends') loadMyFriends();
+        if (tab === 'friends')  loadMyFriends();
     };
 
     // フレンド一覧
     async function loadMyFriends() {
         const panel = document.getElementById('fpanel-friends');
         if (!panel) return;
-        const snap = await getDoc(doc(db, "users_v11", me.id));
+        const snap    = await getDoc(doc(db, "users_v11", me.id));
         const friends = snap.exists() ? (snap.data().friends || []) : [];
         me.friends = friends;
 
@@ -232,11 +277,11 @@ export function initNeoPod() {
         for (const fid of friends) {
             const fs = await getDoc(doc(db, "users_v11", fid));
             if (!fs.exists()) continue;
-            const u = fs.data();
+            const u       = fs.data();
             const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
-            const div = document.createElement('div');
+            const div     = document.createElement('div');
             div.className = 'friend-item';
-            const uJson = JSON.stringify(u).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const uJson   = JSON.stringify(u).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
             div.innerHTML = `
                 <img src="${iconUrl}" class="friend-avatar" onclick='viewUserProfile(${uJson})'>
                 <div class="friend-info">
@@ -257,12 +302,12 @@ export function initNeoPod() {
         results.innerHTML = `<div style="color:#aaa; font-size:12px; text-align:center; padding:10px;">検索中...</div>`;
 
         const sentSnap = await getDocs(query(collection(db, "friend_requests"), where("from", "==", me.id)));
-        const sentMap = {};
+        const sentMap  = {};
         sentSnap.forEach(d => { sentMap[d.data().to] = d.data().status; });
 
-        const snap = await getDocs(collection(db, "users_v11"));
+        const snap     = await getDocs(collection(db, "users_v11"));
         results.innerHTML = "";
-        let count = 0;
+        let count      = 0;
         const myFriends = me.friends || [];
 
         snap.forEach(ds => {
@@ -270,8 +315,8 @@ export function initNeoPod() {
             if (u.id === me.id) return;
             if (!u.name.toLowerCase().includes(keyword) && !u.id.toLowerCase().includes(keyword)) return;
             count++;
-            const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
-            const isFriend = myFriends.includes(u.id);
+            const iconUrl    = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+            const isFriend   = myFriends.includes(u.id);
             const sentStatus = sentMap[u.id];
 
             let actionBtn = '';
@@ -284,7 +329,7 @@ export function initNeoPod() {
             }
 
             const uJson = JSON.stringify(u).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-            const div = document.createElement('div');
+            const div   = document.createElement('div');
             div.className = 'friend-item';
             div.innerHTML = `
                 <img src="${iconUrl}" class="friend-avatar" onclick='viewUserProfile(${uJson})'>
@@ -310,15 +355,15 @@ export function initNeoPod() {
         if (!existing.empty) { btn.textContent = "申請済み"; btn.disabled = true; return; }
 
         await addDoc(collection(db, "friend_requests"), {
-            from: me.id,
+            from:     me.id,
             fromName: me.name,
             fromIcon: (me.icon && me.icon.val) ? me.icon.val : DEFAULT_IMG,
-            to: toId,
-            status: "pending",
+            to:       toId,
+            status:   "pending",
             createdAt: serverTimestamp()
         });
         btn.textContent = "申請中...";
-        btn.disabled = true;
+        btn.disabled    = true;
         btn.classList.add('disabled');
     };
 
@@ -341,9 +386,9 @@ export function initNeoPod() {
                 return;
             }
             snap.forEach(ds => {
-                const req = ds.data();
+                const req   = ds.data();
                 const reqId = ds.id;
-                const div = document.createElement('div');
+                const div   = document.createElement('div');
                 div.className = 'friend-item';
                 div.id = `req-${reqId}`;
                 div.innerHTML = `
@@ -380,13 +425,18 @@ export function initNeoPod() {
     window.removeFriend = async (fid) => {
         if (!confirm("フレンドを削除しますか？")) return;
         await updateDoc(doc(db, "users_v11", me.id), { friends: arrayRemove(fid) });
-        await updateDoc(doc(db, "users_v11", fid), { friends: arrayRemove(me.id) });
+        await updateDoc(doc(db, "users_v11", fid),   { friends: arrayRemove(me.id) });
         me.friends = (me.friends || []).filter(id => id !== fid);
         loadMyFriends();
     };
 
-    // --- 8. チャット ---
-    window.openChat = (roomId, roomName) => { currentRoomId = roomId; document.getElementById('chat-title').innerText = roomName; window.showNeoScreen('chat'); startChat(roomId); };
+    // --- 9. チャット ---
+    window.openChat = (roomId, roomName) => {
+        currentRoomId = roomId;
+        document.getElementById('chat-title').innerText = roomName;
+        window.showNeoScreen('chat');
+        startChat(roomId);
+    };
 
     function startChat(roomId) {
         if (chatUnsubscribe) chatUnsubscribe();
@@ -395,30 +445,30 @@ export function initNeoPod() {
             const area = document.getElementById('chat-area');
             area.innerHTML = "";
             snap.forEach(dSnap => {
-                const d = dSnap.data();
+                const d   = dSnap.data();
                 const mid = dSnap.id;
                 const isMine = me && d.uid === me.id;
 
-                if(!isMine && (!d.readBy || !d.readBy.includes(me.id))) {
+                if (!isMine && (!d.readBy || !d.readBy.includes(me.id))) {
                     updateDoc(doc(db, "rooms_v11", roomId, "messages", mid), { readBy: arrayUnion(me.id) });
                 }
 
                 const group = document.createElement('div');
                 group.style = `display:flex; gap:10px; margin-bottom:15px; flex-direction:${isMine ? 'row-reverse' : 'row'}; align-items:flex-start;`;
 
-                const time = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+                const time      = d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
                 const readCount = d.readBy ? d.readBy.length : 0;
 
                 let iconUrl = isMine
                     ? ((me.icon && me.icon.val) ? me.icon.val : DEFAULT_IMG)
-                    : ((d.icon && d.icon.val) ? d.icon.val : DEFAULT_IMG);
+                    : ((d.icon && d.icon.val)   ? d.icon.val  : DEFAULT_IMG);
 
-                const bubbleBg = isMine ? 'var(--primary)' : 'var(--card-bg, #fff)';
-                const bubbleColor = isMine ? '#fff' : 'var(--text-main)';
+                const bubbleBg     = isMine ? 'var(--primary)' : 'var(--card-bg, #fff)';
+                const bubbleColor  = isMine ? '#fff' : 'var(--text-main)';
                 const bubbleBorder = isMine ? 'none' : '1px solid var(--border-soft)';
 
                 group.innerHTML = `
-                    <img src="${iconUrl}" 
+                    <img src="${iconUrl}"
                          style="width:38px; height:38px; border-radius:50%; object-fit:cover; cursor:pointer; flex-shrink:0; border:2px solid ${isMine ? 'var(--accent)' : '#eee'};"
                          onclick="viewUserById('${d.uid}')"
                          onerror="this.src='${DEFAULT_IMG}'">
@@ -432,7 +482,7 @@ export function initNeoPod() {
                             </div>
                         </div>
                         <div id="menu-${mid}" class="hidden" style="margin-top:5px; display:flex; gap:5px;">
-                            <button onclick="editMsg('${mid}','${(d.text||"").replace(/'/g, "\\'")}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:1px solid #ddd; background:var(--card-bg,#fff); color:var(--text-main);">編集</button>
+                            <button onclick="editMsg('${mid}','${(d.text || "").replace(/'/g, "\\'")}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:1px solid #ddd; background:var(--card-bg,#fff); color:var(--text-main);">編集</button>
                             <button onclick="deleteMsg('${mid}')" style="font-size:10px; padding:3px 8px; border-radius:5px; border:none; background:#ff7675; color:white;">削除</button>
                         </div>
                         <div style="font-size:9px; color:#aaa; margin-top:2px;">
@@ -445,13 +495,13 @@ export function initNeoPod() {
         });
     }
 
-    window.toggleMsgMenu = (mid, isMine) => { if(isMine) document.getElementById(`menu-${mid}`).classList.toggle('hidden'); };
-    window.editMsg = async (mid, old) => { const n = prompt("編集:", old); if(n !== null && n !== old) await updateDoc(doc(db, "rooms_v11", currentRoomId, "messages", mid), { text: n }); };
-    window.deleteMsg = async (mid) => { if(confirm("削除しますか？")) await deleteDoc(doc(db, "rooms_v11", currentRoomId, "messages", mid)); };
-    window.viewUserById = async (uid) => { const s = await getDoc(doc(db, "users_v11", uid)); if(s.exists()) viewUserProfile(s.data()); };
+    window.toggleMsgMenu  = (mid, isMine) => { if (isMine) document.getElementById(`menu-${mid}`).classList.toggle('hidden'); };
+    window.editMsg        = async (mid, old) => { const n = prompt("編集:", old); if (n !== null && n !== old) await updateDoc(doc(db, "rooms_v11", currentRoomId, "messages", mid), { text: n }); };
+    window.deleteMsg      = async (mid) => { if (confirm("削除しますか？")) await deleteDoc(doc(db, "rooms_v11", currentRoomId, "messages", mid)); };
+    window.viewUserById   = async (uid) => { const s = await getDoc(doc(db, "users_v11", uid)); if (s.exists()) viewUserProfile(s.data()); };
 
     async function post(text, media = null) {
-        if((!text && !media) || !me || !currentRoomId) return;
+        if ((!text && !media) || !me || !currentRoomId) return;
         await addDoc(collection(db, "rooms_v11", currentRoomId, "messages"), {
             text, media, uid: me.id, name: me.name,
             icon: me.icon || { val: DEFAULT_IMG },
@@ -460,16 +510,34 @@ export function initNeoPod() {
         document.getElementById('m-text').value = "";
     }
 
-    document.getElementById('send-go').onclick = () => post(document.getElementById('m-text').value.trim());
+    document.getElementById('send-go').onclick   = () => post(document.getElementById('m-text').value.trim());
     window.sendEmoji = (emoji, anim) => post(`<span class="animated-emoji ${anim}">${emoji}</span>`);
-    document.getElementById('m-file').onchange = (e) => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = (v) => post("", { type: f.type, val: v.target.result }); r.readAsDataURL(f); };
+    document.getElementById('m-file').onchange   = (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        const r = new FileReader();
+        r.onload = (v) => post("", { type: f.type, val: v.target.result });
+        r.readAsDataURL(f);
+    };
 
-    window.viewUserProfile = (u) => { document.getElementById('view-profile-modal').classList.remove('hidden'); document.getElementById('view-profile-icon').src = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG; document.getElementById('view-profile-name').innerText = u.name; document.getElementById('view-profile-id').innerText = "ID: " + u.id; document.getElementById('view-profile-birthday').innerText = u.birthday || "未設定"; document.getElementById('view-profile-bio').innerText = u.bio || "自己紹介はありません。"; };
+    // プロフィール表示（他ユーザー）
+    window.viewUserProfile = (u) => {
+        const modal = document.getElementById('view-profile-modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.getElementById('view-profile-icon').src        = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+        document.getElementById('view-profile-name').innerText  = u.name;
+        document.getElementById('view-profile-id').innerText    = "ID: " + u.id;
+        document.getElementById('view-profile-birthday').innerText = u.birthday || "未設定";
+        document.getElementById('view-profile-bio').innerText   = u.bio || "自己紹介はありません。";
+    };
 
-    // ★ openRoomModal: メンバー選択をフレンドのみに変更
-    window.openRoomModal = async (rid=null, n="", i="") => {
+    // --- 10. ルームモーダル ---
+    window.openRoomModal = async (rid = null, n = "", i = "") => {
         currentEditRoomId = rid;
-        document.getElementById('room-modal').classList.remove('hidden');
+        const modal = document.getElementById('room-modal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
         document.getElementById('room-name-input').value = n;
         document.getElementById('room-preview').src = rid ? (i || DEFAULT_ROOM_IMG) : DEFAULT_ROOM_IMG;
         const inviteList = document.getElementById('room-invite-list');
@@ -479,8 +547,7 @@ export function initNeoPod() {
             const rDoc = await getDoc(doc(db, "rooms_v11", rid));
             if (rDoc.exists()) currentMembers = rDoc.data().members || [];
         }
-        // フレンドのみ取得
-        const mySnap = await getDoc(doc(db, "users_v11", me.id));
+        const mySnap    = await getDoc(doc(db, "users_v11", me.id));
         const myFriends = mySnap.exists() ? (mySnap.data().friends || []) : [];
         inviteList.innerHTML = "";
         if (myFriends.length === 0) {
@@ -489,10 +556,10 @@ export function initNeoPod() {
             for (const fid of myFriends) {
                 const fs = await getDoc(doc(db, "users_v11", fid));
                 if (!fs.exists()) continue;
-                const u = fs.data();
+                const u         = fs.data();
                 const isChecked = currentMembers.includes(u.id) ? "checked" : "";
-                const iconUrl = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
-                const div = document.createElement('div');
+                const iconUrl   = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+                const div       = document.createElement('div');
                 div.style = "display:flex; align-items:center; gap:10px; padding:5px; border-bottom:1px solid var(--border-soft);";
                 div.innerHTML = `<input type="checkbox" class="invite-check" value="${u.id}" ${isChecked}><img src="${iconUrl}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;"><span style="font-size:12px; color:var(--text-main);">${u.name}</span>`;
                 inviteList.appendChild(div);
@@ -501,14 +568,14 @@ export function initNeoPod() {
     };
 
     document.getElementById('room-save-btn').onclick = async () => {
-        const name = document.getElementById('room-name-input').value.trim();
-        if(!name) return;
+        const name        = document.getElementById('room-name-input').value.trim();
+        if (!name) return;
         const selectedIds = Array.from(document.querySelectorAll('.invite-check:checked')).map(el => el.value);
         selectedIds.push(me.id);
-        const previewSrc = document.getElementById('room-preview').src;
-        const roomImg = previewSrc || DEFAULT_ROOM_IMG;
-        const roomData = { name, img: roomImg, owner: me.id, members: selectedIds, createdAt: serverTimestamp() };
-        if(currentEditRoomId) {
+        const previewSrc  = document.getElementById('room-preview').src;
+        const roomImg     = previewSrc || DEFAULT_ROOM_IMG;
+        const roomData    = { name, img: roomImg, owner: me.id, members: selectedIds, createdAt: serverTimestamp() };
+        if (currentEditRoomId) {
             await updateDoc(doc(db, "rooms_v11", currentEditRoomId), { name, img: roomImg, members: selectedIds });
         } else {
             await addDoc(collection(db, "rooms_v11"), roomData);
@@ -516,12 +583,48 @@ export function initNeoPod() {
         window.closeModal('room-modal');
     };
 
-    document.getElementById('room-file-input').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('room-preview').src = ev.target.result; }; reader.readAsDataURL(file); };
-    window.deleteRoom = async (rid) => { if(confirm("ルームを削除しますか？")) await deleteDoc(doc(db, "rooms_v11", rid)); };
-    window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-    document.getElementById('toggle-signup').onclick = () => { document.getElementById('signup-extra').classList.toggle('hidden'); document.getElementById('login-btn').classList.toggle('hidden'); document.getElementById('signup-exec-btn').classList.toggle('hidden'); document.getElementById('auth-err').innerText = ""; };
-    
-    document.getElementById('my-profile-btn-wrapper').onclick = () => { document.getElementById('profile-modal').classList.remove('hidden'); document.getElementById('profile-edit-preview').src = me.icon.val || DEFAULT_IMG; if(document.getElementById('edit-profile-name')) document.getElementById('edit-profile-name').innerText = me.name; if(document.getElementById('edit-profile-id')) document.getElementById('edit-profile-id').innerText = "ID: " + me.id; document.getElementById('edit-birthday').value = me.birthday || ""; document.getElementById('edit-bio').value = me.bio || ""; };
-    document.getElementById('profile-file-input').onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { document.getElementById('profile-edit-preview').src = ev.target.result; }; reader.readAsDataURL(file); };
-    document.getElementById('profile-save-btn').onclick = async () => { const birthday = document.getElementById('edit-birthday').value; const bio = document.getElementById('edit-bio').value.trim(); const newIcon = document.getElementById('profile-edit-preview').src; const userRef = doc(db, "users_v11", me.id); await updateDoc(userRef, { "icon.val": newIcon, birthday, bio }); me.icon.val = newIcon; me.birthday = birthday; me.bio = bio; document.getElementById('my-profile-btn').src = newIcon; alert("プロフィールを更新しました"); window.closeModal('profile-modal'); };
+    document.getElementById('room-file-input').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => { document.getElementById('room-preview').src = ev.target.result; };
+        reader.readAsDataURL(file);
+    };
+
+    window.deleteRoom = async (rid) => {
+        if (confirm("ルームを削除しますか？")) await deleteDoc(doc(db, "rooms_v11", rid));
+    };
+
+    document.getElementById('toggle-signup').onclick = () => {
+        document.getElementById('signup-extra').classList.toggle('hidden');
+        document.getElementById('login-btn').classList.toggle('hidden');
+        document.getElementById('signup-exec-btn').classList.toggle('hidden');
+        document.getElementById('auth-err').innerText = "";
+    };
+
+    // --- 11. プロフィール編集（自分）---
+    // my-profile-btn-wrapper はどのタブでも固定ヘッダーに表示されている
+    document.getElementById('my-profile-btn-wrapper').onclick = () => window.openProfileModal();
+
+    document.getElementById('profile-file-input').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => { document.getElementById('profile-edit-preview').src = ev.target.result; };
+        reader.readAsDataURL(file);
+    };
+
+    document.getElementById('profile-save-btn').onclick = async () => {
+        const birthday = document.getElementById('edit-birthday').value;
+        const bio      = document.getElementById('edit-bio').value.trim();
+        const newIcon  = document.getElementById('profile-edit-preview').src;
+        const userRef  = doc(db, "users_v11", me.id);
+        await updateDoc(userRef, { "icon.val": newIcon, birthday, bio });
+        me.icon.val   = newIcon;
+        me.birthday   = birthday;
+        me.bio        = bio;
+        document.getElementById('my-profile-btn').src = newIcon;
+        alert("プロフィールを更新しました");
+        window.closeModal('profile-modal');
+    };
 }

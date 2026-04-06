@@ -14,12 +14,20 @@ document.querySelectorAll(".tag").forEach(tag => {
     tag.addEventListener("click", () => {
         document.querySelectorAll(".tag").forEach(t => t.classList.remove("active"));
         tag.classList.add("active");
-        
-        document.getElementById("news-feed-container").style.display = (tag.id === "news-tag" || tag.innerText === "news") ? "block" : "none";
-        document.getElementById("calendar-container").style.display = tag.id === "calendar-tag" ? "block" : "none";
-        document.getElementById("tolk-screen").style.display = (tag.id === "tolk-tag" || tag.innerText === "tolk") ? "block" : "none";
+
+        document.getElementById("news-feed-container").style.display  = "none";
+        document.getElementById("calendar-container").style.display   = "none";
+        document.getElementById("tolk-screen").style.display          = "none";
+        document.getElementById("study-container").style.display      = "none";
+
+        if (tag.id === "news-tag")      document.getElementById("news-feed-container").style.display  = "block";
+        if (tag.id === "study-tag")     document.getElementById("study-container").style.display      = "block";
+        if (tag.id === "tolk-tag")      document.getElementById("tolk-screen").style.display          = "block";
+        if (tag.id === "calendar-tag")  document.getElementById("calendar-container").style.display   = "block";
     });
 });
+
+// 日付表示
 function updateDateDisplay() {
     const now = new Date();
     const y = now.getFullYear();
@@ -29,13 +37,12 @@ function updateDateDisplay() {
     const day = dayNames[now.getDay()];
 
     const dateEl = document.getElementById("current-date");
-    const dayEl = document.getElementById("current-day");
+    const dayEl  = document.getElementById("current-day");
 
     if (dateEl) dateEl.textContent = `${y}/${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')}`;
-    if (dayEl) dayEl.textContent = day;
+    if (dayEl)  dayEl.textContent  = day;
 }
 
-// 初期化時と、1分ごと（あるいは時計更新時）に実行するように設定
 updateDateDisplay();
 setInterval(updateDateDisplay, 60000);
 // 要素の取得
