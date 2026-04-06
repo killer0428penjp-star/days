@@ -18,18 +18,25 @@ export function initClockAndWeather() {
     }
   }
 
-  toggle.addEventListener("change", () => {
-    const isDark = toggle.checked;
+  // 親ページのダークモードを適用する関数（other.html からの postMessage でも使う）
+  function applyDarkMode(isDark) {
     document.body.classList.toggle("dark-mode", isDark);
     localStorage.setItem("darkMode", isDark);
+    if (toggle) toggle.checked = isDark;
     sendDarkModeToIframe(isDark);
-  });
+  }
+
+  if (toggle) {
+    toggle.addEventListener("change", () => {
+      applyDarkMode(toggle.checked);
+    });
+  }
 
   // リロード後に復元
   const saved = localStorage.getItem("darkMode") === "true";
   if (saved) {
     document.body.classList.add("dark-mode");
-    toggle.checked = true;
+    if (toggle) toggle.checked = true;
   }
 
   // iframeが読み込まれたタイミングでも送る
@@ -45,6 +52,25 @@ export function initClockAndWeather() {
       othersFrame.addEventListener("load", () => {
         sendDarkModeToIframe(localStorage.getItem("darkMode") === "true");
       });
+    }
+  });
+
+  // other.html からの postMessage を受け取る
+  // （index.html側の<script>ブロックでも処理しているが、clock.js側でも対応）
+  window.addEventListener("message", (e) => {
+    if (!e.data || !e.data.type) return;
+
+    // DARK_MODE スイッチ → 親のダークモードを切り替え
+    if (e.data.type === "setDarkMode") {
+      applyDarkMode(e.data.value);
+    }
+
+    // NOTIFICATIONS スイッチ → 右上の切替ボタンの表示/非表示
+    if (e.data.type === "setNotifications") {
+      const switchContainer = document.getElementById("main-switch-container");
+      if (switchContainer) {
+        switchContainer.style.display = e.data.value ? "" : "none";
+      }
     }
   });
 
