@@ -33,14 +33,10 @@
             --dot-color: #2d3748;
         }
 
-        * {
-            border-radius: 0 !important;
-            box-sizing: border-box;
-        }
+        * { border-radius: 0 !important; box-sizing: border-box; }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--main-bg);
             background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
             background-size: 20px 20px;
@@ -50,138 +46,170 @@
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* トップバー（DARKトグルを削除したのでタブのみ） */
         .top-navbar {
-            width: 100%;
-            height: 60px;
+            width: 100%; height: 60px;
             background-color: var(--main-bg);
             background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
             background-size: 20px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
+            display: flex; align-items: center; justify-content: flex-start;
             padding: 0 40px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            position: sticky; top: 0; z-index: 1000;
             border-bottom: 1px solid var(--border-light);
             transition: border-color 0.4s ease, background-color 0.4s ease;
         }
         .top-navbar:hover { border-bottom-color: var(--border-hover); }
 
-        .nav-tags {
-            display: flex;
-            border: 1px solid var(--border-light);
-        }
+        .nav-tags { display: flex; border: 1px solid var(--border-light); }
         .tag {
-            padding: 8px 25px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-right: 1px solid var(--border-light);
-            transition: all 0.2s;
-            color: var(--text-sub);
-            user-select: none;
+            padding: 8px 25px; font-size: 0.75rem; text-transform: uppercase;
+            cursor: pointer; border-right: 1px solid var(--border-light);
+            transition: all 0.2s; color: var(--text-sub); user-select: none;
             background: var(--bg-white);
         }
         .tag:last-child { border-right: none; }
         .tag:hover { background-color: var(--bg-hover); color: var(--text-main); }
         .tag.active { background-color: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 
-        .main-container {
-            max-width: 1100px;
-            margin: 60px auto;
-            padding: 0 20px;
-        }
+        .main-container { max-width: 1100px; margin: 60px auto; padding: 0 20px; }
 
-        .content-section {
-            display: none;
-            flex-direction: column;
-            animation: fadeIn 0.3s ease;
-        }
+        .content-section { display: none; flex-direction: column; animation: fadeIn 0.3s ease; }
         .content-section.active { display: flex; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Settings行 */
         .setting-row {
-            display: grid;
-            grid-template-columns: 200px 1fr 100px;
-            align-items: center;
-            background-color: var(--bg-white);
-            border: 1px solid var(--border-light);
-            margin-bottom: -1px;
-            transition: all 0.2s;
+            display: grid; grid-template-columns: 200px 1fr 100px;
+            align-items: center; background-color: var(--bg-white);
+            border: 1px solid var(--border-light); margin-bottom: -1px; transition: all 0.2s;
         }
-        .setting-row:hover {
-            border-color: var(--border-hover);
-            z-index: 10;
-            background-color: var(--bg-hover);
-        }
+        .setting-row:hover { border-color: var(--border-hover); z-index: 10; background-color: var(--bg-hover); }
         .row-label { padding: 15px 25px; font-weight: 700; font-size: 0.85rem; border-right: 1px solid var(--border-light); }
         .row-desc  { padding: 15px 25px; font-size: 0.8rem; color: var(--text-sub); }
         .row-action { padding: 15px; display: flex; justify-content: center; border-left: 1px solid var(--border-light); }
 
+        /* ---- WIDGET_POS ボタン行（ボタン幅に合わせて調整） ---- */
+        .setting-row.btn-row { grid-template-columns: 200px 1fr auto; }
+
+        .pos-btn {
+            margin: 8px 15px;
+            padding: 7px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: var(--accent);
+            color: var(--accent-text);
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+        .pos-btn:hover { opacity: 0.8; }
+
         /* Othersカード */
         .content-card {
-            display: grid;
-            grid-template-columns: 220px 1fr 2fr;
-            background-color: var(--bg-white);
-            border: 1px solid var(--border-light);
-            margin-bottom: 10px;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            display: grid; grid-template-columns: 220px 1fr 2fr;
+            background-color: var(--bg-white); border: 1px solid var(--border-light);
+            margin-bottom: 10px; transition: all 0.3s ease; cursor: pointer;
         }
-        .content-card:hover {
-            border-color: var(--border-hover);
-            background-color: var(--bg-hover);
-        }
+        .content-card:hover { border-color: var(--border-hover); background-color: var(--bg-hover); }
         .item-img {
-            background-color: var(--bg-sub);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-sub);
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            border-right: 1px solid var(--border-light);
+            background-color: var(--bg-sub); display: flex; justify-content: center;
+            align-items: center; color: var(--text-sub); font-size: 0.7rem;
+            letter-spacing: 2px; border-right: 1px solid var(--border-light);
         }
         .item-title { padding: 30px; display: flex; align-items: center; font-weight: 700; font-size: 1rem; }
         .item-desc  { padding: 30px; color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; display: flex; align-items: center; }
 
         /* スイッチ */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--bg-sub);
-            transition: .4s;
-            border: 1px solid var(--border-light);
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--bg-sub); transition: .4s; border: 1px solid var(--border-light);
         }
         .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px; width: 16px;
-            left: 3px; bottom: 3px;
-            background-color: #ffffff;
-            transition: .4s;
+            position: absolute; content: ""; height: 16px; width: 16px;
+            left: 3px; bottom: 3px; background-color: #ffffff; transition: .4s;
             border: 1px solid var(--border-light);
         }
         input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(26px); border-color: var(--accent); }
+
+        /* ===== 仮想空間オーバーレイ ===== */
+        #vspace-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 99999;
+            background: rgba(0,0,0,0.82);
+            align-items: center; justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #vspace-overlay.open { display: flex; }
+
+        #vspace-title {
+            color: #fff; font-size: 0.8rem; font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 10px; text-align: center;
+        }
+        #vspace-hint {
+            color: rgba(255,255,255,0.5); font-size: 0.7rem;
+            letter-spacing: 1px; text-align: center; margin-top: -10px;
+        }
+
+        /* 縮小されたindex.htmlプレビュー枠 */
+        #vspace-frame-wrap {
+            position: relative;
+            /* 実際の画面サイズに合わせてJSで調整 */
+            border: 1px solid rgba(255,255,255,0.25);
+            overflow: hidden;
+            background: #1a1a2e;
+            box-shadow: 0 0 60px rgba(0,100,255,0.2);
+        }
+
+        /* プレビュー内に描画するミニindex */
+        #vspace-mini {
+            transform-origin: top left;
+            pointer-events: none; /* ドラッグ対象以外は操作不可 */
+            position: absolute; top: 0; left: 0;
+        }
+
+        /* ドラッグ可能なボタンのゴースト */
+        #drag-toggle-btn {
+            position: absolute;
+            cursor: grab;
+            z-index: 10;
+            background: rgba(0,0,0,0.55);
+            border: 2px dashed #fff;
+            padding: 5px 10px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            user-select: none;
+            white-space: nowrap;
+            transition: box-shadow 0.15s;
+        }
+        #drag-toggle-btn:active { cursor: grabbing; box-shadow: 0 0 0 2px #00f2ff; }
+        #drag-toggle-btn.dragging { box-shadow: 0 0 0 2px #00f2ff; opacity: 0.9; }
+
+        /* 決定・キャンセルボタン */
+        #vspace-actions { display: flex; gap: 12px; }
+        .vspace-btn {
+            padding: 10px 32px; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+            border: none; cursor: pointer; transition: opacity 0.2s;
+        }
+        .vspace-btn:hover { opacity: 0.8; }
+        #vspace-confirm { background: #0070ff; color: #fff; }
+        #vspace-cancel  { background: rgba(255,255,255,0.12); color: #fff; }
 
         @media (max-width: 850px) {
             .top-navbar { padding: 0 20px; }
             .content-card { grid-template-columns: 1fr; }
             .item-img { aspect-ratio: 16/9; border-right: none; border-bottom: 1px solid var(--border-light); }
             .setting-row { grid-template-columns: 1fr 80px; }
+            .setting-row.btn-row { grid-template-columns: 1fr auto; }
             .row-label { border-right: none; }
             .row-desc { display: none; }
         }
@@ -194,14 +222,13 @@
             <div class="tag active" data-target="settings">Settings</div>
             <div class="tag" data-target="others">Others</div>
         </nav>
-        <!-- 右上のDARKトグルは削除 -->
     </header>
 
     <main class="main-container">
 
         <section id="settings" class="content-section active">
 
-            <!-- DARK_MODE：切り替えで親ページ全体のダークモードを制御 -->
+            <!-- DARK_MODE -->
             <div class="setting-row">
                 <div class="row-label">DARK_MODE</div>
                 <div class="row-desc">UI全体を低照度の配色に切り替えます。</div>
@@ -213,7 +240,7 @@
                 </div>
             </div>
 
-            <!-- NOTIFICATIONS：オンで右上切替ボタンを表示、オフで非表示 -->
+            <!-- NOTIFICATIONS -->
             <div class="setting-row">
                 <div class="row-label">NOTIFICATIONS</div>
                 <div class="row-desc">右上のダーク切替ボタンの表示・非表示を切り替えます。</div>
@@ -222,6 +249,15 @@
                         <input type="checkbox" id="notificationsSwitch" checked>
                         <span class="slider"></span>
                     </label>
+                </div>
+            </div>
+
+            <!-- WIDGET_POS（新規追加：普通のボタン） -->
+            <div class="setting-row btn-row">
+                <div class="row-label">WIDGET_POS</div>
+                <div class="row-desc">ダーク切替ボタンの位置を仮想空間でドラッグして変更します。</div>
+                <div class="row-action" style="border-left: 1px solid var(--border-light);">
+                    <button class="pos-btn" id="openVspaceBtn">EDIT POSITION</button>
                 </div>
             </div>
 
@@ -235,7 +271,6 @@
                     すべての要素から角丸を排除しました。マウスをホバーした瞬間にだけ、繊細な枠線が表示されるミニマルな仕様です。
                 </div>
             </div>
-
             <div class="content-card">
                 <div class="item-img">IMAGE_AREA</div>
                 <div class="item-title">DESIGN_ASSETS</div>
@@ -247,66 +282,277 @@
 
     </main>
 
+    <!-- ===== 仮想空間オーバーレイ ===== -->
+    <div id="vspace-overlay">
+        <div id="vspace-title">WIDGET POSITION EDITOR</div>
+        <div id="vspace-hint">ボタンをドラッグして位置を決め、CONFIRM で確定</div>
+
+        <div id="vspace-frame-wrap">
+            <!-- index.htmlのミニプレビュー（CSS描画） -->
+            <div id="vspace-mini">
+                <div id="mini-render"></div>
+            </div>
+            <!-- ドラッグ対象：ダークモードトグルボタンのゴースト -->
+            <div id="drag-toggle-btn">☀ / ☾ DARK</div>
+        </div>
+
+        <div id="vspace-actions">
+            <button class="vspace-btn" id="vspace-cancel">CANCEL</button>
+            <button class="vspace-btn" id="vspace-confirm">CONFIRM</button>
+        </div>
+    </div>
+
     <script>
-        // --- タブ切り替え ---
+        // ===== タブ切り替え =====
         const tags     = document.querySelectorAll('.tag');
         const sections = document.querySelectorAll('.content-section');
-
         tags.forEach(tag => {
             tag.addEventListener('click', () => {
                 tags.forEach(t => t.classList.remove('active'));
                 tag.classList.add('active');
                 const target = tag.getAttribute('data-target');
-                sections.forEach(section => {
-                    section.classList.remove('active');
-                    if (section.id === target) section.classList.add('active');
+                sections.forEach(s => {
+                    s.classList.remove('active');
+                    if (s.id === target) s.classList.add('active');
                 });
             });
         });
 
-        // --- DARK_MODE スイッチ ---
+        // ===== DARK_MODE スイッチ =====
         const darkSwitch = document.getElementById('darkModeSwitch');
-
-        // 内部テーマも同期して更新
         function applyTheme(isDark) {
-            if (isDark) {
-                document.body.classList.add('dark-theme');
-            } else {
-                document.body.classList.remove('dark-theme');
-            }
+            document.body.classList.toggle('dark-theme', isDark);
             darkSwitch.checked = isDark;
         }
-
         darkSwitch.addEventListener('change', () => {
-            const isDark = darkSwitch.checked;
-            applyTheme(isDark);
-            // 親ページへ通知
-            window.parent.postMessage({ type: 'setDarkMode', value: isDark }, '*');
+            applyTheme(darkSwitch.checked);
+            window.parent.postMessage({ type: 'setDarkMode', value: darkSwitch.checked }, '*');
         });
 
-        // --- NOTIFICATIONS スイッチ ---
+        // ===== NOTIFICATIONS スイッチ =====
         const notifSwitch = document.getElementById('notificationsSwitch');
-
         notifSwitch.addEventListener('change', () => {
-            // 親ページへ通知（trueで表示、falseで非表示）
             window.parent.postMessage({ type: 'setNotifications', value: notifSwitch.checked }, '*');
         });
 
-        // --- 親ページ（clock.js）からのpostMessageを受け取る ---
-        // 親のダークモードが変わったらこちらも同期
+        // ===== 親からのメッセージ受信 =====
         window.addEventListener('message', (e) => {
-            if (e.data && e.data.type === 'darkMode') {
-                applyTheme(e.data.value);
-            }
+            if (e.data && e.data.type === 'darkMode') applyTheme(e.data.value);
         });
 
-        // --- 初期状態：親のlocalStorageに合わせる ---
-        // iframe内からlocalStorageに直接アクセスできるので読み取り
+        // ===== 初期テーマ復元 =====
         try {
-            const saved = localStorage.getItem('darkMode') === 'true';
-            applyTheme(saved);
-        } catch (e) {
-            // cross-origin時は無視
+            applyTheme(localStorage.getItem('darkMode') === 'true');
+        } catch(e) {}
+
+        // =====================================================
+        //  仮想空間 (WIDGET POSITION EDITOR)
+        // =====================================================
+        const openBtn      = document.getElementById('openVspaceBtn');
+        const overlay      = document.getElementById('vspace-overlay');
+        const frameWrap    = document.getElementById('vspace-frame-wrap');
+        const dragBtn      = document.getElementById('drag-toggle-btn');
+        const confirmBtn   = document.getElementById('vspace-confirm');
+        const cancelBtn    = document.getElementById('vspace-cancel');
+
+        // プレビューのスケール・サイズ設定
+        const PREVIEW_W = Math.min(window.innerWidth  * 0.82, 820);
+        const PREVIEW_H = Math.min(window.innerHeight * 0.62, 520);
+        const REAL_W    = window.screen.width  || 1440;
+        const REAL_H    = window.screen.height || 900;
+        const SCALE     = Math.min(PREVIEW_W / REAL_W, PREVIEW_H / REAL_H);
+
+        // 現在の切替ボタン位置（親ページからもらうか、localStorage から復元）
+        let savedPos = { top: 15, right: 15 }; // デフォルト (px, index.html座標)
+        try {
+            const s = localStorage.getItem('toggleBtnPos');
+            if (s) savedPos = JSON.parse(s);
+        } catch(e) {}
+
+        // ミニプレビュー内でのピクセル位置（top / left）に変換
+        function realToPreview(topPx, rightPx) {
+            const leftPx = REAL_W - rightPx - dragBtn.offsetWidth / SCALE;
+            return {
+                left: leftPx  * SCALE,
+                top:  topPx   * SCALE
+            };
+        }
+        function previewToReal(leftPx, topPx) {
+            return {
+                top:   Math.round(topPx  / SCALE),
+                right: Math.round((REAL_W - leftPx / SCALE) - dragBtn.offsetWidth / SCALE)
+            };
+        }
+
+        // オーバーレイを開く
+        openBtn.addEventListener('click', () => {
+            // フレームサイズ設定
+            frameWrap.style.width  = PREVIEW_W + 'px';
+            frameWrap.style.height = PREVIEW_H + 'px';
+
+            // ミニプレビューの内容を描画
+            buildMiniPreview();
+
+            // ドラッグボタン初期位置を配置
+            const initPos = realToPreview(savedPos.top, savedPos.right);
+            dragBtn.style.left = clampLeft(initPos.left) + 'px';
+            dragBtn.style.top  = clampTop(initPos.top)  + 'px';
+
+            overlay.classList.add('open');
+        });
+
+        // 閉じる
+        cancelBtn.addEventListener('click', () => overlay.classList.remove('open'));
+
+        // 決定 → 親へ postMessage
+        confirmBtn.addEventListener('click', () => {
+            const l = parseFloat(dragBtn.style.left) || 0;
+            const t = parseFloat(dragBtn.style.top)  || 0;
+            const realPos = previewToReal(l, t);
+
+            // localStorage に保存
+            try { localStorage.setItem('toggleBtnPos', JSON.stringify(realPos)); } catch(e) {}
+            savedPos = realPos;
+
+            // 親ページへ通知
+            window.parent.postMessage({ type: 'setTogglePos', value: realPos }, '*');
+
+            overlay.classList.remove('open');
+        });
+
+        // ===== ドラッグ処理 =====
+        let isDragging = false;
+        let dragOffX = 0, dragOffY = 0;
+
+        function clampLeft(v) { return Math.max(0, Math.min(v, PREVIEW_W - dragBtn.offsetWidth)); }
+        function clampTop(v)  { return Math.max(0, Math.min(v, PREVIEW_H - dragBtn.offsetHeight)); }
+
+        dragBtn.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            dragBtn.classList.add('dragging');
+            const rect = dragBtn.getBoundingClientRect();
+            dragOffX = e.clientX - rect.left;
+            dragOffY = e.clientY - rect.top;
+            e.preventDefault();
+        });
+        dragBtn.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            dragBtn.classList.add('dragging');
+            const rect = dragBtn.getBoundingClientRect();
+            dragOffX = e.touches[0].clientX - rect.left;
+            dragOffY = e.touches[0].clientY - rect.top;
+            e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            moveDrag(e.clientX, e.clientY);
+        });
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        function moveDrag(cx, cy) {
+            const wrapRect = frameWrap.getBoundingClientRect();
+            let newLeft = cx - wrapRect.left - dragOffX;
+            let newTop  = cy - wrapRect.top  - dragOffY;
+            dragBtn.style.left = clampLeft(newLeft) + 'px';
+            dragBtn.style.top  = clampTop(newTop)  + 'px';
+        }
+
+        document.addEventListener('mouseup',  () => { isDragging = false; dragBtn.classList.remove('dragging'); });
+        document.addEventListener('touchend', () => { isDragging = false; dragBtn.classList.remove('dragging'); });
+
+        // ===== ミニプレビュー描画（CSS で index.html の雰囲気を再現） =====
+        function buildMiniPreview() {
+            const mini = document.getElementById('mini-render');
+            const isDark = document.body.classList.contains('dark-theme');
+            const bg   = isDark ? '#1e1e2f' : '#f0f4f8';
+            const card = isDark ? '#1e1e2f' : '#ffffff';
+            const acc  = isDark ? '#00f2ff' : '#0070ff';
+            const txt  = isDark ? '#ffffff' : '#1a202c';
+            const sub  = isDark ? '#a0aec0' : '#718096';
+            const dot  = isDark ? '#2d3748' : '#e2e8f0';
+
+            mini.style.cssText = `
+                width:${REAL_W}px; height:${REAL_H}px;
+                transform: scale(${SCALE});
+                transform-origin: top left;
+                background-color:${bg};
+                background-image: radial-gradient(${dot} 1px, transparent 1px);
+                background-size: 20px 20px;
+                font-family: "Inter", sans-serif;
+                position: relative;
+                overflow: hidden;
+            `;
+
+            mini.innerHTML = `
+                <!-- ヘッダー背景（時計エリア） -->
+                <div style="
+                    width:100%; height:220px;
+                    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+                    display:flex; flex-direction:column;
+                    align-items:center; justify-content:center; gap:8px;
+                    position:relative;
+                ">
+                    <div style="color:rgba(255,255,255,0.6); font-size:13px; letter-spacing:2px;">
+                        ${new Date().toLocaleDateString('ja-JP')} (${['日','月','火','水','木','金','土'][new Date().getDay()]})
+                    </div>
+                    <div style="color:rgba(255,255,255,0.55); font-size:12px; letter-spacing:1px;">
+                        天気 ☀️ &nbsp; 温度 --℃ &nbsp; 湿度 --%
+                    </div>
+                    <div style="
+                        font-size:72px; font-weight:700; letter-spacing:4px;
+                        color:#fff; font-family:'Roboto Mono', monospace;
+                        text-shadow: 0 0 30px rgba(0,100,255,0.5);
+                    ">${new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</div>
+                </div>
+
+                <!-- タブバー -->
+                <div style="
+                    display:flex; gap:0; padding:10px 15px 0;
+                    border-bottom: 1px solid ${dot};
+                ">
+                    ${['news','study','tolk','calendar','others'].map((t,i)=>`
+                        <div style="
+                            padding:8px 20px; font-size:12px; font-weight:700;
+                            color:${i===0?'#fff':sub};
+                            background:${i===0?acc:'transparent'};
+                            border: 1px solid ${i===0?acc:dot};
+                            margin-right:-1px; letter-spacing:1px;
+                        ">${t.toUpperCase()}</div>
+                    `).join('')}
+                </div>
+
+                <!-- ニュースカード風ダミー -->
+                ${[1,2,3].map(()=>`
+                    <div style="
+                        margin:10px 15px 0;
+                        padding:14px 16px;
+                        background:${card};
+                        border:1px solid ${dot};
+                        display:flex; gap:12px; align-items:center;
+                    ">
+                        <div style="width:56px;height:56px;background:${dot};flex-shrink:0;"></div>
+                        <div style="flex:1;">
+                            <div style="height:10px;background:${dot};margin-bottom:7px;width:70%;"></div>
+                            <div style="height:8px;background:${dot};width:90%;"></div>
+                        </div>
+                    </div>
+                `).join('')}
+
+                <!-- ダークモード切替ボタン（参照用・薄く表示） -->
+                <div style="
+                    position:absolute; top:${savedPos.top}px;
+                    right:${savedPos.right}px;
+                    background:rgba(0,0,0,0.45);
+                    padding:5px 10px; color:rgba(255,255,255,0.3);
+                    font-size:11px; letter-spacing:1px;
+                    border: 1px dashed rgba(255,255,255,0.2);
+                    pointer-events:none;
+                ">☀ / ☾ DARK</div>
+            `;
         }
     </script>
 
