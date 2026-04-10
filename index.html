@@ -9,17 +9,6 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/calendar.css">
     <link rel="stylesheet" href="css/neopod.css">
-    <style>
-        /* ダークモード切替ボタンを position:fixed で自由配置できるように */
-        #main-switch-container {
-            position: fixed;
-            z-index: 9000;
-            transition: top 0.4s cubic-bezier(.4,0,.2,1),
-                        right 0.4s cubic-bezier(.4,0,.2,1),
-                        left 0.4s cubic-bezier(.4,0,.2,1),
-                        bottom 0.4s cubic-bezier(.4,0,.2,1);
-        }
-    </style>
 </head>
 <body>
 
@@ -152,6 +141,7 @@
                 <div id="tab-rooms"   class="tab active" onclick="window.showNeoScreen('rooms')">トーク</div>
                 <div id="tab-friends" class="tab"        onclick="window.showNeoScreen('friends')">友達</div>
             </div>
+
             <div id="rooms-screen" class="screen">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <span style="font-size:12px; color:#888;">トークルーム</span>
@@ -159,7 +149,9 @@
                 </div>
                 <table class="data-table"><tbody id="room-list-body"></tbody></table>
             </div>
+
             <div id="friends-screen" class="screen hidden"></div>
+
             <div id="chat-screen" class="screen hidden" style="padding:0; display:flex; flex-direction:column;">
                 <div style="padding:10px 15px; border-bottom:1px solid var(--border-soft); display:flex; align-items:center; gap:10px;">
                     <button onclick="window.showNeoScreen('rooms')" style="background:none; border:none; color:var(--accent); font-size:14px; cursor:pointer;">← 戻る</button>
@@ -205,7 +197,9 @@
 
     </div><!-- /#tolk-screen -->
 
-    <!-- プロフィール編集 -->
+    <!-- ===== グローバルモーダル（body直下 / どのタブからでも表示） ===== -->
+
+    <!-- 自分のプロフィール編集 -->
     <div id="profile-modal" class="modal-overlay hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);">
         <div style="background:#ffffff; border-radius:20px; padding:25px; width:90%; max-width:400px; max-height:85vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.4);">
             <h3 style="text-align:center; margin-bottom:15px; color:#333;">プロフィール編集</h3>
@@ -254,27 +248,7 @@
     <script type="module" src="js/main.js"></script>
 
     <script>
-        // ===== ダークモード切替ボタンの位置を localStorage から復元 =====
-        (function restoreTogglePos() {
-            try {
-                const s = localStorage.getItem('toggleBtnPos');
-                if (!s) return;
-                const pos = JSON.parse(s);
-                const el = document.getElementById('main-switch-container');
-                if (!el) return;
-                applyTogglePos(el, pos);
-            } catch(e) {}
-        })();
-
-        function applyTogglePos(el, pos) {
-            // right/left と top/bottom を設定。right優先。
-            el.style.top    = (pos.top  != null ? pos.top  : 15) + 'px';
-            el.style.right  = (pos.right != null ? pos.right : 15) + 'px';
-            el.style.left   = '';
-            el.style.bottom = '';
-        }
-
-        // ===== タブ切り替え =====
+        // ===== タブ切り替え（othersを含む全タブの表示・非表示を一元管理） =====
         const ALL_CONTAINERS = [
             'news-feed-container',
             'study-container',
@@ -283,16 +257,11 @@
             'others-container'
         ];
 
+        // main.js の showTab を上書き or 補完するため window.showTab を定義
+        // （main.js 側でも同様の処理があれば競合しないよう、others専用の処理のみここで対応）
         document.addEventListener('DOMContentLoaded', function () {
-            // 位置復元（DOMContentLoaded 後にも念のため）
-            try {
-                const s = localStorage.getItem('toggleBtnPos');
-                if (s) {
-                    const el = document.getElementById('main-switch-container');
-                    if (el) applyTogglePos(el, JSON.parse(s));
-                }
-            } catch(e) {}
 
+            // othersタブのクリック
             const othersTag = document.getElementById('others-tag');
             if (othersTag) {
                 othersTag.addEventListener('click', function () {
@@ -307,6 +276,7 @@
                 });
             }
 
+            // others以外のタブが押されたときにothers-containerを確実に消す
             ['news-tag', 'study-tag', 'tolk-tag', 'calendar-tag'].forEach(tagId => {
                 const tag = document.getElementById(tagId);
                 if (tag) {
@@ -318,37 +288,29 @@
             });
 
             // other.html からの postMessage を受け取る
+            // (ダークモード切替 / NOTIFICATIONS スイッチ)
             window.addEventListener('message', function (e) {
                 if (!e.data || !e.data.type) return;
 
-                // DARK_MODE
+                // DARK_MODE スイッチ → 親のダークモードを切り替え
                 if (e.data.type === 'setDarkMode') {
                     const isDark = e.data.value;
                     document.body.classList.toggle('dark-mode', isDark);
                     localStorage.setItem('darkMode', isDark);
                     const toggle = document.getElementById('modeToggle');
                     if (toggle) toggle.checked = isDark;
+                    // study にも転送
                     const studyFrame = document.querySelector('#study-container iframe');
                     if (studyFrame && studyFrame.contentWindow) {
                         studyFrame.contentWindow.postMessage({ type: 'darkMode', value: isDark }, '*');
                     }
                 }
 
-                // NOTIFICATIONS
+                // NOTIFICATIONS スイッチ → 右上の切替ボタンの表示/非表示
                 if (e.data.type === 'setNotifications') {
                     const switchContainer = document.getElementById('main-switch-container');
                     if (switchContainer) {
                         switchContainer.style.display = e.data.value ? '' : 'none';
-                    }
-                }
-
-                // ★ WIDGET_POS 確定 → ボタンを実際に移動 ★
-                if (e.data.type === 'setTogglePos') {
-                    const pos = e.data.value; // { top, right }
-                    const el  = document.getElementById('main-switch-container');
-                    if (el) {
-                        localStorage.setItem('toggleBtnPos', JSON.stringify(pos));
-                        applyTogglePos(el, pos);
                     }
                 }
             });
