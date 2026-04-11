@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="css/calendar.css">
     <link rel="stylesheet" href="css/neopod.css">
     <style>
-        /* ダークモード切替ボタンを position:fixed で自由配置できるように */
         #main-switch-container {
             position: fixed;
             z-index: 9000;
@@ -206,7 +205,7 @@
 
     </div><!-- /#tolk-screen -->
 
-    <!-- プロフィール編集モーダル（既存・tolkタブ用） -->
+    <!-- プロフィール編集モーダル -->
     <div id="profile-modal" class="modal-overlay hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);">
         <div style="background:#ffffff; border-radius:20px; padding:25px; width:90%; max-width:400px; max-height:85vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.4);">
             <h3 style="text-align:center; margin-bottom:15px; color:#333;">プロフィール編集</h3>
@@ -294,11 +293,8 @@
             }, '*');
         }
 
-        // main.js 側から me オブジェクトを受け取るための公開関数
-        // main.js の login() 完了後に window.notifyLoginToOthers(me) を呼ぶ
         window.notifyLoginToOthers = function(meObj) {
             sendProfileToOthers(meObj);
-            // others-iframe が読み込まれた後でも送れるよう保存
             try {
                 localStorage.setItem('np_profile_cache', JSON.stringify({
                     id:       meObj.id,
@@ -323,7 +319,6 @@
 
         document.addEventListener('DOMContentLoaded', function () {
 
-            // 位置復元（DOMContentLoaded 後にも念のため）
             try {
                 const s = localStorage.getItem('toggleBtnPos');
                 if (s) {
@@ -399,7 +394,7 @@
                     if (sc) sc.style.display = e.data.value ? '' : 'none';
                 }
 
-                // WIDGET_POS → ボタン位置を実際に移動
+                // WIDGET_POS
                 if (e.data.type === 'setTogglePos') {
                     const pos = e.data.value;
                     const el  = document.getElementById('main-switch-container');
@@ -409,15 +404,26 @@
                     }
                 }
 
-                // ★ PROFILE_EDIT → Firebase 保存 → me オブジェクト更新 ★
+                // PROFILE_PANEL → 右上固定ヘッダーの表示・非表示
+                if (e.data.type === 'setProfilePanel') {
+                    const header = document.getElementById('neo-fixed-header');
+                    if (header) {
+                        header.style.display = e.data.value ? 'flex' : 'none';
+                    }
+                }
+
+                // PROFILE_EDIT → プロフィール編集モーダルを開く
+                if (e.data.type === 'openProfileModal') {
+                    const btn = document.getElementById('my-profile-btn-wrapper');
+                    if (btn) btn.click();
+                }
+
+                // PROFILE_EDIT（updateProfile）→ Firebase 保存
                 if (e.data.type === 'updateProfile') {
                     const { icon, birthday, bio } = e.data.value;
-                    // window._npMe は main.js 側で公開する想定
-                    // （後述の main.js への追加を参照）
                     if (typeof window._npUpdateProfile === 'function') {
                         window._npUpdateProfile({ icon, birthday, bio });
                     } else {
-                        // フォールバック：localStorageキャッシュだけ更新
                         try {
                             const cached = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
                             cached.icon     = icon;

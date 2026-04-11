@@ -177,135 +177,6 @@
         .pf-cancel-btn:hover { border-color: var(--border-hover); color: var(--text-main); }
         .pf-status { font-size: 0.78rem; color: var(--accent); margin-top: 10px; min-height: 18px; font-weight: 700; }
 
-        /* ============================================================
-           WEATHER_DISPLAY スロットパネル
-        ============================================================ */
-        #weather-slot-panel {
-            display: none; border: 1px solid var(--border-light); border-top: none;
-            background-color: var(--bg-white); padding: 28px 30px 24px;
-            margin-bottom: -1px; animation: fadeIn 0.25s ease;
-        }
-        #weather-slot-panel.open { display: block; }
-
-        .slot-panel-title {
-            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 2px; color: var(--text-sub); margin-bottom: 20px;
-        }
-
-        /* 横3列のスロットコンテナ */
-        .slot-columns {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
-            border: 1px solid var(--border-light);
-            margin-bottom: 20px;
-        }
-
-        .slot-col {
-            display: flex; flex-direction: column; align-items: center;
-            border-right: 1px solid var(--border-light);
-            background: var(--bg-white);
-        }
-        .slot-col:last-child { border-right: none; }
-
-        /* 列ヘッダー */
-        .slot-header {
-            width: 100%; padding: 8px 0;
-            text-align: center; font-size: 0.7rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 2px;
-            border-bottom: 1px solid var(--border-light);
-            background: var(--bg-sub); color: var(--text-sub);
-        }
-
-        /* スロットドラム本体 */
-        .slot-drum-wrap {
-            position: relative; width: 100%; overflow: hidden;
-            height: 160px; /* 5行分ぐらい */
-            cursor: ns-resize;
-            user-select: none;
-        }
-
-        /* 中央ハイライト帯 */
-        .slot-drum-wrap::before,
-        .slot-drum-wrap::after {
-            content: ""; position: absolute; left: 0; right: 0; z-index: 2; pointer-events: none;
-        }
-        .slot-drum-wrap::before {
-            top: 0; height: 52px;
-            background: linear-gradient(to bottom, var(--bg-white) 0%, transparent 100%);
-        }
-        .slot-drum-wrap::after {
-            bottom: 0; height: 52px;
-            background: linear-gradient(to top, var(--bg-white) 0%, transparent 100%);
-        }
-
-        /* 選択中ライン */
-        .slot-selected-line {
-            position: absolute; left: 0; right: 0;
-            top: 50%; transform: translateY(-50%);
-            height: 32px; pointer-events: none; z-index: 1;
-            border-top: 1px solid var(--accent);
-            border-bottom: 1px solid var(--accent);
-            background: rgba(0,112,255,0.06);
-        }
-        body.dark-theme .slot-selected-line {
-            background: rgba(0,242,255,0.08);
-        }
-
-        /* アイテムリスト */
-        .slot-list {
-            display: flex; flex-direction: column; align-items: center;
-            position: relative; z-index: 0;
-            padding: 64px 0; /* 上下パディングで中央に1アイテムが来るように */
-            transition: transform 0.18s cubic-bezier(.4,0,.2,1);
-        }
-
-        .slot-item {
-            width: 100%; height: 32px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; font-weight: 500; color: var(--text-sub);
-            transition: color 0.2s, font-size 0.2s;
-            pointer-events: none;
-            white-space: nowrap;
-        }
-        .slot-item.selected {
-            color: var(--text-main); font-size: 1.25rem; font-weight: 700;
-        }
-
-        /* 決定ボタン */
-        .weather-confirm-btn {
-            padding: 10px 32px; font-size: 0.75rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 2px;
-            background: var(--accent); color: var(--accent-text);
-            border: none; cursor: pointer; transition: opacity 0.2s;
-        }
-        .weather-confirm-btn:hover { opacity: 0.8; }
-        .weather-cancel-btn {
-            padding: 10px 20px; font-size: 0.75rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px;
-            background: var(--bg-sub); color: var(--text-sub);
-            border: 1px solid var(--border-light); cursor: pointer; transition: all 0.2s; margin-left: 10px;
-        }
-        .weather-cancel-btn:hover { border-color: var(--border-hover); color: var(--text-main); }
-
-        .weather-status { font-size: 0.78rem; color: var(--accent); margin-top: 12px; min-height: 18px; font-weight: 700; }
-
-        /* 現在の設定プレビュー */
-        .weather-preview {
-            display: flex; gap: 0; margin-bottom: 20px;
-            border: 1px solid var(--border-light);
-        }
-        .weather-preview-item {
-            flex: 1; padding: 10px 0; text-align: center;
-            border-right: 1px solid var(--border-light);
-            font-size: 0.8rem; color: var(--text-sub);
-        }
-        .weather-preview-item:last-child { border-right: none; }
-        .weather-preview-item span {
-            display: block; font-size: 1.1rem; font-weight: 700;
-            color: var(--text-main); margin-top: 4px;
-        }
-
         @media (max-width: 850px) {
             .top-navbar { padding: 0 20px; }
             .content-card { grid-template-columns: 1fr; }
@@ -358,7 +229,7 @@
             <!-- PROFILE_PANEL -->
             <div class="setting-row">
                 <div class="row-label">PROFILE_PANEL</div>
-                <div class="row-desc">下のプロフィール編集行・パネルの表示・非表示を切り替えます。</div>
+                <div class="row-desc">右上のプロフィール欄の表示・非表示を切り替えます。</div>
                 <div class="row-action">
                     <label class="switch">
                         <input type="checkbox" id="profilePanelSwitch" checked>
@@ -405,67 +276,6 @@
                     <div class="pf-status" id="pfStatus"></div>
                 </div>
             </div>
-
-            <!-- WEATHER_DISPLAY ボタン行 -->
-            <div class="setting-row btn-row">
-                <div class="row-label">WEATHER_DISPLAY</div>
-                <div class="row-desc">天気・温度・湿度の表示内容をスロットで選択して変更します。</div>
-                <div class="row-action" style="border-left: 1px solid var(--border-light);">
-                    <button class="action-btn-plain" id="openWeatherSlotBtn">EDIT WEATHER</button>
-                </div>
-            </div>
-
-            <!-- 天気スロットパネル（インライン展開） -->
-            <div id="weather-slot-panel">
-
-                <div class="slot-panel-title">WEATHER DISPLAY SETTINGS</div>
-
-                <!-- 現在の設定プレビュー -->
-                <div class="weather-preview">
-                    <div class="weather-preview-item">天気<span id="prev-weather">☀️</span></div>
-                    <div class="weather-preview-item">温度<span id="prev-temp">--℃</span></div>
-                    <div class="weather-preview-item">湿度<span id="prev-hum">--%</span></div>
-                </div>
-
-                <!-- スロット 3列 -->
-                <div class="slot-columns">
-
-                    <!-- 天気スロット -->
-                    <div class="slot-col">
-                        <div class="slot-header">天気</div>
-                        <div class="slot-drum-wrap" id="drum-weather">
-                            <div class="slot-selected-line"></div>
-                            <div class="slot-list" id="list-weather"></div>
-                        </div>
-                    </div>
-
-                    <!-- 温度スロット -->
-                    <div class="slot-col">
-                        <div class="slot-header">温度</div>
-                        <div class="slot-drum-wrap" id="drum-temp">
-                            <div class="slot-selected-line"></div>
-                            <div class="slot-list" id="list-temp"></div>
-                        </div>
-                    </div>
-
-                    <!-- 湿度スロット -->
-                    <div class="slot-col">
-                        <div class="slot-header">湿度</div>
-                        <div class="slot-drum-wrap" id="drum-hum">
-                            <div class="slot-selected-line"></div>
-                            <div class="slot-list" id="list-hum"></div>
-                        </div>
-                    </div>
-
-                </div><!-- /.slot-columns -->
-
-                <div>
-                    <button class="weather-confirm-btn" id="weatherConfirmBtn">CONFIRM</button>
-                    <button class="weather-cancel-btn"  id="weatherCancelBtn">CANCEL</button>
-                </div>
-                <div class="weather-status" id="weatherStatus"></div>
-
-            </div><!-- /#weather-slot-panel -->
 
         </section>
 
@@ -527,19 +337,17 @@
 
     // ============================================================
     //  PROFILE_PANEL スイッチ
+    //  → index.html の右上プロフィール欄 (#neo-fixed-header) を表示・非表示
     // ============================================================
-    const profilePanelSwitch  = document.getElementById('profilePanelSwitch');
-    const profileEditRow      = document.getElementById('profileEditRow');
+    document.getElementById('profilePanelSwitch').addEventListener('change', function() {
+        window.parent.postMessage({ type: 'setProfilePanel', value: this.checked }, '*');
+    });
+
+    // ============================================================
+    //  PROFILE_EDIT ボタン（元の動作を維持）
+    // ============================================================
     const profileInlinePanel  = document.getElementById('profile-inline-panel');
     const openProfilePanelBtn = document.getElementById('openProfilePanelBtn');
-
-    profilePanelSwitch.addEventListener('change', function() {
-        profileEditRow.style.display = this.checked ? '' : 'none';
-        if (!this.checked) {
-            profileInlinePanel.classList.remove('open');
-            openProfilePanelBtn.textContent = 'EDIT PROFILE';
-        }
-    });
 
     openProfilePanelBtn.addEventListener('click', () => {
         const isOpen = profileInlinePanel.classList.contains('open');
@@ -603,171 +411,12 @@
             try { localStorage.setItem('np_profile_cache', JSON.stringify(e.data.value)); } catch(err) {}
             if (profileInlinePanel.classList.contains('open')) loadProfileData();
         }
-        // 天気・温度・湿度の現在値を受け取ってプレビューを更新
-        if (e.data.type === 'weatherCurrent') {
-            const d = e.data.value;
-            if (d.weather !== undefined) document.getElementById('prev-weather').textContent = d.weather;
-            if (d.temp    !== undefined) document.getElementById('prev-temp').textContent    = d.temp + '℃';
-            if (d.hum     !== undefined) document.getElementById('prev-hum').textContent     = d.hum  + '%';
-        }
     });
 
     // ============================================================
     //  初期テーマ復元
     // ============================================================
     try { applyTheme(localStorage.getItem('darkMode') === 'true'); } catch(e) {}
-
-    // ============================================================
-    //  WEATHER_DISPLAY スロット
-    // ============================================================
-
-    // --- スロットの選択肢 ---
-    const WEATHER_OPTIONS = ['☀️','🌤️','⛅','🌥️','☁️','🌧️','⛈️','🌨️','🌩️','🌪️','☔','🌈'];
-
-    // 温度：-10 〜 45℃
-    const TEMP_OPTIONS = Array.from({ length: 56 }, (_, i) => (i - 10) + '℃');
-
-    // 湿度：0 〜 100%（5刻み）
-    const HUM_OPTIONS = Array.from({ length: 21 }, (_, i) => (i * 5) + '%');
-
-    // 各スロットの状態
-    const slotState = {
-        weather: { options: WEATHER_OPTIONS, index: 0 },
-        temp:    { options: TEMP_OPTIONS,    index: 20 }, // デフォルト10℃ (index=20)
-        hum:     { options: HUM_OPTIONS,     index: 12 }, // デフォルト60%
-    };
-
-    const ITEM_H = 32; // px（.slot-item の height に合わせる）
-
-    // スロットリスト構築
-    function buildSlot(key) {
-        const list = document.getElementById('list-' + key);
-        const state = slotState[key];
-        list.innerHTML = '';
-        state.options.forEach((opt, i) => {
-            const div = document.createElement('div');
-            div.className = 'slot-item' + (i === state.index ? ' selected' : '');
-            div.textContent = opt;
-            list.appendChild(div);
-        });
-        applySlotPosition(key, false);
-    }
-
-    // 位置適用
-    function applySlotPosition(key, animate) {
-        const list  = document.getElementById('list-' + key);
-        const state = slotState[key];
-        if (!animate) list.style.transition = 'none';
-        else          list.style.transition  = 'transform 0.18s cubic-bezier(.4,0,.2,1)';
-        list.style.transform = `translateY(${-state.index * ITEM_H}px)`;
-        // selected クラス更新
-        list.querySelectorAll('.slot-item').forEach((el, i) => {
-            el.classList.toggle('selected', i === state.index);
-        });
-    }
-
-    // インデックスをクランプ
-    function clampIndex(key, idx) {
-        return Math.max(0, Math.min(idx, slotState[key].options.length - 1));
-    }
-
-    // ドラッグスクロール（マウス・タッチ両対応）
-    function attachDrag(key) {
-        const drum  = document.getElementById('drum-' + key);
-        const state = slotState[key];
-        let startY = 0, startIdx = 0, dragging = false;
-
-        function onStart(y) {
-            dragging  = true;
-            startY    = y;
-            startIdx  = state.index;
-            document.getElementById('list-' + key).style.transition = 'none';
-        }
-        function onMove(y) {
-            if (!dragging) return;
-            const delta  = y - startY;
-            const steps  = -Math.round(delta / ITEM_H);
-            state.index  = clampIndex(key, startIdx + steps);
-            applySlotPosition(key, false);
-        }
-        function onEnd() { dragging = false; applySlotPosition(key, true); }
-
-        drum.addEventListener('mousedown',  e => { onStart(e.clientY); e.preventDefault(); });
-        drum.addEventListener('touchstart', e => { onStart(e.touches[0].clientY); }, { passive: true });
-        document.addEventListener('mousemove',  e => { if (dragging) onMove(e.clientY); });
-        document.addEventListener('touchmove',  e => { if (dragging) onMove(e.touches[0].clientY); }, { passive: true });
-        document.addEventListener('mouseup',    () => { if (dragging) onEnd(); });
-        document.addEventListener('touchend',   () => { if (dragging) onEnd(); });
-
-        // ホイールでも操作可能
-        drum.addEventListener('wheel', e => {
-            e.preventDefault();
-            state.index = clampIndex(key, state.index + (e.deltaY > 0 ? 1 : -1));
-            applySlotPosition(key, true);
-        }, { passive: false });
-    }
-
-    // パネル開閉
-    const weatherSlotPanel  = document.getElementById('weather-slot-panel');
-    const openWeatherSlotBtn = document.getElementById('openWeatherSlotBtn');
-
-    openWeatherSlotBtn.addEventListener('click', () => {
-        const isOpen = weatherSlotPanel.classList.contains('open');
-        if (isOpen) {
-            weatherSlotPanel.classList.remove('open');
-            openWeatherSlotBtn.textContent = 'EDIT WEATHER';
-        } else {
-            // 現在値を親ページへリクエスト
-            window.parent.postMessage({ type: 'requestWeatherCurrent' }, '*');
-            // スロット初期化
-            buildSlot('weather');
-            buildSlot('temp');
-            buildSlot('hum');
-            attachDrag('weather');
-            attachDrag('temp');
-            attachDrag('hum');
-            weatherSlotPanel.classList.add('open');
-            openWeatherSlotBtn.textContent = 'CLOSE';
-            setTimeout(() => weatherSlotPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
-        }
-    });
-
-    document.getElementById('weatherCancelBtn').addEventListener('click', () => {
-        weatherSlotPanel.classList.remove('open');
-        openWeatherSlotBtn.textContent = 'EDIT WEATHER';
-    });
-
-    // 決定ボタン → 親ページへ反映
-    document.getElementById('weatherConfirmBtn').addEventListener('click', () => {
-        const weather = slotState.weather.options[slotState.weather.index];
-        const temp    = parseInt(slotState.temp.options[slotState.temp.index], 10);
-        const hum     = parseInt(slotState.hum.options[slotState.hum.index],  10);
-
-        // プレビュー更新
-        document.getElementById('prev-weather').textContent = weather;
-        document.getElementById('prev-temp').textContent    = temp + '℃';
-        document.getElementById('prev-hum').textContent     = hum  + '%';
-
-        // localStorage 保存
-        try { localStorage.setItem('weatherOverride', JSON.stringify({ weather, temp, hum })); } catch(e) {}
-
-        // 親ページへ通知
-        window.parent.postMessage({ type: 'setWeatherOverride', value: { weather, temp, hum } }, '*');
-
-        const st = document.getElementById('weatherStatus');
-        st.textContent = '✓ 反映しました';
-        setTimeout(() => { st.textContent = ''; }, 2500);
-    });
-
-    // ページ読み込み時に保存済みの設定をプレビューに反映
-    try {
-        const ov = JSON.parse(localStorage.getItem('weatherOverride') || 'null');
-        if (ov) {
-            document.getElementById('prev-weather').textContent = ov.weather;
-            document.getElementById('prev-temp').textContent    = ov.temp + '℃';
-            document.getElementById('prev-hum').textContent     = ov.hum  + '%';
-        }
-    } catch(e) {}
 
     </script>
 </body>
