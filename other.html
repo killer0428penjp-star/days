@@ -33,14 +33,10 @@
             --dot-color: #2d3748;
         }
 
-        * {
-            border-radius: 0 !important;
-            box-sizing: border-box;
-        }
+        * { border-radius: 0 !important; box-sizing: border-box; }
 
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             background-color: var(--main-bg);
             background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
             background-size: 20px 20px;
@@ -50,138 +46,272 @@
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* トップバー（DARKトグルを削除したのでタブのみ） */
         .top-navbar {
-            width: 100%;
-            height: 60px;
+            width: 100%; height: 60px;
             background-color: var(--main-bg);
             background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
             background-size: 20px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 0 40px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            display: flex; align-items: center; justify-content: flex-start;
+            padding: 0 40px; position: sticky; top: 0; z-index: 1000;
             border-bottom: 1px solid var(--border-light);
             transition: border-color 0.4s ease, background-color 0.4s ease;
         }
         .top-navbar:hover { border-bottom-color: var(--border-hover); }
 
-        .nav-tags {
-            display: flex;
-            border: 1px solid var(--border-light);
-        }
+        .nav-tags { display: flex; border: 1px solid var(--border-light); }
         .tag {
-            padding: 8px 25px;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            cursor: pointer;
-            border-right: 1px solid var(--border-light);
-            transition: all 0.2s;
-            color: var(--text-sub);
-            user-select: none;
+            padding: 8px 25px; font-size: 0.75rem; text-transform: uppercase;
+            cursor: pointer; border-right: 1px solid var(--border-light);
+            transition: all 0.2s; color: var(--text-sub); user-select: none;
             background: var(--bg-white);
         }
         .tag:last-child { border-right: none; }
         .tag:hover { background-color: var(--bg-hover); color: var(--text-main); }
         .tag.active { background-color: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 
-        .main-container {
-            max-width: 1100px;
-            margin: 60px auto;
-            padding: 0 20px;
-        }
+        .main-container { max-width: 1100px; margin: 60px auto; padding: 0 20px; }
 
-        .content-section {
-            display: none;
-            flex-direction: column;
-            animation: fadeIn 0.3s ease;
-        }
+        .content-section { display: none; flex-direction: column; animation: fadeIn 0.3s ease; }
         .content-section.active { display: flex; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Settings行 */
+        /* Settings 行 */
         .setting-row {
-            display: grid;
-            grid-template-columns: 200px 1fr 100px;
-            align-items: center;
-            background-color: var(--bg-white);
-            border: 1px solid var(--border-light);
-            margin-bottom: -1px;
-            transition: all 0.2s;
+            display: grid; grid-template-columns: 200px 1fr 100px;
+            align-items: center; background-color: var(--bg-white);
+            border: 1px solid var(--border-light); margin-bottom: -1px; transition: all 0.2s;
         }
-        .setting-row:hover {
-            border-color: var(--border-hover);
-            z-index: 10;
-            background-color: var(--bg-hover);
-        }
+        .setting-row:hover { border-color: var(--border-hover); z-index: 10; background-color: var(--bg-hover); }
+        .setting-row.btn-row { grid-template-columns: 200px 1fr auto; }
         .row-label { padding: 15px 25px; font-weight: 700; font-size: 0.85rem; border-right: 1px solid var(--border-light); }
         .row-desc  { padding: 15px 25px; font-size: 0.8rem; color: var(--text-sub); }
         .row-action { padding: 15px; display: flex; justify-content: center; border-left: 1px solid var(--border-light); }
 
-        /* Othersカード */
-        .content-card {
-            display: grid;
-            grid-template-columns: 220px 1fr 2fr;
-            background-color: var(--bg-white);
-            border: 1px solid var(--border-light);
-            margin-bottom: 10px;
-            transition: all 0.3s ease;
-            cursor: pointer;
+        /* 普通のボタン */
+        .action-btn-plain {
+            margin: 8px 15px; padding: 7px 18px;
+            font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            background: var(--accent); color: var(--accent-text);
+            border: none; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
         }
-        .content-card:hover {
-            border-color: var(--border-hover);
-            background-color: var(--bg-hover);
-        }
-        .item-img {
-            background-color: var(--bg-sub);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--text-sub);
-            font-size: 0.7rem;
-            letter-spacing: 2px;
-            border-right: 1px solid var(--border-light);
-        }
-        .item-title { padding: 30px; display: flex; align-items: center; font-weight: 700; font-size: 1rem; }
-        .item-desc  { padding: 30px; color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; display: flex; align-items: center; }
+        .action-btn-plain:hover { opacity: 0.8; }
 
         /* スイッチ */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--bg-sub);
-            transition: .4s;
-            border: 1px solid var(--border-light);
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--bg-sub); transition: .4s; border: 1px solid var(--border-light);
         }
         .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px; width: 16px;
-            left: 3px; bottom: 3px;
-            background-color: #ffffff;
-            transition: .4s;
+            position: absolute; content: ""; height: 16px; width: 16px;
+            left: 3px; bottom: 3px; background-color: #ffffff; transition: .4s;
             border: 1px solid var(--border-light);
         }
         input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(26px); border-color: var(--accent); }
+
+        /* Othersカード */
+        .content-card {
+            display: grid; grid-template-columns: 220px 1fr 2fr;
+            background-color: var(--bg-white); border: 1px solid var(--border-light);
+            margin-bottom: 10px; transition: all 0.3s ease; cursor: pointer;
+        }
+        .content-card:hover { border-color: var(--border-hover); background-color: var(--bg-hover); }
+        .item-img {
+            background-color: var(--bg-sub); display: flex; justify-content: center;
+            align-items: center; color: var(--text-sub); font-size: 0.7rem;
+            letter-spacing: 2px; border-right: 1px solid var(--border-light);
+        }
+        .item-title { padding: 30px; display: flex; align-items: center; font-weight: 700; font-size: 1rem; }
+        .item-desc  { padding: 30px; color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; display: flex; align-items: center; }
+
+        /* ============================================================
+           プロフィール編集パネル（インライン）
+        ============================================================ */
+        #profile-inline-panel {
+            display: none; border: 1px solid var(--border-light); border-top: none;
+            background-color: var(--bg-white); padding: 30px 30px 25px;
+            margin-bottom: -1px; animation: fadeIn 0.25s ease;
+        }
+        #profile-inline-panel.open { display: block; }
+        .profile-panel-inner { max-width: 480px; }
+
+        .avatar-area { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+        .avatar-wrap {
+            width: 80px; height: 80px; border: 2px solid var(--border-light);
+            overflow: hidden; flex-shrink: 0; cursor: pointer; transition: border-color 0.2s;
+        }
+        .avatar-wrap:hover { border-color: var(--accent); }
+        .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .avatar-hint { font-size: 0.72rem; color: var(--text-sub); line-height: 1.6; }
+        .avatar-hint strong { font-weight: 700; color: var(--text-main); font-size: 0.8rem; }
+
+        .pf-field { margin-bottom: 16px; }
+        .pf-label {
+            display: block; font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; color: var(--accent); margin-bottom: 6px;
+        }
+        .pf-input, .pf-textarea {
+            width: 100%; background: var(--bg-sub); border: 1px solid var(--border-light);
+            color: var(--text-main); font-family: inherit; font-size: 0.85rem;
+            padding: 10px 14px; outline: none; transition: border-color 0.2s;
+        }
+        .pf-input:focus, .pf-textarea:focus { border-color: var(--accent); }
+        .pf-textarea { height: 90px; resize: vertical; }
+
+        .pf-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .pf-save-btn {
+            padding: 10px 28px; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            background: var(--accent); color: var(--accent-text); border: none; cursor: pointer; transition: opacity 0.2s;
+        }
+        .pf-save-btn:hover { opacity: 0.8; }
+        .pf-cancel-btn {
+            padding: 10px 20px; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            background: var(--bg-sub); color: var(--text-sub);
+            border: 1px solid var(--border-light); cursor: pointer; transition: all 0.2s;
+        }
+        .pf-cancel-btn:hover { border-color: var(--border-hover); color: var(--text-main); }
+        .pf-status { font-size: 0.78rem; color: var(--accent); margin-top: 10px; min-height: 18px; font-weight: 700; }
+
+        /* ============================================================
+           WEATHER_DISPLAY スロットパネル
+        ============================================================ */
+        #weather-slot-panel {
+            display: none; border: 1px solid var(--border-light); border-top: none;
+            background-color: var(--bg-white); padding: 28px 30px 24px;
+            margin-bottom: -1px; animation: fadeIn 0.25s ease;
+        }
+        #weather-slot-panel.open { display: block; }
+
+        .slot-panel-title {
+            font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 2px; color: var(--text-sub); margin-bottom: 20px;
+        }
+
+        /* 横3列のスロットコンテナ */
+        .slot-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            border: 1px solid var(--border-light);
+            margin-bottom: 20px;
+        }
+
+        .slot-col {
+            display: flex; flex-direction: column; align-items: center;
+            border-right: 1px solid var(--border-light);
+            background: var(--bg-white);
+        }
+        .slot-col:last-child { border-right: none; }
+
+        /* 列ヘッダー */
+        .slot-header {
+            width: 100%; padding: 8px 0;
+            text-align: center; font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-sub); color: var(--text-sub);
+        }
+
+        /* スロットドラム本体 */
+        .slot-drum-wrap {
+            position: relative; width: 100%; overflow: hidden;
+            height: 160px; /* 5行分ぐらい */
+            cursor: ns-resize;
+            user-select: none;
+        }
+
+        /* 中央ハイライト帯 */
+        .slot-drum-wrap::before,
+        .slot-drum-wrap::after {
+            content: ""; position: absolute; left: 0; right: 0; z-index: 2; pointer-events: none;
+        }
+        .slot-drum-wrap::before {
+            top: 0; height: 52px;
+            background: linear-gradient(to bottom, var(--bg-white) 0%, transparent 100%);
+        }
+        .slot-drum-wrap::after {
+            bottom: 0; height: 52px;
+            background: linear-gradient(to top, var(--bg-white) 0%, transparent 100%);
+        }
+
+        /* 選択中ライン */
+        .slot-selected-line {
+            position: absolute; left: 0; right: 0;
+            top: 50%; transform: translateY(-50%);
+            height: 32px; pointer-events: none; z-index: 1;
+            border-top: 1px solid var(--accent);
+            border-bottom: 1px solid var(--accent);
+            background: rgba(0,112,255,0.06);
+        }
+        body.dark-theme .slot-selected-line {
+            background: rgba(0,242,255,0.08);
+        }
+
+        /* アイテムリスト */
+        .slot-list {
+            display: flex; flex-direction: column; align-items: center;
+            position: relative; z-index: 0;
+            padding: 64px 0; /* 上下パディングで中央に1アイテムが来るように */
+            transition: transform 0.18s cubic-bezier(.4,0,.2,1);
+        }
+
+        .slot-item {
+            width: 100%; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 500; color: var(--text-sub);
+            transition: color 0.2s, font-size 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+        .slot-item.selected {
+            color: var(--text-main); font-size: 1.25rem; font-weight: 700;
+        }
+
+        /* 決定ボタン */
+        .weather-confirm-btn {
+            padding: 10px 32px; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px;
+            background: var(--accent); color: var(--accent-text);
+            border: none; cursor: pointer; transition: opacity 0.2s;
+        }
+        .weather-confirm-btn:hover { opacity: 0.8; }
+        .weather-cancel-btn {
+            padding: 10px 20px; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            background: var(--bg-sub); color: var(--text-sub);
+            border: 1px solid var(--border-light); cursor: pointer; transition: all 0.2s; margin-left: 10px;
+        }
+        .weather-cancel-btn:hover { border-color: var(--border-hover); color: var(--text-main); }
+
+        .weather-status { font-size: 0.78rem; color: var(--accent); margin-top: 12px; min-height: 18px; font-weight: 700; }
+
+        /* 現在の設定プレビュー */
+        .weather-preview {
+            display: flex; gap: 0; margin-bottom: 20px;
+            border: 1px solid var(--border-light);
+        }
+        .weather-preview-item {
+            flex: 1; padding: 10px 0; text-align: center;
+            border-right: 1px solid var(--border-light);
+            font-size: 0.8rem; color: var(--text-sub);
+        }
+        .weather-preview-item:last-child { border-right: none; }
+        .weather-preview-item span {
+            display: block; font-size: 1.1rem; font-weight: 700;
+            color: var(--text-main); margin-top: 4px;
+        }
 
         @media (max-width: 850px) {
             .top-navbar { padding: 0 20px; }
             .content-card { grid-template-columns: 1fr; }
             .item-img { aspect-ratio: 16/9; border-right: none; border-bottom: 1px solid var(--border-light); }
             .setting-row { grid-template-columns: 1fr 80px; }
+            .setting-row.btn-row { grid-template-columns: 1fr auto; }
             .row-label { border-right: none; }
             .row-desc { display: none; }
         }
@@ -194,14 +324,14 @@
             <div class="tag active" data-target="settings">Settings</div>
             <div class="tag" data-target="others">Others</div>
         </nav>
-        <!-- 右上のDARKトグルは削除 -->
     </header>
 
     <main class="main-container">
 
+        <!-- ======== Settings ======== -->
         <section id="settings" class="content-section active">
 
-            <!-- DARK_MODE：切り替えで親ページ全体のダークモードを制御 -->
+            <!-- DARK_MODE -->
             <div class="setting-row">
                 <div class="row-label">DARK_MODE</div>
                 <div class="row-desc">UI全体を低照度の配色に切り替えます。</div>
@@ -213,10 +343,10 @@
                 </div>
             </div>
 
-            <!-- NOTIFICATIONS：オンで右上切替ボタンを表示、オフで非表示 -->
+            <!-- NOTIFICATIONS -->
             <div class="setting-row">
                 <div class="row-label">NOTIFICATIONS</div>
-                <div class="row-desc">右上のダーク切替ボタンの表示・非表示を切り替えます。a</div>
+                <div class="row-desc">右上のダーク切替ボタンの表示・非表示を切り替えます。</div>
                 <div class="row-action">
                     <label class="switch">
                         <input type="checkbox" id="notificationsSwitch" checked>
@@ -225,8 +355,121 @@
                 </div>
             </div>
 
+            <!-- PROFILE_PANEL -->
+            <div class="setting-row">
+                <div class="row-label">PROFILE_PANEL</div>
+                <div class="row-desc">下のプロフィール編集行・パネルの表示・非表示を切り替えます。</div>
+                <div class="row-action">
+                    <label class="switch">
+                        <input type="checkbox" id="profilePanelSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- PROFILE_EDIT ボタン行 -->
+            <div class="setting-row btn-row" id="profileEditRow">
+                <div class="row-label">PROFILE_EDIT</div>
+                <div class="row-desc">アイコン・誕生日・自己紹介を編集してプロフィールを更新します。</div>
+                <div class="row-action" style="border-left: 1px solid var(--border-light);">
+                    <button class="action-btn-plain" id="openProfilePanelBtn">EDIT PROFILE</button>
+                </div>
+            </div>
+
+            <!-- プロフィール編集パネル（インライン展開） -->
+            <div id="profile-inline-panel">
+                <div class="profile-panel-inner">
+                    <div class="avatar-area">
+                        <div class="avatar-wrap" id="avatarWrap" title="クリックして画像を変更">
+                            <img id="pfPreviewImg" src="https://placehold.jp/80/cccccc/ffffff/200x200.png?text=?" alt="avatar">
+                        </div>
+                        <div class="avatar-hint">
+                            <strong id="pfDisplayName">—</strong><br>
+                            <span id="pfDisplayId" style="font-size:0.72rem; color:var(--text-sub);"></span><br>
+                            <span style="margin-top:4px; display:inline-block;">クリックして画像を変更</span>
+                        </div>
+                    </div>
+                    <input type="file" id="pfFileInput" hidden accept="image/*">
+                    <div class="pf-field">
+                        <label class="pf-label" for="pfBirthday">誕生日</label>
+                        <input type="date" id="pfBirthday" class="pf-input">
+                    </div>
+                    <div class="pf-field">
+                        <label class="pf-label" for="pfBio">自己紹介</label>
+                        <textarea id="pfBio" class="pf-textarea" placeholder="自己紹介・説明欄"></textarea>
+                    </div>
+                    <div class="pf-actions">
+                        <button class="pf-save-btn" id="pfSaveBtn">SAVE</button>
+                        <button class="pf-cancel-btn" id="pfCancelBtn">CANCEL</button>
+                    </div>
+                    <div class="pf-status" id="pfStatus"></div>
+                </div>
+            </div>
+
+            <!-- WEATHER_DISPLAY ボタン行 -->
+            <div class="setting-row btn-row">
+                <div class="row-label">WEATHER_DISPLAY</div>
+                <div class="row-desc">天気・温度・湿度の表示内容をスロットで選択して変更します。</div>
+                <div class="row-action" style="border-left: 1px solid var(--border-light);">
+                    <button class="action-btn-plain" id="openWeatherSlotBtn">EDIT WEATHER</button>
+                </div>
+            </div>
+
+            <!-- 天気スロットパネル（インライン展開） -->
+            <div id="weather-slot-panel">
+
+                <div class="slot-panel-title">WEATHER DISPLAY SETTINGS</div>
+
+                <!-- 現在の設定プレビュー -->
+                <div class="weather-preview">
+                    <div class="weather-preview-item">天気<span id="prev-weather">☀️</span></div>
+                    <div class="weather-preview-item">温度<span id="prev-temp">--℃</span></div>
+                    <div class="weather-preview-item">湿度<span id="prev-hum">--%</span></div>
+                </div>
+
+                <!-- スロット 3列 -->
+                <div class="slot-columns">
+
+                    <!-- 天気スロット -->
+                    <div class="slot-col">
+                        <div class="slot-header">天気</div>
+                        <div class="slot-drum-wrap" id="drum-weather">
+                            <div class="slot-selected-line"></div>
+                            <div class="slot-list" id="list-weather"></div>
+                        </div>
+                    </div>
+
+                    <!-- 温度スロット -->
+                    <div class="slot-col">
+                        <div class="slot-header">温度</div>
+                        <div class="slot-drum-wrap" id="drum-temp">
+                            <div class="slot-selected-line"></div>
+                            <div class="slot-list" id="list-temp"></div>
+                        </div>
+                    </div>
+
+                    <!-- 湿度スロット -->
+                    <div class="slot-col">
+                        <div class="slot-header">湿度</div>
+                        <div class="slot-drum-wrap" id="drum-hum">
+                            <div class="slot-selected-line"></div>
+                            <div class="slot-list" id="list-hum"></div>
+                        </div>
+                    </div>
+
+                </div><!-- /.slot-columns -->
+
+                <div>
+                    <button class="weather-confirm-btn" id="weatherConfirmBtn">CONFIRM</button>
+                    <button class="weather-cancel-btn"  id="weatherCancelBtn">CANCEL</button>
+                </div>
+                <div class="weather-status" id="weatherStatus"></div>
+
+            </div><!-- /#weather-slot-panel -->
+
         </section>
 
+        <!-- ======== Others ======== -->
         <section id="others" class="content-section">
             <div class="content-card">
                 <div class="item-img">IMAGE_AREA</div>
@@ -235,7 +478,6 @@
                     すべての要素から角丸を排除しました。マウスをホバーした瞬間にだけ、繊細な枠線が表示されるミニマルな仕様です。
                 </div>
             </div>
-
             <div class="content-card">
                 <div class="item-img">IMAGE_AREA</div>
                 <div class="item-title">DESIGN_ASSETS</div>
@@ -248,67 +490,285 @@
     </main>
 
     <script>
-        // --- タブ切り替え ---
-        const tags     = document.querySelectorAll('.tag');
-        const sections = document.querySelectorAll('.content-section');
-
-        tags.forEach(tag => {
-            tag.addEventListener('click', () => {
-                tags.forEach(t => t.classList.remove('active'));
-                tag.classList.add('active');
-                const target = tag.getAttribute('data-target');
-                sections.forEach(section => {
-                    section.classList.remove('active');
-                    if (section.id === target) section.classList.add('active');
-                });
+    // ============================================================
+    //  タブ切り替え
+    // ============================================================
+    document.querySelectorAll('.tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+            document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+            tag.classList.add('active');
+            const target = tag.getAttribute('data-target');
+            document.querySelectorAll('.content-section').forEach(s => {
+                s.classList.remove('active');
+                if (s.id === target) s.classList.add('active');
             });
         });
+    });
 
-        // --- DARK_MODE スイッチ ---
-        const darkSwitch = document.getElementById('darkModeSwitch');
+    // ============================================================
+    //  DARK_MODE スイッチ
+    // ============================================================
+    const darkSwitch = document.getElementById('darkModeSwitch');
+    function applyTheme(isDark) {
+        document.body.classList.toggle('dark-theme', isDark);
+        darkSwitch.checked = isDark;
+    }
+    darkSwitch.addEventListener('change', () => {
+        applyTheme(darkSwitch.checked);
+        window.parent.postMessage({ type: 'setDarkMode', value: darkSwitch.checked }, '*');
+    });
 
-        // 内部テーマも同期して更新
-        function applyTheme(isDark) {
-            if (isDark) {
-                document.body.classList.add('dark-theme');
-            } else {
-                document.body.classList.remove('dark-theme');
-            }
-            darkSwitch.checked = isDark;
+    // ============================================================
+    //  NOTIFICATIONS スイッチ
+    // ============================================================
+    document.getElementById('notificationsSwitch').addEventListener('change', function() {
+        window.parent.postMessage({ type: 'setNotifications', value: this.checked }, '*');
+    });
+
+    // ============================================================
+    //  PROFILE_PANEL スイッチ
+    // ============================================================
+    const profilePanelSwitch  = document.getElementById('profilePanelSwitch');
+    const profileEditRow      = document.getElementById('profileEditRow');
+    const profileInlinePanel  = document.getElementById('profile-inline-panel');
+    const openProfilePanelBtn = document.getElementById('openProfilePanelBtn');
+
+    profilePanelSwitch.addEventListener('change', function() {
+        profileEditRow.style.display = this.checked ? '' : 'none';
+        if (!this.checked) {
+            profileInlinePanel.classList.remove('open');
+            openProfilePanelBtn.textContent = 'EDIT PROFILE';
         }
+    });
 
-        darkSwitch.addEventListener('change', () => {
-            const isDark = darkSwitch.checked;
-            applyTheme(isDark);
-            // 親ページへ通知
-            window.parent.postMessage({ type: 'setDarkMode', value: isDark }, '*');
-        });
+    openProfilePanelBtn.addEventListener('click', () => {
+        const isOpen = profileInlinePanel.classList.contains('open');
+        if (isOpen) {
+            profileInlinePanel.classList.remove('open');
+            openProfilePanelBtn.textContent = 'EDIT PROFILE';
+        } else {
+            loadProfileData();
+            profileInlinePanel.classList.add('open');
+            openProfilePanelBtn.textContent = 'CLOSE';
+            setTimeout(() => profileInlinePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+        }
+    });
 
-        // --- NOTIFICATIONS スイッチ ---
-        const notifSwitch = document.getElementById('notificationsSwitch');
+    document.getElementById('pfCancelBtn').addEventListener('click', () => {
+        profileInlinePanel.classList.remove('open');
+        openProfilePanelBtn.textContent = 'EDIT PROFILE';
+    });
 
-        notifSwitch.addEventListener('change', () => {
-            // 親ページへ通知（trueで表示、falseで非表示）
-            window.parent.postMessage({ type: 'setNotifications', value: notifSwitch.checked }, '*');
-        });
-
-        // --- 親ページ（clock.js）からのpostMessageを受け取る ---
-        // 親のダークモードが変わったらこちらも同期
-        window.addEventListener('message', (e) => {
-            if (e.data && e.data.type === 'darkMode') {
-                applyTheme(e.data.value);
-            }
-        });
-
-        // --- 初期状態：親のlocalStorageに合わせる ---
-        // iframe内からlocalStorageに直接アクセスできるので読み取り
+    function loadProfileData() {
         try {
-            const saved = localStorage.getItem('darkMode') === 'true';
-            applyTheme(saved);
-        } catch (e) {
-            // cross-origin時は無視
-        }
-    </script>
+            const saved = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
+            document.getElementById('pfPreviewImg').src          = saved.icon     || 'https://placehold.jp/80/cccccc/ffffff/200x200.png?text=?';
+            document.getElementById('pfDisplayName').textContent = saved.name     || '—';
+            document.getElementById('pfDisplayId').textContent   = saved.id       ? 'ID: ' + saved.id : '';
+            document.getElementById('pfBirthday').value          = saved.birthday || '';
+            document.getElementById('pfBio').value               = saved.bio      || '';
+        } catch(e) {}
+    }
 
+    document.getElementById('avatarWrap').addEventListener('click', () => document.getElementById('pfFileInput').click());
+    document.getElementById('pfFileInput').addEventListener('change', function() {
+        const file = this.files[0]; if (!file) return;
+        const r = new FileReader();
+        r.onload = ev => { document.getElementById('pfPreviewImg').src = ev.target.result; };
+        r.readAsDataURL(file);
+    });
+
+    document.getElementById('pfSaveBtn').addEventListener('click', () => {
+        const newIcon     = document.getElementById('pfPreviewImg').src;
+        const newBirthday = document.getElementById('pfBirthday').value;
+        const newBio      = document.getElementById('pfBio').value.trim();
+        try {
+            const s = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
+            s.icon = newIcon; s.birthday = newBirthday; s.bio = newBio;
+            localStorage.setItem('np_profile_cache', JSON.stringify(s));
+        } catch(e) {}
+        window.parent.postMessage({ type: 'updateProfile', value: { icon: newIcon, birthday: newBirthday, bio: newBio } }, '*');
+        const st = document.getElementById('pfStatus');
+        st.textContent = '✓ 保存しました';
+        setTimeout(() => { st.textContent = ''; }, 2500);
+    });
+
+    // ============================================================
+    //  親ページからのメッセージ受信
+    // ============================================================
+    window.addEventListener('message', (e) => {
+        if (!e.data) return;
+        if (e.data.type === 'darkMode') applyTheme(e.data.value);
+        if (e.data.type === 'profileData') {
+            try { localStorage.setItem('np_profile_cache', JSON.stringify(e.data.value)); } catch(err) {}
+            if (profileInlinePanel.classList.contains('open')) loadProfileData();
+        }
+        // 天気・温度・湿度の現在値を受け取ってプレビューを更新
+        if (e.data.type === 'weatherCurrent') {
+            const d = e.data.value;
+            if (d.weather !== undefined) document.getElementById('prev-weather').textContent = d.weather;
+            if (d.temp    !== undefined) document.getElementById('prev-temp').textContent    = d.temp + '℃';
+            if (d.hum     !== undefined) document.getElementById('prev-hum').textContent     = d.hum  + '%';
+        }
+    });
+
+    // ============================================================
+    //  初期テーマ復元
+    // ============================================================
+    try { applyTheme(localStorage.getItem('darkMode') === 'true'); } catch(e) {}
+
+    // ============================================================
+    //  WEATHER_DISPLAY スロット
+    // ============================================================
+
+    // --- スロットの選択肢 ---
+    const WEATHER_OPTIONS = ['☀️','🌤️','⛅','🌥️','☁️','🌧️','⛈️','🌨️','🌩️','🌪️','☔','🌈'];
+
+    // 温度：-10 〜 45℃
+    const TEMP_OPTIONS = Array.from({ length: 56 }, (_, i) => (i - 10) + '℃');
+
+    // 湿度：0 〜 100%（5刻み）
+    const HUM_OPTIONS = Array.from({ length: 21 }, (_, i) => (i * 5) + '%');
+
+    // 各スロットの状態
+    const slotState = {
+        weather: { options: WEATHER_OPTIONS, index: 0 },
+        temp:    { options: TEMP_OPTIONS,    index: 20 }, // デフォルト10℃ (index=20)
+        hum:     { options: HUM_OPTIONS,     index: 12 }, // デフォルト60%
+    };
+
+    const ITEM_H = 32; // px（.slot-item の height に合わせる）
+
+    // スロットリスト構築
+    function buildSlot(key) {
+        const list = document.getElementById('list-' + key);
+        const state = slotState[key];
+        list.innerHTML = '';
+        state.options.forEach((opt, i) => {
+            const div = document.createElement('div');
+            div.className = 'slot-item' + (i === state.index ? ' selected' : '');
+            div.textContent = opt;
+            list.appendChild(div);
+        });
+        applySlotPosition(key, false);
+    }
+
+    // 位置適用
+    function applySlotPosition(key, animate) {
+        const list  = document.getElementById('list-' + key);
+        const state = slotState[key];
+        if (!animate) list.style.transition = 'none';
+        else          list.style.transition  = 'transform 0.18s cubic-bezier(.4,0,.2,1)';
+        list.style.transform = `translateY(${-state.index * ITEM_H}px)`;
+        // selected クラス更新
+        list.querySelectorAll('.slot-item').forEach((el, i) => {
+            el.classList.toggle('selected', i === state.index);
+        });
+    }
+
+    // インデックスをクランプ
+    function clampIndex(key, idx) {
+        return Math.max(0, Math.min(idx, slotState[key].options.length - 1));
+    }
+
+    // ドラッグスクロール（マウス・タッチ両対応）
+    function attachDrag(key) {
+        const drum  = document.getElementById('drum-' + key);
+        const state = slotState[key];
+        let startY = 0, startIdx = 0, dragging = false;
+
+        function onStart(y) {
+            dragging  = true;
+            startY    = y;
+            startIdx  = state.index;
+            document.getElementById('list-' + key).style.transition = 'none';
+        }
+        function onMove(y) {
+            if (!dragging) return;
+            const delta  = y - startY;
+            const steps  = -Math.round(delta / ITEM_H);
+            state.index  = clampIndex(key, startIdx + steps);
+            applySlotPosition(key, false);
+        }
+        function onEnd() { dragging = false; applySlotPosition(key, true); }
+
+        drum.addEventListener('mousedown',  e => { onStart(e.clientY); e.preventDefault(); });
+        drum.addEventListener('touchstart', e => { onStart(e.touches[0].clientY); }, { passive: true });
+        document.addEventListener('mousemove',  e => { if (dragging) onMove(e.clientY); });
+        document.addEventListener('touchmove',  e => { if (dragging) onMove(e.touches[0].clientY); }, { passive: true });
+        document.addEventListener('mouseup',    () => { if (dragging) onEnd(); });
+        document.addEventListener('touchend',   () => { if (dragging) onEnd(); });
+
+        // ホイールでも操作可能
+        drum.addEventListener('wheel', e => {
+            e.preventDefault();
+            state.index = clampIndex(key, state.index + (e.deltaY > 0 ? 1 : -1));
+            applySlotPosition(key, true);
+        }, { passive: false });
+    }
+
+    // パネル開閉
+    const weatherSlotPanel  = document.getElementById('weather-slot-panel');
+    const openWeatherSlotBtn = document.getElementById('openWeatherSlotBtn');
+
+    openWeatherSlotBtn.addEventListener('click', () => {
+        const isOpen = weatherSlotPanel.classList.contains('open');
+        if (isOpen) {
+            weatherSlotPanel.classList.remove('open');
+            openWeatherSlotBtn.textContent = 'EDIT WEATHER';
+        } else {
+            // 現在値を親ページへリクエスト
+            window.parent.postMessage({ type: 'requestWeatherCurrent' }, '*');
+            // スロット初期化
+            buildSlot('weather');
+            buildSlot('temp');
+            buildSlot('hum');
+            attachDrag('weather');
+            attachDrag('temp');
+            attachDrag('hum');
+            weatherSlotPanel.classList.add('open');
+            openWeatherSlotBtn.textContent = 'CLOSE';
+            setTimeout(() => weatherSlotPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+        }
+    });
+
+    document.getElementById('weatherCancelBtn').addEventListener('click', () => {
+        weatherSlotPanel.classList.remove('open');
+        openWeatherSlotBtn.textContent = 'EDIT WEATHER';
+    });
+
+    // 決定ボタン → 親ページへ反映
+    document.getElementById('weatherConfirmBtn').addEventListener('click', () => {
+        const weather = slotState.weather.options[slotState.weather.index];
+        const temp    = parseInt(slotState.temp.options[slotState.temp.index], 10);
+        const hum     = parseInt(slotState.hum.options[slotState.hum.index],  10);
+
+        // プレビュー更新
+        document.getElementById('prev-weather').textContent = weather;
+        document.getElementById('prev-temp').textContent    = temp + '℃';
+        document.getElementById('prev-hum').textContent     = hum  + '%';
+
+        // localStorage 保存
+        try { localStorage.setItem('weatherOverride', JSON.stringify({ weather, temp, hum })); } catch(e) {}
+
+        // 親ページへ通知
+        window.parent.postMessage({ type: 'setWeatherOverride', value: { weather, temp, hum } }, '*');
+
+        const st = document.getElementById('weatherStatus');
+        st.textContent = '✓ 反映しました';
+        setTimeout(() => { st.textContent = ''; }, 2500);
+    });
+
+    // ページ読み込み時に保存済みの設定をプレビューに反映
+    try {
+        const ov = JSON.parse(localStorage.getItem('weatherOverride') || 'null');
+        if (ov) {
+            document.getElementById('prev-weather').textContent = ov.weather;
+            document.getElementById('prev-temp').textContent    = ov.temp + '℃';
+            document.getElementById('prev-hum').textContent     = ov.hum  + '%';
+        }
+    } catch(e) {}
+
+    </script>
 </body>
 </html>

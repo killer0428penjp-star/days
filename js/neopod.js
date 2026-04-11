@@ -633,3 +633,45 @@ export function initNeoPod() {
         window.closeModal("profile-modal");
     };
 }
+/*
+ * ===========================================================
+ *  main.js への追加パッチ（2箇所）
+ * ===========================================================
+ *
+ * ① login() 関数の末尾（initCalendar(me.id) の直後あたり）に追記：
+ *
+ *     // other.html へログイン済みプロフィールを送信
+ *     if (typeof window.notifyLoginToOthers === 'function') {
+ *         window.notifyLoginToOthers(me);
+ *     }
+ *
+ * -----------------------------------------------------------
+ *
+ * ② initNeoPod() 内の任意の場所（例：window.closeModal の近く）に追記：
+ *
+ *     // other.html の PROFILE_EDIT パネルからの保存を受け取る
+ *     window._npUpdateProfile = async ({ icon, birthday, bio }) => {
+ *         if (!me) return;
+ *         await updateDoc(doc(db, 'users_v11', me.id), {
+ *             'icon.val': icon,
+ *             birthday,
+ *             bio
+ *         });
+ *         me.icon.val = icon;
+ *         me.birthday = birthday;
+ *         me.bio      = bio;
+ *         // 固定ヘッダーのアイコンも更新
+ *         const myBtn = document.getElementById('my-profile-btn');
+ *         if (myBtn) myBtn.src = icon;
+ *         // localStorageキャッシュ更新
+ *         try {
+ *             const cached = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
+ *             cached.icon     = icon;
+ *             cached.birthday = birthday;
+ *             cached.bio      = bio;
+ *             localStorage.setItem('np_profile_cache', JSON.stringify(cached));
+ *         } catch(e) {}
+ *     };
+ *
+ * ===========================================================
+ */
