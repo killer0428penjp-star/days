@@ -17,7 +17,6 @@ export function initNeoPod() {
 
     // =========================================================
     // ユーティリティ：モーダル開閉
-    // body直下のグローバルモーダルは display を直接操作する
     // =========================================================
     window.closeModal = (id) => {
         const el = document.getElementById(id);
@@ -32,6 +31,67 @@ export function initNeoPod() {
         el.classList.remove("hidden");
         el.style.display = "flex";
     }
+
+    // =========================================================
+    //  プロフィール更新の共通処理
+    //  ・me オブジェクト更新
+    //  ・Firebase 保存
+    //  ・固定ヘッダーのアイコン反映
+    //  ・localStorage キャッシュ更新
+    //  ・other.html へ最新データ送信
+    // =========================================================
+    async function applyProfileUpdate({ icon, birthday, bio }) {
+        if (!me) return;
+
+        // Firebase 保存
+        await updateDoc(doc(db, "users_v11", me.id), {
+            "icon.val": icon,
+            birthday,
+            bio
+        });
+
+        // me オブジェクト更新
+        if (!me.icon) me.icon = {};
+        me.icon.val = icon;
+        me.birthday = birthday;
+        me.bio      = bio;
+
+        // 固定ヘッダーのアイコン更新
+        const myBtn = document.getElementById("my-profile-btn");
+        if (myBtn) myBtn.src = icon;
+
+        // localStorage キャッシュ更新
+        try {
+            const cached    = JSON.parse(localStorage.getItem("np_profile_cache") || "{}");
+            cached.icon     = icon;
+            cached.birthday = birthday;
+            cached.bio      = bio;
+            localStorage.setItem("np_profile_cache", JSON.stringify(cached));
+        } catch(e) {}
+
+        // other.html へ最新プロフィールを送信（パネルが開いていれば表示も更新される）
+        if (typeof window.notifyLoginToOthers === "function") {
+            window.notifyLoginToOthers(me);
+        }
+    }
+
+    // other.html の PROFILE_EDIT パネルからの保存を受け取るグローバル関数
+    window._npUpdateProfile = async ({ icon, birthday, bio }) => {
+        try {
+            await applyProfileUpdate({ icon, birthday, bio });
+            // 成功を other.html へ通知
+            const iframe = document.getElementById("others-iframe");
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: "profileSaved" }, "*");
+            }
+        } catch(err) {
+            console.error("Profile update failed:", err);
+            const iframe = document.getElementById("others-iframe");
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: "profileSaveError" }, "*");
+            }
+        }
+    };
 
     // =========================================================
     // ログイン
@@ -70,7 +130,7 @@ export function initNeoPod() {
         document.getElementById("auth-screen").classList.add("hidden");
         document.getElementById("main-content").classList.remove("hidden");
 
-        // tolk タブへ切り替え（main.js の showTab を使う）
+        // tolk タブへ切り替え
         if (typeof window.showTab === "function") {
             window.showTab("tolk-tag");
         } else {
@@ -81,6 +141,11 @@ export function initNeoPod() {
         window.showNeoScreen("rooms");
         initCalendar(me.id);
         watchPendingRequests();
+
+        // other.html へログイン済みプロフィールを送信
+        if (typeof window.notifyLoginToOthers === "function") {
+            window.notifyLoginToOthers(me);
+        }
     }
 
     // =========================================================
@@ -532,11 +597,11 @@ export function initNeoPod() {
     // プロフィール表示（他ユーザー）
     // =========================================================
     window.viewUserProfile = (u) => {
-        document.getElementById("view-profile-icon").src         = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
-        document.getElementById("view-profile-name").innerText   = u.name;
-        document.getElementById("view-profile-id").innerText     = "ID: " + u.id;
+        document.getElementById("view-profile-icon").src           = (u.icon && u.icon.val) ? u.icon.val : DEFAULT_IMG;
+        document.getElementById("view-profile-name").innerText     = u.name;
+        document.getElementById("view-profile-id").innerText       = "ID: " + u.id;
         document.getElementById("view-profile-birthday").innerText = u.birthday || "未設定";
-        document.getElementById("view-profile-bio").innerText    = u.bio || "自己紹介はありません。";
+        document.getElementById("view-profile-bio").innerText      = u.bio || "自己紹介はありません。";
         openModal("view-profile-modal");
     };
 
@@ -600,7 +665,7 @@ export function initNeoPod() {
     };
 
     // =========================================================
-    // 自分のプロフィール編集
+    // 自分のプロフィール編集（index.html 内モーダル）
     // =========================================================
     document.getElementById("my-profile-btn-wrapper").onclick = () => {
         if (!me) return;
@@ -620,58 +685,15 @@ export function initNeoPod() {
         reader.readAsDataURL(file);
     };
 
+    // 保存ボタン — applyProfileUpdate を呼んで me・Firebase・キャッシュ・ヘッダーを一括更新
     document.getElementById("profile-save-btn").onclick = async () => {
         const birthday = document.getElementById("edit-birthday").value;
         const bio      = document.getElementById("edit-bio").value.trim();
         const newIcon  = document.getElementById("profile-edit-preview").src;
-        await updateDoc(doc(db, "users_v11", me.id), { "icon.val": newIcon, birthday, bio });
-        me.icon.val = newIcon;
-        me.birthday = birthday;
-        me.bio      = bio;
-        document.getElementById("my-profile-btn").src = newIcon;
+
+        await applyProfileUpdate({ icon: newIcon, birthday, bio });
+
         alert("プロフィールを更新しました");
         window.closeModal("profile-modal");
     };
 }
-/*
- * ===========================================================
- *  main.js への追加パッチ（2箇所）
- * ===========================================================
- *
- * ① login() 関数の末尾（initCalendar(me.id) の直後あたり）に追記：
- *
- *     // other.html へログイン済みプロフィールを送信
- *     if (typeof window.notifyLoginToOthers === 'function') {
- *         window.notifyLoginToOthers(me);
- *     }
- *
- * -----------------------------------------------------------
- *
- * ② initNeoPod() 内の任意の場所（例：window.closeModal の近く）に追記：
- *
- *     // other.html の PROFILE_EDIT パネルからの保存を受け取る
- *     window._npUpdateProfile = async ({ icon, birthday, bio }) => {
- *         if (!me) return;
- *         await updateDoc(doc(db, 'users_v11', me.id), {
- *             'icon.val': icon,
- *             birthday,
- *             bio
- *         });
- *         me.icon.val = icon;
- *         me.birthday = birthday;
- *         me.bio      = bio;
- *         // 固定ヘッダーのアイコンも更新
- *         const myBtn = document.getElementById('my-profile-btn');
- *         if (myBtn) myBtn.src = icon;
- *         // localStorageキャッシュ更新
- *         try {
- *             const cached = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
- *             cached.icon     = icon;
- *             cached.birthday = birthday;
- *             cached.bio      = bio;
- *             localStorage.setItem('np_profile_cache', JSON.stringify(cached));
- *         } catch(e) {}
- *     };
- *
- * ===========================================================
- */
