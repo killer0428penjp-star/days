@@ -87,7 +87,6 @@
         .row-desc  { padding: 15px 25px; font-size: 0.8rem; color: var(--text-sub); }
         .row-action { padding: 15px; display: flex; justify-content: center; border-left: 1px solid var(--border-light); }
 
-        /* 普通のボタン */
         .action-btn-plain {
             margin: 8px 15px; padding: 7px 18px;
             font-size: 0.75rem; font-weight: 700;
@@ -97,7 +96,6 @@
         }
         .action-btn-plain:hover { opacity: 0.8; }
 
-        /* スイッチ */
         .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider {
@@ -128,7 +126,7 @@
         .item-desc  { padding: 30px; color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; display: flex; align-items: center; }
 
         /* ============================================================
-           プロフィール編集パネル（インライン）
+           プロフィール編集パネル
         ============================================================ */
         #profile-inline-panel {
             display: none; border: 1px solid var(--border-light); border-top: none;
@@ -176,26 +174,201 @@
         }
         .pf-cancel-btn:hover { border-color: var(--border-hover); color: var(--text-main); }
 
-        /* ステータス行 */
-        .pf-status-row {
-            min-height: 24px;
-            margin-top: 8px;
-        }
+        .pf-status-row { min-height: 24px; margin-top: 8px; }
         .pf-status {
-            font-size: 0.78rem;
-            font-weight: 700;
-            min-height: 18px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            font-size: 0.78rem; font-weight: 700; min-height: 18px;
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 12px; opacity: 0; transition: opacity 0.3s ease;
         }
         .pf-status.show { opacity: 1; }
         .pf-status.success { color: var(--accent); }
         .pf-status.error   { color: #e53e3e; }
 
+        /* ============================================================
+           iframeビューワー — 額縁モード
+        ============================================================ */
+        #iframe-viewer {
+            display: none;
+            flex-direction: column;
+            margin-top: 32px;
+            animation: fadeIn 0.3s ease;
+        }
+        #iframe-viewer.open { display: flex; }
+
+        /* コントロールバー（額縁の外・右上） */
+        .viewer-controls {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0;
+            margin-bottom: 0;
+            border: 1px solid var(--border-light);
+            border-bottom: none;
+            background-color: var(--bg-white);
+        }
+
+        .viewer-ctrl-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sub);
+            padding: 8px 14px;
+            border-right: 1px solid var(--border-light);
+            white-space: nowrap;
+        }
+
+        /* サイズ入力欄グループ */
+        .viewer-size-group {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            border-right: 1px solid var(--border-light);
+        }
+        .size-label {
+            padding: 8px 10px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sub);
+            border-right: 1px solid var(--border-light);
+            background: var(--bg-sub);
+            white-space: nowrap;
+        }
+        .size-input {
+            width: 72px;
+            padding: 8px 10px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: var(--bg-white);
+            border: none;
+            border-right: 1px solid var(--border-light);
+            color: var(--text-main);
+            font-family: inherit;
+            outline: none;
+            transition: background 0.2s;
+        }
+        .size-input:focus { background: var(--bg-hover); }
+        .size-input:last-child { border-right: none; }
+        .size-unit {
+            padding: 8px 8px 8px 2px;
+            font-size: 0.65rem;
+            color: var(--text-sub);
+            border-right: 1px solid var(--border-light);
+        }
+
+        /* ボタン共通 */
+        .viewer-btn {
+            padding: 9px 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            border-left: 1px solid var(--border-light);
+        }
+        .viewer-btn:first-child { border-left: none; }
+
+        .btn-expand {
+            background: var(--bg-sub);
+            color: var(--text-main);
+        }
+        .btn-expand:hover { background: var(--bg-hover); color: var(--accent); }
+
+        .btn-back {
+            background: var(--accent);
+            color: var(--accent-text);
+        }
+        .btn-back:hover { opacity: 0.8; }
+
+        /* 額縁本体 */
+        .viewer-frame {
+            border: 3px solid var(--border-hover);
+            box-shadow:
+                0 0 0 1px var(--border-light),
+                6px 6px 0 0 var(--border-light);
+            background: var(--bg-sub);
+            overflow: hidden;
+            position: relative;
+            transition: width 0.25s ease, height 0.25s ease;
+        }
+
+        .viewer-frame iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* ============================================================
+           フルスクリーンモード
+        ============================================================ */
+        #fullscreen-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9000;
+            background-color: var(--main-bg);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            flex-direction: column;
+        }
+        #fullscreen-overlay.open { display: flex; }
+
+        .fullscreen-bar {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-light);
+            background-color: var(--main-bg);
+            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+            background-size: 20px 20px;
+            flex-shrink: 0;
+        }
+
+        .fullscreen-title {
+            margin-right: auto;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-sub);
+        }
+
+        .btn-fs-back {
+            padding: 8px 22px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: var(--accent);
+            color: var(--accent-text);
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-fs-back:hover { opacity: 0.8; }
+
+        .fullscreen-iframe-wrap {
+            flex: 1;
+            overflow: hidden;
+        }
+        .fullscreen-iframe-wrap iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* ============================================================
+           レスポンシブ
+        ============================================================ */
         @media (max-width: 850px) {
             .top-navbar { padding: 0 20px; }
             .content-card { grid-template-columns: 1fr; }
@@ -204,6 +377,8 @@
             .setting-row.btn-row { grid-template-columns: 1fr auto; }
             .row-label { border-right: none; }
             .row-desc { display: none; }
+            .viewer-ctrl-label { display: none; }
+            .viewer-size-group { flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -220,10 +395,8 @@
 
         <!-- ======== Settings ======== -->
         <section id="settings" class="content-section active">
-
-            <!-- DARK_MODE -->
             <div class="setting-row">
-                <div class="row-label">DARK_MODE</div>
+                <div class="row-label">DARKMODE</div>
                 <div class="row-desc">UI全体を低照度の配色に切り替えます。</div>
                 <div class="row-action">
                     <label class="switch">
@@ -232,8 +405,6 @@
                     </label>
                 </div>
             </div>
-
-            <!-- NOTIFICATIONS -->
             <div class="setting-row">
                 <div class="row-label">NOTIFICATIONS</div>
                 <div class="row-desc">右上のダーク切替ボタンの表示・非表示を切り替えます。</div>
@@ -244,8 +415,6 @@
                     </label>
                 </div>
             </div>
-
-            <!-- PROFILE_PANEL -->
             <div class="setting-row">
                 <div class="row-label">PROFILE_PANEL</div>
                 <div class="row-desc">右上のプロフィール欄の表示・非表示を切り替えます。</div>
@@ -256,8 +425,6 @@
                     </label>
                 </div>
             </div>
-
-            <!-- PROFILE_EDIT ボタン行 -->
             <div class="setting-row btn-row" id="profileEditRow">
                 <div class="row-label">PROFILE_EDIT</div>
                 <div class="row-desc">アイコン・誕生日・自己紹介を編集してプロフィールを更新します。</div>
@@ -266,7 +433,6 @@
                 </div>
             </div>
 
-            <!-- プロフィール編集パネル（インライン展開） -->
             <div id="profile-inline-panel">
                 <div class="profile-panel-inner">
                     <div class="avatar-area">
@@ -292,18 +458,16 @@
                         <button class="pf-save-btn" id="pfSaveBtn">SAVE</button>
                         <button class="pf-cancel-btn" id="pfCancelBtn">CANCEL</button>
                     </div>
-                    <!-- ステータス表示 -->
                     <div class="pf-status-row">
                         <span class="pf-status" id="pfStatus"></span>
                     </div>
                 </div>
             </div>
-
         </section>
 
         <!-- ======== Others ======== -->
         <section id="others" class="content-section">
-            <div class="content-card">
+            <div class="content-card" id="card-project-alpha">
                 <div class="item-img">IMAGE_AREA</div>
                 <div class="item-title">PROJECT_ALPHA</div>
                 <div class="item-desc">
@@ -317,9 +481,50 @@
                     「表」のような整列を維持しつつ、余計な装飾を削ぎ落としています。白をベースにすることで、情報の透明性を高めています。
                 </div>
             </div>
+
+            <!-- ======== iframeビューワー（額縁） ======== -->
+            <div id="iframe-viewer">
+                <!-- コントロールバー（額縁の外・右上） -->
+                <div class="viewer-controls">
+                    <span class="viewer-ctrl-label">FRAME_SIZE</span>
+
+                    <!-- 横幅 -->
+                    <div class="viewer-size-group">
+                        <span class="size-label">W</span>
+                        <input type="number" id="frameWidth"  class="size-input" value="900" min="200" max="3000" step="10">
+                        <span class="size-unit">px</span>
+                        <span class="size-label">H</span>
+                        <input type="number" id="frameHeight" class="size-input" value="600" min="100" max="3000" step="10">
+                        <span class="size-unit" style="border-right:none;">px</span>
+                    </div>
+
+                    <button class="viewer-btn btn-expand" id="btnExpand" title="画面いっぱいに表示">
+                        ⤢ EXPAND
+                    </button>
+                    <button class="viewer-btn btn-back" id="btnBack" title="ビューワーを閉じる">
+                        ✕ BACK
+                    </button>
+                </div>
+
+                <!-- 額縁本体 -->
+                <div class="viewer-frame" id="viewerFrame">
+                    <iframe id="viewerIframe" src="code.html" title="PROJECT_ALPHA"></iframe>
+                </div>
+            </div>
         </section>
 
     </main>
+
+    <!-- ======== フルスクリーンオーバーレイ ======== -->
+    <div id="fullscreen-overlay">
+        <div class="fullscreen-bar">
+            <span class="fullscreen-title">PROJECT_ALPHA — FULLSCREEN</span>
+            <button class="btn-fs-back" id="btnFsBack">⬡ EXIT FULLSCREEN</button>
+        </div>
+        <div class="fullscreen-iframe-wrap">
+            <iframe id="fullscreenIframe" src="" title="PROJECT_ALPHA fullscreen"></iframe>
+        </div>
+    </div>
 
     <script>
     // ============================================================
@@ -350,22 +555,15 @@
         window.parent.postMessage({ type: 'setDarkMode', value: darkSwitch.checked }, '*');
     });
 
-    // ============================================================
-    //  NOTIFICATIONS スイッチ
-    // ============================================================
     document.getElementById('notificationsSwitch').addEventListener('change', function() {
         window.parent.postMessage({ type: 'setNotifications', value: this.checked }, '*');
     });
-
-    // ============================================================
-    //  PROFILE_PANEL スイッチ
-    // ============================================================
     document.getElementById('profilePanelSwitch').addEventListener('change', function() {
         window.parent.postMessage({ type: 'setProfilePanel', value: this.checked }, '*');
     });
 
     // ============================================================
-    //  PROFILE_EDIT パネル — 開閉
+    //  PROFILE_EDIT
     // ============================================================
     const profileInlinePanel  = document.getElementById('profile-inline-panel');
     const openProfilePanelBtn = document.getElementById('openProfilePanelBtn');
@@ -382,15 +580,11 @@
             setTimeout(() => profileInlinePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
         }
     });
-
     document.getElementById('pfCancelBtn').addEventListener('click', () => {
         profileInlinePanel.classList.remove('open');
         openProfilePanelBtn.textContent = 'EDIT PROFILE';
     });
 
-    // ============================================================
-    //  プロフィールデータをキャッシュから読み込む
-    // ============================================================
     function loadProfileData() {
         try {
             const saved = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
@@ -402,9 +596,6 @@
         } catch(e) {}
     }
 
-    // ============================================================
-    //  アバター画像変更
-    // ============================================================
     document.getElementById('avatarWrap').addEventListener('click', () =>
         document.getElementById('pfFileInput').click()
     );
@@ -416,9 +607,6 @@
         r.readAsDataURL(file);
     });
 
-    // ============================================================
-    //  ステータス表示ヘルパー
-    // ============================================================
     function showStatus(msg, type = 'success') {
         const st = document.getElementById('pfStatus');
         st.textContent = msg;
@@ -427,34 +615,73 @@
         st._timer = setTimeout(() => { st.classList.remove('show'); }, 2800);
     }
 
-    // ============================================================
-    //  SAVE ボタン
-    //  ① localStorageキャッシュを更新
-    //  ② postMessage で親 (index.html) へ送信
-    //     → neopod.js の _npUpdateProfile が Firebase に保存 ＋ ヘッダー反映
-    // ============================================================
     document.getElementById('pfSaveBtn').addEventListener('click', () => {
         const newIcon     = document.getElementById('pfPreviewImg').src;
         const newBirthday = document.getElementById('pfBirthday').value;
         const newBio      = document.getElementById('pfBio').value.trim();
-
-        // ① localStorageキャッシュ更新
         try {
-            const s     = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
-            s.icon      = newIcon;
-            s.birthday  = newBirthday;
-            s.bio       = newBio;
+            const s = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
+            s.icon = newIcon; s.birthday = newBirthday; s.bio = newBio;
             localStorage.setItem('np_profile_cache', JSON.stringify(s));
         } catch(e) {}
-
-        // ② 親ページ (index.html) へ送信
-        //    index.html 側で _npUpdateProfile(Firebase保存) ＋ ヘッダーアイコン更新が行われる
-        window.parent.postMessage({
-            type: 'updateProfile',
-            value: { icon: newIcon, birthday: newBirthday, bio: newBio }
-        }, '*');
-
+        window.parent.postMessage({ type: 'updateProfile', value: { icon: newIcon, birthday: newBirthday, bio: newBio } }, '*');
         showStatus('✓ 保存しました', 'success');
+    });
+
+    // ============================================================
+    //  PROJECT_ALPHA — iframeビューワー
+    // ============================================================
+    const iframeViewer    = document.getElementById('iframe-viewer');
+    const viewerFrame     = document.getElementById('viewerFrame');
+    const viewerIframe    = document.getElementById('viewerIframe');
+    const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+    const fullscreenIframe  = document.getElementById('fullscreenIframe');
+    const frameWidthInput  = document.getElementById('frameWidth');
+    const frameHeightInput = document.getElementById('frameHeight');
+
+    // デフォルトサイズ適用
+    function applyFrameSize() {
+        const w = parseInt(frameWidthInput.value)  || 900;
+        const h = parseInt(frameHeightInput.value) || 600;
+        viewerFrame.style.width  = w + 'px';
+        viewerFrame.style.height = h + 'px';
+    }
+    applyFrameSize();
+
+    frameWidthInput.addEventListener('input',  applyFrameSize);
+    frameHeightInput.addEventListener('input', applyFrameSize);
+
+    // PROJECT_ALPHA カードをクリック → ビューワーを開く
+    document.getElementById('card-project-alpha').addEventListener('click', () => {
+        iframeViewer.classList.add('open');
+        viewerIframe.src = 'code.html';
+        applyFrameSize();
+        setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    });
+
+    // ✕ BACK — ビューワーを閉じる（カード一覧に戻る）
+    document.getElementById('btnBack').addEventListener('click', () => {
+        iframeViewer.classList.remove('open');
+        viewerIframe.src = '';
+    });
+
+    // ⤢ EXPAND — フルスクリーンへ
+    document.getElementById('btnExpand').addEventListener('click', () => {
+        fullscreenIframe.src = viewerIframe.src || 'code.html';
+        fullscreenOverlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    });
+
+    // フルスクリーン → 額縁モードに戻る
+    document.getElementById('btnFsBack').addEventListener('click', () => {
+        fullscreenOverlay.classList.remove('open');
+        fullscreenIframe.src = '';
+        document.body.style.overflow = '';
+        // 額縁モードは維持（開いたまま）
+        iframeViewer.classList.add('open');
+        viewerIframe.src = 'code.html';
+        applyFrameSize();
+        setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
     });
 
     // ============================================================
@@ -462,39 +689,17 @@
     // ============================================================
     window.addEventListener('message', (e) => {
         if (!e.data) return;
-
-        // ダークモード同期
-        if (e.data.type === 'darkMode') {
-            applyTheme(e.data.value);
-        }
-
-        // ログイン後にプロフィールデータが届いたらキャッシュへ保存
-        // パネルが開いていれば表示も即時更新
+        if (e.data.type === 'darkMode')         applyTheme(e.data.value);
         if (e.data.type === 'profileData') {
-            try {
-                localStorage.setItem('np_profile_cache', JSON.stringify(e.data.value));
-            } catch(err) {}
-            if (profileInlinePanel.classList.contains('open')) {
-                loadProfileData();
-            }
+            try { localStorage.setItem('np_profile_cache', JSON.stringify(e.data.value)); } catch(err) {}
+            if (profileInlinePanel.classList.contains('open')) loadProfileData();
         }
-
-        // Firebase保存成功の確認応答（index.html から任意送信）
-        if (e.data.type === 'profileSaved') {
-            showStatus('✓ Firebaseに保存しました', 'success');
-        }
-
-        // Firebase保存失敗の通知（index.html から任意送信）
-        if (e.data.type === 'profileSaveError') {
-            showStatus('⚠ 保存に失敗しました', 'error');
-        }
+        if (e.data.type === 'profileSaved')     showStatus('✓ Firebaseに保存しました', 'success');
+        if (e.data.type === 'profileSaveError') showStatus('⚠ 保存に失敗しました', 'error');
     });
 
-    // ============================================================
-    //  初期テーマ復元
-    // ============================================================
+    // 初期テーマ復元
     try { applyTheme(localStorage.getItem('darkMode') === 'true'); } catch(e) {}
-
     </script>
 </body>
 </html>
