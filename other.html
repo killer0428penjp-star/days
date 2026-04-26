@@ -18,7 +18,6 @@
             --main-bg: #f0f4f8;
             --dot-color: #e2e8f0;
         }
-
         body.dark-theme {
             --bg-white: rgba(30, 30, 47, 0.85);
             --bg-sub: #111111;
@@ -75,7 +74,7 @@
         .content-section.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Settings 行 */
+        /* Settings rows */
         .setting-row {
             display: grid; grid-template-columns: 200px 1fr 100px;
             align-items: center; background-color: var(--bg-white);
@@ -89,8 +88,7 @@
 
         .action-btn-plain {
             margin: 8px 15px; padding: 7px 18px;
-            font-size: 0.75rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px;
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
             background: var(--accent); color: var(--accent-text);
             border: none; cursor: pointer; transition: opacity 0.2s; white-space: nowrap;
         }
@@ -110,7 +108,7 @@
         input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(26px); border-color: var(--accent); }
 
-        /* Othersカード */
+        /* Cards */
         .content-card {
             display: grid; grid-template-columns: 220px 1fr 2fr;
             background-color: var(--bg-white); border: 1px solid var(--border-light);
@@ -125,9 +123,7 @@
         .item-title { padding: 30px; display: flex; align-items: center; font-weight: 700; font-size: 1rem; }
         .item-desc  { padding: 30px; color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; display: flex; align-items: center; }
 
-        /* ============================================================
-           プロフィール編集パネル
-        ============================================================ */
+        /* Profile panel */
         #profile-inline-panel {
             display: none; border: 1px solid var(--border-light); border-top: none;
             background-color: var(--bg-white); padding: 30px 30px 25px;
@@ -135,7 +131,6 @@
         }
         #profile-inline-panel.open { display: block; }
         .profile-panel-inner { max-width: 480px; }
-
         .avatar-area { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
         .avatar-wrap {
             width: 80px; height: 80px; border: 2px solid var(--border-light);
@@ -145,7 +140,6 @@
         .avatar-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .avatar-hint { font-size: 0.72rem; color: var(--text-sub); line-height: 1.6; }
         .avatar-hint strong { font-weight: 700; color: var(--text-main); font-size: 0.8rem; }
-
         .pf-field { margin-bottom: 16px; }
         .pf-label {
             display: block; font-size: 0.72rem; font-weight: 700;
@@ -158,7 +152,6 @@
         }
         .pf-input:focus, .pf-textarea:focus { border-color: var(--accent); }
         .pf-textarea { height: 90px; resize: vertical; }
-
         .pf-actions { display: flex; gap: 10px; margin-top: 20px; }
         .pf-save-btn {
             padding: 10px 28px; font-size: 0.75rem; font-weight: 700;
@@ -173,7 +166,6 @@
             border: 1px solid var(--border-light); cursor: pointer; transition: all 0.2s;
         }
         .pf-cancel-btn:hover { border-color: var(--border-hover); color: var(--text-main); }
-
         .pf-status-row { min-height: 24px; margin-top: 8px; }
         .pf-status {
             font-size: 0.78rem; font-weight: 700; min-height: 18px;
@@ -185,190 +177,149 @@
         .pf-status.error   { color: #e53e3e; }
 
         /* ============================================================
-           iframeビューワー — 額縁モード
+           iframeビューワー
         ============================================================ */
+
+        /* ビューワーラッパー: main-containerを突き抜けて画面幅に広げる */
         #iframe-viewer {
             display: none;
             flex-direction: column;
-            margin-top: 32px;
-            animation: fadeIn 0.3s ease;
+            align-items: center;
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 40px 40px 60px;
+            margin-top: 16px;
+            animation: fadeIn 0.35s ease;
         }
         #iframe-viewer.open { display: flex; }
 
-        /* コントロールバー（額縁の外・右上） */
+        /* コントロールバー: 左から BACK / EXPAND / spacer / W / H */
         .viewer-controls {
             display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 0;
-            margin-bottom: 0;
+            align-items: stretch;
             border: 1px solid var(--border-light);
-            border-bottom: none;
-            background-color: var(--bg-white);
-        }
-
-        .viewer-ctrl-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-sub);
-            padding: 8px 14px;
-            border-right: 1px solid var(--border-light);
-            white-space: nowrap;
-        }
-
-        /* サイズ入力欄グループ */
-        .viewer-size-group {
-            display: flex;
-            align-items: center;
-            gap: 0;
-            border-right: 1px solid var(--border-light);
-        }
-        .size-label {
-            padding: 8px 10px;
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-sub);
-            border-right: 1px solid var(--border-light);
-            background: var(--bg-sub);
-            white-space: nowrap;
-        }
-        .size-input {
-            width: 72px;
-            padding: 8px 10px;
-            font-size: 0.78rem;
-            font-weight: 700;
             background: var(--bg-white);
-            border: none;
-            border-right: 1px solid var(--border-light);
-            color: var(--text-main);
-            font-family: inherit;
-            outline: none;
-            transition: background 0.2s;
-        }
-        .size-input:focus { background: var(--bg-hover); }
-        .size-input:last-child { border-right: none; }
-        .size-unit {
-            padding: 8px 8px 8px 2px;
-            font-size: 0.65rem;
-            color: var(--text-sub);
-            border-right: 1px solid var(--border-light);
+            margin-bottom: 16px;
+            /* 幅はJSで額縁に合わせる */
         }
 
-        /* ボタン共通 */
         .viewer-btn {
-            padding: 9px 20px;
+            padding: 9px 22px;
             font-size: 0.72rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             border: none;
+            border-right: 1px solid var(--border-light);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.18s;
             white-space: nowrap;
-            border-left: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .viewer-btn:first-child { border-left: none; }
 
-        .btn-expand {
-            background: var(--bg-sub);
-            color: var(--text-main);
-        }
+        .btn-back   { background: var(--accent); color: var(--accent-text); }
+        .btn-back:hover { opacity: 0.82; }
+        .btn-expand { background: var(--bg-sub); color: var(--text-main); }
         .btn-expand:hover { background: var(--bg-hover); color: var(--accent); }
 
-        .btn-back {
-            background: var(--accent);
-            color: var(--accent-text);
-        }
-        .btn-back:hover { opacity: 0.8; }
+        .ctrl-spacer { flex: 1; border-right: 1px solid var(--border-light); }
 
-        /* 額縁本体 */
-        .viewer-frame {
-            border: 3px solid var(--border-hover);
+        .size-group {
+            display: flex;
+            align-items: center;
+            border-right: 1px solid var(--border-light);
+        }
+        .size-group:last-child { border-right: none; }
+        .size-key {
+            padding: 9px 10px 9px 14px;
+            font-size: 0.66rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            color: var(--text-sub); user-select: none;
+        }
+        .size-input {
+            width: 74px; padding: 9px 8px;
+            font-size: 0.82rem; font-weight: 700;
+            background: transparent; border: none;
+            border-left: 1px solid var(--border-light);
+            color: var(--text-main); font-family: inherit; outline: none;
+            transition: background 0.15s;
+        }
+        .size-input:focus { background: var(--bg-hover); }
+        .size-px {
+            padding: 0 12px 0 4px;
+            font-size: 0.62rem; color: var(--text-sub); user-select: none;
+        }
+
+        /* ── 額縁 ── */
+        .viewer-frame-wrap {
+            /* 多重ボーダーで額縁らしい重厚感 */
+            outline: 1px solid var(--border-light);
             box-shadow:
-                0 0 0 1px var(--border-light),
-                6px 6px 0 0 var(--border-light);
-            background: var(--bg-sub);
+                0 0 0 5px var(--bg-white),
+                0 0 0 6px var(--border-light),
+                0 0 0 11px var(--bg-white),
+                0 0 0 13px var(--border-hover),
+                0 0 0 14px var(--border-hover),
+                12px 18px 48px rgba(0,0,0,0.14),
+                4px 6px 16px  rgba(0,0,0,0.07);
+            background: var(--bg-white);
+            /* padding = 額縁の「ふち」 */
+            padding: 16px;
+            transition: box-shadow 0.3s ease;
+        }
+        body.dark-theme .viewer-frame-wrap {
+            box-shadow:
+                0 0 0 5px rgba(255,255,255,0.04),
+                0 0 0 6px var(--border-light),
+                0 0 0 11px rgba(255,255,255,0.04),
+                0 0 0 13px var(--accent),
+                0 0 0 14px var(--accent),
+                12px 18px 52px rgba(0,0,0,0.5),
+                4px 6px 18px  rgba(0,242,255,0.10);
+        }
+
+        .viewer-frame-inner {
             overflow: hidden;
-            position: relative;
-            transition: width 0.25s ease, height 0.25s ease;
+            line-height: 0;
+        }
+        .viewer-frame-inner iframe {
+            display: block; border: none;
         }
 
-        .viewer-frame iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
-
-        /* ============================================================
-           フルスクリーンモード
-        ============================================================ */
+        /* フルスクリーン */
         #fullscreen-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 9000;
+            display: none; position: fixed; inset: 0; z-index: 9000;
             background-color: var(--main-bg);
             background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
             background-size: 20px 20px;
             flex-direction: column;
         }
         #fullscreen-overlay.open { display: flex; }
-
         .fullscreen-bar {
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 0 24px;
+            height: 50px; display: flex; align-items: center; padding: 0 28px;
             border-bottom: 1px solid var(--border-light);
             background-color: var(--main-bg);
             background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
-            background-size: 20px 20px;
-            flex-shrink: 0;
+            background-size: 20px 20px; flex-shrink: 0;
         }
-
         .fullscreen-title {
-            margin-right: auto;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-sub);
+            margin-right: auto; font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 2px; color: var(--text-sub);
         }
-
         .btn-fs-back {
-            padding: 8px 22px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            background: var(--accent);
-            color: var(--accent-text);
-            border: none;
-            cursor: pointer;
-            transition: opacity 0.2s;
+            padding: 8px 24px; font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px;
+            background: var(--accent); color: var(--accent-text);
+            border: none; cursor: pointer; transition: opacity 0.2s;
         }
         .btn-fs-back:hover { opacity: 0.8; }
+        .fullscreen-iframe-wrap { flex: 1; overflow: hidden; }
+        .fullscreen-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 
-        .fullscreen-iframe-wrap {
-            flex: 1;
-            overflow: hidden;
-        }
-        .fullscreen-iframe-wrap iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: block;
-        }
-
-        /* ============================================================
-           レスポンシブ
-        ============================================================ */
         @media (max-width: 850px) {
             .top-navbar { padding: 0 20px; }
             .content-card { grid-template-columns: 1fr; }
@@ -377,329 +328,303 @@
             .setting-row.btn-row { grid-template-columns: 1fr auto; }
             .row-label { border-right: none; }
             .row-desc { display: none; }
-            .viewer-ctrl-label { display: none; }
-            .viewer-size-group { flex-wrap: wrap; }
+            #iframe-viewer { padding: 20px 12px 40px; }
         }
     </style>
 </head>
 <body>
 
-    <header class="top-navbar">
-        <nav class="nav-tags">
-            <div class="tag active" data-target="settings">Settings</div>
-            <div class="tag" data-target="others">Others</div>
-        </nav>
-    </header>
+<header class="top-navbar">
+    <nav class="nav-tags">
+        <div class="tag active" data-target="settings">Settings</div>
+        <div class="tag" data-target="others">Others</div>
+    </nav>
+</header>
 
-    <main class="main-container">
+<main class="main-container">
 
-        <!-- ======== Settings ======== -->
-        <section id="settings" class="content-section active">
-            <div class="setting-row">
-                <div class="row-label">DARKMODE</div>
-                <div class="row-desc">UI全体を低照度の配色に切り替えます。</div>
-                <div class="row-action">
-                    <label class="switch">
-                        <input type="checkbox" id="darkModeSwitch">
-                        <span class="slider"></span>
-                    </label>
-                </div>
+    <!-- Settings -->
+    <section id="settings" class="content-section active">
+        <div class="setting-row">
+            <div class="row-label">DARKMODE</div>
+            <div class="row-desc">UI全体を低照度の配色に切り替えます。</div>
+            <div class="row-action"><label class="switch"><input type="checkbox" id="darkModeSwitch"><span class="slider"></span></label></div>
+        </div>
+        <div class="setting-row">
+            <div class="row-label">NOTIFICATIONS</div>
+            <div class="row-desc">右上のダーク切替ボタンの表示・非表示を切り替えます。</div>
+            <div class="row-action"><label class="switch"><input type="checkbox" id="notificationsSwitch" checked><span class="slider"></span></label></div>
+        </div>
+        <div class="setting-row">
+            <div class="row-label">PROFILE_PANEL</div>
+            <div class="row-desc">右上のプロフィール欄の表示・非表示を切り替えます。</div>
+            <div class="row-action"><label class="switch"><input type="checkbox" id="profilePanelSwitch" checked><span class="slider"></span></label></div>
+        </div>
+        <div class="setting-row btn-row">
+            <div class="row-label">PROFILE_EDIT</div>
+            <div class="row-desc">アイコン・誕生日・自己紹介を編集してプロフィールを更新します。</div>
+            <div class="row-action" style="border-left:1px solid var(--border-light);">
+                <button class="action-btn-plain" id="openProfilePanelBtn">EDIT PROFILE</button>
             </div>
-            <div class="setting-row">
-                <div class="row-label">NOTIFICATIONS</div>
-                <div class="row-desc">右上のダーク切替ボタンの表示・非表示を切り替えます。</div>
-                <div class="row-action">
-                    <label class="switch">
-                        <input type="checkbox" id="notificationsSwitch" checked>
-                        <span class="slider"></span>
-                    </label>
+        </div>
+        <div id="profile-inline-panel">
+            <div class="profile-panel-inner">
+                <div class="avatar-area">
+                    <div class="avatar-wrap" id="avatarWrap" title="クリックして画像を変更">
+                        <img id="pfPreviewImg" src="https://placehold.jp/80/cccccc/ffffff/200x200.png?text=?" alt="avatar">
+                    </div>
+                    <div class="avatar-hint">
+                        <strong id="pfDisplayName">—</strong><br>
+                        <span id="pfDisplayId" style="font-size:0.72rem;color:var(--text-sub);"></span><br>
+                        <span style="margin-top:4px;display:inline-block;">クリックして画像を変更</span>
+                    </div>
                 </div>
-            </div>
-            <div class="setting-row">
-                <div class="row-label">PROFILE_PANEL</div>
-                <div class="row-desc">右上のプロフィール欄の表示・非表示を切り替えます。</div>
-                <div class="row-action">
-                    <label class="switch">
-                        <input type="checkbox" id="profilePanelSwitch" checked>
-                        <span class="slider"></span>
-                    </label>
+                <input type="file" id="pfFileInput" hidden accept="image/*">
+                <div class="pf-field">
+                    <label class="pf-label" for="pfBirthday">誕生日</label>
+                    <input type="date" id="pfBirthday" class="pf-input">
                 </div>
-            </div>
-            <div class="setting-row btn-row" id="profileEditRow">
-                <div class="row-label">PROFILE_EDIT</div>
-                <div class="row-desc">アイコン・誕生日・自己紹介を編集してプロフィールを更新します。</div>
-                <div class="row-action" style="border-left: 1px solid var(--border-light);">
-                    <button class="action-btn-plain" id="openProfilePanelBtn">EDIT PROFILE</button>
+                <div class="pf-field">
+                    <label class="pf-label" for="pfBio">自己紹介</label>
+                    <textarea id="pfBio" class="pf-textarea" placeholder="自己紹介・説明欄"></textarea>
                 </div>
+                <div class="pf-actions">
+                    <button class="pf-save-btn" id="pfSaveBtn">SAVE</button>
+                    <button class="pf-cancel-btn" id="pfCancelBtn">CANCEL</button>
+                </div>
+                <div class="pf-status-row"><span class="pf-status" id="pfStatus"></span></div>
             </div>
+        </div>
+    </section>
 
-            <div id="profile-inline-panel">
-                <div class="profile-panel-inner">
-                    <div class="avatar-area">
-                        <div class="avatar-wrap" id="avatarWrap" title="クリックして画像を変更">
-                            <img id="pfPreviewImg" src="https://placehold.jp/80/cccccc/ffffff/200x200.png?text=?" alt="avatar">
-                        </div>
-                        <div class="avatar-hint">
-                            <strong id="pfDisplayName">—</strong><br>
-                            <span id="pfDisplayId" style="font-size:0.72rem; color:var(--text-sub);"></span><br>
-                            <span style="margin-top:4px; display:inline-block;">クリックして画像を変更</span>
-                        </div>
-                    </div>
-                    <input type="file" id="pfFileInput" hidden accept="image/*">
-                    <div class="pf-field">
-                        <label class="pf-label" for="pfBirthday">誕生日</label>
-                        <input type="date" id="pfBirthday" class="pf-input">
-                    </div>
-                    <div class="pf-field">
-                        <label class="pf-label" for="pfBio">自己紹介</label>
-                        <textarea id="pfBio" class="pf-textarea" placeholder="自己紹介・説明欄"></textarea>
-                    </div>
-                    <div class="pf-actions">
-                        <button class="pf-save-btn" id="pfSaveBtn">SAVE</button>
-                        <button class="pf-cancel-btn" id="pfCancelBtn">CANCEL</button>
-                    </div>
-                    <div class="pf-status-row">
-                        <span class="pf-status" id="pfStatus"></span>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <!-- Others -->
+    <section id="others" class="content-section">
 
-        <!-- ======== Others ======== -->
-        <section id="others" class="content-section">
+        <div id="cards-list">
             <div class="content-card" id="card-project-alpha">
                 <div class="item-img">IMAGE_AREA</div>
                 <div class="item-title">PROJECT_ALPHA</div>
-                <div class="item-desc">
-                    すべての要素から角丸を排除しました。マウスをホバーした瞬間にだけ、繊細な枠線が表示されるミニマルな仕様です。
-                </div>
+                <div class="item-desc">すべての要素から角丸を排除しました。マウスをホバーした瞬間にだけ、繊細な枠線が表示されるミニマルな仕様です。</div>
             </div>
             <div class="content-card">
                 <div class="item-img">IMAGE_AREA</div>
                 <div class="item-title">DESIGN_ASSETS</div>
-                <div class="item-desc">
-                    「表」のような整列を維持しつつ、余計な装飾を削ぎ落としています。白をベースにすることで、情報の透明性を高めています。
+                <div class="item-desc">「表」のような整列を維持しつつ、余計な装飾を削ぎ落としています。白をベースにすることで、情報の透明性を高めています。</div>
+            </div>
+        </div>
+
+        <!-- iframeビューワー -->
+        <div id="iframe-viewer">
+            <!-- 左から: BACK / EXPAND / spacer / W / H -->
+            <div class="viewer-controls" id="viewerControls">
+                <button class="viewer-btn btn-back"   id="btnBack">   ✕ BACK   </button>
+                <button class="viewer-btn btn-expand" id="btnExpand"> ⤢ EXPAND </button>
+                <div class="ctrl-spacer"></div>
+                <div class="size-group">
+                    <span class="size-key">W</span>
+                    <input type="number" id="frameWidth"  class="size-input" value="1500" min="200" max="5000" step="10">
+                    <span class="size-px">px</span>
+                </div>
+                <div class="size-group">
+                    <span class="size-key">H</span>
+                    <input type="number" id="frameHeight" class="size-input" value="800"  min="100" max="5000" step="10">
+                    <span class="size-px">px</span>
                 </div>
             </div>
 
-            <!-- ======== iframeビューワー（額縁） ======== -->
-            <div id="iframe-viewer">
-                <!-- コントロールバー（額縁の外・右上） -->
-                <div class="viewer-controls">
-                    <span class="viewer-ctrl-label">FRAME_SIZE</span>
-
-                    <!-- 横幅 -->
-                    <div class="viewer-size-group">
-                        <span class="size-label">W</span>
-                        <input type="number" id="frameWidth"  class="size-input" value="900" min="200" max="3000" step="10">
-                        <span class="size-unit">px</span>
-                        <span class="size-label">H</span>
-                        <input type="number" id="frameHeight" class="size-input" value="600" min="100" max="3000" step="10">
-                        <span class="size-unit" style="border-right:none;">px</span>
-                    </div>
-
-                    <button class="viewer-btn btn-expand" id="btnExpand" title="画面いっぱいに表示">
-                        ⤢ EXPAND
-                    </button>
-                    <button class="viewer-btn btn-back" id="btnBack" title="ビューワーを閉じる">
-                        ✕ BACK
-                    </button>
-                </div>
-
-                <!-- 額縁本体 -->
-                <div class="viewer-frame" id="viewerFrame">
-                    <iframe id="viewerIframe" src="code.html" title="PROJECT_ALPHA"></iframe>
+            <!-- 額縁 -->
+            <div class="viewer-frame-wrap" id="viewerFrameWrap">
+                <div class="viewer-frame-inner" id="viewerFrameInner">
+                    <iframe id="viewerIframe" src="" title="PROJECT_ALPHA"></iframe>
                 </div>
             </div>
-        </section>
-
-    </main>
-
-    <!-- ======== フルスクリーンオーバーレイ ======== -->
-    <div id="fullscreen-overlay">
-        <div class="fullscreen-bar">
-            <span class="fullscreen-title">PROJECT_ALPHA — FULLSCREEN</span>
-            <button class="btn-fs-back" id="btnFsBack">⬡ EXIT FULLSCREEN</button>
         </div>
-        <div class="fullscreen-iframe-wrap">
-            <iframe id="fullscreenIframe" src="" title="PROJECT_ALPHA fullscreen"></iframe>
-        </div>
+
+    </section>
+
+</main>
+
+<!-- フルスクリーン -->
+<div id="fullscreen-overlay">
+    <div class="fullscreen-bar">
+        <span class="fullscreen-title">PROJECT_ALPHA</span>
+        <button class="btn-fs-back" id="btnFsBack">✕ BACK</button>
     </div>
+    <div class="fullscreen-iframe-wrap">
+        <iframe id="fullscreenIframe" src="" title="fullscreen"></iframe>
+    </div>
+</div>
 
-    <script>
-    // ============================================================
-    //  タブ切り替え
-    // ============================================================
-    document.querySelectorAll('.tag').forEach(tag => {
-        tag.addEventListener('click', () => {
-            document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
-            tag.classList.add('active');
-            const target = tag.getAttribute('data-target');
-            document.querySelectorAll('.content-section').forEach(s => {
-                s.classList.remove('active');
-                if (s.id === target) s.classList.add('active');
-            });
+<script>
+// タブ切り替え
+document.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+        document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+        tag.classList.add('active');
+        const target = tag.getAttribute('data-target');
+        document.querySelectorAll('.content-section').forEach(s => {
+            s.classList.remove('active');
+            if (s.id === target) s.classList.add('active');
         });
     });
+});
 
-    // ============================================================
-    //  DARK_MODE スイッチ
-    // ============================================================
-    const darkSwitch = document.getElementById('darkModeSwitch');
-    function applyTheme(isDark) {
-        document.body.classList.toggle('dark-theme', isDark);
-        darkSwitch.checked = isDark;
-    }
-    darkSwitch.addEventListener('change', () => {
-        applyTheme(darkSwitch.checked);
-        window.parent.postMessage({ type: 'setDarkMode', value: darkSwitch.checked }, '*');
-    });
+// ダークモード
+const darkSwitch = document.getElementById('darkModeSwitch');
+function applyTheme(isDark) {
+    document.body.classList.toggle('dark-theme', isDark);
+    darkSwitch.checked = isDark;
+}
+darkSwitch.addEventListener('change', () => {
+    applyTheme(darkSwitch.checked);
+    window.parent.postMessage({ type: 'setDarkMode', value: darkSwitch.checked }, '*');
+});
+document.getElementById('notificationsSwitch').addEventListener('change', function() {
+    window.parent.postMessage({ type: 'setNotifications', value: this.checked }, '*');
+});
+document.getElementById('profilePanelSwitch').addEventListener('change', function() {
+    window.parent.postMessage({ type: 'setProfilePanel', value: this.checked }, '*');
+});
 
-    document.getElementById('notificationsSwitch').addEventListener('change', function() {
-        window.parent.postMessage({ type: 'setNotifications', value: this.checked }, '*');
-    });
-    document.getElementById('profilePanelSwitch').addEventListener('change', function() {
-        window.parent.postMessage({ type: 'setProfilePanel', value: this.checked }, '*');
-    });
-
-    // ============================================================
-    //  PROFILE_EDIT
-    // ============================================================
-    const profileInlinePanel  = document.getElementById('profile-inline-panel');
-    const openProfilePanelBtn = document.getElementById('openProfilePanelBtn');
-
-    openProfilePanelBtn.addEventListener('click', () => {
-        const isOpen = profileInlinePanel.classList.contains('open');
-        if (isOpen) {
-            profileInlinePanel.classList.remove('open');
-            openProfilePanelBtn.textContent = 'EDIT PROFILE';
-        } else {
-            loadProfileData();
-            profileInlinePanel.classList.add('open');
-            openProfilePanelBtn.textContent = 'CLOSE';
-            setTimeout(() => profileInlinePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
-        }
-    });
-    document.getElementById('pfCancelBtn').addEventListener('click', () => {
+// プロフィール編集
+const profileInlinePanel  = document.getElementById('profile-inline-panel');
+const openProfilePanelBtn = document.getElementById('openProfilePanelBtn');
+openProfilePanelBtn.addEventListener('click', () => {
+    const isOpen = profileInlinePanel.classList.contains('open');
+    if (isOpen) {
         profileInlinePanel.classList.remove('open');
         openProfilePanelBtn.textContent = 'EDIT PROFILE';
-    });
-
-    function loadProfileData() {
-        try {
-            const saved = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
-            document.getElementById('pfPreviewImg').src          = saved.icon     || 'https://placehold.jp/80/cccccc/ffffff/200x200.png?text=?';
-            document.getElementById('pfDisplayName').textContent = saved.name     || '—';
-            document.getElementById('pfDisplayId').textContent   = saved.id       ? 'ID: ' + saved.id : '';
-            document.getElementById('pfBirthday').value          = saved.birthday || '';
-            document.getElementById('pfBio').value               = saved.bio      || '';
-        } catch(e) {}
+    } else {
+        loadProfileData();
+        profileInlinePanel.classList.add('open');
+        openProfilePanelBtn.textContent = 'CLOSE';
+        setTimeout(() => profileInlinePanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
     }
+});
+document.getElementById('pfCancelBtn').addEventListener('click', () => {
+    profileInlinePanel.classList.remove('open');
+    openProfilePanelBtn.textContent = 'EDIT PROFILE';
+});
+function loadProfileData() {
+    try {
+        const s = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
+        document.getElementById('pfPreviewImg').src          = s.icon     || 'https://placehold.jp/80/cccccc/ffffff/200x200.png?text=?';
+        document.getElementById('pfDisplayName').textContent = s.name     || '—';
+        document.getElementById('pfDisplayId').textContent   = s.id       ? 'ID: ' + s.id : '';
+        document.getElementById('pfBirthday').value          = s.birthday || '';
+        document.getElementById('pfBio').value               = s.bio      || '';
+    } catch(e) {}
+}
+document.getElementById('avatarWrap').addEventListener('click', () => document.getElementById('pfFileInput').click());
+document.getElementById('pfFileInput').addEventListener('change', function() {
+    const file = this.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = ev => { document.getElementById('pfPreviewImg').src = ev.target.result; };
+    r.readAsDataURL(file);
+});
+function showStatus(msg, type = 'success') {
+    const st = document.getElementById('pfStatus');
+    st.textContent = msg;
+    st.className = 'pf-status ' + type + ' show';
+    clearTimeout(st._timer);
+    st._timer = setTimeout(() => st.classList.remove('show'), 2800);
+}
+document.getElementById('pfSaveBtn').addEventListener('click', () => {
+    const newIcon     = document.getElementById('pfPreviewImg').src;
+    const newBirthday = document.getElementById('pfBirthday').value;
+    const newBio      = document.getElementById('pfBio').value.trim();
+    try {
+        const s = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
+        s.icon = newIcon; s.birthday = newBirthday; s.bio = newBio;
+        localStorage.setItem('np_profile_cache', JSON.stringify(s));
+    } catch(e) {}
+    window.parent.postMessage({ type: 'updateProfile', value: { icon: newIcon, birthday: newBirthday, bio: newBio } }, '*');
+    showStatus('✓ 保存しました', 'success');
+});
 
-    document.getElementById('avatarWrap').addEventListener('click', () =>
-        document.getElementById('pfFileInput').click()
-    );
-    document.getElementById('pfFileInput').addEventListener('change', function() {
-        const file = this.files[0];
-        if (!file) return;
-        const r = new FileReader();
-        r.onload = ev => { document.getElementById('pfPreviewImg').src = ev.target.result; };
-        r.readAsDataURL(file);
-    });
+// ── iframeビューワー ──────────────────────────────────────────
+const iframeViewer      = document.getElementById('iframe-viewer');
+const viewerControls    = document.getElementById('viewerControls');
+const viewerFrameWrap   = document.getElementById('viewerFrameWrap');
+const viewerFrameInner  = document.getElementById('viewerFrameInner');
+const viewerIframe      = document.getElementById('viewerIframe');
+const cardsList         = document.getElementById('cards-list');
+const fullscreenOverlay = document.getElementById('fullscreen-overlay');
+const fullscreenIframe  = document.getElementById('fullscreenIframe');
+const frameWidthInput   = document.getElementById('frameWidth');
+const frameHeightInput  = document.getElementById('frameHeight');
 
-    function showStatus(msg, type = 'success') {
-        const st = document.getElementById('pfStatus');
-        st.textContent = msg;
-        st.className   = 'pf-status ' + type + ' show';
-        clearTimeout(st._timer);
-        st._timer = setTimeout(() => { st.classList.remove('show'); }, 2800);
-    }
+const FRAME_PAD = 16; // viewer-frame-wrap の padding値
 
-    document.getElementById('pfSaveBtn').addEventListener('click', () => {
-        const newIcon     = document.getElementById('pfPreviewImg').src;
-        const newBirthday = document.getElementById('pfBirthday').value;
-        const newBio      = document.getElementById('pfBio').value.trim();
-        try {
-            const s = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
-            s.icon = newIcon; s.birthday = newBirthday; s.bio = newBio;
-            localStorage.setItem('np_profile_cache', JSON.stringify(s));
-        } catch(e) {}
-        window.parent.postMessage({ type: 'updateProfile', value: { icon: newIcon, birthday: newBirthday, bio: newBio } }, '*');
-        showStatus('✓ 保存しました', 'success');
-    });
+function applyFrameSize() {
+    const w = Math.max(200, parseInt(frameWidthInput.value)  || 1500);
+    const h = Math.max(100, parseInt(frameHeightInput.value) || 800);
 
-    // ============================================================
-    //  PROJECT_ALPHA — iframeビューワー
-    // ============================================================
-    const iframeViewer    = document.getElementById('iframe-viewer');
-    const viewerFrame     = document.getElementById('viewerFrame');
-    const viewerIframe    = document.getElementById('viewerIframe');
-    const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-    const fullscreenIframe  = document.getElementById('fullscreenIframe');
-    const frameWidthInput  = document.getElementById('frameWidth');
-    const frameHeightInput = document.getElementById('frameHeight');
+    // iframe サイズ
+    viewerFrameInner.style.width  = w + 'px';
+    viewerFrameInner.style.height = h + 'px';
+    viewerIframe.style.width      = w + 'px';
+    viewerIframe.style.height     = h + 'px';
 
-    // デフォルトサイズ適用
-    function applyFrameSize() {
-        const w = parseInt(frameWidthInput.value)  || 900;
-        const h = parseInt(frameHeightInput.value) || 600;
-        viewerFrame.style.width  = w + 'px';
-        viewerFrame.style.height = h + 'px';
-    }
+    // 額縁ラッパー幅 (padding * 2 + iframe幅)
+    const totalW = w + FRAME_PAD * 2;
+    viewerFrameWrap.style.width  = totalW + 'px';
+
+    // コントロールバーを額縁と同幅に
+    viewerControls.style.width = totalW + 'px';
+}
+
+frameWidthInput.addEventListener('input',  applyFrameSize);
+frameHeightInput.addEventListener('input', applyFrameSize);
+
+// PROJECT_ALPHA クリック → ビューワーを開く
+document.getElementById('card-project-alpha').addEventListener('click', () => {
+    cardsList.style.display = 'none';
+    viewerIframe.src = 'code.html';
+    iframeViewer.classList.add('open');
     applyFrameSize();
+    setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+});
 
-    frameWidthInput.addEventListener('input',  applyFrameSize);
-    frameHeightInput.addEventListener('input', applyFrameSize);
+// ✕ BACK → ビューワーを閉じてカード一覧を戻す
+document.getElementById('btnBack').addEventListener('click', () => {
+    iframeViewer.classList.remove('open');
+    viewerIframe.src = '';
+    cardsList.style.display = '';
+});
 
-    // PROJECT_ALPHA カードをクリック → ビューワーを開く
-    document.getElementById('card-project-alpha').addEventListener('click', () => {
-        iframeViewer.classList.add('open');
-        viewerIframe.src = 'code.html';
-        applyFrameSize();
-        setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
-    });
+// ⤢ EXPAND → フルスクリーン
+document.getElementById('btnExpand').addEventListener('click', () => {
+    fullscreenIframe.src = 'code.html';
+    fullscreenOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+});
 
-    // ✕ BACK — ビューワーを閉じる（カード一覧に戻る）
-    document.getElementById('btnBack').addEventListener('click', () => {
-        iframeViewer.classList.remove('open');
-        viewerIframe.src = '';
-    });
+// フルスクリーン ✕ BACK → 額縁モードへ戻る
+document.getElementById('btnFsBack').addEventListener('click', () => {
+    fullscreenOverlay.classList.remove('open');
+    fullscreenIframe.src = '';
+    document.body.style.overflow = '';
+    iframeViewer.classList.add('open');
+    viewerIframe.src = 'code.html';
+    applyFrameSize();
+    setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+});
 
-    // ⤢ EXPAND — フルスクリーンへ
-    document.getElementById('btnExpand').addEventListener('click', () => {
-        fullscreenIframe.src = viewerIframe.src || 'code.html';
-        fullscreenOverlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    });
+// 親からのメッセージ
+window.addEventListener('message', (e) => {
+    if (!e.data) return;
+    if (e.data.type === 'darkMode')         applyTheme(e.data.value);
+    if (e.data.type === 'profileData') {
+        try { localStorage.setItem('np_profile_cache', JSON.stringify(e.data.value)); } catch(err) {}
+        if (profileInlinePanel.classList.contains('open')) loadProfileData();
+    }
+    if (e.data.type === 'profileSaved')     showStatus('✓ Firebaseに保存しました', 'success');
+    if (e.data.type === 'profileSaveError') showStatus('⚠ 保存に失敗しました', 'error');
+});
 
-    // フルスクリーン → 額縁モードに戻る
-    document.getElementById('btnFsBack').addEventListener('click', () => {
-        fullscreenOverlay.classList.remove('open');
-        fullscreenIframe.src = '';
-        document.body.style.overflow = '';
-        // 額縁モードは維持（開いたまま）
-        iframeViewer.classList.add('open');
-        viewerIframe.src = 'code.html';
-        applyFrameSize();
-        setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
-    });
-
-    // ============================================================
-    //  親ページからのメッセージ受信
-    // ============================================================
-    window.addEventListener('message', (e) => {
-        if (!e.data) return;
-        if (e.data.type === 'darkMode')         applyTheme(e.data.value);
-        if (e.data.type === 'profileData') {
-            try { localStorage.setItem('np_profile_cache', JSON.stringify(e.data.value)); } catch(err) {}
-            if (profileInlinePanel.classList.contains('open')) loadProfileData();
-        }
-        if (e.data.type === 'profileSaved')     showStatus('✓ Firebaseに保存しました', 'success');
-        if (e.data.type === 'profileSaveError') showStatus('⚠ 保存に失敗しました', 'error');
-    });
-
-    // 初期テーマ復元
-    try { applyTheme(localStorage.getItem('darkMode') === 'true'); } catch(e) {}
-    </script>
+// 初期テーマ復元
+try { applyTheme(localStorage.getItem('darkMode') === 'true'); } catch(e) {}
+</script>
 </body>
 </html>
