@@ -130,11 +130,11 @@ export function initNeoPod() {
         document.getElementById("auth-screen").classList.add("hidden");
         document.getElementById("main-content").classList.remove("hidden");
 
-        // tolk タブへ切り替え
+        // news タブへ切り替え（初期表示）
         if (typeof window.showTab === "function") {
-            window.showTab("tolk-tag");
+            window.showTab("news-tag");
         } else {
-            const el = document.getElementById("tolk-screen");
+            const el = document.getElementById("news-feed-container");
             if (el) el.style.display = "block";
         }
 
