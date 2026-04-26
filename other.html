@@ -175,7 +175,26 @@
             border: 1px solid var(--border-light); cursor: pointer; transition: all 0.2s;
         }
         .pf-cancel-btn:hover { border-color: var(--border-hover); color: var(--text-main); }
-        .pf-status { font-size: 0.78rem; color: var(--accent); margin-top: 10px; min-height: 18px; font-weight: 700; }
+
+        /* ステータス行 */
+        .pf-status-row {
+            min-height: 24px;
+            margin-top: 8px;
+        }
+        .pf-status {
+            font-size: 0.78rem;
+            font-weight: 700;
+            min-height: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .pf-status.show { opacity: 1; }
+        .pf-status.success { color: var(--accent); }
+        .pf-status.error   { color: #e53e3e; }
 
         @media (max-width: 850px) {
             .top-navbar { padding: 0 20px; }
@@ -273,7 +292,10 @@
                         <button class="pf-save-btn" id="pfSaveBtn">SAVE</button>
                         <button class="pf-cancel-btn" id="pfCancelBtn">CANCEL</button>
                     </div>
-                    <div class="pf-status" id="pfStatus"></div>
+                    <!-- ステータス表示 -->
+                    <div class="pf-status-row">
+                        <span class="pf-status" id="pfStatus"></span>
+                    </div>
                 </div>
             </div>
 
@@ -337,14 +359,13 @@
 
     // ============================================================
     //  PROFILE_PANEL スイッチ
-    //  → index.html の右上プロフィール欄 (#neo-fixed-header) を表示・非表示
     // ============================================================
     document.getElementById('profilePanelSwitch').addEventListener('change', function() {
         window.parent.postMessage({ type: 'setProfilePanel', value: this.checked }, '*');
     });
 
     // ============================================================
-    //  PROFILE_EDIT ボタン（元の動作を維持）
+    //  PROFILE_EDIT パネル — 開閉
     // ============================================================
     const profileInlinePanel  = document.getElementById('profile-inline-panel');
     const openProfilePanelBtn = document.getElementById('openProfilePanelBtn');
@@ -367,6 +388,9 @@
         openProfilePanelBtn.textContent = 'EDIT PROFILE';
     });
 
+    // ============================================================
+    //  プロフィールデータをキャッシュから読み込む
+    // ============================================================
     function loadProfileData() {
         try {
             const saved = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
@@ -378,27 +402,59 @@
         } catch(e) {}
     }
 
-    document.getElementById('avatarWrap').addEventListener('click', () => document.getElementById('pfFileInput').click());
+    // ============================================================
+    //  アバター画像変更
+    // ============================================================
+    document.getElementById('avatarWrap').addEventListener('click', () =>
+        document.getElementById('pfFileInput').click()
+    );
     document.getElementById('pfFileInput').addEventListener('change', function() {
-        const file = this.files[0]; if (!file) return;
+        const file = this.files[0];
+        if (!file) return;
         const r = new FileReader();
         r.onload = ev => { document.getElementById('pfPreviewImg').src = ev.target.result; };
         r.readAsDataURL(file);
     });
 
+    // ============================================================
+    //  ステータス表示ヘルパー
+    // ============================================================
+    function showStatus(msg, type = 'success') {
+        const st = document.getElementById('pfStatus');
+        st.textContent = msg;
+        st.className   = 'pf-status ' + type + ' show';
+        clearTimeout(st._timer);
+        st._timer = setTimeout(() => { st.classList.remove('show'); }, 2800);
+    }
+
+    // ============================================================
+    //  SAVE ボタン
+    //  ① localStorageキャッシュを更新
+    //  ② postMessage で親 (index.html) へ送信
+    //     → neopod.js の _npUpdateProfile が Firebase に保存 ＋ ヘッダー反映
+    // ============================================================
     document.getElementById('pfSaveBtn').addEventListener('click', () => {
         const newIcon     = document.getElementById('pfPreviewImg').src;
         const newBirthday = document.getElementById('pfBirthday').value;
         const newBio      = document.getElementById('pfBio').value.trim();
+
+        // ① localStorageキャッシュ更新
         try {
-            const s = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
-            s.icon = newIcon; s.birthday = newBirthday; s.bio = newBio;
+            const s     = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
+            s.icon      = newIcon;
+            s.birthday  = newBirthday;
+            s.bio       = newBio;
             localStorage.setItem('np_profile_cache', JSON.stringify(s));
         } catch(e) {}
-        window.parent.postMessage({ type: 'updateProfile', value: { icon: newIcon, birthday: newBirthday, bio: newBio } }, '*');
-        const st = document.getElementById('pfStatus');
-        st.textContent = '✓ 保存しました';
-        setTimeout(() => { st.textContent = ''; }, 2500);
+
+        // ② 親ページ (index.html) へ送信
+        //    index.html 側で _npUpdateProfile(Firebase保存) ＋ ヘッダーアイコン更新が行われる
+        window.parent.postMessage({
+            type: 'updateProfile',
+            value: { icon: newIcon, birthday: newBirthday, bio: newBio }
+        }, '*');
+
+        showStatus('✓ 保存しました', 'success');
     });
 
     // ============================================================
@@ -406,10 +462,31 @@
     // ============================================================
     window.addEventListener('message', (e) => {
         if (!e.data) return;
-        if (e.data.type === 'darkMode') applyTheme(e.data.value);
+
+        // ダークモード同期
+        if (e.data.type === 'darkMode') {
+            applyTheme(e.data.value);
+        }
+
+        // ログイン後にプロフィールデータが届いたらキャッシュへ保存
+        // パネルが開いていれば表示も即時更新
         if (e.data.type === 'profileData') {
-            try { localStorage.setItem('np_profile_cache', JSON.stringify(e.data.value)); } catch(err) {}
-            if (profileInlinePanel.classList.contains('open')) loadProfileData();
+            try {
+                localStorage.setItem('np_profile_cache', JSON.stringify(e.data.value));
+            } catch(err) {}
+            if (profileInlinePanel.classList.contains('open')) {
+                loadProfileData();
+            }
+        }
+
+        // Firebase保存成功の確認応答（index.html から任意送信）
+        if (e.data.type === 'profileSaved') {
+            showStatus('✓ Firebaseに保存しました', 'success');
+        }
+
+        // Firebase保存失敗の通知（index.html から任意送信）
+        if (e.data.type === 'profileSaveError') {
+            showStatus('⚠ 保存に失敗しました', 'error');
         }
     });
 

@@ -16,6 +16,204 @@
             transition: top 0.4s cubic-bezier(.4,0,.2,1),
                         right 0.4s cubic-bezier(.4,0,.2,1);
         }
+
+        /* ============================================================
+           プロフィール編集モーダル — リデザイン
+        ============================================================ */
+        #profile-modal .pf-modal-inner {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+            width: 90%;
+            max-width: 420px;
+            max-height: 88vh;
+            overflow-y: auto;
+            box-shadow: 0 16px 56px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        body.dark-mode #profile-modal .pf-modal-inner {
+            background: #1e1e2f;
+            box-shadow: 0 16px 56px rgba(0,0,0,0.6);
+        }
+
+        /* アバターエリア */
+        #profile-modal .pf-avatar-wrap {
+            position: relative;
+            width: 96px;
+            height: 96px;
+            margin-bottom: 6px;
+            cursor: pointer;
+        }
+        #profile-modal .pf-avatar-wrap img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent, #7c3aed);
+            box-shadow: 0 4px 18px rgba(124,58,237,0.25);
+            display: block;
+            transition: filter 0.2s, transform 0.2s;
+        }
+        #profile-modal .pf-avatar-wrap:hover img {
+            filter: brightness(0.75);
+            transform: scale(1.04);
+        }
+        #profile-modal .pf-avatar-overlay {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        #profile-modal .pf-avatar-wrap:hover .pf-avatar-overlay {
+            opacity: 1;
+        }
+        #profile-modal .pf-avatar-overlay span {
+            font-size: 11px;
+            color: #fff;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+        }
+
+        /* 名前・ID */
+        #profile-modal .pf-name {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--text-main, #1a202c);
+            margin-bottom: 2px;
+            letter-spacing: 0.2px;
+        }
+        #profile-modal .pf-id {
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 24px;
+        }
+
+        /* 区切り線 */
+        #profile-modal .pf-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(124,58,237,0.25), transparent);
+            margin-bottom: 22px;
+        }
+
+        /* フィールドグループ */
+        #profile-modal .pf-fields {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+        #profile-modal .pf-field-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+        }
+        #profile-modal .pf-field-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--accent, #7c3aed);
+            margin-bottom: 6px;
+            padding-left: 2px;
+        }
+        #profile-modal .pf-field-wrap input[type="date"],
+        #profile-modal .pf-field-wrap textarea {
+            width: 100%;
+            background: #f7f7fb;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            color: #1a202c;
+            font-family: inherit;
+            font-size: 14px;
+            padding: 11px 15px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+            box-sizing: border-box;
+        }
+        body.dark-mode #profile-modal .pf-field-wrap input[type="date"],
+        body.dark-mode #profile-modal .pf-field-wrap textarea {
+            background: #2a2a40;
+            border-color: #3d3d5c;
+            color: #e2e8f0;
+        }
+        #profile-modal .pf-field-wrap input[type="date"]:focus,
+        #profile-modal .pf-field-wrap textarea:focus {
+            border-color: var(--accent, #7c3aed);
+            box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+            background: #fff;
+        }
+        body.dark-mode #profile-modal .pf-field-wrap input[type="date"]:focus,
+        body.dark-mode #profile-modal .pf-field-wrap textarea:focus {
+            background: #2a2a40;
+        }
+        #profile-modal .pf-field-wrap textarea {
+            height: 90px;
+            resize: none;
+            line-height: 1.6;
+        }
+
+        /* ボタン行 */
+        #profile-modal .pf-btn-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+        #profile-modal .pf-btn-cancel {
+            flex: 1;
+            background: #f3f4f6;
+            color: #6b7280;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.18s, color 0.18s;
+        }
+        #profile-modal .pf-btn-cancel:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+        body.dark-mode #profile-modal .pf-btn-cancel {
+            background: #2a2a40;
+            color: #a0aec0;
+        }
+        body.dark-mode #profile-modal .pf-btn-cancel:hover {
+            background: #3a3a55;
+            color: #e2e8f0;
+        }
+        #profile-modal .pf-btn-save {
+            flex: 2;
+            background: linear-gradient(135deg, var(--accent, #7c3aed), #a855f7);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+            transition: opacity 0.18s, transform 0.15s;
+        }
+        #profile-modal .pf-btn-save:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        #profile-modal .pf-btn-save:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -205,29 +403,47 @@
 
     </div><!-- /#tolk-screen -->
 
-    <!-- プロフィール編集モーダル -->
-    <div id="profile-modal" class="modal-overlay hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);">
-        <div style="background:#ffffff; border-radius:20px; padding:25px; width:90%; max-width:400px; max-height:85vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.4);">
-            <h3 style="text-align:center; margin-bottom:15px; color:#333;">プロフィール編集</h3>
+    <!-- ============================================================
+         プロフィール編集モーダル — リデザイン版
+    ============================================================ -->
+    <div id="profile-modal" class="modal-overlay hidden"
+         style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999;
+                display:none; align-items:center; justify-content:center;
+                background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);">
+
+        <div class="pf-modal-inner">
+
+            <!-- アバター -->
+            <div class="pf-avatar-wrap" onclick="document.getElementById('profile-file-input').click()">
+                <img id="profile-edit-preview" src="" alt="avatar">
+                <div class="pf-avatar-overlay"><span>📷 変更</span></div>
+            </div>
             <input type="file" id="profile-file-input" hidden accept="image/*">
-            <div onclick="document.getElementById('profile-file-input').click()" style="width:100px; height:100px; margin:0 auto 10px; border-radius:50%; overflow:hidden; cursor:pointer; border:3px solid var(--accent); background:#f0f0f0;">
-                <img id="profile-edit-preview" src="" style="width:100%; height:100%; object-fit:cover;">
+
+            <!-- 名前・ID -->
+            <div class="pf-name" id="edit-profile-name"></div>
+            <div class="pf-id"   id="edit-profile-id"></div>
+
+            <div class="pf-divider"></div>
+
+            <!-- フィールド -->
+            <div class="pf-fields">
+                <div class="pf-field-wrap">
+                    <label class="pf-field-label">🎂 誕生日</label>
+                    <input type="date" id="edit-birthday">
+                </div>
+                <div class="pf-field-wrap">
+                    <label class="pf-field-label">✏️ 自己紹介</label>
+                    <textarea id="edit-bio" placeholder="自己紹介・説明欄"></textarea>
+                </div>
             </div>
-            <p style="font-size:11px; color:#888; text-align:center; margin-bottom:10px;">クリックして画像を変更</p>
-            <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:15px;">
-                <span id="edit-profile-name" style="font-weight:bold; font-size:15px; color:#333;"></span>
-                <span id="edit-profile-id"   style="font-size:12px; color:#888; border-left:1px solid #ddd; padding-left:8px;"></span>
+
+            <!-- ボタン -->
+            <div class="pf-btn-row">
+                <button class="pf-btn-cancel" onclick="window.closeModal('profile-modal')">キャンセル</button>
+                <button class="pf-btn-save"   id="profile-save-btn">保存する</button>
             </div>
-            <div style="text-align:left; margin-bottom:15px;">
-                <label style="display:block; font-size:11px; color:var(--accent); font-weight:bold; margin-bottom:4px; margin-left:5px;">誕生日</label>
-                <input type="date" id="edit-birthday" class="input-field" style="background:#f8f8f8; color:#333;">
-                <label style="display:block; font-size:11px; color:var(--accent); font-weight:bold; margin-bottom:4px; margin-left:5px; margin-top:10px;">自己紹介</label>
-                <textarea id="edit-bio" class="input-field" style="height:80px; resize:none; background:#f8f8f8; color:#333;" placeholder="自己紹介・説明欄"></textarea>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <button onclick="window.closeModal('profile-modal')" style="flex:1; background:#eee; border:none; padding:10px; border-radius:15px; cursor:pointer; color:#555;">戻る</button>
-                <button id="profile-save-btn" style="flex:2; background:var(--accent); color:white; border:none; padding:10px; border-radius:15px; font-weight:bold; cursor:pointer;">保存する</button>
-            </div>
+
         </div>
     </div>
 
@@ -418,12 +634,14 @@
                     if (btn) btn.click();
                 }
 
-                // PROFILE_EDIT（updateProfile）→ Firebase 保存
+                // updateProfile → Firebase保存 ＋ 固定ヘッダー即時反映
                 if (e.data.type === 'updateProfile') {
                     const { icon, birthday, bio } = e.data.value;
+                    // Firebase保存（neopod.js 側の関数を呼ぶ）
                     if (typeof window._npUpdateProfile === 'function') {
                         window._npUpdateProfile({ icon, birthday, bio });
                     } else {
+                        // フォールバック：localStorageだけ更新 ＋ ヘッダー反映
                         try {
                             const cached = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
                             cached.icon     = icon;
@@ -432,6 +650,9 @@
                             localStorage.setItem('np_profile_cache', JSON.stringify(cached));
                         } catch(err) {}
                     }
+                    // 固定ヘッダーのアイコンを即時更新
+                    const myBtn = document.getElementById('my-profile-btn');
+                    if (myBtn && icon) myBtn.src = icon;
                 }
             });
         });
