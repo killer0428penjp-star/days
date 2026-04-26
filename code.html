@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --sidebar-green: #c5e1a5; 
+            --line-white: #ffffff; 
+            --hover-white: rgba(255, 255, 255, 0.4);
+            --main-bg: linear-gradient(135deg, #e0e5ec 0%, #cbd5e0 100%); 
+            --editor-bg: #ffffff;
+            --accent-color: #8bc34a; 
+            --deep-shadow: 20px 20px 60px #bebebe, -20px -20px 60px #ffffff;
+            --cat-html: #e34c26;
+            --cat-css: #264de4;
+            --cat-cmd: #555555;
+            --cat-memo: #666666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body { display: flex; height: 100vh; font-family: 'Arial', sans-serif; overflow: hidden; background: var(--main-bg); }
+        
+        /* --- サイドバー --- */
+        #sidebar {
+            width: 280px; background-color: var(--sidebar-green);
+            color: #333; display: flex; flex-direction: column;
+            transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            flex-shrink: 0; z-index: 100; overflow: hidden;
+        }
+        #sidebar.collapsed { width: 60px; }
+        
+        .nav-unit { border-bottom: 2px solid var(--line-white); display: flex; justify-content: center; position: relative; }
+        #sidebar:not(.collapsed) .nav-unit { justify-content: flex-end; }
+        
+        button { background: none; border: none; cursor: pointer; transition: 0.2s; outline: none; }
+        .toggle-btn { padding: 10px; font-size: 1.2rem; width: 60px; text-align: center; }
+        
+        /* カテゴリタブ */
+        .category-tabs {
+            display: flex;
+            padding: 5px;
+            gap: 2px;
+            background: rgba(255,255,255,0.2);
+            overflow-x: auto;
+            scrollbar-width: none; 
+        }
+        .category-tabs::-webkit-scrollbar { display: none; }
+        #sidebar.collapsed .category-tabs { display: none; }
+
+        .cat-btn {
+            flex: 1;
+            padding: 6px 2px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: #555;
+            border-radius: 4px;
+            text-align: center;
+            white-space: nowrap;
+            background: rgba(255,255,255,0.3);
+        }
+        .cat-btn:hover { background: rgba(255,255,255,0.6); }
+        .cat-btn.active { background: #fff; color: var(--accent-color); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        .add-btn { 
+            padding: 15px 15px; font-weight: bold; font-size: 1rem; text-align: left;
+            border-bottom: 2px solid var(--line-white); background-color: rgba(255, 255, 255, 0.15);
+            white-space: nowrap; display: flex; align-items: center; gap: 10px;
+        }
+        #sidebar.collapsed .add-btn { justify-content: center; padding: 15px 0; font-size: 1.4rem; }
+        
+        .item-list { flex-grow: 1; overflow-y: auto; overflow-x: hidden; }
+        
+        .item { 
+            display: flex; align-items: center; padding: 10px 15px; 
+            border-bottom: 1px solid var(--line-white); cursor: pointer; 
+            white-space: nowrap; transition: background 0.2s;
+            user-select: none;
+        }
+        .item:hover { background: rgba(255,255,255,0.2); }
+        .item.active { background: var(--hover-white); font-weight: bold; border-left: 4px solid var(--accent-color); }
+        .item.dragging { opacity: 0.5; background: #e0e0e0; }
+
+        #sidebar.collapsed .item { justify-content: center; padding: 12px 0; border-left: none; }
+        .txt-label { transition: opacity 0.2s; overflow: hidden; text-overflow: ellipsis; }
+        #sidebar.collapsed .txt-label { opacity: 0; width: 0; display: none; }
+        
+        .type-badge {
+            width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; flex-shrink: 0;
+        }
+        .type-html { background: var(--cat-html); }
+        .type-css { background: var(--cat-css); }
+        .type-cmd { background: var(--cat-cmd); }
+        .type-memo { background: var(--cat-memo); }
+
+        .item-del { margin-left: auto; opacity: 0.5; padding: 4px; border-radius: 4px; }
+        .item-del:hover { background: #ffcdd2; color: #d32f2f; opacity: 1; }
+        
+        .drag-handle { 
+            cursor: grab; color: #888; margin-right: 5px; font-size: 12px; 
+            display: none; 
+        }
+        #sidebar.collapsed .drag-handle { display: none !important; }
+
+        /* --- 検索エリア --- */
+        #search-container {
+            padding: 15px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-top: 2px solid var(--line-white);
+        }
+        #sidebar.collapsed #search-container { display: none; }
+        .search-box {
+            background: #fff; border-radius: 8px; padding: 6px 10px;
+            display: flex; align-items: center; gap: 5px;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        .search-input { border: none; outline: none; width: 100%; font-size: 0.85rem; }
+        #search-results {
+            margin-top: 10px; max-height: 150px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 5px;
+        }
+        .search-res-item {
+            padding: 8px; background: rgba(255, 255, 255, 0.4);
+            border-radius: 5px; font-size: 0.8rem; cursor: pointer;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .search-res-item:hover { background: #fff; }
+
+        /* --- メインエリア --- */
+        #main { flex-grow: 1; display: flex; flex-direction: column; padding: 10px 10px 10px 15px; gap: 10px; overflow: hidden; position: relative; }
+        .toolbar {
+            display: flex; align-items: center; padding: 10px 20px;
+            background: #e0e5ec; border-radius: 12px;
+            box-shadow: 6px 6px 12px #bebebe, -6px -6px 12px #ffffff; gap: 10px; z-index: 10;
+            width: fit-content; flex-wrap: wrap;
+        }
+        .toolbar-group { display: flex; align-items: center; gap: 8px; padding-right: 12px; border-right: 1px solid #b8b9be; }
+        .toolbar-group:last-child { border-right: none; }
+        .toolbar select { border-radius: 5px; border: 1px solid #b8b9be; background: #fff; padding: 4px; font-size: 0.85rem; cursor: pointer; }
+        .t-btn {
+            border-radius: 8px; border: none; background: #e0e5ec; padding: 6px 12px; cursor: pointer;
+            box-shadow: 3px 3px 6px #b8b9be, -3px -3px 6px #ffffff; font-weight: bold; color: #444; transition: all 0.1s;
+        }
+        .t-btn.is-active { background: var(--accent-color); color: white; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.2); }
+        #foreColor { appearance: none; -webkit-appearance: none; width: 28px; height: 28px; background: transparent; border: none; cursor: pointer; padding: 0; border-radius: 50%; overflow: hidden; }
+        #foreColor::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+        /* --- エディタコンテナ --- */
+        #editor-container { flex-grow: 1; display: flex; position: relative; overflow: hidden; padding-bottom: 20px; }
+        
+        #paper {
+            width: 100%; background: #ffffff; border-radius: 20px;
+            box-shadow: var(--deep-shadow); display: flex; flex-direction: column;
+            overflow: hidden; position: relative; 
+        }
+
+        #page-meta {
+            display: flex; align-items: center; justify-content: center;
+            padding-top: 20px; gap: 10px;
+        }
+        #page-type-select {
+            font-size: 0.8rem; padding: 2px 8px; border-radius: 12px; border: 1px solid #ddd;
+            background: #f9f9f9; color: #666; cursor: pointer; outline: none;
+        }
+
+        #page-title {
+            text-align: center; font-size: 32px; font-weight: bold;
+            padding: 10px 0 10px 0; margin: 0 50px;
+            border-bottom: 2px solid #eee; color: #333; outline: none;
+        }
+
+        #editor {
+            flex-grow: 1; padding: 20px 50px 40px 50px;
+            outline: none; font-family: 'Arial', sans-serif; font-size: 18px; 
+            line-height: 1.8; overflow-y: auto; text-align: left;
+        }
+
+        /* --- コードブロック --- */
+        .code-wrapper {
+            margin: 20px 0; border-radius: 8px; background: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden;
+            border: 1px solid #e0e0e0; font-family: 'Consolas', 'Monaco', monospace;
+        }
+        .code-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 6px 12px; background: #f8f9fa; border-bottom: 1px solid #e0e0e0; user-select: none;
+        }
+        .lang-badge {
+            font-size: 0.75rem; font-weight: bold; color: #fff; padding: 3px 8px;
+            border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .lang-css { background: var(--cat-css); } 
+        .lang-html { background: var(--cat-html); } 
+        .lang-cmd { background: var(--cat-cmd); } 
+
+        .code-controls { display: flex; gap: 5px; }
+        .code-btn {
+            background: transparent; color: #666; border: none; border-radius: 4px;
+            padding: 6px 8px; font-size: 1rem; cursor: pointer; transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .code-btn:hover { background: rgba(0,0,0,0.05); color: #000; }
+        .code-btn.del:hover { background: #ffebee; color: #d32f2f; }
+        .code-btn.preview:hover { background: #e3f2fd; color: #1976d2; }
+
+        pre {
+            background: #ffffff; color: #333333; padding: 15px 20px; margin: 0;
+            font-family: 'Consolas', 'Monaco', monospace; font-size: 15px; line-height: 1.6;
+            overflow-x: auto; border: none; outline: none; white-space: pre;
+        }
+        code { font-family: 'Consolas', 'Monaco', monospace; outline: none; }
+
+        /* --- 画像操作 --- */
+        .resizable-img { position: absolute; max-width: none; cursor: default; user-select: none; }
+        .resize-wrapper { position: absolute; border: 2px solid var(--accent-color); z-index: 50; pointer-events: none; }
+        .resize-wrapper > * { pointer-events: auto; }
+        .resize-handle {
+            position: absolute; width: 12px; height: 12px; background: var(--accent-color);
+            border: 1px solid white; border-radius: 50%; box-shadow: 0 0 2px rgba(0,0,0,0.3);
+        }
+        .ne { top: -6px; right: -6px; cursor: ne-resize; }
+        .se { bottom: -6px; right: -6px; cursor: se-resize; }
+        .sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+        .move-handle {
+            position: absolute; top: -15px; left: -15px; width: 30px; height: 30px;
+            background: #fff; border: 2px solid var(--accent-color); border-radius: 50%;
+            cursor: move; display: flex; justify-content: center; align-items: center;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2); z-index: 60;
+        }
+        .move-handle::before, .move-handle::after { content: ''; position: absolute; background: var(--accent-color); }
+        .move-handle::before { width: 16px; height: 3px; }
+        .move-handle::after { width: 3px; height: 16px; }
+
+        /* --- CSSプレビューパネル --- */
+        #preview-panel {
+            position: fixed; top: 0; right: -400px; width: 400px; height: 100vh;
+            background: #f5f5f5; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            z-index: 200; display: flex; flex-direction: column;
+        }
+        #preview-panel.open { right: 0; }
+        .panel-header {
+            padding: 15px; background: var(--cat-css); color: white;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: bold;
+        }
+        .panel-controls { display: flex; gap: 10px; }
+        .panel-btn {
+            background: none; border: none; color: white; font-size: 1.1rem; cursor: pointer;
+            padding: 2px 8px; border-radius: 4px;
+        }
+        .panel-btn:hover { background: rgba(255,255,255,0.2); }
+
+        #preview-content {
+            flex-grow: 1; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            background-image: linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee),
+                              linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+        #preview-frame {
+            width: 100%; height: 100%; border: none; background: transparent;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="nav-unit">
+        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    </div>
+    
+    <div class="category-tabs">
+        <button class="cat-btn active" onclick="setCategory('all')" id="tab-all">ALL</button>
+        <button class="cat-btn" onclick="setCategory('html')" id="tab-html" style="color: #e34c26;">HTML</button>
+        <button class="cat-btn" onclick="setCategory('css')" id="tab-css" style="color: #264de4;">CSS</button>
+        <button class="cat-btn" onclick="setCategory('cmd')" id="tab-cmd" style="color: #555;">CMD</button>
+        <button class="cat-btn" onclick="setCategory('memo')" id="tab-memo" style="color: #666;">MEMO</button>
+    </div>
+
+    <button class="add-btn" onclick="addItem()"><span>＋</span><span class="txt-label">新しいページ追加</span></button>
+    <div id="list" class="item-list"></div>
+
+    <div id="search-container">
+        <div class="search-box">
+            <input type="text" id="search-input" class="search-input" placeholder="🔍 タイトル・本文で検索" oninput="runSearch()">
+        </div>
+        <div id="search-results"></div>
+    </div>
+</div>
+
+<div id="main">
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <select id="fontName" onchange="doAction('fontName', this.value)" style="width: 130px;">
+                <option value="Arial">Arial (標準)</option>
+                <option value="Yu Gothic">遊ゴシック</option>
+                <option value="Meiryo">メイリオ</option>
+                <option value="MS Gothic">ＭＳ ゴシック</option>
+            </select>
+            <select id="fontSize" onchange="doAction('fontSize', this.value)">
+                <option value="1">10px (h6)</option>
+                <option value="2">13px (h5)</option>
+                <option value="3">16px (h4)</option>
+                <option value="4" selected>18px (h3)</option>
+                <option value="5">24px (h2)</option>
+                <option value="6">32px (h1)</option>
+                <option value="7">48px (h-max)</option>
+            </select>
+        </div>
+        <div class="toolbar-group">
+            <button id="btn-bold" class="t-btn" onclick="doAction('bold')">B</button>
+            <button id="btn-italic" class="t-btn" onclick="doAction('italic')">I</button>
+            <button id="btn-underline" class="t-btn" onclick="doAction('underline')">U</button>
+            <input type="color" id="foreColor" onchange="doAction('foreColor', this.value)" value="#000000">
+        </div>
+        <div class="toolbar-group">
+            <button id="btn-left" class="t-btn" onclick="doAction('justifyLeft')">左</button>
+            <button id="btn-center" class="t-btn" onclick="doAction('justifyCenter')">中</button>
+            <button id="btn-right" class="t-btn" onclick="doAction('justifyRight')">右</button>
+        </div>
+        <div class="toolbar-group">
+            <button class="t-btn" onclick="triggerImageUpload()" title="画像を追加">画像</button>
+            <input type="file" id="imgInput" style="display:none" accept="image/*" onchange="insertImage(event)">
+        </div>
+        <div class="toolbar-group">
+            <button class="t-btn" onclick="insertCodeBlock('css')" title="CSSコード挿入" style="color: var(--cat-css)">CSS</button>
+            <button class="t-btn" onclick="insertCodeBlock('html')" title="HTMLコード挿入" style="color: var(--cat-html)">HTML</button>
+            <button class="t-btn" onclick="insertCodeBlock('cmd')" title="コマンド挿入" style="color: var(--cat-cmd)">CMD</button>
+        </div>
+        <div class="toolbar-group">
+            <button class="t-btn" onclick="doAction('undo')">↩</button>
+            <button class="t-btn" onclick="doAction('redo')">↪</button>
+        </div>
+    </div>
+    
+    <div id="editor-container">
+        <div id="paper">
+            <div id="page-meta">
+                <select id="page-type-select" onchange="changePageType(this.value)">
+                    <option value="memo">📝 Memo</option>
+                    <option value="html">🌐 HTML</option>
+                    <option value="css">🎨 CSS</option>
+                    <option value="cmd">💻 CMD</option>
+                </select>
+            </div>
+            <h1 id="page-title" contenteditable="true">タイトル</h1>
+            <div id="editor" contenteditable="true" spellcheck="false"></div>
+        </div>
+    </div>
+</div>
+
+<div id="preview-panel">
+    <div class="panel-header">
+        <span><i class="bi bi-palette"></i> CSS Preview</span>
+        <div class="panel-controls">
+            <button class="panel-btn" onclick="updatePreview()" title="更新"><i class="bi bi-arrow-clockwise"></i></button>
+            <button class="panel-btn" onclick="closePreview()" title="閉じる"><i class="bi bi-x-lg"></i></button>
+        </div>
+    </div>
+    <div id="preview-content">
+        <iframe id="preview-frame"></iframe>
+    </div>
+</div>
+
+<script>
+    // データ構造: { title, content, type } (type: 'memo'|'html'|'css'|'cmd')
+    let items = JSON.parse(localStorage.getItem('myItems')) || [{ title: "最初のページ", content: "", type: "memo" }];
+    
+    // データマイグレーション（古いデータ用）
+    items.forEach(item => { if(!item.type) item.type = "memo"; });
+
+    let currentIndex = parseInt(localStorage.getItem('myCurrentIndex')) || 0;
+    let currentCategory = 'all'; // フィルタ用状態
+
+    const editor = document.getElementById('editor');
+    const pageTitleEl = document.getElementById('page-title');
+    const pageTypeSelect = document.getElementById('page-type-select');
+    const editorContainer = document.getElementById('editor-container');
+    const previewPanel = document.getElementById('preview-panel');
+    const previewFrame = document.getElementById('preview-frame');
+    
+    let selectedImg = null;
+    let resizeWrapper = null;
+    let dragSrcEl = null;
+    let activeCodeBlock = null; // 現在プレビュー中のブロック
+
+    window.onload = () => {
+        renderList();
+        loadCurrentPage();
+    };
+
+    // --- カテゴリ・フィルタ機能 ---
+    function setCategory(cat) {
+        currentCategory = cat;
+        // タブのスタイル更新
+        document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(`tab-${cat}`).classList.add('active');
+        renderList();
+    }
+
+    function changePageType(newType) {
+        if(items[currentIndex]) {
+            items[currentIndex].type = newType;
+            saveAllData();
+            renderList();
+        }
+    }
+
+    // --- 検索機能 ---
+    function runSearch() {
+        const query = document.getElementById('search-input').value.trim().toLowerCase();
+        const resultsArea = document.getElementById('search-results');
+        resultsArea.innerHTML = '';
+
+        if (!query) return;
+
+        items.forEach((item, index) => {
+            const inTitle = item.title.toLowerCase().includes(query);
+            const inContent = item.content.toLowerCase().includes(query);
+
+            if (inTitle || inContent) {
+                const resDiv = document.createElement('div');
+                resDiv.className = 'search-res-item';
+                resDiv.innerText = `📄 ${item.title}`;
+                resDiv.onclick = () => {
+                    selectItem(index);
+                    document.getElementById('search-input').value = '';
+                    resultsArea.innerHTML = '';
+                    // 検索で見つかったアイテムのカテゴリタブを表示
+                    setCategory('all'); 
+                };
+                resultsArea.appendChild(resDiv);
+            }
+        });
+    }
+
+    // --- エディタ基本操作 ---
+    function doAction(command, value = null) {
+        document.execCommand(command, false, value);
+        editor.focus();
+        updateUI();
+        saveContent();
+    }
+
+    function insertCodeBlock(type) {
+        // 初期コードは空、または最低限
+        let sampleCode = "\n";
+        
+        let langClass = "lang-" + type;
+        
+        // CSSの場合のみプレビューボタンを追加
+        let previewBtnHTML = "";
+        if (type === 'css') {
+            previewBtnHTML = `<button class="code-btn preview" onclick="showCssPreview(this)" title="プレビューを表示"><i class="bi bi-eye"></i></button>`;
+        }
+
+        const html = `
+            <div class="code-wrapper" contenteditable="false">
+                <div class="code-header">
+                    <span class="lang-badge ${langClass}">${type.toUpperCase()}</span>
+                    <div class="code-controls">
+                        ${previewBtnHTML}
+                        <button class="code-btn" onclick="copyCode(this)" title="コピー"><i class="bi bi-clipboard"></i></button>
+                        <button class="code-btn del" onclick="deleteCodeBlock(this)" title="削除"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+                <pre contenteditable="true"><code>${sampleCode}</code></pre>
+            </div>
+            <p><br></p>
+        `;
+        doAction('insertHTML', html);
+    }
+
+    function deleteCodeBlock(btn) {
+        const wrapper = btn.closest('.code-wrapper');
+        if(wrapper) { wrapper.remove(); saveContent(); }
+    }
+
+    function copyCode(btn) {
+        const wrapper = btn.closest('.code-wrapper');
+        const codeText = wrapper.querySelector('pre').innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+            const icon = btn.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = "bi bi-check-lg";
+            setTimeout(() => { icon.className = originalClass; }, 1000);
+        });
+    }
+
+    // --- CSSプレビュー機能 ---
+    function showCssPreview(btn) {
+        activeCodeBlock = btn.closest('.code-wrapper');
+        previewPanel.classList.add('open');
+        updatePreview();
+    }
+
+    function updatePreview() {
+        if (!activeCodeBlock) return;
+
+        const codeText = activeCodeBlock.querySelector('pre').innerText.trim();
+        
+        // ユーザーが「{」を含んでいない場合は、プロパティだけ書いたとみなして.boxでラップする
+        let cssToInject = codeText;
+        if (!codeText.includes('{')) {
+            cssToInject = `.box { ${codeText} }`;
+        }
+
+        const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+        doc.open();
+        doc.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body { 
+                        display: flex; justify-content: center; align-items: center; 
+                        height: 100vh; margin: 0; font-family: sans-serif; 
+                        overflow: hidden;
+                    }
+                    /* デフォルトのターゲット要素基盤（リセット含む） */
+                    .box {
+                        width: 100px; height: 100px; background: #ddd; 
+                        display: flex; justify-content: center; align-items: center;
+                        color: #666; font-weight: bold;
+                        /* ユーザー入力を優先するために最低限のスタイルのみ */
+                    }
+                    /* ユーザーCSS */
+                    ${cssToInject}
+                </style>
+            </head>
+            <body>
+                <div class="box">BOX</div>
+            </body>
+            </html>
+        `);
+        doc.close();
+    }
+
+    function closePreview() {
+        previewPanel.classList.remove('open');
+        activeCodeBlock = null;
+    }
+
+    function updateUI() {
+        const styles = { 'bold': 'btn-bold', 'italic': 'btn-italic', 'underline': 'btn-underline', 'justifyLeft': 'btn-left', 'justifyCenter': 'btn-center', 'justifyRight': 'btn-right' };
+        for (let cmd in styles) {
+            const el = document.getElementById(styles[cmd]);
+            if (el) el.classList.toggle('is-active', document.queryCommandState(cmd));
+        }
+        const currentFont = document.queryCommandValue('fontName').replace(/"/g, "");
+        if(currentFont) document.getElementById('fontName').value = currentFont;
+        const currentSize = document.queryCommandValue('fontSize');
+        if(currentSize) document.getElementById('fontSize').value = currentSize;
+    }
+
+    pageTitleEl.addEventListener('input', () => {
+        items[currentIndex].title = pageTitleEl.innerText;
+        saveAllData();
+        // リスト全体を再描画するとフォーカスが外れるため、テキストのみ更新
+        const activeItemLabel = document.querySelector('.item.active .txt-label');
+        if(activeItemLabel) activeItemLabel.innerText = items[currentIndex].title;
+    });
+
+    // --- 画像処理 ---
+    function triggerImageUpload() { document.getElementById('imgInput').click(); }
+
+    function insertImage(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                img.className = 'resizable-img';
+                img.style.width = '200px';
+                img.style.top = (editor.scrollTop + 50) + 'px';
+                img.style.left = '50px';
+                editor.appendChild(img);
+                saveContent();
+                setTimeout(() => showResizeHandles(img), 0);
+            };
+            reader.readAsDataURL(file);
+        }
+        e.target.value = ''; 
+    }
+
+    window.addEventListener('keydown', (e) => {
+        if (selectedImg && (e.key === 'Delete' || e.key === 'Backspace')) {
+            e.preventDefault();
+            selectedImg.remove();
+            removeResizeHandles();
+            saveContent();
+        }
+    });
+
+    editor.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'IMG') {
+            e.preventDefault(); 
+            showResizeHandles(e.target);
+        } else {
+            if (!resizeWrapper || !resizeWrapper.contains(e.target)) {
+                removeResizeHandles();
+            }
+        }
+    });
+
+    editor.addEventListener('scroll', () => { if(selectedImg) updateWrapperPosition(); });
+
+    function showResizeHandles(img) {
+        removeResizeHandles();
+        selectedImg = img;
+        resizeWrapper = document.createElement('div');
+        resizeWrapper.className = 'resize-wrapper';
+        
+        const moveHandle = document.createElement('div');
+        moveHandle.className = 'move-handle';
+        moveHandle.onmousedown = (e) => { e.stopPropagation(); startMove(e); };
+        resizeWrapper.appendChild(moveHandle);
+
+        ['ne', 'se', 'sw'].forEach(type => {
+            const h = document.createElement('div');
+            h.className = `resize-handle ${type}`;
+            h.onmousedown = (e) => { e.stopPropagation(); startResize(e, type); };
+            resizeWrapper.appendChild(h);
+        });
+
+        editorContainer.appendChild(resizeWrapper);
+        updateWrapperPosition();
+    }
+
+    function removeResizeHandles() {
+        if (resizeWrapper) { resizeWrapper.remove(); resizeWrapper = null; }
+        selectedImg = null;
+    }
+
+    function updateWrapperPosition() {
+        if (!selectedImg || !resizeWrapper) return;
+        const imgRect = selectedImg.getBoundingClientRect();
+        const containerRect = editorContainer.getBoundingClientRect();
+        resizeWrapper.style.top = (imgRect.top - containerRect.top) + 'px';
+        resizeWrapper.style.left = (imgRect.left - containerRect.left) + 'px';
+        resizeWrapper.style.width = imgRect.width + 'px';
+        resizeWrapper.style.height = imgRect.height + 'px';
+    }
+
+    function startMove(e) {
+        e.preventDefault();
+        const startLeft = parseFloat(selectedImg.style.left) || 0;
+        const startTop = parseFloat(selectedImg.style.top) || 0;
+        const startX = e.clientX;
+        const startY = e.clientY;
+        function doMove(ev) {
+            selectedImg.style.left = (startLeft + ev.clientX - startX) + 'px';
+            selectedImg.style.top = (startTop + ev.clientY - startY) + 'px';
+            updateWrapperPosition();
+        }
+        function stopMove() {
+            window.removeEventListener('mousemove', doMove);
+            window.removeEventListener('mouseup', stopMove);
+            saveContent();
+        }
+        window.addEventListener('mousemove', doMove);
+        window.addEventListener('mouseup', stopMove);
+    }
+
+    function startResize(e, type) {
+        e.preventDefault();
+        const startX = e.clientX;
+        const startWidth = selectedImg.offsetWidth;
+        const startHeight = selectedImg.offsetHeight;
+        const startLeft = parseFloat(selectedImg.style.left) || 0;
+        const startTop = parseFloat(selectedImg.style.top) || 0;
+        const ratio = startWidth / startHeight;
+
+        function doResize(ev) {
+            const dx = ev.clientX - startX;
+            let newWidth, newHeight;
+            if (type === 'se' || type === 'ne') newWidth = Math.max(20, startWidth + dx);
+            else if (type === 'sw') newWidth = Math.max(20, startWidth - dx);
+            
+            newHeight = newWidth / ratio;
+            selectedImg.style.width = newWidth + 'px';
+            selectedImg.style.height = newHeight + 'px';
+
+            if (type === 'ne') selectedImg.style.top = (startTop - (newHeight - startHeight)) + 'px';
+            else if (type === 'sw') selectedImg.style.left = (startLeft + dx) + 'px';
+            
+            updateWrapperPosition();
+        }
+        function stopResize() {
+            window.removeEventListener('mousemove', doResize);
+            window.removeEventListener('mouseup', stopResize);
+            saveContent();
+        }
+        window.addEventListener('mousemove', doResize);
+        window.addEventListener('mouseup', stopResize);
+    }
+
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('collapsed'); }
+    
+    // --- リスト表示と操作（ドラッグ＆ドロップ含む） ---
+    function renderList() {
+        const listEl = document.getElementById('list');
+        listEl.innerHTML = '';
+        
+        items.forEach((item, index) => {
+            // フィルタリング
+            if (currentCategory !== 'all' && item.type !== currentCategory) return;
+
+            const div = document.createElement('div');
+            div.className = 'item' + (index === currentIndex ? ' active' : '');
+            
+            // ドラッグ&ドロップ設定（ALL表示時のみ許可）
+            if (currentCategory === 'all') {
+                div.draggable = true;
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragenter', handleDragEnter);
+                div.addEventListener('dragover', handleDragOver);
+                div.addEventListener('dragleave', handleDragLeave);
+                div.addEventListener('drop', handleDrop);
+                div.addEventListener('dragend', handleDragEnd);
+                div.dataset.index = index; // インデックスを保持
+            }
+
+            div.onclick = () => selectItem(index);
+            div.ondblclick = () => renameItem(index);
+            
+            const typeClass = `type-${item.type || 'memo'}`;
+            const dragIcon = currentCategory === 'all' ? '<i class="bi bi-grip-vertical drag-handle"></i>' : '';
+
+            div.innerHTML = `
+                ${dragIcon}
+                <div class="type-badge ${typeClass}"></div>
+                <span class="txt-label">${item.title}</span>
+                <button class="item-del txt-label" onclick="deleteItem(${index}, event)">✕</button>
+            `;
+            listEl.appendChild(div);
+        });
+    }
+
+    // DnD Event Handlers
+    function handleDragStart(e) {
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/html', this.innerHTML);
+        this.classList.add('dragging');
+    }
+    function handleDragOver(e) {
+        if (e.preventDefault) e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        return false;
+    }
+    function handleDragEnter(e) { this.classList.add('over'); }
+    function handleDragLeave(e) { this.classList.remove('over'); }
+    function handleDrop(e) {
+        if (e.stopPropagation) e.stopPropagation();
+        
+        const srcIndex = parseInt(dragSrcEl.dataset.index);
+        const destIndex = parseInt(this.dataset.index);
+
+        if (srcIndex !== destIndex) {
+            // 配列の並び替え
+            const itemToMove = items[srcIndex];
+            items.splice(srcIndex, 1);
+            items.splice(destIndex, 0, itemToMove);
+            
+            // 現在選択中のインデックスも追従させる
+            if (currentIndex === srcIndex) {
+                currentIndex = destIndex;
+            } else if (currentIndex > srcIndex && currentIndex <= destIndex) {
+                currentIndex--;
+            } else if (currentIndex < srcIndex && currentIndex >= destIndex) {
+                currentIndex++;
+            }
+            
+            saveAllData();
+            renderList();
+        }
+        return false;
+    }
+    function handleDragEnd() {
+        this.classList.remove('dragging');
+        document.querySelectorAll('.item').forEach(item => item.classList.remove('over'));
+    }
+
+    function selectItem(index) { currentIndex = index; saveAllData(); loadCurrentPage(); renderList(); }
+    
+    function loadCurrentPage() { 
+        if (items[currentIndex]) { 
+            editor.innerHTML = items[currentIndex].content;
+            pageTitleEl.innerText = items[currentIndex].title;
+            // ページタイプのプルダウンを更新
+            pageTypeSelect.value = items[currentIndex].type || 'memo';
+        } 
+        updateUI();
+    }
+
+    function renameItem(index) {
+        const newTitle = prompt("新しいページタイトルを入力:", items[index].title);
+        if (newTitle !== null && newTitle.trim() !== "") {
+            items[index].title = newTitle;
+            saveAllData();
+            renderList();
+            loadCurrentPage();
+        }
+    }
+
+    function saveContent() { if (items[currentIndex]) { items[currentIndex].content = editor.innerHTML; saveAllData(); } }
+    
+    function addItem() {
+        // 現在のカテゴリタブに応じて初期タイプを決定
+        let initType = 'memo';
+        if (['html', 'css', 'cmd'].includes(currentCategory)) {
+            initType = currentCategory;
+        }
+
+        items.push({ title: `新しいページ`, content: "", type: initType });
+        currentIndex = items.length - 1;
+        saveAllData();
+        renderList();
+        loadCurrentPage();
+    }
+    
+    function deleteItem(index, event) { 
+        event.stopPropagation(); 
+        if(!confirm("削除しますか？")) return;
+        if(items.length <= 1) {
+            // 最後の1つならリセット
+            items[0] = { title: "新しいページ", content: "", type: "memo" };
+            currentIndex = 0;
+        } else {
+            items.splice(index, 1); 
+            if (currentIndex >= items.length) currentIndex = items.length - 1; 
+        }
+        saveAllData(); 
+        renderList(); 
+        loadCurrentPage(); 
+    }
+    
+    function saveAllData() { localStorage.setItem('myItems', JSON.stringify(items)); localStorage.setItem('myCurrentIndex', currentIndex); }
+
+    editor.addEventListener('input', saveContent);
+    editor.addEventListener('mouseup', updateUI);
+</script>
+
+</body>
+</html>
