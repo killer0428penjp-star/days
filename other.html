@@ -17,9 +17,8 @@
             --accent-text: #ffffff;
             --main-bg: #f0f4f8;
             --dot-color: #e2e8f0;
-            /* サイバーフレーム色（ライトモードでは落ち着いたブルー） */
             --cyber: #0070ff;
-            --cyber-glow: rgba(0,112,255,0.5);
+            --cyber-glow: rgba(0,112,255,0.45);
         }
         body.dark-theme {
             --bg-white: rgba(30, 30, 47, 0.85);
@@ -34,7 +33,7 @@
             --main-bg: #1e1e2f;
             --dot-color: #2d3748;
             --cyber: #00f2ff;
-            --cyber-glow: rgba(0,242,255,0.5);
+            --cyber-glow: rgba(0,242,255,0.45);
         }
 
         * { border-radius: 0 !important; box-sizing: border-box; }
@@ -50,6 +49,7 @@
             transition: background-color 0.4s ease, color 0.4s ease;
         }
 
+        /* ── navbar ── */
         .top-navbar {
             width: 100%; height: 60px;
             background-color: var(--main-bg);
@@ -61,7 +61,6 @@
             transition: border-color 0.4s ease, background-color 0.4s ease;
         }
         .top-navbar:hover { border-bottom-color: var(--border-hover); }
-
         .nav-tags { display: flex; border: 1px solid var(--border-light); }
         .tag {
             padding: 8px 25px; font-size: 0.75rem; text-transform: uppercase;
@@ -74,12 +73,11 @@
         .tag.active { background-color: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 
         .main-container { max-width: 1100px; margin: 60px auto; padding: 0 20px; }
-
         .content-section { display: none; flex-direction: column; animation: fadeIn 0.3s ease; }
         .content-section.active { display: flex; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Settings rows */
+        /* ── settings rows ── */
         .setting-row {
             display: grid; grid-template-columns: 200px 1fr 100px;
             align-items: center; background-color: var(--bg-white);
@@ -113,7 +111,7 @@
         input:checked + .slider { background-color: var(--accent); border-color: var(--accent); }
         input:checked + .slider:before { transform: translateX(26px); border-color: var(--accent); }
 
-        /* Cards */
+        /* ── cards ── */
         .content-card {
             display: grid; grid-template-columns: 220px 1fr 2fr;
             background-color: var(--bg-white); border: 1px solid var(--border-light);
@@ -128,7 +126,7 @@
         .item-title { padding: 30px; display: flex; align-items: center; font-weight: 700; font-size: 1rem; }
         .item-desc  { padding: 30px; color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; display: flex; align-items: center; }
 
-        /* Profile panel */
+        /* ── profile panel ── */
         #profile-inline-panel {
             display: none; border: 1px solid var(--border-light); border-top: none;
             background-color: var(--bg-white); padding: 30px 30px 25px;
@@ -188,7 +186,6 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            /* main-containerを突き抜けて全画面幅 */
             width: 100vw;
             position: relative;
             left: 50%;
@@ -207,7 +204,6 @@
             background: var(--bg-white);
             margin-bottom: 20px;
             box-shadow: 0 0 8px var(--cyber-glow);
-            /* 幅はJSで設定 */
         }
 
         .viewer-btn {
@@ -216,8 +212,7 @@
             text-transform: uppercase; letter-spacing: 1.5px;
             border: none; border-right: 1px solid var(--cyber);
             cursor: pointer; transition: all 0.18s;
-            white-space: nowrap;
-            display: flex; align-items: center; gap: 6px;
+            white-space: nowrap; display: flex; align-items: center; gap: 6px;
         }
         .btn-back   { background: var(--accent); color: var(--accent-text); }
         .btn-back:hover { opacity: 0.82; }
@@ -251,76 +246,53 @@
             font-size: 0.62rem; color: var(--text-sub); user-select: none;
         }
 
-        /* ============================================================
-           サイバーフレーム
-        ============================================================ */
+        /* ── サイバーフレーム ── */
         .cyber-frame-outer {
             position: relative;
-            /* clip-path で右上・左下を斜めカット（PC基準: 幅1500px想定で 5% = 75px） */
-            /* JSで動的に更新するためCSSカスタムプロパティを利用 */
-            --cut: 5%;
-            clip-path: polygon(
-                0 0,
-                calc(100% - var(--cut) * 1.6) 0,
-                100% calc(var(--cut) * 0.9),
-                100% 100%,
-                calc(var(--cut) * 1.6) 100%,
-                0 calc(100% - var(--cut) * 0.9)
-            );
-            background: rgba(0, 112, 255, 0.04);
+            background: rgba(0, 112, 255, 0.03);
             border: 1px solid var(--cyber);
             box-shadow:
                 0 0 12px var(--cyber-glow),
-                inset 0 0 24px rgba(0,112,255,0.04);
+                inset 0 0 20px rgba(0,112,255,0.03);
             transition: box-shadow 0.3s ease;
         }
         body.dark-theme .cyber-frame-outer {
-            background: rgba(0, 242, 255, 0.03);
+            background: rgba(0, 242, 255, 0.02);
             box-shadow:
-                0 0 20px var(--cyber-glow),
-                inset 0 0 32px rgba(0,242,255,0.04);
+                0 0 22px var(--cyber-glow),
+                inset 0 0 30px rgba(0,242,255,0.04);
         }
 
-        /* iframe をラップする内側 */
+        /* 左上 L字 */
+        .cyber-frame-outer::before {
+            content: "";
+            position: absolute;
+            top: -1px; left: -1px;
+            width: 24px; height: 24px;
+            border-top: 3px solid var(--cyber);
+            border-left: 3px solid var(--cyber);
+            box-shadow: -1px -1px 8px var(--cyber-glow);
+            z-index: 4;
+        }
+        /* 右下 L字 */
+        .cyber-frame-outer::after {
+            content: "";
+            position: absolute;
+            bottom: -1px; right: -1px;
+            width: 24px; height: 24px;
+            border-bottom: 3px solid var(--cyber);
+            border-right: 3px solid var(--cyber);
+            box-shadow: 1px 1px 8px var(--cyber-glow);
+            z-index: 4;
+        }
+
         .cyber-frame-inner {
             position: relative;
             overflow: hidden;
             line-height: 0;
+            /* clip-path はJSで設定 */
         }
-        .cyber-frame-inner iframe {
-            display: block; border: none;
-        }
-
-        /* スキャンライン — 常時グロー、動かない */
-        .scan {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg,
-                transparent 0%,
-                var(--cyber) 20%,
-                var(--cyber) 80%,
-                transparent 100%
-            );
-            box-shadow: 0 0 8px var(--cyber), 0 0 18px var(--cyber-glow);
-            opacity: 0.6;
-            z-index: 3;
-            pointer-events: none;
-        }
-
-        /* ============================================================
-           big.html 遷移後に表示するフローティングBACKボタン
-           big.html 側では不要だが、settings.html が big.html を
-           window.open で開いた場合は big.html 内で管理するため、
-           ここでは遷移ロジックのみ JS で処理する
-        ============================================================ */
-
-        /* ============================================================
-           big.html 用フローティングBACKボタン
-           (big.html 側の <body> に直接埋め込むスニペット用スタイル)
-           settings.html 自体には不要だがリファレンスとして残す
-        ============================================================ */
+        .cyber-frame-inner iframe { display: block; border: none; }
 
         @media (max-width: 850px) {
             .top-navbar { padding: 0 20px; }
@@ -417,42 +389,32 @@
 
         <!-- iframeビューワー -->
         <div id="iframe-viewer">
-
-            <!-- コントロールバー -->
             <div class="viewer-controls" id="viewerControls">
                 <button class="viewer-btn btn-back"   id="btnBack">   ✕ BACK   </button>
                 <button class="viewer-btn btn-expand" id="btnExpand"> ⤢ EXPAND </button>
                 <div class="ctrl-spacer"></div>
+                <!-- W だけ入力。H は 7:5 比率で自動計算 -->
                 <div class="size-group">
                     <span class="size-key">W</span>
-                    <input type="number" id="frameWidth"  class="size-input" value="88" min="10" max="100" step="1">
+                    <input type="number" id="frameWidth" class="size-input" value="88" min="10" max="100" step="1">
                     <span class="size-px">%</span>
-                </div>
-                <div class="size-group">
-                    <span class="size-key">H</span>
-                    <input type="number" id="frameHeight" class="size-input" value="80" min="10" max="100" step="1">
-                    <span class="size-px">vh</span>
                 </div>
             </div>
 
-            <!-- サイバーフレーム -->
+            <!-- サイバーフレーム（スキャンライン・モーションなし） -->
             <div class="cyber-frame-outer" id="cyberFrameOuter">
                 <div class="cyber-frame-inner" id="cyberFrameInner">
                     <iframe id="viewerIframe" src="" title="PROJECT_ALPHA"></iframe>
-                    <div class="scan"></div>
                 </div>
             </div>
-
         </div>
 
     </section>
 
 </main>
 
-
-
 <script>
-// タブ切り替え
+// ── タブ切り替え ─────────────────────────────────────────────
 document.querySelectorAll('.tag').forEach(tag => {
     tag.addEventListener('click', () => {
         document.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
@@ -465,7 +427,7 @@ document.querySelectorAll('.tag').forEach(tag => {
     });
 });
 
-// ダークモード
+// ── ダークモード ─────────────────────────────────────────────
 const darkSwitch = document.getElementById('darkModeSwitch');
 function applyTheme(isDark) {
     document.body.classList.toggle('dark-theme', isDark);
@@ -482,7 +444,7 @@ document.getElementById('profilePanelSwitch').addEventListener('change', functio
     window.parent.postMessage({ type: 'setProfilePanel', value: this.checked }, '*');
 });
 
-// プロフィール
+// ── プロフィール ─────────────────────────────────────────────
 const profileInlinePanel  = document.getElementById('profile-inline-panel');
 const openProfilePanelBtn = document.getElementById('openProfilePanelBtn');
 openProfilePanelBtn.addEventListener('click', () => {
@@ -520,15 +482,14 @@ document.getElementById('pfFileInput').addEventListener('change', function() {
 });
 function showStatus(msg, type = 'success') {
     const st = document.getElementById('pfStatus');
-    st.textContent = msg;
-    st.className = 'pf-status ' + type + ' show';
+    st.textContent = msg; st.className = 'pf-status ' + type + ' show';
     clearTimeout(st._timer);
     st._timer = setTimeout(() => st.classList.remove('show'), 2800);
 }
 document.getElementById('pfSaveBtn').addEventListener('click', () => {
-    const newIcon = document.getElementById('pfPreviewImg').src;
+    const newIcon     = document.getElementById('pfPreviewImg').src;
     const newBirthday = document.getElementById('pfBirthday').value;
-    const newBio = document.getElementById('pfBio').value.trim();
+    const newBio      = document.getElementById('pfBio').value.trim();
     try {
         const s = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
         s.icon = newIcon; s.birthday = newBirthday; s.bio = newBio;
@@ -538,51 +499,46 @@ document.getElementById('pfSaveBtn').addEventListener('click', () => {
     showStatus('✓ 保存しました', 'success');
 });
 
-// ── iframeビューワー ──────────────────────────────────────────
-const iframeViewer      = document.getElementById('iframe-viewer');
-const viewerControls    = document.getElementById('viewerControls');
-const cyberFrameOuter   = document.getElementById('cyberFrameOuter');
-const cyberFrameInner   = document.getElementById('cyberFrameInner');
-const viewerIframe      = document.getElementById('viewerIframe');
-const cardsList         = document.getElementById('cards-list');
-const frameWidthInput   = document.getElementById('frameWidth');
-const frameHeightInput  = document.getElementById('frameHeight');
+// ── iframeビューワー ─────────────────────────────────────────
+const iframeViewer    = document.getElementById('iframe-viewer');
+const viewerControls  = document.getElementById('viewerControls');
+const cyberFrameOuter = document.getElementById('cyberFrameOuter');
+const cyberFrameInner = document.getElementById('cyberFrameInner');
+const viewerIframe    = document.getElementById('viewerIframe');
+const cardsList       = document.getElementById('cards-list');
+const frameWidthInput = document.getElementById('frameWidth');
 
-// PC基準: W=88vw, H=80vh
-// 入力欄は % / vh 単位
+// W:H = 7:5 固定比率
+const RATIO_W = 7, RATIO_H = 5;
+
+// clip-path 斜めカットサイズ (px)
+const CUT_PX = 36;
+
 function applyFrameSize() {
-    const wPct = Math.min(100, Math.max(10, parseFloat(frameWidthInput.value)  || 88));
-    const hVh  = Math.min(100, Math.max(10, parseFloat(frameHeightInput.value) || 80));
+    const wPct = Math.min(100, Math.max(10, parseFloat(frameWidthInput.value) || 88));
+    const wPx  = Math.round(window.innerWidth * wPct / 100);
+    const hPx  = Math.round(wPx * RATIO_H / RATIO_W); // 7:5 比率
 
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    const wPx = Math.round(vw  * wPct / 100);
-    const hPx = Math.round(vh  * hVh  / 100);
-
-    // iframe & inner サイズ
+    // iframe サイズ
     cyberFrameInner.style.width  = wPx + 'px';
     cyberFrameInner.style.height = hPx + 'px';
     viewerIframe.style.width     = wPx + 'px';
     viewerIframe.style.height    = hPx + 'px';
 
-    // 外枠
+    // 外枠サイズ
     cyberFrameOuter.style.width  = wPx + 'px';
     cyberFrameOuter.style.height = hPx + 'px';
 
-    // clip-pathの切り落とし角サイズ: 幅の5%と高さの8%の小さい方
-    const cutPx = Math.min(wPx * 0.05, hPx * 0.08);
-    const cutW  = (cutPx / wPx  * 100).toFixed(2) + '%';
-    const cutH  = (cutPx / hPx  * 100).toFixed(2) + '%';
-    cyberFrameOuter.style.clipPath =
-        `polygon(0 0, calc(100% - ${cutW} * 1.6) 0, 100% ${cutH}, 100% 100%, calc(${cutW} * 1.6) 100%, 0 calc(100% - ${cutH}))`;
+    // clip-path: 右上・左下の斜めカット（固定px）
+    const cw = CUT_PX; // px → polygon内は px直書き
+    cyberFrameInner.style.clipPath =
+        `polygon(0 0, calc(100% - ${cw}px) 0, 100% ${cw}px, 100% 100%, ${cw}px 100%, 0 calc(100% - ${cw}px))`;
 
     // コントロールバー幅を枠に合わせる
     viewerControls.style.width = wPx + 'px';
 }
 
-frameWidthInput.addEventListener('input',  applyFrameSize);
-frameHeightInput.addEventListener('input', applyFrameSize);
+frameWidthInput.addEventListener('input', applyFrameSize);
 window.addEventListener('resize', () => { if (iframeViewer.classList.contains('open')) applyFrameSize(); });
 
 // PROJECT_ALPHA クリック
@@ -594,21 +550,20 @@ document.getElementById('card-project-alpha').addEventListener('click', () => {
     setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 });
 
-// ✕ BACK
+// ✕ BACK — カード一覧へ戻る
 document.getElementById('btnBack').addEventListener('click', () => {
     iframeViewer.classList.remove('open');
     viewerIframe.src = '';
     cardsList.style.display = '';
 });
 
-// ⤢ EXPAND → big.html へページ遷移（履歴に残してBACKで戻れる）
+// ⤢ EXPAND — 親 (index.html) へメッセージを送り big.html へ遷移させる
 document.getElementById('btnExpand').addEventListener('click', () => {
-    // code.html を big.html に渡すためにsessionStorageを使う
-    sessionStorage.setItem('bigSrc', 'code.html');
-    window.location.href = 'big.html';
+    // この iframe の親（index.html）へ通知
+    window.parent.postMessage({ type: 'navigateToBig', src: 'code.html' }, '*');
 });
 
-// 親からのメッセージ
+// ── 親からのメッセージ受信 ───────────────────────────────────
 window.addEventListener('message', (e) => {
     if (!e.data) return;
     if (e.data.type === 'darkMode')         applyTheme(e.data.value);

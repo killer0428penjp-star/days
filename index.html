@@ -589,6 +589,11 @@
             //  postMessage 受信（other.html から）
             // ============================================================
             window.addEventListener('message', function (e) {
+                if (e.data.type === 'navigateToBig') {
+    // 表示するURLをsessionStorageに保存してからbig.htmlへ遷移
+    sessionStorage.setItem('bigSrc', e.data.src || 'code.html');
+    window.location.href = 'big.html';
+}
                 if (!e.data || !e.data.type) return;
 
                 // DARK_MODE

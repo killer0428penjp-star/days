@@ -6,14 +6,8 @@
     <title>PROJECT_ALPHA — FULLSCREEN</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
 
-        html, body {
-            width: 100%; height: 100%;
-            overflow: hidden;
-            background: #000;
-        }
-
-        /* メインのiframe */
         #main-iframe {
             position: fixed;
             inset: 0;
@@ -23,17 +17,13 @@
             display: block;
         }
 
-        /* ─── フローティングBACKボタン ───
-           画面右上に固定。影が大きめについている。
-           カーソルが乗るとより明るく。
-        */
+        /* ── フローティングBACKボタン（右上固定） ── */
         #float-back {
             position: fixed;
             top: 20px;
             right: 24px;
             z-index: 9999;
 
-            /* テキスト */
             font-family: "Inter", "Hiragino Sans", sans-serif;
             font-size: 0.72rem;
             font-weight: 700;
@@ -41,60 +31,52 @@
             letter-spacing: 1.8px;
             color: #ffffff;
 
-            /* 見た目 */
-            background: rgba(0, 0, 0, 0.72);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 10px 26px;
+            background: rgba(0, 0, 0, 0.68);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            padding: 11px 28px;
             cursor: pointer;
 
-            /* 影 — 大きくて柔らかい */
+            /* 大きめのソフトシャドウ */
             box-shadow:
-                0 4px 24px rgba(0, 0, 0, 0.7),
-                0 2px 8px  rgba(0, 0, 0, 0.5),
-                0 0  0 1px rgba(255,255,255,0.06);
+                0 4px 28px rgba(0, 0, 0, 0.75),
+                0 2px 8px  rgba(0, 0, 0, 0.55),
+                0 0  0 1px rgba(255, 255, 255, 0.05);
 
-            /* backdrop blur でガラス感 */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
 
-            transition: background 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            transition: background 0.18s, box-shadow 0.18s, border-color 0.18s;
             user-select: none;
         }
-
         #float-back:hover {
-            background: rgba(20, 20, 20, 0.90);
-            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(20, 20, 20, 0.88);
+            border-color: rgba(255, 255, 255, 0.48);
             box-shadow:
-                0 6px 36px rgba(0, 0, 0, 0.85),
-                0 2px 12px rgba(0, 0, 0, 0.6),
-                0 0  0 1px rgba(255,255,255,0.15);
+                0 6px 40px rgba(0, 0, 0, 0.9),
+                0 2px 14px rgba(0, 0, 0, 0.65),
+                0 0  0 1px rgba(255, 255, 255, 0.14);
         }
-
         #float-back:active {
             transform: translateY(1px);
-            box-shadow:
-                0 2px 12px rgba(0, 0, 0, 0.7),
-                0 1px 4px  rgba(0, 0, 0, 0.5);
+            box-shadow: 0 2px 14px rgba(0,0,0,0.7);
         }
     </style>
 </head>
 <body>
 
-    <iframe id="main-iframe" src="" title="PROJECT_ALPHA"></iframe>
+<iframe id="main-iframe" src="" title="PROJECT_ALPHA"></iframe>
+<button id="float-back">✕ &nbsp;BACK</button>
 
-    <!-- フローティングBACKボタン（右上） -->
-    <button id="float-back">✕ &nbsp;BACK</button>
+<script>
+    // sessionStorage から表示URLを取得（index.html が設定）
+    const src = sessionStorage.getItem('bigSrc') || 'code.html';
+    document.getElementById('main-iframe').src = src;
 
-    <script>
-        // sessionStorageから表示するURLを取得
-        const src = sessionStorage.getItem('bigSrc') || 'code.html';
-        document.getElementById('main-iframe').src = src;
-
-        // BACKボタン → ブラウザ履歴を1つ戻る（settings.htmlに戻る）
-        document.getElementById('float-back').addEventListener('click', () => {
-            history.back();
-        });
-    </script>
+    // BACKボタン → ブラウザ履歴を1つ戻す（index.htmlへ）
+    document.getElementById('float-back').addEventListener('click', () => {
+        history.back();
+    });
+</script>
 
 </body>
 </html>
