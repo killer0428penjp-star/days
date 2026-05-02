@@ -281,29 +281,6 @@
                 inset 0 0 32px rgba(0,242,255,0.04);
         }
 
-        /* 左上 L字 */
-        .cyber-frame-outer::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0;
-            width: 28px; height: 28px;
-            border-top: 3px solid var(--cyber);
-            border-left: 3px solid var(--cyber);
-            box-shadow: -2px -2px 8px var(--cyber-glow);
-            z-index: 2;
-        }
-        /* 右下 L字 */
-        .cyber-frame-outer::after {
-            content: "";
-            position: absolute;
-            bottom: 0; right: 0;
-            width: 28px; height: 28px;
-            border-bottom: 3px solid var(--cyber);
-            border-right: 3px solid var(--cyber);
-            box-shadow: 2px 2px 8px var(--cyber-glow);
-            z-index: 2;
-        }
-
         /* iframe をラップする内側 */
         .cyber-frame-inner {
             position: relative;
@@ -314,56 +291,36 @@
             display: block; border: none;
         }
 
-        /* スキャンライン */
+        /* スキャンライン — 常時グロー、動かない */
         .scan {
             position: absolute;
             top: 0; left: 0;
             width: 100%;
             height: 2px;
-            background: var(--cyber);
-            box-shadow: 0 0 10px var(--cyber), 0 0 20px var(--cyber-glow);
-            animation: scan-move 3s linear infinite;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                var(--cyber) 20%,
+                var(--cyber) 80%,
+                transparent 100%
+            );
+            box-shadow: 0 0 8px var(--cyber), 0 0 18px var(--cyber-glow);
+            opacity: 0.6;
             z-index: 3;
             pointer-events: none;
         }
-        @keyframes scan-move {
-            0%   { top: 0%;   opacity: 0; }
-            10%  { opacity: 1; }
-            90%  { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
 
         /* ============================================================
-           フルスクリーン
+           big.html 遷移後に表示するフローティングBACKボタン
+           big.html 側では不要だが、settings.html が big.html を
+           window.open で開いた場合は big.html 内で管理するため、
+           ここでは遷移ロジックのみ JS で処理する
         ============================================================ */
-        #fullscreen-overlay {
-            display: none; position: fixed; inset: 0; z-index: 9000;
-            background-color: var(--main-bg);
-            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
-            background-size: 20px 20px;
-            flex-direction: column;
-        }
-        #fullscreen-overlay.open { display: flex; }
-        .fullscreen-bar {
-            height: 50px; display: flex; align-items: center; padding: 0 28px;
-            border-bottom: 1px solid var(--border-light);
-            background-color: var(--main-bg);
-            background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
-            background-size: 20px 20px; flex-shrink: 0;
-        }
-        .fullscreen-title {
-            margin-right: auto; font-size: 0.72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 2px; color: var(--text-sub);
-        }
-        .btn-fs-back {
-            padding: 8px 24px; font-size: 0.72rem; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1px;
-            background: var(--accent); color: var(--accent-text);
-            border: none; cursor: pointer; transition: opacity 0.2s;
-        }
-        .btn-fs-back:hover { opacity: 0.8; }
-        .fullscreen-iframe-wrap { flex: 1; overflow: hidden; }
-        .fullscreen-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+
+        /* ============================================================
+           big.html 用フローティングBACKボタン
+           (big.html 側の <body> に直接埋め込むスニペット用スタイル)
+           settings.html 自体には不要だがリファレンスとして残す
+        ============================================================ */
 
         @media (max-width: 850px) {
             .top-navbar { padding: 0 20px; }
@@ -492,16 +449,7 @@
 
 </main>
 
-<!-- フルスクリーン -->
-<div id="fullscreen-overlay">
-    <div class="fullscreen-bar">
-        <span class="fullscreen-title">PROJECT_ALPHA</span>
-        <button class="btn-fs-back" id="btnFsBack">✕ BACK</button>
-    </div>
-    <div class="fullscreen-iframe-wrap">
-        <iframe id="fullscreenIframe" src="" title="fullscreen"></iframe>
-    </div>
-</div>
+
 
 <script>
 // タブ切り替え
@@ -597,8 +545,6 @@ const cyberFrameOuter   = document.getElementById('cyberFrameOuter');
 const cyberFrameInner   = document.getElementById('cyberFrameInner');
 const viewerIframe      = document.getElementById('viewerIframe');
 const cardsList         = document.getElementById('cards-list');
-const fullscreenOverlay = document.getElementById('fullscreen-overlay');
-const fullscreenIframe  = document.getElementById('fullscreenIframe');
 const frameWidthInput   = document.getElementById('frameWidth');
 const frameHeightInput  = document.getElementById('frameHeight');
 
@@ -655,22 +601,11 @@ document.getElementById('btnBack').addEventListener('click', () => {
     cardsList.style.display = '';
 });
 
-// ⤢ EXPAND
+// ⤢ EXPAND → big.html へページ遷移（履歴に残してBACKで戻れる）
 document.getElementById('btnExpand').addEventListener('click', () => {
-    fullscreenIframe.src = 'code.html';
-    fullscreenOverlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-});
-
-// フルスクリーン ✕ BACK
-document.getElementById('btnFsBack').addEventListener('click', () => {
-    fullscreenOverlay.classList.remove('open');
-    fullscreenIframe.src = '';
-    document.body.style.overflow = '';
-    iframeViewer.classList.add('open');
-    viewerIframe.src = 'code.html';
-    applyFrameSize();
-    setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    // code.html を big.html に渡すためにsessionStorageを使う
+    sessionStorage.setItem('bigSrc', 'code.html');
+    window.location.href = 'big.html';
 });
 
 // 親からのメッセージ
