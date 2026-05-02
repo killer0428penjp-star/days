@@ -17,6 +17,9 @@
             --accent-text: #ffffff;
             --main-bg: #f0f4f8;
             --dot-color: #e2e8f0;
+            /* サイバーフレーム色（ライトモードでは落ち着いたブルー） */
+            --cyber: #0070ff;
+            --cyber-glow: rgba(0,112,255,0.5);
         }
         body.dark-theme {
             --bg-white: rgba(30, 30, 47, 0.85);
@@ -30,6 +33,8 @@
             --accent-text: #1e1e2f;
             --main-bg: #1e1e2f;
             --dot-color: #2d3748;
+            --cyber: #00f2ff;
+            --cyber-glow: rgba(0,242,255,0.5);
         }
 
         * { border-radius: 0 !important; box-sizing: border-box; }
@@ -179,72 +184,64 @@
         /* ============================================================
            iframeビューワー
         ============================================================ */
-
-        /* ビューワーラッパー: main-containerを突き抜けて画面幅に広げる */
         #iframe-viewer {
             display: none;
             flex-direction: column;
             align-items: center;
+            /* main-containerを突き抜けて全画面幅 */
             width: 100vw;
             position: relative;
             left: 50%;
             transform: translateX(-50%);
-            padding: 40px 40px 60px;
+            padding: 40px 40px 80px;
             margin-top: 16px;
             animation: fadeIn 0.35s ease;
         }
         #iframe-viewer.open { display: flex; }
 
-        /* コントロールバー: 左から BACK / EXPAND / spacer / W / H */
+        /* コントロールバー */
         .viewer-controls {
             display: flex;
             align-items: stretch;
-            border: 1px solid var(--border-light);
+            border: 1px solid var(--cyber);
             background: var(--bg-white);
-            margin-bottom: 16px;
-            /* 幅はJSで額縁に合わせる */
+            margin-bottom: 20px;
+            box-shadow: 0 0 8px var(--cyber-glow);
+            /* 幅はJSで設定 */
         }
 
         .viewer-btn {
             padding: 9px 22px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            border: none;
-            border-right: 1px solid var(--border-light);
-            cursor: pointer;
-            transition: all 0.18s;
+            font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            border: none; border-right: 1px solid var(--cyber);
+            cursor: pointer; transition: all 0.18s;
             white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            display: flex; align-items: center; gap: 6px;
         }
-
         .btn-back   { background: var(--accent); color: var(--accent-text); }
         .btn-back:hover { opacity: 0.82; }
         .btn-expand { background: var(--bg-sub); color: var(--text-main); }
-        .btn-expand:hover { background: var(--bg-hover); color: var(--accent); }
+        .btn-expand:hover { background: var(--bg-hover); color: var(--cyber); }
 
-        .ctrl-spacer { flex: 1; border-right: 1px solid var(--border-light); }
+        .ctrl-spacer { flex: 1; border-right: 1px solid var(--cyber); }
 
         .size-group {
-            display: flex;
-            align-items: center;
-            border-right: 1px solid var(--border-light);
+            display: flex; align-items: center;
+            border-right: 1px solid var(--cyber);
         }
         .size-group:last-child { border-right: none; }
         .size-key {
             padding: 9px 10px 9px 14px;
             font-size: 0.66rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 1px;
-            color: var(--text-sub); user-select: none;
+            color: var(--cyber); user-select: none;
         }
         .size-input {
             width: 74px; padding: 9px 8px;
             font-size: 0.82rem; font-weight: 700;
             background: transparent; border: none;
-            border-left: 1px solid var(--border-light);
+            border-left: 1px solid var(--cyber);
             color: var(--text-main); font-family: inherit; outline: none;
             transition: background 0.15s;
         }
@@ -254,43 +251,91 @@
             font-size: 0.62rem; color: var(--text-sub); user-select: none;
         }
 
-        /* ── 額縁 ── */
-        .viewer-frame-wrap {
-            /* 多重ボーダーで額縁らしい重厚感 */
-            outline: 1px solid var(--border-light);
+        /* ============================================================
+           サイバーフレーム
+        ============================================================ */
+        .cyber-frame-outer {
+            position: relative;
+            /* clip-path で右上・左下を斜めカット（PC基準: 幅1500px想定で 5% = 75px） */
+            /* JSで動的に更新するためCSSカスタムプロパティを利用 */
+            --cut: 5%;
+            clip-path: polygon(
+                0 0,
+                calc(100% - var(--cut) * 1.6) 0,
+                100% calc(var(--cut) * 0.9),
+                100% 100%,
+                calc(var(--cut) * 1.6) 100%,
+                0 calc(100% - var(--cut) * 0.9)
+            );
+            background: rgba(0, 112, 255, 0.04);
+            border: 1px solid var(--cyber);
             box-shadow:
-                0 0 0 5px var(--bg-white),
-                0 0 0 6px var(--border-light),
-                0 0 0 11px var(--bg-white),
-                0 0 0 13px var(--border-hover),
-                0 0 0 14px var(--border-hover),
-                12px 18px 48px rgba(0,0,0,0.14),
-                4px 6px 16px  rgba(0,0,0,0.07);
-            background: var(--bg-white);
-            /* padding = 額縁の「ふち」 */
-            padding: 16px;
+                0 0 12px var(--cyber-glow),
+                inset 0 0 24px rgba(0,112,255,0.04);
             transition: box-shadow 0.3s ease;
         }
-        body.dark-theme .viewer-frame-wrap {
+        body.dark-theme .cyber-frame-outer {
+            background: rgba(0, 242, 255, 0.03);
             box-shadow:
-                0 0 0 5px rgba(255,255,255,0.04),
-                0 0 0 6px var(--border-light),
-                0 0 0 11px rgba(255,255,255,0.04),
-                0 0 0 13px var(--accent),
-                0 0 0 14px var(--accent),
-                12px 18px 52px rgba(0,0,0,0.5),
-                4px 6px 18px  rgba(0,242,255,0.10);
+                0 0 20px var(--cyber-glow),
+                inset 0 0 32px rgba(0,242,255,0.04);
         }
 
-        .viewer-frame-inner {
+        /* 左上 L字 */
+        .cyber-frame-outer::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 28px; height: 28px;
+            border-top: 3px solid var(--cyber);
+            border-left: 3px solid var(--cyber);
+            box-shadow: -2px -2px 8px var(--cyber-glow);
+            z-index: 2;
+        }
+        /* 右下 L字 */
+        .cyber-frame-outer::after {
+            content: "";
+            position: absolute;
+            bottom: 0; right: 0;
+            width: 28px; height: 28px;
+            border-bottom: 3px solid var(--cyber);
+            border-right: 3px solid var(--cyber);
+            box-shadow: 2px 2px 8px var(--cyber-glow);
+            z-index: 2;
+        }
+
+        /* iframe をラップする内側 */
+        .cyber-frame-inner {
+            position: relative;
             overflow: hidden;
             line-height: 0;
         }
-        .viewer-frame-inner iframe {
+        .cyber-frame-inner iframe {
             display: block; border: none;
         }
 
-        /* フルスクリーン */
+        /* スキャンライン */
+        .scan {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--cyber);
+            box-shadow: 0 0 10px var(--cyber), 0 0 20px var(--cyber-glow);
+            animation: scan-move 3s linear infinite;
+            z-index: 3;
+            pointer-events: none;
+        }
+        @keyframes scan-move {
+            0%   { top: 0%;   opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* ============================================================
+           フルスクリーン
+        ============================================================ */
         #fullscreen-overlay {
             display: none; position: fixed; inset: 0; z-index: 9000;
             background-color: var(--main-bg);
@@ -328,7 +373,7 @@
             .setting-row.btn-row { grid-template-columns: 1fr auto; }
             .row-label { border-right: none; }
             .row-desc { display: none; }
-            #iframe-viewer { padding: 20px 12px 40px; }
+            #iframe-viewer { padding: 20px 12px 50px; }
         }
     </style>
 </head>
@@ -415,29 +460,32 @@
 
         <!-- iframeビューワー -->
         <div id="iframe-viewer">
-            <!-- 左から: BACK / EXPAND / spacer / W / H -->
+
+            <!-- コントロールバー -->
             <div class="viewer-controls" id="viewerControls">
                 <button class="viewer-btn btn-back"   id="btnBack">   ✕ BACK   </button>
                 <button class="viewer-btn btn-expand" id="btnExpand"> ⤢ EXPAND </button>
                 <div class="ctrl-spacer"></div>
                 <div class="size-group">
                     <span class="size-key">W</span>
-                    <input type="number" id="frameWidth"  class="size-input" value="1500" min="200" max="5000" step="10">
-                    <span class="size-px">px</span>
+                    <input type="number" id="frameWidth"  class="size-input" value="88" min="10" max="100" step="1">
+                    <span class="size-px">%</span>
                 </div>
                 <div class="size-group">
                     <span class="size-key">H</span>
-                    <input type="number" id="frameHeight" class="size-input" value="800"  min="100" max="5000" step="10">
-                    <span class="size-px">px</span>
+                    <input type="number" id="frameHeight" class="size-input" value="80" min="10" max="100" step="1">
+                    <span class="size-px">vh</span>
                 </div>
             </div>
 
-            <!-- 額縁 -->
-            <div class="viewer-frame-wrap" id="viewerFrameWrap">
-                <div class="viewer-frame-inner" id="viewerFrameInner">
+            <!-- サイバーフレーム -->
+            <div class="cyber-frame-outer" id="cyberFrameOuter">
+                <div class="cyber-frame-inner" id="cyberFrameInner">
                     <iframe id="viewerIframe" src="" title="PROJECT_ALPHA"></iframe>
+                    <div class="scan"></div>
                 </div>
             </div>
+
         </div>
 
     </section>
@@ -486,7 +534,7 @@ document.getElementById('profilePanelSwitch').addEventListener('change', functio
     window.parent.postMessage({ type: 'setProfilePanel', value: this.checked }, '*');
 });
 
-// プロフィール編集
+// プロフィール
 const profileInlinePanel  = document.getElementById('profile-inline-panel');
 const openProfilePanelBtn = document.getElementById('openProfilePanelBtn');
 openProfilePanelBtn.addEventListener('click', () => {
@@ -530,9 +578,9 @@ function showStatus(msg, type = 'success') {
     st._timer = setTimeout(() => st.classList.remove('show'), 2800);
 }
 document.getElementById('pfSaveBtn').addEventListener('click', () => {
-    const newIcon     = document.getElementById('pfPreviewImg').src;
+    const newIcon = document.getElementById('pfPreviewImg').src;
     const newBirthday = document.getElementById('pfBirthday').value;
-    const newBio      = document.getElementById('pfBio').value.trim();
+    const newBio = document.getElementById('pfBio').value.trim();
     try {
         const s = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
         s.icon = newIcon; s.birthday = newBirthday; s.bio = newBio;
@@ -545,8 +593,8 @@ document.getElementById('pfSaveBtn').addEventListener('click', () => {
 // ── iframeビューワー ──────────────────────────────────────────
 const iframeViewer      = document.getElementById('iframe-viewer');
 const viewerControls    = document.getElementById('viewerControls');
-const viewerFrameWrap   = document.getElementById('viewerFrameWrap');
-const viewerFrameInner  = document.getElementById('viewerFrameInner');
+const cyberFrameOuter   = document.getElementById('cyberFrameOuter');
+const cyberFrameInner   = document.getElementById('cyberFrameInner');
 const viewerIframe      = document.getElementById('viewerIframe');
 const cardsList         = document.getElementById('cards-list');
 const fullscreenOverlay = document.getElementById('fullscreen-overlay');
@@ -554,30 +602,44 @@ const fullscreenIframe  = document.getElementById('fullscreenIframe');
 const frameWidthInput   = document.getElementById('frameWidth');
 const frameHeightInput  = document.getElementById('frameHeight');
 
-const FRAME_PAD = 16; // viewer-frame-wrap の padding値
-
+// PC基準: W=88vw, H=80vh
+// 入力欄は % / vh 単位
 function applyFrameSize() {
-    const w = Math.max(200, parseInt(frameWidthInput.value)  || 1500);
-    const h = Math.max(100, parseInt(frameHeightInput.value) || 800);
+    const wPct = Math.min(100, Math.max(10, parseFloat(frameWidthInput.value)  || 88));
+    const hVh  = Math.min(100, Math.max(10, parseFloat(frameHeightInput.value) || 80));
 
-    // iframe サイズ
-    viewerFrameInner.style.width  = w + 'px';
-    viewerFrameInner.style.height = h + 'px';
-    viewerIframe.style.width      = w + 'px';
-    viewerIframe.style.height     = h + 'px';
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
 
-    // 額縁ラッパー幅 (padding * 2 + iframe幅)
-    const totalW = w + FRAME_PAD * 2;
-    viewerFrameWrap.style.width  = totalW + 'px';
+    const wPx = Math.round(vw  * wPct / 100);
+    const hPx = Math.round(vh  * hVh  / 100);
 
-    // コントロールバーを額縁と同幅に
-    viewerControls.style.width = totalW + 'px';
+    // iframe & inner サイズ
+    cyberFrameInner.style.width  = wPx + 'px';
+    cyberFrameInner.style.height = hPx + 'px';
+    viewerIframe.style.width     = wPx + 'px';
+    viewerIframe.style.height    = hPx + 'px';
+
+    // 外枠
+    cyberFrameOuter.style.width  = wPx + 'px';
+    cyberFrameOuter.style.height = hPx + 'px';
+
+    // clip-pathの切り落とし角サイズ: 幅の5%と高さの8%の小さい方
+    const cutPx = Math.min(wPx * 0.05, hPx * 0.08);
+    const cutW  = (cutPx / wPx  * 100).toFixed(2) + '%';
+    const cutH  = (cutPx / hPx  * 100).toFixed(2) + '%';
+    cyberFrameOuter.style.clipPath =
+        `polygon(0 0, calc(100% - ${cutW} * 1.6) 0, 100% ${cutH}, 100% 100%, calc(${cutW} * 1.6) 100%, 0 calc(100% - ${cutH}))`;
+
+    // コントロールバー幅を枠に合わせる
+    viewerControls.style.width = wPx + 'px';
 }
 
 frameWidthInput.addEventListener('input',  applyFrameSize);
 frameHeightInput.addEventListener('input', applyFrameSize);
+window.addEventListener('resize', () => { if (iframeViewer.classList.contains('open')) applyFrameSize(); });
 
-// PROJECT_ALPHA クリック → ビューワーを開く
+// PROJECT_ALPHA クリック
 document.getElementById('card-project-alpha').addEventListener('click', () => {
     cardsList.style.display = 'none';
     viewerIframe.src = 'code.html';
@@ -586,21 +648,21 @@ document.getElementById('card-project-alpha').addEventListener('click', () => {
     setTimeout(() => iframeViewer.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
 });
 
-// ✕ BACK → ビューワーを閉じてカード一覧を戻す
+// ✕ BACK
 document.getElementById('btnBack').addEventListener('click', () => {
     iframeViewer.classList.remove('open');
     viewerIframe.src = '';
     cardsList.style.display = '';
 });
 
-// ⤢ EXPAND → フルスクリーン
+// ⤢ EXPAND
 document.getElementById('btnExpand').addEventListener('click', () => {
     fullscreenIframe.src = 'code.html';
     fullscreenOverlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 });
 
-// フルスクリーン ✕ BACK → 額縁モードへ戻る
+// フルスクリーン ✕ BACK
 document.getElementById('btnFsBack').addEventListener('click', () => {
     fullscreenOverlay.classList.remove('open');
     fullscreenIframe.src = '';
@@ -623,7 +685,7 @@ window.addEventListener('message', (e) => {
     if (e.data.type === 'profileSaveError') showStatus('⚠ 保存に失敗しました', 'error');
 });
 
-// 初期テーマ復元
+// 初期テーマ
 try { applyTheme(localStorage.getItem('darkMode') === 'true'); } catch(e) {}
 </script>
 </body>
