@@ -396,7 +396,7 @@
                 <!-- W だけ入力。H は 7:5 比率で自動計算 -->
                 <div class="size-group">
                     <span class="size-key">W</span>
-                    <input type="number" id="frameWidth" class="size-input" value="88" min="10" max="100" step="1">
+                    <input type="number" id="frameWidth" class="size-input" value="75" min="10" max="100" step="1">
                     <span class="size-px">%</span>
                 </div>
             </div>
@@ -515,7 +515,7 @@ const RATIO_W = 7, RATIO_H = 4;
 const CUT_PX = 36;
 
 function applyFrameSize() {
-    const wPct = Math.min(100, Math.max(10, parseFloat(frameWidthInput.value) || 88));
+    const wPct = Math.min(100, Math.max(10, parseFloat(frameWidthInput.value) || 75));
     const wPx  = Math.round(window.innerWidth * wPct / 100);
     const hPx  = Math.round(wPx * RATIO_H / RATIO_W); // 7:5 比率
 
