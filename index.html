@@ -17,9 +17,6 @@
                         right 0.4s cubic-bezier(.4,0,.2,1);
         }
 
-        /* ============================================================
-           プロフィール編集モーダル — リデザイン
-        ============================================================ */
         #profile-modal .pf-modal-inner {
             background: #ffffff;
             border-radius: 24px;
@@ -33,13 +30,10 @@
             flex-direction: column;
             align-items: center;
         }
-
         body.dark-mode #profile-modal .pf-modal-inner {
             background: #1e1e2f;
             box-shadow: 0 16px 56px rgba(0,0,0,0.6);
         }
-
-        /* アバターエリア */
         #profile-modal .pf-avatar-wrap {
             position: relative;
             width: 96px;
@@ -72,9 +66,7 @@
             transition: opacity 0.2s;
             pointer-events: none;
         }
-        #profile-modal .pf-avatar-wrap:hover .pf-avatar-overlay {
-            opacity: 1;
-        }
+        #profile-modal .pf-avatar-wrap:hover .pf-avatar-overlay { opacity: 1; }
         #profile-modal .pf-avatar-overlay span {
             font-size: 11px;
             color: #fff;
@@ -82,8 +74,6 @@
             letter-spacing: 0.5px;
             text-shadow: 0 1px 4px rgba(0,0,0,0.6);
         }
-
-        /* 名前・ID */
         #profile-modal .pf-name {
             font-size: 17px;
             font-weight: 800;
@@ -96,16 +86,12 @@
             color: #a0aec0;
             margin-bottom: 24px;
         }
-
-        /* 区切り線 */
         #profile-modal .pf-divider {
             width: 100%;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(124,58,237,0.25), transparent);
             margin-bottom: 22px;
         }
-
-        /* フィールドグループ */
         #profile-modal .pf-fields {
             width: 100%;
             display: flex;
@@ -163,8 +149,6 @@
             resize: none;
             line-height: 1.6;
         }
-
-        /* ボタン行 */
         #profile-modal .pf-btn-row {
             display: flex;
             gap: 10px;
@@ -182,18 +166,9 @@
             cursor: pointer;
             transition: background 0.18s, color 0.18s;
         }
-        #profile-modal .pf-btn-cancel:hover {
-            background: #e5e7eb;
-            color: #374151;
-        }
-        body.dark-mode #profile-modal .pf-btn-cancel {
-            background: #2a2a40;
-            color: #a0aec0;
-        }
-        body.dark-mode #profile-modal .pf-btn-cancel:hover {
-            background: #3a3a55;
-            color: #e2e8f0;
-        }
+        #profile-modal .pf-btn-cancel:hover { background: #e5e7eb; color: #374151; }
+        body.dark-mode #profile-modal .pf-btn-cancel { background: #2a2a40; color: #a0aec0; }
+        body.dark-mode #profile-modal .pf-btn-cancel:hover { background: #3a3a55; color: #e2e8f0; }
         #profile-modal .pf-btn-save {
             flex: 2;
             background: linear-gradient(135deg, var(--accent, #7c3aed), #a855f7);
@@ -207,18 +182,12 @@
             box-shadow: 0 4px 14px rgba(124,58,237,0.3);
             transition: opacity 0.18s, transform 0.15s;
         }
-        #profile-modal .pf-btn-save:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-        #profile-modal .pf-btn-save:active {
-            transform: translateY(0);
-        }
+        #profile-modal .pf-btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+        #profile-modal .pf-btn-save:active { transform: translateY(0); }
     </style>
 </head>
 <body>
 
-    <!-- 固定ヘッダー -->
     <header id="neo-fixed-header" style="display:none; position:fixed; top:15px; right:15px; z-index:10000; align-items:center; gap:10px; background:rgba(0,0,0,0.5); padding:5px 10px; border-radius:25px; backdrop-filter:blur(5px);">
         <div id="my-profile-btn-wrapper" style="cursor:pointer; display:flex; align-items:center; gap:8px;">
             <img id="my-profile-btn" src="" style="width:38px; height:38px; border-radius:50%; border:2px solid var(--accent); object-fit:cover; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.3);">
@@ -230,12 +199,10 @@
         </div>
     </header>
 
-    <!-- ダーク/ライト切り替え -->
     <div class="switch-container" id="main-switch-container">
         <label class="switch"><input type="checkbox" id="modeToggle"><span class="slider"></span></label>
     </div>
 
-    <!-- 時計・天気 -->
     <div class="top-space" id="header-bg">
         <div id="date-top" style="text-align:center; font-size:14px; font-weight:bold; margin-bottom:5px; letter-spacing:1px; color:var(--text-main);">
             <span id="current-date">----/--/--</span>
@@ -249,7 +216,6 @@
         <div class="clock-main" id="clock">--:--:<span class="seconds">--</span></div>
     </div>
 
-    <!-- 今日の予定バー -->
     <div id="today-memo-top-header" class="today-bar" style="display:none;">
         <div class="today-bar-content">
             <span class="today-label">TODAY:</span>
@@ -258,7 +224,6 @@
         </div>
     </div>
 
-    <!-- タブ -->
     <div class="tag-container">
         <span class="tag active" id="news-tag">news</span>
         <span class="tag" id="study-tag">study</span>
@@ -267,7 +232,6 @@
         <span class="tag" id="others-tag">others</span>
     </div>
 
-    <!-- news（初期表示） -->
     <div id="news-feed-container" style="display:block;">
         <div class="news-tabs">
             <div id="tab-latest"  class="n-tab active">Latest</div>
@@ -277,17 +241,14 @@
         <div id="feed"><div style="text-align:center; padding:40px; font-weight:800; color:var(--accent);">INITIALIZING...</div></div>
     </div>
 
-    <!-- study -->
     <div id="study-container" style="display:none; width:100%; height:calc(100vh - 220px); margin:0; padding:0;">
         <iframe src="study.html" style="width:100%; height:100vh; border:none;" allowfullscreen></iframe>
     </div>
 
-    <!-- others -->
     <div id="others-container" style="display:none; width:100%; height:calc(100vh - 220px); margin:0; padding:0;">
         <iframe id="others-iframe" src="other.html" style="width:100%; height:600vh; border:none;" allowfullscreen></iframe>
     </div>
 
-    <!-- calendar -->
     <div id="calendar-container" style="display:none;">
         <div class="calendar">
             <div id="today-memo-top" style="margin-bottom:15px; padding:10px; background:rgba(255,105,180,0.1); border-radius:8px; border-left:4px solid #ff69b4; font-size:0.9em; font-weight:bold; color:var(--text-main);">今日の予定: なし</div>
@@ -309,19 +270,16 @@
                     <label><input type="checkbox" id="repeat-checkbox"> 繰り返し3か月</label>
                 </div>
                 <div>
-                    <button class="action-btn save-btn"      id="save-btn">保存</button>
-                    <button class="action-btn important-btn" id="important-btn">大事な保存</button>
-                    <button class="action-btn delete-btn"    id="delete-btn">削除</button>
+                    <button class="action-btn save-btn"       id="save-btn">保存</button>
+                    <button class="action-btn important-btn"  id="important-btn">大事な保存</button>
+                    <button class="action-btn delete-btn"     id="delete-btn">削除</button>
                     <button class="action-btn delete-all-btn" id="delete-all-btn">全削除</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- tolk -->
     <div id="tolk-screen" class="screen" style="display:none;">
-
-        <!-- ログイン画面 -->
         <div id="auth-screen" class="auth-overlay">
             <div class="auth-card">
                 <h2 style="margin-bottom:20px;">Neo Pod Pro</h2>
@@ -340,14 +298,11 @@
                 <button id="signup-exec-btn" class="send-btn hidden" style="background:var(--accent);">登録完了</button>
             </div>
         </div>
-
-        <!-- ログイン後 -->
         <div id="main-content" class="hidden" style="display:flex; flex-direction:column; height:100%;">
             <div id="nav-area" class="nav-tabs">
                 <div id="tab-rooms"   class="tab active" onclick="window.showNeoScreen('rooms')">トーク</div>
                 <div id="tab-friends" class="tab"        onclick="window.showNeoScreen('friends')">友達</div>
             </div>
-
             <div id="rooms-screen" class="screen">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <span style="font-size:12px; color:#888;">トークルーム</span>
@@ -355,9 +310,7 @@
                 </div>
                 <table class="data-table"><tbody id="room-list-body"></tbody></table>
             </div>
-
             <div id="friends-screen" class="screen hidden"></div>
-
             <div id="chat-screen" class="screen hidden" style="padding:0; display:flex; flex-direction:column;">
                 <div style="padding:10px 15px; border-bottom:1px solid var(--border-soft); display:flex; align-items:center; gap:10px;">
                     <button onclick="window.showNeoScreen('rooms')" style="background:none; border:none; color:var(--accent); font-size:14px; cursor:pointer;">← 戻る</button>
@@ -380,8 +333,6 @@
                 </footer>
             </div>
         </div>
-
-        <!-- ルームモーダル（tolk内） -->
         <div id="room-modal" class="modal-overlay hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99998; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);">
             <div style="background:#fff; border-radius:20px; padding:25px; width:90%; max-width:400px; max-height:85vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.3);">
                 <h3 id="modal-title" style="margin-bottom:15px; text-align:center;">ルーム作成</h3>
@@ -400,33 +351,21 @@
                 </div>
             </div>
         </div>
+    </div>
 
-    </div><!-- /#tolk-screen -->
-
-    <!-- ============================================================
-         プロフィール編集モーダル — リデザイン版
-    ============================================================ -->
     <div id="profile-modal" class="modal-overlay hidden"
          style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999;
                 display:none; align-items:center; justify-content:center;
                 background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);">
-
         <div class="pf-modal-inner">
-
-            <!-- アバター -->
             <div class="pf-avatar-wrap" onclick="document.getElementById('profile-file-input').click()">
                 <img id="profile-edit-preview" src="" alt="avatar">
                 <div class="pf-avatar-overlay"><span>📷 変更</span></div>
             </div>
             <input type="file" id="profile-file-input" hidden accept="image/*">
-
-            <!-- 名前・ID -->
             <div class="pf-name" id="edit-profile-name"></div>
             <div class="pf-id"   id="edit-profile-id"></div>
-
             <div class="pf-divider"></div>
-
-            <!-- フィールド -->
             <div class="pf-fields">
                 <div class="pf-field-wrap">
                     <label class="pf-field-label">🎂 誕生日</label>
@@ -437,17 +376,13 @@
                     <textarea id="edit-bio" placeholder="自己紹介・説明欄"></textarea>
                 </div>
             </div>
-
-            <!-- ボタン -->
             <div class="pf-btn-row">
                 <button class="pf-btn-cancel" onclick="window.closeModal('profile-modal')">キャンセル</button>
                 <button class="pf-btn-save"   id="profile-save-btn">保存する</button>
             </div>
-
         </div>
     </div>
 
-    <!-- 他ユーザープロフィール表示 -->
     <div id="view-profile-modal" class="modal-overlay hidden" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:99999; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6);">
         <div style="background:#ffffff; border-radius:20px; padding:25px; width:90%; max-width:400px; max-height:85vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.4);">
             <div style="width:100px; height:100px; margin:0 auto 15px; border-radius:50%; overflow:hidden; border:3px solid var(--accent); background:#f0f0f0;">
@@ -470,9 +405,21 @@
     <script type="module" src="js/main.js"></script>
 
     <script>
-        // ============================================================
-        //  ダークモード切替ボタン位置を localStorage から復元
-        // ============================================================
+        /* ============================================================
+           localStorage ヘルパー
+        ============================================================ */
+        const _LS = {
+            get(k, def) {
+                try { const v = localStorage.getItem(k); return v === null ? def : JSON.parse(v); } catch(e) { return def; }
+            },
+            set(k, v) {
+                try { localStorage.setItem(k, JSON.stringify(v)); } catch(e) {}
+            }
+        };
+
+        /* ============================================================
+           ダークモード切替ボタン位置を localStorage から復元
+        ============================================================ */
         (function() {
             try {
                 const s = localStorage.getItem('toggleBtnPos');
@@ -490,9 +437,9 @@
             el.style.bottom = '';
         }
 
-        // ============================================================
-        //  others iframe へプロフィールデータを送るヘルパー
-        // ============================================================
+        /* ============================================================
+           others iframe へプロフィールデータを送るヘルパー
+        ============================================================ */
         function sendProfileToOthers(meObj) {
             if (!meObj) return;
             const iframe = document.getElementById('others-iframe');
@@ -522,19 +469,23 @@
             } catch(e) {}
         };
 
-        // ============================================================
-        //  タブ切り替え
-        // ============================================================
-        const ALL_CONTAINERS = [
-            'news-feed-container',
-            'study-container',
-            'calendar-container',
-            'tolk-screen',
-            'others-container'
-        ];
+        /* ============================================================
+           others iframe に保存済み設定を送信するヘルパー
+        ============================================================ */
+        function syncSettingsToOthers() {
+            const iframe = document.getElementById('others-iframe');
+            if (!iframe || !iframe.contentWindow) return;
+            /* ダークモード */
+            const isDark = _LS.get('darkMode', false);
+            iframe.contentWindow.postMessage({ type: 'darkMode', value: isDark }, '*');
+        }
 
+        /* ============================================================
+           DOMContentLoaded
+        ============================================================ */
         document.addEventListener('DOMContentLoaded', function () {
 
+            /* ダークモード切替ボタン位置の復元 */
             try {
                 const s = localStorage.getItem('toggleBtnPos');
                 if (s) {
@@ -543,7 +494,30 @@
                 }
             } catch(e) {}
 
-            // others タブ
+            /* --------------------------------------------------------
+               NOTIFICATIONS（ダーク切替ボタン）表示状態を復元
+               デフォルト: true（表示）
+            -------------------------------------------------------- */
+            const notifState = _LS.get('portal_notifications', true);
+            const switchContainer = document.getElementById('main-switch-container');
+            if (switchContainer) {
+                switchContainer.style.display = notifState ? '' : 'none';
+            }
+
+            /* --------------------------------------------------------
+               PROFILE_PANEL（固定ヘッダー）表示状態を復元
+               デフォルト: true（表示）
+               ※ ログイン後に neo-fixed-header が flex になるため、
+                 非表示指定の場合は 'none' で上書き。
+                 表示指定の場合は neopod.js 側の制御に任せるため何もしない。
+            -------------------------------------------------------- */
+            const ppState = _LS.get('portal_profilePanel', true);
+            if (!ppState) {
+                const header = document.getElementById('neo-fixed-header');
+                if (header) header.style.display = 'none';
+            }
+
+            /* others タブ */
             const othersTag = document.getElementById('others-tag');
             if (othersTag) {
                 othersTag.addEventListener('click', function () {
@@ -558,7 +532,7 @@
                 });
             }
 
-            // others 以外のタブ
+            /* others 以外のタブ */
             ['news-tag', 'study-tag', 'tolk-tag', 'calendar-tag'].forEach(tagId => {
                 const tag = document.getElementById(tagId);
                 if (tag) {
@@ -569,10 +543,11 @@
                 }
             });
 
-            // others iframe が読み込まれたらプロフィールを送る
+            /* others iframe 読み込み完了 → プロフィール＋設定を送信 */
             const othersIframe = document.getElementById('others-iframe');
             if (othersIframe) {
                 othersIframe.addEventListener('load', function() {
+                    /* プロフィール */
                     try {
                         const cached = localStorage.getItem('np_profile_cache');
                         if (cached) {
@@ -582,25 +557,29 @@
                             }, '*');
                         }
                     } catch(e) {}
+                    /* ダークモード */
+                    syncSettingsToOthers();
                 });
             }
 
-            // ============================================================
-            //  postMessage 受信（other.html から）
-            // ============================================================
+            /* --------------------------------------------------------
+               postMessage 受信（other.html から）
+            -------------------------------------------------------- */
             window.addEventListener('message', function (e) {
-                if (e.data.type === 'navigateToBig') {
-    // 表示するURLをsessionStorageに保存してからbig.htmlへ遷移
-    sessionStorage.setItem('bigSrc', e.data.src || 'code.html');
-    window.location.href = 'big.html';
-}
+
+                if (e.data && e.data.type === 'navigateToBig') {
+                    sessionStorage.setItem('bigSrc', e.data.src || 'code.html');
+                    window.location.href = 'big.html';
+                    return;
+                }
+
                 if (!e.data || !e.data.type) return;
 
-                // DARK_MODE
+                /* DARK_MODE */
                 if (e.data.type === 'setDarkMode') {
                     const isDark = e.data.value;
                     document.body.classList.toggle('dark-mode', isDark);
-                    localStorage.setItem('darkMode', isDark);
+                    _LS.set('darkMode', isDark);
                     const toggle = document.getElementById('modeToggle');
                     if (toggle) toggle.checked = isDark;
                     const studyFrame = document.querySelector('#study-container iframe');
@@ -609,44 +588,44 @@
                     }
                 }
 
-                // NOTIFICATIONS
+                /* NOTIFICATIONS — ダーク切替ボタンの表示切替＋永続保存 */
                 if (e.data.type === 'setNotifications') {
+                    const val = e.data.value;
+                    _LS.set('portal_notifications', val);
                     const sc = document.getElementById('main-switch-container');
-                    if (sc) sc.style.display = e.data.value ? '' : 'none';
+                    if (sc) sc.style.display = val ? '' : 'none';
                 }
 
-                // WIDGET_POS
+                /* WIDGET_POS */
                 if (e.data.type === 'setTogglePos') {
                     const pos = e.data.value;
                     const el  = document.getElementById('main-switch-container');
                     if (el) {
-                        localStorage.setItem('toggleBtnPos', JSON.stringify(pos));
+                        _LS.set('toggleBtnPos', pos);
                         applyTogglePos(el, pos);
                     }
                 }
 
-                // PROFILE_PANEL → 右上固定ヘッダーの表示・非表示
+                /* PROFILE_PANEL — 固定ヘッダーの表示切替＋永続保存 */
                 if (e.data.type === 'setProfilePanel') {
+                    const val = e.data.value;
+                    _LS.set('portal_profilePanel', val);
                     const header = document.getElementById('neo-fixed-header');
-                    if (header) {
-                        header.style.display = e.data.value ? 'flex' : 'none';
-                    }
+                    if (header) header.style.display = val ? 'flex' : 'none';
                 }
 
-                // PROFILE_EDIT → プロフィール編集モーダルを開く
+                /* PROFILE_EDIT → プロフィール編集モーダルを開く */
                 if (e.data.type === 'openProfileModal') {
                     const btn = document.getElementById('my-profile-btn-wrapper');
                     if (btn) btn.click();
                 }
 
-                // updateProfile → Firebase保存 ＋ 固定ヘッダー即時反映
+                /* updateProfile → Firebase保存 ＋ 固定ヘッダー即時反映 */
                 if (e.data.type === 'updateProfile') {
                     const { icon, birthday, bio } = e.data.value;
-                    // Firebase保存（neopod.js 側の関数を呼ぶ）
                     if (typeof window._npUpdateProfile === 'function') {
                         window._npUpdateProfile({ icon, birthday, bio });
                     } else {
-                        // フォールバック：localStorageだけ更新 ＋ ヘッダー反映
                         try {
                             const cached = JSON.parse(localStorage.getItem('np_profile_cache') || '{}');
                             cached.icon     = icon;
@@ -655,12 +634,19 @@
                             localStorage.setItem('np_profile_cache', JSON.stringify(cached));
                         } catch(err) {}
                     }
-                    // 固定ヘッダーのアイコンを即時更新
                     const myBtn = document.getElementById('my-profile-btn');
                     if (myBtn && icon) myBtn.src = icon;
                 }
             });
         });
+
+        const ALL_CONTAINERS = [
+            'news-feed-container',
+            'study-container',
+            'calendar-container',
+            'tolk-screen',
+            'others-container'
+        ];
     </script>
 
 </body>

@@ -50,6 +50,8 @@ body{
 .content-section{display:none;flex-direction:column;animation:fadeIn 0.3s ease;}
 .content-section.active{display:flex;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ── setting rows ── */
 .setting-row{
   display:grid;grid-template-columns:200px 1fr 100px;
   align-items:center;background-color:var(--bg-white);
@@ -72,19 +74,35 @@ body{
 .slider:before{position:absolute;content:"";height:16px;width:16px;left:3px;bottom:3px;background-color:#fff;transition:.4s;border:1px solid var(--border-light);}
 input:checked+.slider{background-color:var(--accent);border-color:var(--accent);}
 input:checked+.slider:before{transform:translateX(26px);border-color:var(--accent);}
+
+/* ── cards: 画像列なし 1列デザイン ── */
 .content-card{
-  display:grid;grid-template-columns:220px 1fr 2fr;
+  display:flex;flex-direction:row;align-items:stretch;
   background-color:var(--bg-white);border:1px solid var(--border-light);
-  margin-bottom:10px;transition:all 0.3s ease;cursor:pointer;
+  margin-bottom:-1px;transition:all 0.2s ease;cursor:pointer;
 }
-.content-card:hover{border-color:var(--border-hover);background-color:var(--bg-hover);}
-.item-img{
-  background-color:var(--bg-sub);display:flex;justify-content:center;
-  align-items:center;color:var(--text-sub);font-size:0.7rem;
-  letter-spacing:2px;border-right:1px solid var(--border-light);
+.content-card:hover{border-color:var(--border-hover);background-color:var(--bg-hover);z-index:10;}
+.card-index{
+  width:48px;min-width:48px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.65rem;font-weight:700;letter-spacing:2px;
+  color:var(--accent);border-right:1px solid var(--border-light);
+  user-select:none;
 }
-.item-title{padding:22px;display:flex;align-items:center;font-weight:700;font-size:1rem;}
-.item-desc{padding:22px;color:var(--text-sub);font-size:0.9rem;line-height:1.8;display:flex;align-items:center;}
+.card-body{
+  flex:1;padding:16px 20px;display:flex;flex-direction:column;justify-content:center;
+}
+.card-title{font-weight:700;font-size:0.9rem;margin-bottom:4px;color:var(--text-main);}
+.card-desc{font-size:0.78rem;color:var(--text-sub);line-height:1.7;}
+.card-arrow{
+  width:44px;min-width:44px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-sub);font-size:0.75rem;border-left:1px solid var(--border-light);
+  transition:color 0.2s;
+}
+.content-card:hover .card-arrow{color:var(--accent);}
+
+/* ── profile panel ── */
 #profile-inline-panel{
   display:none;border:1px solid var(--border-light);border-top:none;
   background-color:var(--bg-white);padding:22px 22px 18px;
@@ -120,6 +138,8 @@ input:checked+.slider:before{transform:translateX(26px);border-color:var(--accen
 .pf-status.show{opacity:1;}
 .pf-status.success{color:var(--accent);}
 .pf-status.error{color:#e53e3e;}
+
+/* ── iframe viewer ── */
 #iframe-viewer{
   display:none;flex-direction:column;align-items:center;width:100vw;
   position:relative;left:50%;transform:translateX(-50%);
@@ -176,10 +196,9 @@ body.dark-theme .cyber-frame-outer{
 }
 .cyber-frame-inner{position:relative;overflow:hidden;line-height:0;}
 .cyber-frame-inner iframe{display:block;border:none;}
+
 @media(max-width:850px){
   .top-navbar{padding:0 14px;}
-  .content-card{grid-template-columns:1fr;}
-  .item-img{aspect-ratio:16/9;border-right:none;border-bottom:1px solid var(--border-light);}
   .setting-row{grid-template-columns:1fr 80px;}
   .setting-row.btn-row{grid-template-columns:1fr auto;}
   .row-label{border-right:none;}
@@ -196,6 +215,8 @@ body.dark-theme .cyber-frame-outer{
   </nav>
 </header>
 <main class="main-container">
+
+  <!-- Settings -->
   <section id="settings" class="content-section active">
     <div class="setting-row">
       <div class="row-label">DARKMODE</div>
@@ -205,12 +226,12 @@ body.dark-theme .cyber-frame-outer{
     <div class="setting-row">
       <div class="row-label">NOTIFICATIONS</div>
       <div class="row-desc">右上のダーク切替ボタンの表示・非表示を切り替えます。</div>
-      <div class="row-action"><label class="switch"><input type="checkbox" id="notificationsSwitch" checked><span class="slider"></span></label></div>
+      <div class="row-action"><label class="switch"><input type="checkbox" id="notificationsSwitch"><span class="slider"></span></label></div>
     </div>
     <div class="setting-row">
       <div class="row-label">PROFILE_PANEL</div>
       <div class="row-desc">右上のプロフィール欄の表示・非表示を切り替えます。</div>
-      <div class="row-action"><label class="switch"><input type="checkbox" id="profilePanelSwitch" checked><span class="slider"></span></label></div>
+      <div class="row-action"><label class="switch"><input type="checkbox" id="profilePanelSwitch"><span class="slider"></span></label></div>
     </div>
     <div class="setting-row btn-row">
       <div class="row-label">PROFILE_EDIT</div>
@@ -248,19 +269,29 @@ body.dark-theme .cyber-frame-outer{
       </div>
     </div>
   </section>
+
+  <!-- Others -->
   <section id="others" class="content-section">
     <div id="cards-list">
       <div class="content-card" id="card-project-alpha">
-        <div class="item-img">IMAGE_AREA</div>
-        <div class="item-title">PROJECT_ALPHA</div>
-        <div class="item-desc">すべての要素から角丸を排除しました。マウスをホバーした瞬間にだけ、繊細な枠線が表示されるミニマルな仕様です。</div>
+        <div class="card-index">01</div>
+        <div class="card-body">
+          <div class="card-title">PROJECT_ALPHA</div>
+          <div class="card-desc">すべての要素から角丸を排除しました。マウスをホバーした瞬間にだけ、繊細な枠線が表示されるミニマルな仕様です。</div>
+        </div>
+        <div class="card-arrow">▶</div>
       </div>
       <div class="content-card">
-        <div class="item-img">IMAGE_AREA</div>
-        <div class="item-title">DESIGN_ASSETS</div>
-        <div class="item-desc">「表」のような整列を維持しつつ、余計な装飾を削ぎ落としています。白をベースにすることで、情報の透明性を高めています。</div>
+        <div class="card-index">02</div>
+        <div class="card-body">
+          <div class="card-title">DESIGN_ASSETS</div>
+          <div class="card-desc">「表」のような整列を維持しつつ、余計な装飾を削ぎ落としています。白をベースにすることで、情報の透明性を高めています。</div>
+        </div>
+        <div class="card-arrow">▶</div>
       </div>
     </div>
+
+    <!-- iframe viewer -->
     <div id="iframe-viewer">
       <div class="viewer-controls" id="viewerControls">
         <button class="viewer-btn btn-back" id="btnBack">✕ BACK</button>
@@ -278,6 +309,7 @@ body.dark-theme .cyber-frame-outer{
       </div>
     </div>
   </section>
+
 </main>
 <script>
 const LS = {
@@ -285,6 +317,7 @@ const LS = {
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 };
 
+/* タブ切り替え */
 document.querySelectorAll('.tag').forEach(tag=>{
   tag.addEventListener('click',()=>{
     document.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'));
@@ -297,6 +330,7 @@ document.querySelectorAll('.tag').forEach(tag=>{
   });
 });
 
+/* ダークモード */
 const darkSwitch=document.getElementById('darkModeSwitch');
 function applyTheme(isDark){
   document.body.classList.toggle('dark-theme',isDark);
@@ -308,18 +342,21 @@ darkSwitch.addEventListener('change',()=>{
   window.parent.postMessage({type:'setDarkMode',value:darkSwitch.checked},'*');
 });
 
+/* NOTIFICATIONS */
 const notifSwitch=document.getElementById('notificationsSwitch');
 notifSwitch.addEventListener('change',function(){
   LS.set('portal_notifications',this.checked);
   window.parent.postMessage({type:'setNotifications',value:this.checked},'*');
 });
 
+/* PROFILE_PANEL */
 const profilePanelSwitch=document.getElementById('profilePanelSwitch');
 profilePanelSwitch.addEventListener('change',function(){
   LS.set('portal_profilePanel',this.checked);
   window.parent.postMessage({type:'setProfilePanel',value:this.checked},'*');
 });
 
+/* プロフィールパネル */
 const profileInlinePanel=document.getElementById('profile-inline-panel');
 const openProfilePanelBtn=document.getElementById('openProfilePanelBtn');
 openProfilePanelBtn.addEventListener('click',()=>{
@@ -374,6 +411,7 @@ document.getElementById('pfSaveBtn').addEventListener('click',()=>{
   showStatus('✓ 保存しました','success');
 });
 
+/* iframeビューワー */
 const iframeViewer=document.getElementById('iframe-viewer');
 const viewerControls=document.getElementById('viewerControls');
 const cyberFrameOuter=document.getElementById('cyberFrameOuter');
@@ -419,6 +457,7 @@ document.getElementById('btnExpand').addEventListener('click',()=>{
   window.parent.postMessage({type:'navigateToBig',src:'code.html'},'*');
 });
 
+/* 親からのメッセージ */
 window.addEventListener('message',(e)=>{
   if(!e.data)return;
   if(e.data.type==='darkMode')applyTheme(e.data.value);
@@ -430,10 +469,21 @@ window.addEventListener('message',(e)=>{
   if(e.data.type==='profileSaveError')showStatus('⚠ 保存に失敗しました','error');
 });
 
+/* 初期化 — localStorage から全設定を復元 */
 (function init(){
   applyTheme(LS.get('portal_darkMode',false));
-  notifSwitch.checked=LS.get('portal_notifications',true);
-  profilePanelSwitch.checked=LS.get('portal_profilePanel',true);
+
+  /* NOTIFICATIONS: 保存値があればそれを使用、なければtrue */
+  const notifVal=LS.get('portal_notifications',true);
+  notifSwitch.checked=notifVal;
+  /* 親へも通知して表示状態を同期 */
+  window.parent.postMessage({type:'setNotifications',value:notifVal},'*');
+
+  /* PROFILE_PANEL: 保存値があればそれを使用、なければtrue */
+  const ppVal=LS.get('portal_profilePanel',true);
+  profilePanelSwitch.checked=ppVal;
+  window.parent.postMessage({type:'setProfilePanel',value:ppVal},'*');
+
   const savedW=LS.get('portal_frameWidth',null);
   if(savedW!==null)frameWidthInput.value=savedW;
 })();
