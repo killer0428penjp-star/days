@@ -50,6 +50,8 @@ body{
 .content-section{display:none;flex-direction:column;animation:fadeIn 0.3s ease;}
 .content-section.active{display:flex;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ── setting rows ── */
 .setting-row{
   display:grid;grid-template-columns:200px 1fr 100px;
   align-items:center;background-color:var(--bg-white);
@@ -73,7 +75,7 @@ body{
 input:checked+.slider{background-color:var(--accent);border-color:var(--accent);}
 input:checked+.slider:before{transform:translateX(26px);border-color:var(--accent);}
 
-/* ── cards: 画像列なし・1列フラットデザイン ── */
+/* ── cards: 画像列なし 1列デザイン ── */
 .content-card{
   display:flex;flex-direction:row;align-items:stretch;
   background-color:var(--bg-white);border:1px solid var(--border-light);
@@ -88,14 +90,14 @@ input:checked+.slider:before{transform:translateX(26px);border-color:var(--accen
   user-select:none;
 }
 .card-body{
-  flex:1;padding:14px 18px;display:flex;flex-direction:column;justify-content:center;
+  flex:1;padding:16px 20px;display:flex;flex-direction:column;justify-content:center;
 }
 .card-title{font-weight:700;font-size:0.9rem;margin-bottom:4px;color:var(--text-main);}
 .card-desc{font-size:0.78rem;color:var(--text-sub);line-height:1.7;}
 .card-arrow{
-  width:40px;min-width:40px;
+  width:44px;min-width:44px;
   display:flex;align-items:center;justify-content:center;
-  color:var(--text-sub);font-size:0.7rem;border-left:1px solid var(--border-light);
+  color:var(--text-sub);font-size:0.75rem;border-left:1px solid var(--border-light);
   transition:color 0.2s;
 }
 .content-card:hover .card-arrow{color:var(--accent);}
@@ -137,13 +139,11 @@ input:checked+.slider:before{transform:translateX(26px);border-color:var(--accen
 .pf-status.success{color:var(--accent);}
 .pf-status.error{color:#e53e3e;}
 
-/* ── iframe viewer: 上の空白を極限まで詰める ── */
+/* ── iframe viewer ── */
 #iframe-viewer{
   display:none;flex-direction:column;align-items:center;width:100vw;
   position:relative;left:50%;transform:translateX(-50%);
-  padding:4px 20px 56px;
-  margin-top:0;
-  animation:fadeIn 0.35s ease;
+  padding:20px 20px 56px;margin-top:14px;animation:fadeIn 0.35s ease;
 }
 #iframe-viewer.open{display:flex;}
 .viewer-controls{
@@ -203,7 +203,7 @@ body.dark-theme .cyber-frame-outer{
   .setting-row.btn-row{grid-template-columns:1fr auto;}
   .row-label{border-right:none;}
   .row-desc{display:none;}
-  #iframe-viewer{padding:2px 6px 36px;}
+  #iframe-viewer{padding:14px 6px 36px;}
 }
 </style>
 </head>
@@ -291,6 +291,7 @@ body.dark-theme .cyber-frame-outer{
       </div>
     </div>
 
+    <!-- iframe viewer -->
     <div id="iframe-viewer">
       <div class="viewer-controls" id="viewerControls">
         <button class="viewer-btn btn-back" id="btnBack">✕ BACK</button>
@@ -311,11 +312,12 @@ body.dark-theme .cyber-frame-outer{
 
 </main>
 <script>
-const LS={
+const LS = {
   get(k,def){try{const v=localStorage.getItem(k);return v===null?def:JSON.parse(v);}catch(e){return def;}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 };
 
+/* タブ切り替え */
 document.querySelectorAll('.tag').forEach(tag=>{
   tag.addEventListener('click',()=>{
     document.querySelectorAll('.tag').forEach(t=>t.classList.remove('active'));
@@ -328,6 +330,7 @@ document.querySelectorAll('.tag').forEach(tag=>{
   });
 });
 
+/* ダークモード */
 const darkSwitch=document.getElementById('darkModeSwitch');
 function applyTheme(isDark){
   document.body.classList.toggle('dark-theme',isDark);
@@ -339,18 +342,21 @@ darkSwitch.addEventListener('change',()=>{
   window.parent.postMessage({type:'setDarkMode',value:darkSwitch.checked},'*');
 });
 
+/* NOTIFICATIONS */
 const notifSwitch=document.getElementById('notificationsSwitch');
 notifSwitch.addEventListener('change',function(){
   LS.set('portal_notifications',this.checked);
   window.parent.postMessage({type:'setNotifications',value:this.checked},'*');
 });
 
+/* PROFILE_PANEL */
 const profilePanelSwitch=document.getElementById('profilePanelSwitch');
 profilePanelSwitch.addEventListener('change',function(){
   LS.set('portal_profilePanel',this.checked);
   window.parent.postMessage({type:'setProfilePanel',value:this.checked},'*');
 });
 
+/* プロフィールパネル */
 const profileInlinePanel=document.getElementById('profile-inline-panel');
 const openProfilePanelBtn=document.getElementById('openProfilePanelBtn');
 openProfilePanelBtn.addEventListener('click',()=>{
@@ -405,6 +411,7 @@ document.getElementById('pfSaveBtn').addEventListener('click',()=>{
   showStatus('✓ 保存しました','success');
 });
 
+/* iframeビューワー */
 const iframeViewer=document.getElementById('iframe-viewer');
 const viewerControls=document.getElementById('viewerControls');
 const cyberFrameOuter=document.getElementById('cyberFrameOuter');
@@ -450,6 +457,7 @@ document.getElementById('btnExpand').addEventListener('click',()=>{
   window.parent.postMessage({type:'navigateToBig',src:'code.html'},'*');
 });
 
+/* 親からのメッセージ */
 window.addEventListener('message',(e)=>{
   if(!e.data)return;
   if(e.data.type==='darkMode')applyTheme(e.data.value);
@@ -461,14 +469,21 @@ window.addEventListener('message',(e)=>{
   if(e.data.type==='profileSaveError')showStatus('⚠ 保存に失敗しました','error');
 });
 
+/* 初期化 — localStorage から全設定を復元 */
 (function init(){
   applyTheme(LS.get('portal_darkMode',false));
+
+  /* NOTIFICATIONS: 保存値があればそれを使用、なければtrue */
   const notifVal=LS.get('portal_notifications',true);
   notifSwitch.checked=notifVal;
+  /* 親へも通知して表示状態を同期 */
   window.parent.postMessage({type:'setNotifications',value:notifVal},'*');
+
+  /* PROFILE_PANEL: 保存値があればそれを使用、なければtrue */
   const ppVal=LS.get('portal_profilePanel',true);
   profilePanelSwitch.checked=ppVal;
   window.parent.postMessage({type:'setProfilePanel',value:ppVal},'*');
+
   const savedW=LS.get('portal_frameWidth',null);
   if(savedW!==null)frameWidthInput.value=savedW;
 })();
