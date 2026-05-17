@@ -405,9 +405,6 @@
     <script type="module" src="js/main.js"></script>
 
     <script>
-        /* ============================================================
-           localStorage ヘルパー
-        ============================================================ */
         const _LS = {
             get(k, def) {
                 try { const v = localStorage.getItem(k); return v === null ? def : JSON.parse(v); } catch(e) { return def; }
@@ -417,9 +414,6 @@
             }
         };
 
-        /* ============================================================
-           ダークモード切替ボタン位置を localStorage から復元
-        ============================================================ */
         (function() {
             try {
                 const s = localStorage.getItem('toggleBtnPos');
@@ -437,9 +431,6 @@
             el.style.bottom = '';
         }
 
-        /* ============================================================
-           others iframe へプロフィールデータを送るヘルパー
-        ============================================================ */
         function sendProfileToOthers(meObj) {
             if (!meObj) return;
             const iframe = document.getElementById('others-iframe');
@@ -469,23 +460,25 @@
             } catch(e) {}
         };
 
-        /* ============================================================
-           others iframe に保存済み設定を送信するヘルパー
-        ============================================================ */
         function syncSettingsToOthers() {
             const iframe = document.getElementById('others-iframe');
             if (!iframe || !iframe.contentWindow) return;
-            /* ダークモード */
             const isDark = _LS.get('darkMode', false);
             iframe.contentWindow.postMessage({ type: 'darkMode', value: isDark }, '*');
         }
 
-        /* ============================================================
-           DOMContentLoaded
-        ============================================================ */
+        // ★ 追加：PROFILE_PANEL と NOTIFICATIONS の状態を other.html へ送信
+        function syncPanelSettingsToOthers() {
+            const iframe = document.getElementById('others-iframe');
+            if (!iframe || !iframe.contentWindow) return;
+            const ppVal    = _LS.get('portal_profilePanel', true);
+            const notifVal = _LS.get('portal_notifications', true);
+            iframe.contentWindow.postMessage({ type: 'setProfilePanel',  value: ppVal    }, '*');
+            iframe.contentWindow.postMessage({ type: 'setNotifications',  value: notifVal }, '*');
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
 
-            /* ダークモード切替ボタン位置の復元 */
             try {
                 const s = localStorage.getItem('toggleBtnPos');
                 if (s) {
@@ -494,30 +487,18 @@
                 }
             } catch(e) {}
 
-            /* --------------------------------------------------------
-               NOTIFICATIONS（ダーク切替ボタン）表示状態を復元
-               デフォルト: true（表示）
-            -------------------------------------------------------- */
             const notifState = _LS.get('portal_notifications', true);
             const switchContainer = document.getElementById('main-switch-container');
             if (switchContainer) {
                 switchContainer.style.display = notifState ? '' : 'none';
             }
 
-            /* --------------------------------------------------------
-               PROFILE_PANEL（固定ヘッダー）表示状態を復元
-               デフォルト: true（表示）
-               ※ ログイン後に neo-fixed-header が flex になるため、
-                 非表示指定の場合は 'none' で上書き。
-                 表示指定の場合は neopod.js 側の制御に任せるため何もしない。
-            -------------------------------------------------------- */
             const ppState = _LS.get('portal_profilePanel', true);
             if (!ppState) {
                 const header = document.getElementById('neo-fixed-header');
                 if (header) header.style.display = 'none';
             }
 
-            /* others タブ */
             const othersTag = document.getElementById('others-tag');
             if (othersTag) {
                 othersTag.addEventListener('click', function () {
@@ -532,7 +513,6 @@
                 });
             }
 
-            /* others 以外のタブ */
             ['news-tag', 'study-tag', 'tolk-tag', 'calendar-tag'].forEach(tagId => {
                 const tag = document.getElementById(tagId);
                 if (tag) {
@@ -543,11 +523,11 @@
                 }
             });
 
-            /* others iframe 読み込み完了 → プロフィール＋設定を送信 */
+            /* ★ 修正：others iframe 読み込み完了時に全設定を送信 */
             const othersIframe = document.getElementById('others-iframe');
             if (othersIframe) {
                 othersIframe.addEventListener('load', function() {
-                    /* プロフィール */
+                    // プロフィール
                     try {
                         const cached = localStorage.getItem('np_profile_cache');
                         if (cached) {
@@ -557,14 +537,13 @@
                             }, '*');
                         }
                     } catch(e) {}
-                    /* ダークモード */
+                    // ダークモード
                     syncSettingsToOthers();
+                    // ★ PROFILE_PANEL と NOTIFICATIONS を送信（これが追加箇所）
+                    syncPanelSettingsToOthers();
                 });
             }
 
-            /* --------------------------------------------------------
-               postMessage 受信（other.html から）
-            -------------------------------------------------------- */
             window.addEventListener('message', function (e) {
 
                 if (e.data && e.data.type === 'navigateToBig') {
@@ -575,7 +554,6 @@
 
                 if (!e.data || !e.data.type) return;
 
-                /* DARK_MODE */
                 if (e.data.type === 'setDarkMode') {
                     const isDark = e.data.value;
                     document.body.classList.toggle('dark-mode', isDark);
@@ -588,7 +566,6 @@
                     }
                 }
 
-                /* NOTIFICATIONS — ダーク切替ボタンの表示切替＋永続保存 */
                 if (e.data.type === 'setNotifications') {
                     const val = e.data.value;
                     _LS.set('portal_notifications', val);
@@ -596,7 +573,6 @@
                     if (sc) sc.style.display = val ? '' : 'none';
                 }
 
-                /* WIDGET_POS */
                 if (e.data.type === 'setTogglePos') {
                     const pos = e.data.value;
                     const el  = document.getElementById('main-switch-container');
@@ -606,7 +582,6 @@
                     }
                 }
 
-                /* PROFILE_PANEL — 固定ヘッダーの表示切替＋永続保存 */
                 if (e.data.type === 'setProfilePanel') {
                     const val = e.data.value;
                     _LS.set('portal_profilePanel', val);
@@ -614,13 +589,11 @@
                     if (header) header.style.display = val ? 'flex' : 'none';
                 }
 
-                /* PROFILE_EDIT → プロフィール編集モーダルを開く */
                 if (e.data.type === 'openProfileModal') {
                     const btn = document.getElementById('my-profile-btn-wrapper');
                     if (btn) btn.click();
                 }
 
-                /* updateProfile → Firebase保存 ＋ 固定ヘッダー即時反映 */
                 if (e.data.type === 'updateProfile') {
                     const { icon, birthday, bio } = e.data.value;
                     if (typeof window._npUpdateProfile === 'function') {
