@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QuizHub</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f7f6f2;--white:#fff;--border:#e8e6e0;--text:#1a1916;--sub:#6b6860;--hint:#a09d97;
+  --accent:#2d5be3;--accent-l:#eef1fd;
+  --sw:60px;--hh:52px
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+
+.sb{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--white);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:4px;z-index:200}
+.sb-logo{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.sb-logo svg{width:18px;height:18px;fill:#fff}
+.sb-btn{width:42px;height:42px;border:none;background:transparent;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--hint);transition:background .15s}
+.sb-btn:hover{background:var(--bg)}
+.sb-btn.on{background:var(--accent-l);color:var(--accent)}
+.sb-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
+.sb-btn span{font-size:9px;font-weight:500}
+.sb-sp{flex:1}
+
+.main{margin-left:var(--sw);display:flex;flex-direction:column;min-height:100vh;flex:1}
+
+.hdr{position:sticky;top:0;z-index:100;background:rgba(247,246,242,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);height:var(--hh);display:flex;align-items:center;padding:0 20px;gap:12px}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:1.25rem;flex:1}
+.search{display:flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--border);border-radius:6px;padding:0 10px;height:34px;min-width:160px;max-width:240px;flex:1}
+.search svg{width:14px;height:14px;stroke:var(--hint);fill:none;stroke-width:1.8;flex-shrink:0}
+.search input{border:none;outline:none;background:transparent;font:400 13px 'DM Sans',sans-serif;color:var(--text);width:100%}
+.search input::placeholder{color:var(--hint)}
+.btn{height:34px;padding:0 14px;border-radius:6px;font:500 13px 'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:5px;border:none;transition:opacity .15s;white-space:nowrap}
+.btn-p{background:var(--accent);color:#fff}.btn-p:hover{opacity:.86}
+.btn-g{background:transparent;color:var(--sub);border:1px solid var(--border)}.btn-g:hover{border-color:#b0ada6;color:var(--text)}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.btn-p svg{stroke:#fff}
+
+.tabs{display:flex;background:var(--white);border:1px solid var(--border);border-radius:8px;padding:3px;margin:14px 20px 0}
+.tab{flex:1;height:34px;border:none;background:transparent;font:500 13px 'DM Sans',sans-serif;color:var(--sub);cursor:pointer;border-radius:5px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.tab svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+.tab:hover{color:var(--text);background:var(--bg)}
+.tab.on{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(45,91,227,.25)}
+
+.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:12px 20px 0}
+.cats::-webkit-scrollbar{display:none}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--white);font:500 12px 'DM Sans',sans-serif;color:var(--sub);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.pill:hover{border-color:#b0ada6;color:var(--text)}
+.pill svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.pill.on{border-color:transparent;color:#fff}
+.p-all.on{background:var(--text)}.p-science.on{background:#2563eb}.p-history.on{background:#c2530a}
+.p-math.on{background:#16a34a}.p-art.on{background:#9333ea}.p-geo.on{background:#059669}
+
+.content{padding:16px 20px 40px}
+.pane{display:none}.pane.on{display:block}
+.pane-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.pane-title{font-size:14px;font-weight:600}
+.pane-hint{font-size:11px;color:var(--hint)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px rgba(45,91,227,.1)}
+.card-cat{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;margin-bottom:8px}
+.c-science{background:#eef4ff;color:#2563eb}.c-history{background:#fef3ec;color:#c2530a}
+.c-math{background:#f0fdf4;color:#16a34a}.c-art{background:#fdf4ff;color:#9333ea}.c-geo{background:#ecfdf5;color:#059669}
+.card-title{font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.4}
+.card-meta{font-size:11px;color:var(--hint);display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.card-meta span{display:flex;align-items:center;gap:3px}
+.card-meta svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8}
+.card-foot{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)}
+.ava{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:#fff;flex-shrink:0}
+.card-author{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--sub)}
+.card-date{font-size:10px;color:var(--hint)}
+.del-btn{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:#fee2e2;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;color:#ef4444}
+.del-btn svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
+.card:hover .del-btn{display:flex}
+
+.loading{text-align:center;padding:48px 16px;color:var(--hint);font-size:13px}
+.spin{width:22px;height:22px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{background:var(--white);border:1.5px dashed #d0cdc5;border-radius:10px;padding:48px 24px;text-align:center}
+.empty svg{width:36px;height:36px;stroke:var(--hint);fill:none;stroke-width:1.2;margin:0 auto 10px;display:block}
+.empty p{font-size:13px;color:var(--hint);line-height:1.7;margin-bottom:16px}
+.no-res{text-align:center;padding:40px;color:var(--hint);font-size:13px}
+.no-res svg{width:36px;height:36px;stroke:var(--hint);fill:none;stroke-width:1.2;margin:0 auto 8px;display:block}
+.err-banner{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin-bottom:12px;font-size:13px;color:#b91c1c;display:none}
+.err-banner.show{display:block}
+
+.ov{position:fixed;inset:0;background:rgba(26,25,22,.55);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.ov.open{opacity:1;pointer-events:all}
+.modal{background:var(--white);border-radius:14px;padding:28px;width:100%;max-width:460px;box-shadow:0 24px 60px rgba(0,0,0,.18);transform:translateY(14px) scale(.97);transition:transform .22s cubic-bezier(.22,.68,0,1.2);max-height:90vh;overflow-y:auto}
+.ov.open .modal{transform:none}
+.m-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.m-title{font-family:'DM Serif Display',serif;font-size:1.2rem}
+.m-close{width:30px;height:30px;border:none;background:var(--bg);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--sub)}
+.m-close:hover{background:var(--border)}
+.m-close svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.fg{margin-bottom:14px}
+.lbl{display:block;font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+.inp{width:100%;height:38px;padding:0 10px;border:1.5px solid var(--border);border-radius:6px;font:400 14px 'DM Sans',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--accent)}
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.co{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border:1.5px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;color:var(--sub);cursor:pointer;transition:all .15s;background:var(--white)}
+.co:hover{border-color:#b0ada6}
+.co svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.co.on{color:#fff;border-color:transparent}
+.co[data-c="science"].on{background:#2563eb}.co[data-c="history"].on{background:#c2530a}
+.co[data-c="math"].on{background:#16a34a}.co[data-c="art"].on{background:#9333ea}.co[data-c="geo"].on{background:#059669}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{padding:4px 10px;border:1.5px solid var(--border);border-radius:20px;font:500 12px 'DM Sans',sans-serif;color:var(--sub);cursor:pointer;transition:all .15s;background:var(--white)}
+.chip:hover{border-color:#b0ada6;color:var(--text)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.m-foot{margin-top:20px;display:flex;gap:8px;justify-content:flex-end}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media(max-width:480px){.tab span{display:none}.hdr-title{font-size:1rem}}
+</style>
+</head>
+<body>
+
+<aside class="sb">
+  <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>
+  <button class="sb-btn on" id="sb0" onclick="goTab(0)">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+    <span>みんな</span>
+  </button>
+  <button class="sb-btn" id="sb1" onclick="goTab(1)">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>作品</span>
+  </button>
+  <div class="sb-sp"></div>
+</aside>
+
+<div class="main">
+  <header class="hdr">
+    <div class="hdr-title">QuizHub</div>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="クイズを検索..." oninput="onSearch(this.value)">
+    </div>
+    <button class="btn btn-p" onclick="openModal()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      新規作成
+    </button>
+  </header>
+
+  <div class="tabs">
+    <button class="tab on" id="t0" onclick="goTab(0)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>みんなの作品</span>
+    </button>
+    <button class="tab" id="t1" onclick="goTab(1)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>自分の作品</span>
+    </button>
+  </div>
+
+  <div class="cats" id="cat-bar">
+    <button class="pill p-all on" data-c="all" onclick="setCat('all')">すべて</button>
+    <button class="pill p-science" data-c="science" onclick="setCat('science')"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18"/></svg>理科</button>
+    <button class="pill p-history" data-c="history" onclick="setCat('history')"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>歴史</button>
+    <button class="pill p-math" data-c="math" onclick="setCat('math')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>数学</button>
+    <button class="pill p-art" data-c="art" onclick="setCat('art')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8.5 14.5c1.5 2 5.5 2 7 0"/></svg>芸術</button>
+    <button class="pill p-geo" data-c="geo" onclick="setCat('geo')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>地理</button>
+  </div>
+
+  <div class="content">
+    <!-- みんなの作品 -->
+    <div class="pane on" id="p0">
+      <div class="err-banner" id="err-banner">
+        ❌ サーバーに接続できません。<code>server.js</code> が起動しているか確認してください。
+      </div>
+      <div class="pane-head">
+        <div class="pane-title" id="com-label">みんなのクイズ</div>
+        <span class="pane-hint" id="status-badge">読み込み中...</span>
+      </div>
+      <div class="loading" id="com-loading"><div class="spin"></div>サーバーから取得中...</div>
+      <div class="grid" id="com-grid" style="display:none"></div>
+      <div class="empty" id="com-empty" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <p>まだクイズがありません。<br>「新規作成」で最初のクイズを作りましょう！</p>
+        <button class="btn btn-p" style="margin:0 auto" onclick="openModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新規作成
+        </button>
+      </div>
+      <div class="no-res" id="com-nores" style="display:none">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        該当するクイズが見つかりませんでした
+      </div>
+    </div>
+
+    <!-- 自分の作品 -->
+    <div class="pane" id="p1">
+      <div class="pane-head">
+        <div class="pane-title">自分の作品 <span id="mine-cnt" style="color:var(--hint);font-weight:400">(0)</span></div>
+        <button class="btn btn-p" onclick="openModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新しいクイズを作る
+        </button>
+      </div>
+      <div class="grid" id="mine-grid" style="display:none"></div>
+      <div class="empty" id="mine-empty">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <p>まだ作品がありません。<br>クイズを作ってみましょう！</p>
+        <button class="btn btn-p" style="margin:0 auto" onclick="openModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>最初のクイズを作る
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal -->
+<div class="ov" id="ov" onclick="ovClick(event)">
+  <div class="modal">
+    <div class="m-head">
+      <div class="m-title">クイズを作成</div>
+      <button class="m-close" onclick="closeModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="fg">
+      <label class="lbl">クイズの題名 *</label>
+      <input class="inp" id="m-title" placeholder="例：元素記号マスターになろう" maxlength="60">
+    </div>
+    <div class="fg">
+      <label class="lbl">投稿者名</label>
+      <input class="inp" id="m-author" placeholder="あなたの名前（任意）" maxlength="20">
+    </div>
+    <div class="fg">
+      <label class="lbl">カテゴリ *</label>
+      <div class="cg">
+        <div class="co" data-c="science" onclick="selCat('science')"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18"/></svg>理科</div>
+        <div class="co" data-c="history" onclick="selCat('history')"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>歴史</div>
+        <div class="co" data-c="math" onclick="selCat('math')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>数学</div>
+        <div class="co" data-c="art" onclick="selCat('art')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8.5 14.5c1.5 2 5.5 2 7 0"/></svg>芸術</div>
+        <div class="co" data-c="geo" onclick="selCat('geo')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10z"/></svg>地理</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">問題数 *</label>
+      <div class="chips" id="qc-grp">
+        <div class="chip" data-v="5" onclick="selChip('qc',5)">5問</div>
+        <div class="chip" data-v="10" onclick="selChip('qc',10)">10問</div>
+        <div class="chip" data-v="15" onclick="selChip('qc',15)">15問</div>
+        <div class="chip" data-v="20" onclick="selChip('qc',20)">20問</div>
+        <div class="chip" data-v="30" onclick="selChip('qc',30)">30問</div>
+        <div class="chip" data-v="50" onclick="selChip('qc',50)">50問</div>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">時間制限 *</label>
+      <div class="chips" id="tl-grp">
+        <div class="chip" data-v="5" onclick="selChip('tl',5)">5分</div>
+        <div class="chip" data-v="10" onclick="selChip('tl',10)">10分</div>
+        <div class="chip" data-v="15" onclick="selChip('tl',15)">15分</div>
+        <div class="chip" data-v="20" onclick="selChip('tl',20)">20分</div>
+        <div class="chip" data-v="30" onclick="selChip('tl',30)">30分</div>
+        <div class="chip" data-v="0" onclick="selChip('tl',0)">∞ 無制限</div>
+      </div>
+    </div>
+    <div class="m-foot">
+      <button class="btn btn-g" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-p" id="submit-btn" onclick="submit()">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>作成して公開
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================
+//  ★ サーバーのURLをここに設定してください ★
+//  ローカル開発時:  http://localhost:3000
+//  本番サーバー時:  https://yourdomain.com
+// =====================================================
+const API = 'http://localhost:3000';
+// =====================================================
+
+const CATS = {
+  science:{l:'理科',c:'c-science',col:'#2563eb'},
+  history:{l:'歴史',c:'c-history',col:'#c2530a'},
+  math:   {l:'数学',c:'c-math',   col:'#16a34a'},
+  art:    {l:'芸術',c:'c-art',    col:'#9333ea'},
+  geo:    {l:'地理',c:'c-geo',    col:'#059669'},
+};
+const COLORS=['#667eea','#f97316','#16a34a','#9333ea','#059669','#2d5be3','#e11d48','#0891b2'];
+
+// セッション内ユーザーID（ページを開き直すと変わる。ログイン機能は未実装）
+const MY_ID = localStorage.getItem('qhub_uid') || (() => {
+  const id = 'u_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  localStorage.setItem('qhub_uid', id);
+  return id;
+})();
+
+let quizzes=[], cat='all', searchQ='', mCat=null, mQc=null, mTl=null;
+
+// ── utils ──
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const tlabel = v => v===0 ? '∞無制限' : v+'分';
+function ago(ts){
+  const m=Math.floor((Date.now()-ts)/60000);
+  if(m<1)return'たった今';if(m<60)return m+'分前';
+  const h=Math.floor(m/60);if(h<24)return h+'時間前';
+  return Math.floor(h/24)+'日前';
+}
+const ICONS={
+  science:`<path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18"/>`,
+  history:`<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>`,
+  math:`<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
+  art:`<circle cx="12" cy="12" r="10"/><path d="M8.5 14.5c1.5 2 5.5 2 7 0"/>`,
+  geo:`<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>`,
+};
+const icon = k => `<svg style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24">${ICONS[k]||''}</svg>`;
+
+function cardHTML(z){
+  const ci=CATS[z.cat]||{};
+  const isMine = z.userId===MY_ID;
+  return`<div class="card" data-c="${z.cat}" data-id="${z.id}">
+    ${isMine?`<button class="del-btn" onclick="delQuiz('${z.id}',event)" title="削除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
+    <div class="card-cat ${ci.c}">${icon(z.cat)} ${ci.l}</div>
+    <div class="card-title">${esc(z.title)}</div>
+    <div class="card-meta">
+      <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${tlabel(z.timeLimit)}</span>
+      <span><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-5-3z"/></svg>${z.qCount}問</span>
+    </div>
+    <div class="card-foot">
+      <div class="card-author"><div class="ava" style="background:${z.authorColor||'#667eea'}">${(z.author||'ゲスト')[0].toUpperCase()}</div>${esc(z.author||'ゲスト')}</div>
+      <span class="card-date">${ago(z.createdAt)}</span>
+    </div>
+  </div>`;
+}
+
+// ── render ──
+function renderCom(){
+  const loading=document.getElementById('com-loading');
+  const grid=document.getElementById('com-grid');
+  const empty=document.getElementById('com-empty');
+  const nores=document.getElementById('com-nores');
+  loading.style.display='none';
+  let list=quizzes.filter(z=>(cat==='all'||z.cat===cat)&&(!searchQ||z.title.toLowerCase().includes(searchQ))).sort((a,b)=>b.createdAt-a.createdAt);
+  if(!quizzes.length){grid.style.display='none';empty.style.display='';nores.style.display='none';document.getElementById('com-label').textContent='みんなのクイズ';return}
+  empty.style.display='none';
+  if(!list.length){grid.style.display='none';nores.style.display='';document.getElementById('com-label').textContent='検索結果 (0件)';return}
+  nores.style.display='none';grid.style.display='';
+  grid.innerHTML=list.map(cardHTML).join('');
+  document.getElementById('com-label').textContent=(cat!=='all'||searchQ)?`検索結果 (${list.length}件)`:`みんなのクイズ (${list.length}件)`;
+}
+function renderMine(){
+  const grid=document.getElementById('mine-grid');
+  const empty=document.getElementById('mine-empty');
+  const mine=quizzes.filter(z=>z.userId===MY_ID).sort((a,b)=>b.createdAt-a.createdAt);
+  document.getElementById('mine-cnt').textContent=`(${mine.length})`;
+  if(!mine.length){grid.style.display='none';empty.style.display=''}
+  else{empty.style.display='none';grid.style.display='';grid.innerHTML=mine.map(cardHTML).join('')}
+}
+function render(){renderCom();renderMine()}
+
+// ── API ──
+async function fetchQuizzes(){
+  try{
+    const r=await fetch(`${API}/api/quizzes`);
+    if(!r.ok) throw new Error(r.status);
+    quizzes=await r.json();
+    render();
+    document.getElementById('err-banner').classList.remove('show');
+    document.getElementById('status-badge').textContent=`🌐 ${quizzes.length}件`;
+  }catch(e){
+    document.getElementById('com-loading').style.display='none';
+    document.getElementById('err-banner').classList.add('show');
+    document.getElementById('status-badge').textContent='❌ 未接続';
+  }
+}
+
+async function delQuiz(id, e){
+  e.stopPropagation();
+  if(!confirm('このクイズを削除しますか？')) return;
+  try{
+    const r=await fetch(`${API}/api/quizzes/${id}`,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:MY_ID})});
+    if(!r.ok) throw new Error(await r.text());
+    await fetchQuizzes();
+    toast('🗑️ 削除しました');
+  }catch(e){toast('❌ 削除に失敗しました')}
+}
+
+// ── タブ・フィルター ──
+function goTab(i){
+  [0,1].forEach(n=>{
+    document.getElementById('t'+n).classList.toggle('on',n===i);
+    document.getElementById('p'+n).classList.toggle('on',n===i);
+    document.getElementById('sb'+n).classList.toggle('on',n===i);
+  });
+  document.getElementById('cat-bar').style.display=i===0?'flex':'none';
+}
+function setCat(c){
+  cat=c;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on',p.dataset.c===c));
+  renderCom();
+}
+function onSearch(v){searchQ=v.trim().toLowerCase();renderCom()}
+
+// ── モーダル ──
+function openModal(){
+  document.getElementById('ov').classList.add('open');
+  document.getElementById('m-title').value='';
+  document.getElementById('m-author').value='';
+  mCat=null;mQc=null;mTl=null;
+  document.querySelectorAll('.co,.chip').forEach(el=>el.classList.remove('on'));
+}
+function closeModal(){document.getElementById('ov').classList.remove('open')}
+function ovClick(e){if(e.target===document.getElementById('ov'))closeModal()}
+function selCat(c){mCat=c;document.querySelectorAll('.co').forEach(el=>el.classList.toggle('on',el.dataset.c===c))}
+function selChip(grp,v){
+  if(grp==='qc')mQc=v;else mTl=v;
+  document.querySelectorAll(`#${grp}-grp .chip`).forEach(el=>el.classList.toggle('on',Number(el.dataset.v)===v));
+}
+
+async function submit(){
+  const title=document.getElementById('m-title').value.trim();
+  const author=document.getElementById('m-author').value.trim()||'ゲスト';
+  if(!title)return toast('❗ 題名を入力してください');
+  if(!mCat)return toast('❗ カテゴリを選択してください');
+  if(mQc===null)return toast('❗ 問題数を選択してください');
+  if(mTl===null)return toast('❗ 時間制限を選択してください');
+
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;btn.textContent='送信中...';
+
+  try{
+    const r=await fetch(`${API}/api/quizzes`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({title,cat:mCat,qCount:mQc,timeLimit:mTl,author,
+        authorColor:COLORS[Math.floor(Math.random()*COLORS.length)],userId:MY_ID})
+    });
+    if(!r.ok) throw new Error(await r.text());
+    closeModal();
+    await fetchQuizzes();
+    toast('✅ クイズを公開しました！');
+  }catch(e){
+    toast('❌ 保存に失敗しました: '+e.message);
+  }finally{
+    btn.disabled=false;
+    btn.innerHTML='<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>作成して公開';
+  }
+}
+
+// ── toast ──
+let tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('on');
+  clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2800);
+}
+
+// ── 初期化 ──
+fetchQuizzes();
+setInterval(fetchQuizzes, 30000); // 30秒ごとに自動更新
+</script>
+</body>
+</html>
