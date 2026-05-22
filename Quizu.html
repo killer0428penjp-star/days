@@ -4,94 +4,331 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QuizHub</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#f7f6f2;--w:#fff;--b:#e8e6e0;--t:#1a1916;--s:#6b6860;--h:#a09d97;--a:#2d5be3;--al:#eef1fd;--sw:60px;--hh:52px}
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-height:100vh;display:flex}
-.sb{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--w);border-right:1px solid var(--b);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:4px;z-index:200}
-.sb-logo{width:34px;height:34px;background:var(--a);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
-.sb-logo svg{width:18px;height:18px;fill:#fff}
-.sb-btn{width:42px;height:42px;border:none;background:transparent;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--h);transition:background .15s}
-.sb-btn:hover{background:var(--bg)}.sb-btn.on{background:var(--al);color:var(--a)}
+:root{
+  --bg:#f7f6f2;
+  --surface:#ffffff;
+  --surface2:#f0ede8;
+  --border:#e2ddd7;
+  --border2:#ccc8c0;
+  --text:#1a1917;
+  --sub:#6b6860;
+  --hint:#9e9b94;
+  --a:#2d5be3;--a2:#4a74f0;--al:rgba(45,91,227,.08);
+  --gold:#c8860a;--gl:rgba(200,134,10,.1);
+  --green:#1a8a50;--green-bg:#edf7f1;
+  --red:#c0392b;--red-bg:#fef0ee;
+  --blue:#1a5cb8;--blue-bg:#eef3fc;
+  --yellow:#b07a00;--yellow-bg:#fdf5e0;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 12px rgba(0,0,0,.05);
+  --shadow-lg:0 4px 16px rgba(0,0,0,.1),0 12px 40px rgba(0,0,0,.08);
+  --radius:10px;--radius-lg:14px;--radius-xl:18px;
+  --sw:68px;
+  --header-h:56px;
+}
+
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;line-height:1.5}
+
+/* ── sidebar ── */
+.sb{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:2px;z-index:200}
+.sb-logo{width:36px;height:36px;background:var(--a);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.sb-logo svg{width:17px;height:17px;fill:#fff}
+.sb-btn{width:48px;height:48px;border:none;background:transparent;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--hint);transition:all .15s}
+.sb-btn:hover{background:var(--surface2);color:var(--sub)}
+.sb-btn.on{background:var(--al);color:var(--a)}
 .sb-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
-.sb-btn span{font-size:9px;font-weight:500}
-.main{margin-left:var(--sw);display:flex;flex-direction:column;min-height:100vh;flex:1}
-.hdr{position:sticky;top:0;z-index:100;background:rgba(247,246,242,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--b);height:var(--hh);display:flex;align-items:center;padding:0 20px;gap:12px}
-.hdr-title{font-family:'DM Serif Display',serif;font-size:1.25rem;flex:1}
-.search{display:flex;align-items:center;gap:6px;background:var(--w);border:1px solid var(--b);border-radius:6px;padding:0 10px;height:34px;min-width:160px;max-width:240px;flex:1}
-.search svg{width:14px;height:14px;stroke:var(--h);fill:none;stroke-width:1.8;flex-shrink:0}
-.search input{border:none;outline:none;background:transparent;font:400 13px 'DM Sans',sans-serif;color:var(--t);width:100%}
-.search input::placeholder{color:var(--h)}
-.btn{height:34px;padding:0 14px;border-radius:6px;font:500 13px 'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:5px;border:none;transition:opacity .15s;white-space:nowrap}
-.bp{background:var(--a);color:#fff}.bp:hover{opacity:.86}
-.bg{background:transparent;color:var(--s);border:1px solid var(--b)}.bg:hover{border-color:#b0ada6;color:var(--t)}
-.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}.bp svg{stroke:#fff}
-.tabs{display:flex;background:var(--w);border:1px solid var(--b);border-radius:8px;padding:3px;margin:14px 20px 0}
-.tab{flex:1;height:34px;border:none;background:transparent;font:500 13px 'DM Sans',sans-serif;color:var(--s);cursor:pointer;border-radius:5px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.sb-btn span{font-size:9px;font-weight:600;letter-spacing:.3px}
+.sb-sp{flex:1}
+.sb-user{width:34px;height:34px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;cursor:pointer;border:none;transition:opacity .15s;overflow:hidden;flex-shrink:0}
+.sb-user:hover{opacity:.85}
+.sb-user img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+
+/* ── main ── */
+.main{margin-left:var(--sw);display:flex;flex-direction:column;min-height:100vh;flex:1;min-width:0}
+
+/* ── header ── */
+.hdr{position:sticky;top:0;z-index:100;background:rgba(247,246,242,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);height:var(--header-h);display:flex;align-items:center;padding:0 20px;gap:10px}
+.hdr-title{font-family:'DM Serif Display',serif;font-size:1.25rem;color:var(--text);flex:0 0 auto;letter-spacing:-.3px}
+.hdr-title em{font-style:italic;color:var(--a)}
+.search{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0 11px;height:34px;flex:1;max-width:280px;transition:border-color .15s}
+.search:focus-within{border-color:var(--a)}
+.search svg{width:13px;height:13px;stroke:var(--hint);fill:none;stroke-width:1.8;flex-shrink:0}
+.search input{border:none;outline:none;background:transparent;font:500 13px 'DM Sans',sans-serif;color:var(--text);width:100%}
+.search input::placeholder{color:var(--hint)}
+.btn{height:34px;padding:0 14px;border-radius:8px;font:600 13px 'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap;text-decoration:none}
+.bp{background:var(--a);color:#fff}.bp:hover{background:var(--a2)}
+.bg{background:var(--surface);color:var(--sub);border:1px solid var(--border)}.bg:hover{border-color:var(--border2);color:var(--text)}
+.btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2}
+
+/* ── profile bar ── */
+.profile-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px}
+.profile-bar.hidden{display:none}
+.profile-bar-avatar{width:36px;height:36px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden;cursor:pointer}
+.profile-bar-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-bar-info{flex:1}
+.profile-bar-name{font-size:13px;font-weight:700;color:var(--text)}
+.profile-bar-sub{font-size:11px;color:var(--hint)}
+.profile-bar-actions{display:flex;gap:6px}
+
+/* ── tabs ── */
+.tabs{display:flex;padding:14px 20px 0;gap:0;border-bottom:1px solid var(--border);background:var(--surface)}
+.tab{padding:8px 16px;border:none;background:transparent;font:600 13px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;display:flex;align-items:center;gap:5px}
 .tab svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
-.tab:hover{color:var(--t);background:var(--bg)}.tab.on{background:var(--a);color:#fff;box-shadow:0 2px 8px rgba(45,91,227,.25)}
-.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:12px 20px 0}
+.tab:hover{color:var(--sub)}
+.tab.on{color:var(--a);border-bottom-color:var(--a)}
+
+/* ── category pills ── */
+.cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:14px 20px}
 .cats::-webkit-scrollbar{display:none}
-.pill{display:inline-flex;align-items:center;gap:4px;padding:4px 12px;border-radius:20px;border:1.5px solid var(--b);background:var(--w);font:500 12px 'DM Sans',sans-serif;color:var(--s);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
-.pill:hover{border-color:#b0ada6;color:var(--t)}.pill svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.pill:hover{border-color:var(--border2);color:var(--sub)}
 .pill.on{border-color:transparent;color:#fff}
-.p-all.on{background:var(--t)}.p-science.on{background:#2563eb}.p-history.on{background:#c2530a}
-.p-math.on{background:#16a34a}.p-art.on{background:#9333ea}.p-geo.on{background:#059669}
-.content{padding:16px 20px 40px}
+.p-all.on{background:var(--sub)}
+.p-trivia.on{background:#7c3aed}
+.p-general.on{background:#0369a1}
+.p-sns.on{background:#be185d}
+.p-music.on{background:#b45309}
+.p-sports.on{background:#047857}
+.p-anime.on{background:#b91c1c}
+.p-other.on{background:#4b5563}
+
+/* ── content ── */
+.content{padding:6px 20px 48px}
 .pane{display:none}.pane.on{display:block}
-.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.pt{font-size:14px;font-weight:600}.ph-hint{font-size:11px;color:var(--h)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-.card{background:var(--w);border:1px solid var(--b);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s,transform .15s,box-shadow .15s;position:relative;overflow:hidden}
-.card:hover{border-color:var(--a);transform:translateY(-2px);box-shadow:0 4px 16px rgba(45,91,227,.1)}
-.cc{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:500;margin-bottom:8px}
-.cs{background:#eef4ff;color:#2563eb}.ch{background:#fef3ec;color:#c2530a}
-.cm{background:#f0fdf4;color:#16a34a}.ca{background:#fdf4ff;color:#9333ea}.cg{background:#ecfdf5;color:#059669}
-.ct{font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.4}
-.cm2{font-size:11px;color:var(--h);display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap}
-.cm2 span{display:flex;align-items:center;gap:3px}
-.cm2 svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8}
-.cf{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid var(--b)}
-.ava{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:#fff;flex-shrink:0}
-.cau{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--s)}
-.cdt{font-size:10px;color:var(--h)}
-.del{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:#fee2e2;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;color:#ef4444}
-.del svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
-.card:hover .del{display:flex}
-.empty{background:var(--w);border:1.5px dashed #d0cdc5;border-radius:10px;padding:48px 24px;text-align:center}
-.empty svg{width:36px;height:36px;stroke:var(--h);fill:none;stroke-width:1.2;margin:0 auto 10px;display:block}
-.empty p{font-size:13px;color:var(--h);line-height:1.7;margin-bottom:16px}
-.nores{text-align:center;padding:40px;color:var(--h);font-size:13px}
-.nores svg{width:36px;height:36px;stroke:var(--h);fill:none;stroke-width:1.2;margin:0 auto 8px;display:block}
-.ov{position:fixed;inset:0;background:rgba(26,25,22,.55);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-top:4px}
+.pt{font-size:14px;font-weight:600;color:var(--text)}
+.ph-hint{font-size:11px;color:var(--hint)}
+
+/* ── quiz grid ── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.card:hover{border-color:var(--border2);box-shadow:var(--shadow)}
+.card-badge-row{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.card-cat{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600}
+.cc-trivia{background:#f3eeff;color:#7c3aed}
+.cc-general{background:#e0f2fe;color:#0369a1}
+.cc-sns{background:#fce7f3;color:#be185d}
+.cc-music{background:#fef3c7;color:#b45309}
+.cc-sports{background:#d1fae5;color:#047857}
+.cc-anime{background:#fee2e2;color:#b91c1c}
+.cc-other{background:#f3f4f6;color:#4b5563}
+.card-online-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:var(--blue-bg);color:var(--blue)}
+.card-title{font-size:14px;font-weight:600;margin-bottom:5px;line-height:1.4;color:var(--text)}
+.card-meta{font-size:11px;color:var(--hint);display:flex;gap:8px;margin-bottom:11px;flex-wrap:wrap}
+.card-meta span{display:flex;align-items:center;gap:3px}
+.card-meta svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8}
+.card-foot{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)}
+.ava{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
+.ava img{width:100%;height:100%;object-fit:cover}
+.card-author{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--sub)}
+.card-date{font-size:10px;color:var(--hint)}
+.card-actions{position:absolute;top:10px;right:10px;display:flex;gap:4px;opacity:0;transition:opacity .15s}
+.card:hover .card-actions{opacity:1}
+.icon-btn{width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.icon-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.ib-play{background:var(--a);color:#fff}.ib-play:hover{background:var(--a2)}
+.ib-del{background:var(--red-bg);color:var(--red)}.ib-del:hover{background:#fcd5d0}
+
+/* ── empty ── */
+.empty{background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius-lg);padding:52px 24px;text-align:center}
+.empty svg{width:36px;height:36px;stroke:var(--hint);fill:none;stroke-width:1.2;margin:0 auto 12px;display:block}
+.empty p{font-size:13px;color:var(--hint);line-height:1.8;margin-bottom:18px}
+.nores{text-align:center;padding:48px;color:var(--hint);font-size:13px}
+.nores svg{width:36px;height:36px;stroke:var(--hint);fill:none;stroke-width:1.2;margin:0 auto 10px;display:block}
+
+/* ── モーダル共通 ── */
+.ov{position:fixed;inset:0;background:rgba(26,25,23,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
 .ov.open{opacity:1;pointer-events:all}
-.modal{background:var(--w);border-radius:14px;padding:28px;width:100%;max-width:460px;box-shadow:0 24px 60px rgba(0,0,0,.18);transform:translateY(14px) scale(.97);transition:transform .22s cubic-bezier(.22,.68,0,1.2);max-height:90vh;overflow-y:auto}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:26px;width:100%;box-shadow:var(--shadow-lg);transform:translateY(12px) scale(.98);transition:transform .22s cubic-bezier(.22,.68,0,1.2);max-height:92vh;overflow-y:auto}
 .ov.open .modal{transform:none}
 .mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.mt{font-family:'DM Serif Display',serif;font-size:1.2rem}
-.mc{width:30px;height:30px;border:none;background:var(--bg);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--s)}
-.mc:hover{background:var(--b)}.mc svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.mt{font-size:1rem;font-weight:700;color:var(--text)}
+.mc{width:28px;height:28px;border:none;background:var(--surface2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--sub);transition:background .15s}
+.mc:hover{background:var(--border)}.mc svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
 .fg{margin-bottom:14px}
-.lbl{display:block;font-size:11px;font-weight:600;color:var(--s);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
-.inp{width:100%;height:38px;padding:0 10px;border:1.5px solid var(--b);border-radius:6px;font:400 14px 'DM Sans',sans-serif;color:var(--t);background:var(--w);outline:none;transition:border-color .15s}
-.inp:focus{border-color:var(--a)}
-.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.co{display:flex;align-items:center;justify-content:center;gap:5px;padding:8px;border:1.5px solid var(--b);border-radius:6px;font-size:12px;font-weight:500;color:var(--s);cursor:pointer;transition:all .15s;background:var(--w)}
-.co:hover{border-color:#b0ada6}.co svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
-.co.on{color:#fff;border-color:transparent}
-.co[data-c=science].on{background:#2563eb}.co[data-c=history].on{background:#c2530a}
-.co[data-c=math].on{background:#16a34a}.co[data-c=art].on{background:#9333ea}.co[data-c=geo].on{background:#059669}
-.chips{display:flex;flex-wrap:wrap;gap:5px}
-.chip{padding:4px 10px;border:1.5px solid var(--b);border-radius:20px;font:500 12px 'DM Sans',sans-serif;color:var(--s);cursor:pointer;transition:all .15s;background:var(--w)}
-.chip:hover{border-color:#b0ada6;color:var(--t)}.chip.on{background:var(--a);border-color:var(--a);color:#fff}
-.mf{margin-top:20px;display:flex;gap:8px;justify-content:flex-end}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--t);color:#fff;padding:8px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.lbl{display:block;font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.inp{width:100%;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:500 14px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s}
+.inp:focus{border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
+.textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font:500 13px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;resize:vertical;min-height:70px;line-height:1.6}
+.textarea:focus{border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
+
+/* カテゴリ選択 */
+.cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.co{display:flex;align-items:center;justify-content:center;gap:4px;padding:8px 4px;border:1px solid var(--border);border-radius:8px;font:600 11px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;transition:all .15s;background:var(--surface);flex-direction:column}
+.co:hover{border-color:var(--border2);color:var(--sub)}
+.co .co-icon{font-size:15px;line-height:1}
+.co.on{border-color:transparent;color:#fff}
+.co[data-c=trivia].on{background:#7c3aed}.co[data-c=general].on{background:#0369a1}
+.co[data-c=sns].on{background:#be185d}.co[data-c=music].on{background:#b45309}
+.co[data-c=sports].on{background:#047857}.co[data-c=anime].on{background:#b91c1c}
+.co[data-c=other].on{background:#4b5563}
+
+/* 問題タイプ切り替え */
+.type-toggle{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;gap:0;margin-bottom:12px}
+.type-btn{flex:1;height:30px;border:none;background:transparent;font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;border-radius:6px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
+.type-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8}
+.type-btn.on{background:var(--surface);color:var(--a);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.type-btn:hover:not(.on){color:var(--sub)}
+
+/* 選択肢 */
+.choices-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.choice-row{display:flex;align-items:center;gap:5px}
+.choice-label{font-size:11px;font-weight:700;color:var(--hint);width:14px;flex-shrink:0}
+.choice-inp{flex:1;height:34px;padding:0 9px;border:1px solid var(--border);border-radius:7px;font:500 13px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s}
+.choice-inp:focus{border-color:var(--a)}
+.correct-sel{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.correct-btn{padding:4px 10px;border:1px solid var(--border);border-radius:6px;font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;background:var(--surface);transition:all .15s}
+.correct-btn:hover{border-color:var(--green);color:var(--green)}
+.correct-btn.on{background:var(--green);border-color:var(--green);color:#fff}
+
+/* 問題リスト */
+.q-list{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.q-item{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:flex-start;gap:9px}
+.q-num{width:20px;height:20px;border-radius:50%;background:var(--al);color:var(--a);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.q-body{flex:1}
+.q-text{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.q-type-badge{display:inline-flex;align-items:center;gap:2px;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-bottom:3px}
+.qt-choice{background:var(--blue-bg);color:var(--blue)}
+.qt-text{background:var(--green-bg);color:var(--green)}
+.q-ans{font-size:11px;color:var(--green);display:flex;align-items:center;gap:3px}
+.q-ans svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.5}
+.q-del{width:22px;height:22px;border-radius:5px;border:none;background:transparent;color:var(--hint);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.q-del:hover{background:var(--red-bg);color:var(--red)}
+.q-del svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.add-q-btn{width:100%;height:36px;border:1.5px dashed var(--border);border-radius:8px;background:transparent;color:var(--hint);font:600 13px 'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .15s}
+.add-q-btn:hover{border-color:var(--a);color:var(--a)}
+.add-q-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2}
+.mf{margin-top:18px;display:flex;gap:7px;justify-content:flex-end}
+
+/* 時間設定 */
+.time-input-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.time-num-input{width:88px;height:36px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:600 14px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;text-align:center;transition:border-color .15s}
+.time-num-input:focus{border-color:var(--a)}
+.time-unit{font-size:12px;color:var(--sub);font-weight:600}
+.time-inf{display:flex;align-items:center;gap:4px;padding:5px 11px;border:1px solid var(--border);border-radius:8px;font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;background:var(--surface);transition:all .15s}
+.time-inf.on{border-color:var(--a);color:var(--a);background:var(--al)}
+.time-inf svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* メディアアップロード */
+.media-section{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-top:8px}
+.media-section-title{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:9px}
+.media-row{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.media-row:last-child{margin-bottom:0}
+.media-lbl{font-size:11px;color:var(--sub);width:48px;flex-shrink:0}
+.media-upload-btn{display:flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;font:600 11px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;background:var(--surface);transition:all .15s}
+.media-upload-btn:hover{border-color:var(--a);color:var(--a)}
+.media-upload-btn svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2}
+.media-preview{display:flex;align-items:center;gap:5px;flex:1;min-width:0}
+.media-thumb{width:32px;height:32px;object-fit:cover;border-radius:5px;border:1px solid var(--border)}
+.media-audio-icon{width:32px;height:32px;background:var(--al);border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--a);flex-shrink:0}
+.media-audio-icon svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.media-name{font-size:10px;color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.media-remove{width:18px;height:18px;border:none;background:transparent;color:var(--hint);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:4px;transition:all .15s}
+.media-remove:hover{background:var(--red-bg);color:var(--red)}
+.media-remove svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2}
+.hidden-file{display:none}
+
+/* ── プレイ画面 ── */
+.play-progress{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.progress-bar{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:var(--a);border-radius:3px;transition:width .4s ease}
+.progress-text{font-size:11px;font-weight:600;color:var(--hint);white-space:nowrap}
+.play-timer-wrap{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.play-timer-bar{flex:1;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.play-timer-fill{height:100%;border-radius:2px;transition:width .9s linear,background .3s}
+.play-timer-num{font-size:13px;font-weight:700;color:var(--text);width:32px;text-align:right;font-variant-numeric:tabular-nums}
+.play-timer-num.warn{color:var(--red)}
+.play-cat-label{font-size:11px;font-weight:700;color:var(--a);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.play-quiz-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:16px;line-height:1.4}
+.play-q-num{font-size:11px;font-weight:600;color:var(--hint);margin-bottom:8px}
+.play-q-text{font-size:1rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:14px}
+.play-media-img{max-width:100%;max-height:180px;border-radius:9px;margin-bottom:10px;object-fit:contain;border:1px solid var(--border)}
+.play-media-audio{width:100%;height:34px;margin-bottom:10px;border-radius:7px;outline:none}
+.play-choices{display:flex;flex-direction:column;gap:7px}
+.play-choice{padding:12px 14px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font:600 14px 'DM Sans',sans-serif;color:var(--sub);cursor:pointer;transition:all .15s;text-align:left;display:flex;align-items:center;gap:9px}
+.play-choice:hover:not(.answered){border-color:var(--a);color:var(--text);background:var(--al)}
+.play-choice .choice-key{width:24px;height:24px;border-radius:6px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;transition:all .15s}
+.play-choice:hover:not(.answered) .choice-key{border-color:var(--a);color:var(--a)}
+.play-choice.correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.play-choice.correct .choice-key{background:var(--green);border-color:var(--green);color:#fff}
+.play-choice.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.play-choice.wrong .choice-key{background:var(--red);border-color:var(--red);color:#fff}
+.play-choice.show-correct{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.play-choice.show-correct .choice-key{border-color:var(--green);color:var(--green)}
+.play-text-input{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;background:var(--surface);font:600 14px 'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .15s;resize:none;line-height:1.5;min-height:72px}
+.play-text-input:focus{border-color:var(--a)}
+.play-text-submit{width:100%;height:40px;margin-top:7px;border-radius:9px;border:none;background:var(--a);color:#fff;font:700 14px 'DM Sans',sans-serif;cursor:pointer;transition:background .15s}
+.play-text-submit:hover{background:var(--a2)}
+.play-feedback{padding:11px 13px;border-radius:9px;font:600 13px 'DM Sans',sans-serif;margin-top:12px;display:none}
+.play-feedback.show{display:block}
+.play-feedback.ok{background:var(--green-bg);color:var(--green);border:1px solid #a7f3d0}
+.play-feedback.ng{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
+.play-next{width:100%;height:42px;margin-top:14px;border-radius:9px;border:none;background:var(--a);color:#fff;font:700 14px 'DM Sans',sans-serif;cursor:pointer;transition:background .15s;display:none}
+.play-next.show{display:block}.play-next:hover{background:var(--a2)}
+
+/* 結果 */
+.result-screen{display:none;text-align:center;padding:8px 0}
+.result-screen.show{display:block}
+.result-score{font-family:'DM Serif Display',serif;font-size:3.5rem;color:var(--a);line-height:1;margin-bottom:4px}
+.result-label{font-size:13px;color:var(--sub);margin-bottom:22px}
+.result-msg{font-size:1rem;font-weight:600;color:var(--text);margin-bottom:6px}
+.result-stars{font-size:2rem;margin-bottom:22px;letter-spacing:4px}
+.result-detail{display:flex;justify-content:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.result-stat{text-align:center;padding:12px 18px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)}
+.result-stat-v{font-size:1.3rem;font-weight:700;color:var(--text)}
+.result-stat-l{font-size:11px;color:var(--hint);margin-top:2px}
+.result-actions{display:flex;gap:8px;justify-content:center}
+
+/* ── 認証モーダル ── */
+.auth-tabs{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:16px}
+.auth-tab{flex:1;height:30px;border:none;background:transparent;font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;border-radius:6px;transition:all .15s}
+.auth-tab.on{background:var(--surface);color:var(--a);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.divider{display:flex;align-items:center;gap:8px;margin:12px 0;color:var(--hint);font-size:11px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.user-menu{position:absolute;right:4px;bottom:70px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:6px;box-shadow:var(--shadow-lg);min-width:160px;display:none;z-index:300}
+.user-menu.open{display:block}
+.user-menu-item{padding:8px 10px;border-radius:7px;font-size:13px;color:var(--sub);cursor:pointer;transition:background .12s;display:flex;align-items:center;gap:7px}
+.user-menu-item:hover{background:var(--surface2);color:var(--text)}
+.user-menu-item svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+.user-menu-sep{height:1px;background:var(--border);margin:4px 0}
+.user-info-row{padding:8px 10px;font-size:11px;color:var(--hint)}
+
+/* pw strength */
+.pw-strength-wrap{margin-bottom:10px}
+.pw-bar{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.pw-bar-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
+.pw-bar-label{font-size:11px;color:var(--hint)}
+
+/* mode badge */
+.mode-indicator{font-size:11px;padding:3px 8px;border-radius:4px;font-weight:600;margin-left:8px}
+.mode-local{background:var(--yellow-bg);color:var(--yellow)}
+.mode-online{background:var(--green-bg);color:var(--green)}
+
+/* toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--text);color:#fff;padding:8px 18px;border-radius:20px;font:600 13px 'DM Sans',sans-serif;z-index:999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%)}
-@media(max-width:480px){.tab span{display:none}.hdr-title{font-size:1rem}}
+
+/* loading */
+.loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--a);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr}
+  .cgrid{grid-template-columns:repeat(4,1fr)}
+  .choices-grid{grid-template-columns:1fr}
+  .hdr-title{display:none}
+}
+@media(max-width:480px){
+  :root{--sw:56px}
+  .tab span{display:none}
+}
 </style>
 </head>
 <body>
+
 <aside class="sb">
   <div class="sb-logo"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg></div>
   <button class="sb-btn on" id="sb0" onclick="goTab(0)">
@@ -100,23 +337,54 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
   <button class="sb-btn" id="sb1" onclick="goTab(1)">
     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>作品</span>
   </button>
+  <div class="sb-sp"></div>
+  <button class="sb-user" id="sb-user-btn" onclick="toggleUserMenu()" title="アカウント">?</button>
 </aside>
+
+<div class="user-menu" id="user-menu">
+  <div class="user-info-row" id="user-info-row">ログインしていません</div>
+  <div class="user-menu-sep"></div>
+  <div class="user-menu-item" onclick="openAuth('login');closeUserMenu()" id="menu-login">
+    <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>ログイン
+  </div>
+  <div class="user-menu-item" onclick="openAuth('signup');closeUserMenu()" id="menu-signup">
+    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>新規登録
+  </div>
+  <div class="user-menu-item" onclick="doLogout();closeUserMenu()" id="menu-logout" style="display:none;color:var(--red)">
+    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>ログアウト
+  </div>
+</div>
 
 <div class="main">
   <header class="hdr">
-    <div class="hdr-title">QuizHub</div>
+    <div class="hdr-title">Quiz<em>Hub</em></div>
     <div class="search">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" placeholder="クイズを検索..." oninput="onSearch(this.value)">
     </div>
-    <button class="btn bp" onclick="openModal()">
+    <span class="mode-indicator mode-local" id="mode-badge">ローカル</span>
+    <button class="btn bp" onclick="openCreate()">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新規作成
     </button>
   </header>
 
-  <div class="tabs">
+  <!-- プロフィールバー（ログイン済みのとき表示） -->
+  <div class="profile-bar hidden" id="profile-bar">
+    <div class="profile-bar-avatar" id="profile-bar-avatar" onclick="toggleUserMenu()">
+      <span id="profile-bar-initial">?</span>
+    </div>
+    <div class="profile-bar-info">
+      <div class="profile-bar-name" id="profile-bar-name">—</div>
+      <div class="profile-bar-sub" id="profile-bar-sub">クイズを作って共有しよう</div>
+    </div>
+    <div class="profile-bar-actions">
+      <button class="btn bg" style="height:28px;font-size:11px" onclick="doLogout()">ログアウト</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tab-bar">
     <button class="tab on" id="t0" onclick="goTab(0)">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg><span>みんなの作品</span>
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>みんなの作品</span>
     </button>
     <button class="tab" id="t1" onclick="goTab(1)">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>自分の作品</span>
@@ -125,24 +393,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
 
   <div class="cats" id="cat-bar">
     <button class="pill p-all on" data-c="all" onclick="setCat('all')">すべて</button>
-    <button class="pill p-science" data-c="science" onclick="setCat('science')"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18"/></svg>理科</button>
-    <button class="pill p-history" data-c="history" onclick="setCat('history')"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>歴史</button>
-    <button class="pill p-math" data-c="math" onclick="setCat('math')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>数学</button>
-    <button class="pill p-art" data-c="art" onclick="setCat('art')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8.5 14.5c1.5 2 5.5 2 7 0"/></svg>芸術</button>
-    <button class="pill p-geo" data-c="geo" onclick="setCat('geo')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>地理</button>
+    <button class="pill p-trivia" data-c="trivia" onclick="setCat('trivia')"><span>🧠</span>雑学</button>
+    <button class="pill p-general" data-c="general" onclick="setCat('general')"><span>📚</span>一般常識</button>
+    <button class="pill p-sns" data-c="sns" onclick="setCat('sns')"><span>📱</span>SNS</button>
+    <button class="pill p-music" data-c="music" onclick="setCat('music')"><span>🎵</span>音楽</button>
+    <button class="pill p-sports" data-c="sports" onclick="setCat('sports')"><span>⚽</span>スポーツ</button>
+    <button class="pill p-anime" data-c="anime" onclick="setCat('anime')"><span>🎌</span>アニメ</button>
+    <button class="pill p-other" data-c="other" onclick="setCat('other')"><span>✨</span>その他</button>
   </div>
 
   <div class="content">
     <div class="pane on" id="p0">
       <div class="ph">
         <div class="pt" id="com-label">みんなのクイズ</div>
-        <span class="ph-hint">💾 ローカル保存</span>
+        <span class="ph-hint" id="com-source-hint">💾 ローカル</span>
       </div>
       <div class="grid" id="com-grid"></div>
       <div class="empty" id="com-empty" style="display:none">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <p>まだクイズがありません。<br>「新規作成」で最初のクイズを作りましょう！</p>
-        <button class="btn bp" style="margin:0 auto" onclick="openModal()">
+        <button class="btn bp" style="margin:0 auto" onclick="openCreate()">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新規作成
         </button>
       </div>
@@ -154,8 +424,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
 
     <div class="pane" id="p1">
       <div class="ph">
-        <div class="pt">自分の作品 <span id="mine-cnt" style="color:var(--h);font-weight:400">(0)</span></div>
-        <button class="btn bp" onclick="openModal()">
+        <div class="pt">自分の作品 <span id="mine-cnt" style="color:var(--hint);font-weight:400">(0)</span></div>
+        <button class="btn bp" onclick="openCreate()">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新しいクイズを作る
         </button>
       </div>
@@ -163,7 +433,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
       <div class="empty" id="mine-empty">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <p>まだ作品がありません。<br>クイズを作ってみましょう！</p>
-        <button class="btn bp" style="margin:0 auto" onclick="openModal()">
+        <button class="btn bp" style="margin:0 auto" onclick="openCreate()">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>最初のクイズを作る
         </button>
       </div>
@@ -171,49 +441,253 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
   </div>
 </div>
 
-<div class="ov" id="ov" onclick="ovClick(event)">
-  <div class="modal">
+<!-- ── クイズ作成モーダル ── -->
+<div class="ov" id="create-ov" onclick="ovClick('create-ov',event)">
+  <div class="modal" style="max-width:540px">
     <div class="mh">
       <div class="mt">クイズを作成</div>
-      <button class="mc" onclick="closeModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="mc" onclick="closeOv('create-ov')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
-    <div class="fg"><label class="lbl">クイズの題名 *</label><input class="inp" id="m-title" placeholder="例：元素記号マスターになろう" maxlength="60"></div>
-    <div class="fg"><label class="lbl">投稿者名</label><input class="inp" id="m-author" placeholder="あなたの名前（任意）" maxlength="20"></div>
+
+    <div class="fg">
+      <label class="lbl">クイズのタイトル *</label>
+      <input class="inp" id="m-title" placeholder="例：ワンピース雑学クイズ！" maxlength="60">
+      <div class="media-section" style="margin-top:7px">
+        <div class="media-section-title">タイトル画像・音声（任意）</div>
+        <div class="media-row">
+          <span class="media-lbl">🖼 画像</span>
+          <button class="media-upload-btn" onclick="triggerFile('title-img-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>アップロード</button>
+          <div class="media-preview" id="title-img-preview"></div>
+          <input type="file" accept="image/*" class="hidden-file" id="title-img-file" onchange="handleMedia(this,'title-img')">
+        </div>
+        <div class="media-row">
+          <span class="media-lbl">🔊 音声</span>
+          <button class="media-upload-btn" onclick="triggerFile('title-aud-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>アップロード</button>
+          <div class="media-preview" id="title-aud-preview"></div>
+          <input type="file" accept="audio/*" class="hidden-file" id="title-aud-file" onchange="handleMedia(this,'title-aud')">
+        </div>
+      </div>
+    </div>
+
     <div class="fg">
       <label class="lbl">カテゴリ *</label>
       <div class="cgrid">
-        <div class="co" data-c="science" onclick="selCat('science')"><svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18"/></svg>理科</div>
-        <div class="co" data-c="history" onclick="selCat('history')"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>歴史</div>
-        <div class="co" data-c="math" onclick="selCat('math')"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>数学</div>
-        <div class="co" data-c="art" onclick="selCat('art')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8.5 14.5c1.5 2 5.5 2 7 0"/></svg>芸術</div>
-        <div class="co" data-c="geo" onclick="selCat('geo')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10z"/></svg>地理</div>
+        <div class="co" data-c="trivia" onclick="selCat('trivia')"><span class="co-icon">🧠</span>雑学</div>
+        <div class="co" data-c="general" onclick="selCat('general')"><span class="co-icon">📚</span>一般常識</div>
+        <div class="co" data-c="sns" onclick="selCat('sns')"><span class="co-icon">📱</span>SNS</div>
+        <div class="co" data-c="music" onclick="selCat('music')"><span class="co-icon">🎵</span>音楽</div>
+        <div class="co" data-c="sports" onclick="selCat('sports')"><span class="co-icon">⚽</span>スポーツ</div>
+        <div class="co" data-c="anime" onclick="selCat('anime')"><span class="co-icon">🎌</span>アニメ</div>
+        <div class="co" data-c="other" onclick="selCat('other')"><span class="co-icon">✨</span>その他</div>
       </div>
     </div>
+
     <div class="fg">
-      <label class="lbl">問題数 *</label>
-      <div class="chips" id="qc-grp">
-        <div class="chip" data-v="5" onclick="selChip('qc',5)">5問</div>
-        <div class="chip" data-v="10" onclick="selChip('qc',10)">10問</div>
-        <div class="chip" data-v="15" onclick="selChip('qc',15)">15問</div>
-        <div class="chip" data-v="20" onclick="selChip('qc',20)">20問</div>
-        <div class="chip" data-v="30" onclick="selChip('qc',30)">30問</div>
-        <div class="chip" data-v="50" onclick="selChip('qc',50)">50問</div>
+      <label class="lbl">時間制限（1問ごと）*</label>
+      <div class="time-input-wrap">
+        <input type="number" class="time-num-input" id="m-time-sec" min="5" max="3600" value="30">
+        <span class="time-unit">秒 / 問</span>
+        <div class="time-inf" id="time-inf-btn" onclick="toggleInfinite()">
+          <svg viewBox="0 0 24 24"><path d="M18.178 8c5.096 0 5.096 8 0 8-5.095 0-7.133-8-12.739-8-4.585 0-4.585 8 0 8 5.606 0 7.644-8 12.74-8z"/></svg>無制限
+        </div>
       </div>
     </div>
+
     <div class="fg">
-      <label class="lbl">時間制限 *</label>
-      <div class="chips" id="tl-grp">
-        <div class="chip" data-v="5" onclick="selChip('tl',5)">5分</div>
-        <div class="chip" data-v="10" onclick="selChip('tl',10)">10分</div>
-        <div class="chip" data-v="15" onclick="selChip('tl',15)">15分</div>
-        <div class="chip" data-v="20" onclick="selChip('tl',20)">20分</div>
-        <div class="chip" data-v="30" onclick="selChip('tl',30)">30分</div>
-        <div class="chip" data-v="0" onclick="selChip('tl',0)">∞ 無制限</div>
-      </div>
+      <label class="lbl">問題 <span id="q-count-badge" style="color:var(--a)">0問</span></label>
+      <div class="q-list" id="q-list"></div>
+      <button class="add-q-btn" onclick="openAddQ()">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>問題を追加
+      </button>
     </div>
+
     <div class="mf">
-      <button class="btn bg" onclick="closeModal()">キャンセル</button>
-      <button class="btn bp" onclick="submit()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>作成して保存</button>
+      <button class="btn bg" onclick="closeOv('create-ov')">キャンセル</button>
+      <button class="btn bp" id="submit-quiz-btn" onclick="submitQuiz()"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>作成して保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 問題追加モーダル ── -->
+<div class="ov" id="addq-ov" onclick="ovClick('addq-ov',event)">
+  <div class="modal" style="max-width:480px">
+    <div class="mh">
+      <div class="mt">問題を追加</div>
+      <button class="mc" onclick="closeOv('addq-ov')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+
+    <div class="type-toggle">
+      <button class="type-btn on" id="type-choice-btn" onclick="setQType('choice')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>選択式
+      </button>
+      <button class="type-btn" id="type-text-btn" onclick="setQType('text')">
+        <svg viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>記述式
+      </button>
+    </div>
+
+    <div class="fg">
+      <label class="lbl">問題文 *</label>
+      <textarea class="textarea" id="aq-text" placeholder="例：ワンピースの主人公の名前は？"></textarea>
+      <div class="media-section" style="margin-top:7px">
+        <div class="media-section-title">問題文の画像・音声（任意）</div>
+        <div class="media-row">
+          <span class="media-lbl">🖼 画像</span>
+          <button class="media-upload-btn" onclick="triggerFile('qimg-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>アップロード</button>
+          <div class="media-preview" id="qimg-preview"></div>
+          <input type="file" accept="image/*" class="hidden-file" id="qimg-file" onchange="handleMedia(this,'qimg')">
+        </div>
+        <div class="media-row">
+          <span class="media-lbl">🔊 音声</span>
+          <button class="media-upload-btn" onclick="triggerFile('qaud-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>アップロード</button>
+          <div class="media-preview" id="qaud-preview"></div>
+          <input type="file" accept="audio/*" class="hidden-file" id="qaud-file" onchange="handleMedia(this,'qaud')">
+        </div>
+      </div>
+    </div>
+
+    <div id="choice-area">
+      <div class="fg">
+        <label class="lbl">選択肢（A〜D）*</label>
+        <div class="choices-grid">
+          <div class="choice-row"><span class="choice-label">A</span><input class="choice-inp" id="ch-a" placeholder="選択肢A"></div>
+          <div class="choice-row"><span class="choice-label">B</span><input class="choice-inp" id="ch-b" placeholder="選択肢B"></div>
+          <div class="choice-row"><span class="choice-label">C</span><input class="choice-inp" id="ch-c" placeholder="選択肢C"></div>
+          <div class="choice-row"><span class="choice-label">D</span><input class="choice-inp" id="ch-d" placeholder="選択肢D"></div>
+        </div>
+        <div class="media-section" style="margin-top:9px">
+          <div class="media-section-title">選択肢の画像（任意）</div>
+          <div class="media-row"><span class="media-lbl">A</span><button class="media-upload-btn" onclick="triggerFile('cha-img-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>画像</button><div class="media-preview" id="cha-img-preview"></div><input type="file" accept="image/*" class="hidden-file" id="cha-img-file" onchange="handleMedia(this,'cha-img')"></div>
+          <div class="media-row"><span class="media-lbl">B</span><button class="media-upload-btn" onclick="triggerFile('chb-img-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>画像</button><div class="media-preview" id="chb-img-preview"></div><input type="file" accept="image/*" class="hidden-file" id="chb-img-file" onchange="handleMedia(this,'chb-img')"></div>
+          <div class="media-row"><span class="media-lbl">C</span><button class="media-upload-btn" onclick="triggerFile('chc-img-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>画像</button><div class="media-preview" id="chc-img-preview"></div><input type="file" accept="image/*" class="hidden-file" id="chc-img-file" onchange="handleMedia(this,'chc-img')"></div>
+          <div class="media-row"><span class="media-lbl">D</span><button class="media-upload-btn" onclick="triggerFile('chd-img-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>画像</button><div class="media-preview" id="chd-img-preview"></div><input type="file" accept="image/*" class="hidden-file" id="chd-img-file" onchange="handleMedia(this,'chd-img')"></div>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="lbl">正解 *</label>
+        <div class="correct-sel">
+          <button class="correct-btn" data-v="0" onclick="selCorrect(0)">A</button>
+          <button class="correct-btn" data-v="1" onclick="selCorrect(1)">B</button>
+          <button class="correct-btn" data-v="2" onclick="selCorrect(2)">C</button>
+          <button class="correct-btn" data-v="3" onclick="selCorrect(3)">D</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="text-area" style="display:none">
+      <div class="fg">
+        <label class="lbl">正解（模範解答）*</label>
+        <input class="inp" id="text-ans" placeholder="例：ルフィ">
+        <div style="font-size:11px;color:var(--hint);margin-top:5px">※ 回答は部分一致で採点します（大文字小文字・スペース無視）</div>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="lbl">解説（任意）</label>
+      <input class="inp" id="aq-exp" placeholder="例：ルフィはゴムゴムの実を食べた海賊です">
+      <div class="media-section" style="margin-top:7px">
+        <div class="media-section-title">解説の画像・音声（任意）</div>
+        <div class="media-row">
+          <span class="media-lbl">🖼 画像</span>
+          <button class="media-upload-btn" onclick="triggerFile('expimg-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>アップロード</button>
+          <div class="media-preview" id="expimg-preview"></div>
+          <input type="file" accept="image/*" class="hidden-file" id="expimg-file" onchange="handleMedia(this,'expimg')">
+        </div>
+        <div class="media-row">
+          <span class="media-lbl">🔊 音声</span>
+          <button class="media-upload-btn" onclick="triggerFile('expaud-file')"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>アップロード</button>
+          <div class="media-preview" id="expaud-preview"></div>
+          <input type="file" accept="audio/*" class="hidden-file" id="expaud-file" onchange="handleMedia(this,'expaud')">
+        </div>
+      </div>
+    </div>
+
+    <div class="mf">
+      <button class="btn bg" onclick="closeOv('addq-ov')">キャンセル</button>
+      <button class="btn bp" onclick="addQuestion()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 認証モーダル ── -->
+<div class="ov" id="auth-ov" onclick="ovClick('auth-ov',event)">
+  <div class="modal" style="max-width:380px">
+    <div class="mh">
+      <div class="mt" id="auth-modal-title">ログイン</div>
+      <button class="mc" onclick="closeOv('auth-ov')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab on" id="auth-tab-login" onclick="switchAuthTab('login')">ログイン</button>
+      <button class="auth-tab" id="auth-tab-signup" onclick="switchAuthTab('signup')">新規登録</button>
+    </div>
+    <div class="fg">
+      <label class="lbl">メールアドレス</label>
+      <input class="inp" id="auth-email" type="email" placeholder="your@email.com">
+    </div>
+    <div class="fg">
+      <label class="lbl">パスワード</label>
+      <input class="inp" id="auth-password" type="password" placeholder="••••••••" oninput="checkPwStrength(this.value)" onkeydown="if(event.key==='Enter')doAuth()">
+    </div>
+    <div id="pw-strength-row" class="pw-strength-wrap" style="display:none">
+      <div class="pw-bar"><div id="pw-strength-bar" class="pw-bar-fill"></div></div>
+      <div id="pw-strength-label" class="pw-bar-label"></div>
+    </div>
+    <div class="fg" id="auth-name-row" style="display:none">
+      <label class="lbl">表示名（任意）</label>
+      <input class="inp" id="auth-name" placeholder="例：クイズ太郎">
+    </div>
+    <button class="btn bp" id="auth-submit-btn" onclick="doAuth()" style="width:100%;justify-content:center;height:40px;font-size:14px">ログイン</button>
+    <div class="divider">または</div>
+    <div style="font-size:12px;color:var(--hint);text-align:center">
+      <span id="auth-switch-text">アカウントをお持ちでない方は</span>
+      <button onclick="switchAuthTab(currentAuthTab==='login'?'signup':'login')" style="background:none;border:none;color:var(--a);font:600 12px 'DM Sans',sans-serif;cursor:pointer;text-decoration:underline" id="auth-switch-btn">新規登録</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── プレイモーダル ── -->
+<div class="ov" id="play-ov" onclick="ovClick('play-ov',event)">
+  <div class="modal" style="max-width:540px">
+    <div id="play-game">
+      <div class="mh" style="margin-bottom:6px">
+        <div>
+          <div class="play-cat-label" id="play-cat-label"></div>
+          <div class="play-quiz-title" id="play-quiz-title"></div>
+        </div>
+        <button class="mc" onclick="closePlay()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="play-progress">
+        <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+        <div class="progress-text" id="prog-text"></div>
+      </div>
+      <div class="play-timer-wrap" id="timer-wrap" style="display:none">
+        <div class="play-timer-bar"><div class="play-timer-fill" id="timer-fill"></div></div>
+        <div class="play-timer-num" id="timer-num"></div>
+      </div>
+      <div class="play-q-num" id="play-q-num"></div>
+      <div class="play-q-text" id="play-q-text"></div>
+      <img id="play-q-img" class="play-media-img" style="display:none" src="" alt="">
+      <audio id="play-q-audio" class="play-media-audio" controls style="display:none"></audio>
+      <div class="play-choices" id="play-choices"></div>
+      <div class="play-feedback" id="play-fb"></div>
+      <img id="play-exp-img" class="play-media-img" style="display:none;margin-top:9px" src="" alt="">
+      <audio id="play-exp-audio" class="play-media-audio" controls style="display:none;margin-top:7px"></audio>
+      <button class="play-next" id="play-next" onclick="nextQ()">次の問題 →</button>
+    </div>
+
+    <div class="result-screen" id="play-result">
+      <div class="result-score" id="res-score"></div>
+      <div class="result-label">点 / <span id="res-total"></span>点</div>
+      <div class="result-stars" id="res-stars"></div>
+      <div class="result-msg" id="res-msg"></div>
+      <div class="result-detail">
+        <div class="result-stat"><div class="result-stat-v" id="res-correct" style="color:var(--green)"></div><div class="result-stat-l">正解</div></div>
+        <div class="result-stat"><div class="result-stat-v" id="res-wrong" style="color:var(--red)"></div><div class="result-stat-l">不正解</div></div>
+        <div class="result-stat"><div class="result-stat-v" id="res-rate" style="color:var(--a)"></div><div class="result-stat-l">正答率</div></div>
+      </div>
+      <div class="result-actions">
+        <button class="btn bg" onclick="closePlay()">閉じる</button>
+        <button class="btn bp" onclick="restartPlay()"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>もう一度</button>
+      </div>
     </div>
   </div>
 </div>
@@ -221,87 +695,604 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);min-he
 <div class="toast" id="toast"></div>
 
 <script>
-const CATS={science:{l:'理科',c:'cs'},history:{l:'歴史',c:'ch'},math:{l:'数学',c:'cm'},art:{l:'芸術',c:'ca'},geo:{l:'地理',c:'cg'}};
-const COLORS=['#667eea','#f97316','#16a34a','#9333ea','#059669','#2d5be3','#e11d48','#0891b2'];
-const ICONS={science:`<path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18"/>`,history:`<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>`,math:`<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,art:`<circle cx="12" cy="12" r="10"/><path d="M8.5 14.5c1.5 2 5.5 2 7 0"/>`,geo:`<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>`};
+// ═══════════════════════════════════════
+//  Supabase 初期化
+// ═══════════════════════════════════════
+const SB_URL='https://uftjafldmtkoxusezqyh.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmdGphZmxkbXRrb3h1c2V6cXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjU3ODAsImV4cCI6MjA5NDg0MTc4MH0.Ufu7IFq7rCKDduYf-hdv-6Ie5YwnPypCiZ_nlEqEVDE';
+let sbClient=null;
+let currentUser=null;
+let isOnline=false;
 
+function initSupabase(){
+  try{
+    sbClient=window.supabase.createClient(SB_URL,SB_KEY);
+    isOnline=true;
+    document.getElementById('mode-badge').className='mode-indicator mode-online';
+    document.getElementById('mode-badge').textContent='オンライン';
+    document.getElementById('com-source-hint').textContent='🌐 オンライン';
+    return true;
+  }catch(e){console.error(e);return false;}
+}
+
+// ═══════════════════════════════════════
+//  定数・状態
+// ═══════════════════════════════════════
+const CATS={
+  trivia:{l:'雑学',e:'🧠',c:'cc-trivia'},
+  general:{l:'一般常識',e:'📚',c:'cc-general'},
+  sns:{l:'SNS',e:'📱',c:'cc-sns'},
+  music:{l:'音楽',e:'🎵',c:'cc-music'},
+  sports:{l:'スポーツ',e:'⚽',c:'cc-sports'},
+  anime:{l:'アニメ',e:'🎌',c:'cc-anime'},
+  other:{l:'その他',e:'✨',c:'cc-other'},
+};
+const COLORS=['#2d5be3','#e05b2e','#1a8a50','#be185d','#b45309','#0369a1','#b91c1c','#7c3aed'];
+const KEY='qhub_v3';
 const MY_ID=localStorage.getItem('qhub_uid')||(()=>{const id='u_'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);localStorage.setItem('qhub_uid',id);return id})();
-const KEY='qhub_quizzes';
 
-let quizzes=JSON.parse(localStorage.getItem(KEY)||'[]');
-let cat='all',sq='',mCat=null,mQc=null,mTl=null;
+let localQuizzes=JSON.parse(localStorage.getItem(KEY)||'[]');
+let onlineQuizzes=[];
+let filterCat='all',searchQ='';
+let mCat=null,mInfinite=false,draftQs=[];
+let qType='choice',correctIdx=null;
+let playQuiz=null,playIdx=0,playScore=0,playAnswered=false;
+let timerSec=0,timerRemain=0,timerInterval=null;
+const mediaStore={};
+let currentAuthTab='login';
 
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const tl=v=>v===0?'∞無制限':v+'分';
-function ago(ts){const m=Math.floor((Date.now()-ts)/60000);if(m<1)return'たった今';if(m<60)return m+'分前';const h=Math.floor(m/60);if(h<24)return h+'時間前';return Math.floor(h/24)+'日前';}
-const ico=k=>`<svg style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2" viewBox="0 0 24 24">${ICONS[k]}</svg>`;
+const tl=v=>v===0?'∞':v+'秒';
+function ago(ts){const m=Math.floor((Date.now()-new Date(ts).getTime())/60000);if(m<1)return'たった今';if(m<60)return m+'分前';const h=Math.floor(m/60);if(h<24)return h+'時間前';return Math.floor(h/24)+'日前';}
+function saveLocal(){localStorage.setItem(KEY,JSON.stringify(localQuizzes));}
 
+// ─── ユーザー表示名・アイコン取得 ───
+function getUserName(){
+  if(currentUser){
+    return currentUser.user_metadata?.display_name||currentUser.email?.split('@')[0]||'ユーザー';
+  }
+  return 'ゲスト';
+}
+function getUserInitial(){
+  return getUserName()[0].toUpperCase();
+}
+function getUserIcon(){
+  return currentUser?.user_metadata?.avatar_url||null;
+}
+
+// ═══════════════════════════════════════
+//  認証
+// ═══════════════════════════════════════
+async function checkSession(){
+  if(!sbClient)return;
+  const {data:{session}}=await sbClient.auth.getSession();
+  if(session){currentUser=session.user;updateUserUI();}
+  sbClient.auth.onAuthStateChange((_,sess)=>{
+    currentUser=sess?sess.user:null;
+    updateUserUI();
+  });
+}
+
+function updateUserUI(){
+  const btn=document.getElementById('sb-user-btn');
+  const infoRow=document.getElementById('user-info-row');
+  const loginItem=document.getElementById('menu-login');
+  const signupItem=document.getElementById('menu-signup');
+  const logoutItem=document.getElementById('menu-logout');
+  const profileBar=document.getElementById('profile-bar');
+  const profileBarName=document.getElementById('profile-bar-name');
+  const profileBarSub=document.getElementById('profile-bar-sub');
+  const profileBarAvatar=document.getElementById('profile-bar-avatar');
+  const profileBarInitial=document.getElementById('profile-bar-initial');
+
+  if(currentUser){
+    const name=getUserName();
+    const initial=getUserInitial();
+    const icon=getUserIcon();
+    const email=currentUser.email||'';
+
+    // サイドバーアイコン
+    if(icon){
+      btn.innerHTML=`<img src="${icon}" alt="${initial}">`;
+    }else{
+      btn.textContent=initial;
+    }
+    btn.style.background=icon?'transparent':COLORS[name.charCodeAt(0)%COLORS.length];
+
+    infoRow.textContent=name;
+    loginItem.style.display='none';signupItem.style.display='none';
+    logoutItem.style.display='flex';
+
+    // プロフィールバー
+    profileBar.classList.remove('hidden');
+    profileBarName.textContent=name;
+    profileBarSub.textContent=email;
+    if(icon){
+      profileBarAvatar.innerHTML=`<img src="${icon}" alt="${initial}">`;
+    }else{
+      profileBarAvatar.innerHTML=`<span style="font-size:14px;font-weight:700;color:#fff">${initial}</span>`;
+      profileBarAvatar.style.background=COLORS[name.charCodeAt(0)%COLORS.length];
+    }
+  }else{
+    btn.innerHTML='?';
+    btn.style.background='var(--a)';
+    infoRow.textContent='ログインしていません';
+    loginItem.style.display='flex';signupItem.style.display='flex';
+    logoutItem.style.display='none';
+    profileBar.classList.add('hidden');
+  }
+  render();
+}
+
+function openAuth(tab){
+  switchAuthTab(tab||'login');
+  openOv('auth-ov');
+}
+
+function switchAuthTab(tab){
+  currentAuthTab=tab;
+  document.getElementById('auth-tab-login').classList.toggle('on',tab==='login');
+  document.getElementById('auth-tab-signup').classList.toggle('on',tab==='signup');
+  document.getElementById('auth-modal-title').textContent=tab==='login'?'ログイン':'新規登録';
+  document.getElementById('auth-submit-btn').textContent=tab==='login'?'ログイン':'アカウント作成';
+  document.getElementById('auth-name-row').style.display=tab==='signup'?'':'none';
+  document.getElementById('pw-strength-row').style.display=tab==='signup'?'':'none';
+  document.getElementById('auth-switch-text').textContent=tab==='login'?'アカウントをお持ちでない方は':'すでにアカウントをお持ちの方は';
+  document.getElementById('auth-switch-btn').textContent=tab==='login'?'新規登録':'ログイン';
+}
+
+function checkPwStrength(pw){
+  if(currentAuthTab!=='signup')return;
+  const row=document.getElementById('pw-strength-row');
+  row.style.display=pw.length>0?'':'none';
+  let score=0;
+  if(pw.length>=8)score++;if(/[A-Z]/.test(pw))score++;if(/[0-9]/.test(pw))score++;if(/[^a-zA-Z0-9]/.test(pw))score++;
+  const bar=document.getElementById('pw-strength-bar');
+  const lbl=document.getElementById('pw-strength-label');
+  const levels=[{w:'25%',c:'#e24b4a',t:'弱い'},{w:'50%',c:'#ef9f27',t:'まあまあ'},{w:'75%',c:'#97c459',t:'良い'},{w:'100%',c:'#1a8a50',t:'強い'}];
+  const l=levels[Math.min(score,3)];
+  bar.style.width=l.w;bar.style.background=l.c;lbl.textContent=l.t;
+}
+
+async function doAuth(){
+  if(!sbClient){toast('❗ 接続エラー');return;}
+  const email=document.getElementById('auth-email').value.trim();
+  const password=document.getElementById('auth-password').value;
+  if(!email||!password)return toast('❗ メールアドレスとパスワードを入力してください');
+  const btn=document.getElementById('auth-submit-btn');
+  btn.innerHTML='<span class="loading-spinner"></span>';btn.disabled=true;
+  if(currentAuthTab==='login'){
+    const{error}=await sbClient.auth.signInWithPassword({email,password});
+    if(error){toast('❌ '+error.message);btn.textContent='ログイン';btn.disabled=false;return;}
+    closeOv('auth-ov');toast('✅ ログインしました');
+    await loadOnlineQuizzes();render();
+  }else{
+    const name=document.getElementById('auth-name').value.trim();
+    const{error}=await sbClient.auth.signUp({email,password,options:{data:{display_name:name||email.split('@')[0]}}});
+    if(error){toast('❌ '+error.message);btn.textContent='アカウント作成';btn.disabled=false;return;}
+    closeOv('auth-ov');toast('✅ 登録しました！確認メールをご確認ください');
+  }
+  btn.disabled=false;
+}
+
+async function doLogout(){
+  if(!sbClient)return;
+  await sbClient.auth.signOut();
+  currentUser=null;onlineQuizzes=[];
+  updateUserUI();render();
+  toast('👋 ログアウトしました');
+}
+
+// ═══════════════════════════════════════
+//  データ取得
+// ═══════════════════════════════════════
+async function loadOnlineQuizzes(){
+  if(!sbClient)return;
+  try{
+    let q=sbClient.from('quizzes').select('*').order('created_at',{ascending:false});
+    if(filterCat!=='all')q=q.eq('cat',filterCat);
+    const{data,error}=await q.limit(200);
+    if(error)throw error;
+    onlineQuizzes=(data||[]).map(r=>({
+      id:r.id,title:r.title,cat:r.cat,timeLimit:r.time_limit,
+      questions:r.questions,author:r.author,authorColor:r.author_color,
+      authorIcon:r.author_icon||null,
+      userId:r.user_id,createdAt:r.created_at,isOnline:true,
+    }));
+  }catch(e){console.error(e);}
+}
+
+function getQuizzes(){return isOnline?onlineQuizzes:localQuizzes;}
+
+// ═══════════════════════════════════════
+//  カードHTML
+// ═══════════════════════════════════════
 function cardHTML(z){
   const ci=CATS[z.cat]||{};
-  return`<div class="card"><div class="cc ${ci.c}">${ico(z.cat)} ${ci.l}</div>
-    ${z.userId===MY_ID?`<button class="del" onclick="del('${z.id}',event)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
-    <div class="ct">${esc(z.title)}</div>
-    <div class="cm2">
-      <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${tl(z.timeLimit)}</span>
-      <span><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-5-3z"/></svg>${z.qCount}問</span>
+  const myUid=currentUser?currentUser.id:MY_ID;
+  const isMine=z.userId===myUid||(z.userId===MY_ID&&!isOnline);
+  const authorInitial=(z.author||'?')[0].toUpperCase();
+  const avaContent=z.authorIcon
+    ?`<img src="${esc(z.authorIcon)}" alt="${authorInitial}">`
+    :`${authorInitial}`;
+  const avaStyle=z.authorIcon?'':`background:${z.authorColor||'#2d5be3'}`;
+  return`<div class="card">
+    <div class="card-actions">
+      <button class="icon-btn ib-play" onclick="startPlay('${z.id}')" title="プレイ"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg></button>
+      ${isMine?`<button class="icon-btn ib-del" onclick="delQuiz('${z.id}',event)" title="削除"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
     </div>
-    <div class="cf"><div class="cau"><div class="ava" style="background:${z.authorColor||'#667eea'}">${(z.author||'ゲスト')[0].toUpperCase()}</div>${esc(z.author||'ゲスト')}</div><span class="cdt">${ago(z.createdAt)}</span></div>
+    <div class="card-badge-row">
+      <div class="card-cat ${ci.c}">${ci.e} ${ci.l}</div>
+      ${z.isOnline?'<div class="card-online-badge">🌐 オンライン</div>':''}
+    </div>
+    <div class="card-title">${esc(z.title)}</div>
+    <div class="card-meta">
+      <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${tl(z.timeLimit)}</span>
+      <span><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-5-3z"/></svg>${(z.questions||[]).length}問</span>
+    </div>
+    <div class="card-foot">
+      <div class="card-author"><div class="ava" style="${avaStyle}">${avaContent}</div>${esc(z.author||'ゲスト')}</div>
+      <span class="card-date">${ago(z.createdAt)}</span>
+    </div>
   </div>`;
 }
 
-function save(){localStorage.setItem(KEY,JSON.stringify(quizzes));}
-
+// ═══════════════════════════════════════
+//  レンダリング
+// ═══════════════════════════════════════
 function renderCom(){
   const grid=document.getElementById('com-grid'),empty=document.getElementById('com-empty'),nores=document.getElementById('com-nores');
-  let list=quizzes.filter(z=>(cat==='all'||z.cat===cat)&&(!sq||z.title.toLowerCase().includes(sq))).sort((a,b)=>b.createdAt-a.createdAt);
-  if(!quizzes.length){grid.style.display='none';empty.style.display='';nores.style.display='none';document.getElementById('com-label').textContent='みんなのクイズ';return;}
+  const all=getQuizzes();
+  let list=all.filter(z=>(filterCat==='all'||z.cat===filterCat)&&(!searchQ||z.title.toLowerCase().includes(searchQ)));
+  if(!all.length){grid.innerHTML='';grid.style.display='none';empty.style.display='';nores.style.display='none';document.getElementById('com-label').textContent='みんなのクイズ';return;}
   empty.style.display='none';
   if(!list.length){grid.style.display='none';nores.style.display='';document.getElementById('com-label').textContent='検索結果 (0件)';return;}
   nores.style.display='none';grid.style.display='';
   grid.innerHTML=list.map(cardHTML).join('');
-  document.getElementById('com-label').textContent=(cat!=='all'||sq)?`検索結果 (${list.length}件)`:`みんなのクイズ (${list.length}件)`;
+  document.getElementById('com-label').textContent=(filterCat!=='all'||searchQ)?`検索結果 (${list.length}件)`:`みんなのクイズ (${list.length}件)`;
 }
 function renderMine(){
   const grid=document.getElementById('mine-grid'),empty=document.getElementById('mine-empty');
-  const mine=quizzes.filter(z=>z.userId===MY_ID).sort((a,b)=>b.createdAt-a.createdAt);
+  const myUid=currentUser?currentUser.id:MY_ID;
+  const mine=getQuizzes().filter(z=>z.userId===myUid||(z.userId===MY_ID&&!isOnline));
   document.getElementById('mine-cnt').textContent=`(${mine.length})`;
   if(!mine.length){grid.style.display='none';empty.style.display='';}
   else{empty.style.display='none';grid.style.display='';grid.innerHTML=mine.map(cardHTML).join('');}
 }
 function render(){renderCom();renderMine();}
 
-function goTab(i){[0,1].forEach(n=>{document.getElementById('t'+n).classList.toggle('on',n===i);document.getElementById('p'+n).classList.toggle('on',n===i);document.getElementById('sb'+n).classList.toggle('on',n===i);});document.getElementById('cat-bar').style.display=i===0?'flex':'none';}
-function setCat(c){cat=c;document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on',p.dataset.c===c));renderCom();}
-function onSearch(v){sq=v.trim().toLowerCase();renderCom();}
+// ─── タブ・カテゴリ ───
+function goTab(i){
+  [0,1].forEach(n=>{
+    document.getElementById('t'+n).classList.toggle('on',n===i);
+    document.getElementById('p'+n).classList.toggle('on',n===i);
+    document.getElementById('sb'+n).classList.toggle('on',n===i);
+  });
+  document.getElementById('cat-bar').style.display=i===0?'flex':'none';
+}
+function setCat(c){
+  filterCat=c;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on',p.dataset.c===c));
+  if(isOnline)loadOnlineQuizzes().then(render);else render();
+}
+function onSearch(v){searchQ=v.trim().toLowerCase();render();}
 
-function openModal(){document.getElementById('ov').classList.add('open');document.getElementById('m-title').value='';document.getElementById('m-author').value='';mCat=null;mQc=null;mTl=null;document.querySelectorAll('.co,.chip').forEach(el=>el.classList.remove('on'));}
-function closeModal(){document.getElementById('ov').classList.remove('open');}
-function ovClick(e){if(e.target===document.getElementById('ov'))closeModal();}
-function selCat(c){mCat=c;document.querySelectorAll('.co').forEach(el=>el.classList.toggle('on',el.dataset.c===c));}
-function selChip(g,v){if(g==='qc')mQc=v;else mTl=v;document.querySelectorAll(`#${g}-grp .chip`).forEach(el=>el.classList.toggle('on',Number(el.dataset.v)===v));}
+// ─── モーダル共通 ───
+function openOv(id){document.getElementById(id).classList.add('open');}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+function ovClick(id,e){if(e.target===document.getElementById(id))closeOv(id);}
+function toggleUserMenu(){document.getElementById('user-menu').classList.toggle('open');}
+function closeUserMenu(){document.getElementById('user-menu').classList.remove('open');}
+document.addEventListener('click',e=>{const m=document.getElementById('user-menu');if(m.classList.contains('open')&&!m.contains(e.target)&&e.target!==document.getElementById('sb-user-btn'))closeUserMenu();});
 
-function submit(){
-  const title=document.getElementById('m-title').value.trim();
-  const author=document.getElementById('m-author').value.trim()||'ゲスト';
-  if(!title)return toast('❗ 題名を入力してください');
-  if(!mCat)return toast('❗ カテゴリを選択してください');
-  if(mQc===null)return toast('❗ 問題数を選択してください');
-  if(mTl===null)return toast('❗ 時間制限を選択してください');
-  quizzes.push({id:'q_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),title,cat:mCat,qCount:mQc,timeLimit:mTl,author,authorColor:COLORS[Math.floor(Math.random()*COLORS.length)],userId:MY_ID,createdAt:Date.now()});
-  save();closeModal();render();toast('✅ クイズを保存しました！');
+// ─── メディア ───
+function triggerFile(id){document.getElementById(id).click();}
+function handleMedia(input,key){
+  const file=input.files[0];if(!file)return;
+  const isImg=file.type.startsWith('image/'),isAud=file.type.startsWith('audio/');
+  const reader=new FileReader();
+  reader.onload=e=>{mediaStore[key]={dataUrl:e.target.result,name:file.name,type:file.type};renderMediaPreview(key,isImg,isAud,file.name);};
+  reader.readAsDataURL(file);
+}
+function renderMediaPreview(key,isImg,isAud,name){
+  const prev=document.getElementById(key+'-preview');if(!prev)return;
+  if(isImg){prev.innerHTML=`<img class="media-thumb" src="${mediaStore[key].dataUrl}" alt=""><span class="media-name">${esc(name)}</span><button class="media-remove" onclick="removeMedia('${key}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;}
+  else if(isAud){prev.innerHTML=`<div class="media-audio-icon"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></div><span class="media-name">${esc(name)}</span><button class="media-remove" onclick="removeMedia('${key}')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;}
+}
+function removeMedia(key){delete mediaStore[key];const prev=document.getElementById(key+'-preview');if(prev)prev.innerHTML='';const fi=document.getElementById(key+'-file');if(fi)fi.value='';}
+
+// ─── 時間制限 ───
+function toggleInfinite(){
+  mInfinite=!mInfinite;
+  document.getElementById('time-inf-btn').classList.toggle('on',mInfinite);
+  document.getElementById('m-time-sec').disabled=mInfinite;
+  document.getElementById('m-time-sec').style.opacity=mInfinite?'0.4':'1';
 }
 
-function del(id,e){
+// ═══════════════════════════════════════
+//  クイズ作成（投稿者名欄なし → ログインユーザー名を自動使用）
+// ═══════════════════════════════════════
+function openCreate(){
+  mCat=null;mInfinite=false;draftQs=[];
+  document.getElementById('m-title').value='';
+  document.getElementById('m-time-sec').value='30';
+  document.getElementById('m-time-sec').disabled=false;
+  document.getElementById('m-time-sec').style.opacity='1';
+  document.getElementById('time-inf-btn').classList.remove('on');
+  document.querySelectorAll('.co').forEach(el=>el.classList.remove('on'));
+  ['title-img','title-aud'].forEach(k=>{delete mediaStore[k];const p=document.getElementById(k+'-preview');if(p)p.innerHTML='';});
+  renderQList();
+  openOv('create-ov');
+}
+function selCat(c){mCat=c;document.querySelectorAll('.co').forEach(el=>el.classList.toggle('on',el.dataset.c===c));}
+
+function renderQList(){
+  const el=document.getElementById('q-list');
+  document.getElementById('q-count-badge').textContent=draftQs.length+'問';
+  if(!draftQs.length){el.innerHTML='';return;}
+  el.innerHTML=draftQs.map((q,i)=>{
+    const isChoice=q.type==='choice';
+    const ansText=isChoice?q.choices[q.correct]:q.textAnswer;
+    return`<div class="q-item">
+      <div class="q-num">${i+1}</div>
+      <div class="q-body">
+        <span class="q-type-badge ${isChoice?'qt-choice':'qt-text'}">${isChoice?'選択式':'記述式'}</span>
+        <div class="q-text">${esc(q.text)}</div>
+        <div class="q-ans"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${esc(ansText)}</div>
+      </div>
+      <button class="q-del" onclick="removeQ(${i})"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>`;
+  }).join('');
+}
+function removeQ(i){draftQs.splice(i,1);renderQList();}
+
+async function submitQuiz(){
+  const title=document.getElementById('m-title').value.trim();
+  if(!title)return toast('❗ タイトルを入力してください');
+  if(!mCat)return toast('❗ カテゴリを選択してください');
+  const timeSec=mInfinite?0:parseInt(document.getElementById('m-time-sec').value)||30;
+  if(!mInfinite&&(timeSec<1||timeSec>3600))return toast('❗ 時間制限は1〜3600秒で入力してください');
+  if(!draftQs.length)return toast('❗ 問題を1つ以上追加してください');
+
+  // 投稿者名はログインユーザー名 or ゲスト
+  const author=getUserName();
+  const authorIcon=getUserIcon()||null;
+
+  const btn=document.getElementById('submit-quiz-btn');
+  btn.innerHTML='<span class="loading-spinner"></span>';btn.disabled=true;
+
+  if(isOnline&&currentUser){
+    const{error}=await sbClient.from('quizzes').insert({
+      title,cat:mCat,time_limit:timeSec,questions:draftQs,
+      author,author_color:COLORS[Math.floor(Math.random()*COLORS.length)],
+      author_icon:authorIcon,
+      user_id:currentUser.id,
+    });
+    if(error){toast('❌ 保存失敗: '+error.message);btn.textContent='作成して保存';btn.disabled=false;return;}
+    await loadOnlineQuizzes();
+    btn.textContent='作成して保存';btn.disabled=false;
+    closeOv('create-ov');render();toast('✅ オンラインに投稿しました！');return;
+  }else if(isOnline&&!currentUser){
+    const{error}=await sbClient.from('quizzes').insert({
+      title,cat:mCat,time_limit:timeSec,questions:draftQs,
+      author,author_color:COLORS[Math.floor(Math.random()*COLORS.length)],
+    });
+    if(error){toast('❌ 保存失敗: '+error.message);btn.textContent='作成して保存';btn.disabled=false;return;}
+    await loadOnlineQuizzes();
+    btn.textContent='作成して保存';btn.disabled=false;
+    closeOv('create-ov');render();toast('✅ ゲストとしてオンラインに投稿しました！');return;
+  }else{
+    localQuizzes.push({
+      id:'q_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+      title,cat:mCat,timeLimit:timeSec,questions:draftQs,
+      author,authorColor:COLORS[Math.floor(Math.random()*COLORS.length)],
+      authorIcon,
+      userId:MY_ID,createdAt:new Date().toISOString(),
+    });
+    saveLocal();
+  }
+
+  btn.textContent='作成して保存';btn.disabled=false;
+  closeOv('create-ov');render();
+  toast('✅ クイズを保存しました！');
+}
+
+async function delQuiz(id,e){
   e.stopPropagation();
   if(!confirm('このクイズを削除しますか？'))return;
-  quizzes=quizzes.filter(z=>z.id!==id);
-  save();render();toast('🗑️ 削除しました');
+  if(isOnline&&currentUser){
+    const{error}=await sbClient.from('quizzes').delete().eq('id',id).eq('user_id',currentUser.id);
+    if(error){toast('❌ 削除失敗');return;}
+    await loadOnlineQuizzes();
+  }else{
+    localQuizzes=localQuizzes.filter(z=>z.id!==id);saveLocal();
+  }
+  render();toast('🗑️ 削除しました');
 }
 
+// ═══════════════════════════════════════
+//  問題追加
+// ═══════════════════════════════════════
+function setQType(t){
+  qType=t;
+  document.getElementById('type-choice-btn').classList.toggle('on',t==='choice');
+  document.getElementById('type-text-btn').classList.toggle('on',t==='text');
+  document.getElementById('choice-area').style.display=t==='choice'?'':'none';
+  document.getElementById('text-area').style.display=t==='text'?'':'none';
+}
+function openAddQ(){
+  qType='choice';correctIdx=null;
+  document.getElementById('aq-text').value='';
+  ['ch-a','ch-b','ch-c','ch-d','aq-exp','text-ans'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.correct-btn').forEach(b=>b.classList.remove('on'));
+  setQType('choice');
+  ['qimg','qaud','cha-img','chb-img','chc-img','chd-img','expimg','expaud'].forEach(k=>{delete mediaStore[k];const p=document.getElementById(k+'-preview');if(p)p.innerHTML='';const f=document.getElementById(k+'-file');if(f)f.value='';});
+  openOv('addq-ov');
+}
+function selCorrect(i){correctIdx=i;document.querySelectorAll('.correct-btn').forEach((b,j)=>b.classList.toggle('on',j===i));}
+function addQuestion(){
+  const text=document.getElementById('aq-text').value.trim();
+  if(!text)return toast('❗ 問題文を入力してください');
+  const exp=document.getElementById('aq-exp').value.trim();
+  const q={type:qType,text,explanation:exp,
+    questionImage:mediaStore['qimg']?.dataUrl||null,questionAudio:mediaStore['qaud']?.dataUrl||null,
+    explanationImage:mediaStore['expimg']?.dataUrl||null,explanationAudio:mediaStore['expaud']?.dataUrl||null,
+  };
+  if(qType==='choice'){
+    const choices=['ch-a','ch-b','ch-c','ch-d'].map(id=>document.getElementById(id).value.trim());
+    if(choices.some(c=>!c))return toast('❗ 選択肢A〜Dをすべて入力してください');
+    if(correctIdx===null)return toast('❗ 正解を選択してください');
+    q.choices=choices;q.correct=correctIdx;
+    q.choiceImages=['cha-img','chb-img','chc-img','chd-img'].map(k=>mediaStore[k]?.dataUrl||null);
+  }else{
+    const ans=document.getElementById('text-ans').value.trim();
+    if(!ans)return toast('❗ 模範解答を入力してください');
+    q.textAnswer=ans;
+  }
+  draftQs.push(q);renderQList();closeOv('addq-ov');toast(`✅ 問題${draftQs.length}を追加しました`);
+}
+
+// ═══════════════════════════════════════
+//  タイマー
+// ═══════════════════════════════════════
+function startTimer(sec){
+  clearInterval(timerInterval);
+  if(sec===0){document.getElementById('timer-wrap').style.display='none';return;}
+  timerSec=sec;timerRemain=sec;
+  document.getElementById('timer-wrap').style.display='flex';
+  updateTimerUI();
+  timerInterval=setInterval(()=>{timerRemain--;updateTimerUI();if(timerRemain<=0){clearInterval(timerInterval);timeUp();}},1000);
+}
+function updateTimerUI(){
+  const pct=timerSec>0?Math.round(timerRemain/timerSec*100):0;
+  const fill=document.getElementById('timer-fill'),num=document.getElementById('timer-num');
+  fill.style.width=pct+'%';
+  fill.style.background=timerRemain<=5?'var(--red)':timerRemain<=10?'var(--gold)':'var(--a)';
+  num.textContent=timerRemain;
+  num.className='play-timer-num'+(timerRemain<=5?' warn':'');
+}
+function timeUp(){
+  if(playAnswered)return;playAnswered=true;
+  document.querySelectorAll('.play-choice').forEach(b=>b.classList.add('answered'));
+  const q=playQuiz.questions[playIdx];
+  const fb=document.getElementById('play-fb');
+  fb.className='play-feedback ng show';
+  fb.textContent='⏱ 時間切れ！正解は「'+(q.type==='choice'?q.choices[q.correct]:q.textAnswer)+'」'+(q.explanation?' — '+q.explanation:'');
+  if(q.type==='choice'){const btns=document.querySelectorAll('.play-choice');if(btns[q.correct])btns[q.correct].classList.add('show-correct');}
+  showExpMedia(q);
+  const nextBtn=document.getElementById('play-next');
+  nextBtn.className='play-next show';
+  nextBtn.textContent=playIdx+1<playQuiz.questions.length?'次の問題 →':'結果を見る';
+}
+
+// ═══════════════════════════════════════
+//  プレイ
+// ═══════════════════════════════════════
+function startPlay(id){
+  const all=[...localQuizzes,...onlineQuizzes];
+  playQuiz=all.find(z=>z.id===id);
+  if(!playQuiz||!playQuiz.questions||!playQuiz.questions.length)return toast('❗ 問題がありません');
+  playIdx=0;playScore=0;playAnswered=false;
+  document.getElementById('play-game').style.display='block';
+  document.getElementById('play-result').classList.remove('show');
+  const ci=CATS[playQuiz.cat]||{};
+  document.getElementById('play-cat-label').textContent=ci.e+' '+ci.l;
+  document.getElementById('play-quiz-title').textContent=playQuiz.title;
+  showQuestion();openOv('play-ov');
+}
+function showQuestion(){
+  playAnswered=false;
+  const q=playQuiz.questions[playIdx],total=playQuiz.questions.length;
+  document.getElementById('prog-fill').style.width=Math.round(playIdx/total*100)+'%';
+  document.getElementById('prog-text').textContent=`${playIdx}/${total}`;
+  document.getElementById('play-q-num').textContent=`Q${playIdx+1}`;
+  document.getElementById('play-q-text').textContent=q.text;
+  document.getElementById('play-fb').className='play-feedback';document.getElementById('play-fb').textContent='';
+  document.getElementById('play-next').className='play-next';
+  document.getElementById('play-exp-img').style.display='none';
+  document.getElementById('play-exp-audio').style.display='none';
+  const qImg=document.getElementById('play-q-img');
+  if(q.questionImage){qImg.src=q.questionImage;qImg.style.display='';}else{qImg.style.display='none';}
+  const qAud=document.getElementById('play-q-audio');
+  if(q.questionAudio){qAud.src=q.questionAudio;qAud.style.display='';}else{qAud.style.display='none';}
+  const labels=['A','B','C','D'],choicesEl=document.getElementById('play-choices');
+  if(q.type==='choice'){
+    choicesEl.innerHTML=q.choices.map((c,i)=>{
+      const imgHtml=q.choiceImages&&q.choiceImages[i]?`<img src="${q.choiceImages[i]}" style="width:44px;height:44px;object-fit:cover;border-radius:5px;border:1px solid var(--border);flex-shrink:0" alt="">`:'';
+      return`<button class="play-choice" onclick="answer(${i})"><span class="choice-key">${labels[i]}</span>${imgHtml}${esc(c)}</button>`;
+    }).join('');
+  }else{
+    choicesEl.innerHTML=`<textarea class="play-text-input" id="play-text-inp" placeholder="答えを入力してください..." rows="3"></textarea><button class="play-text-submit" onclick="answerText()">回答する</button>`;
+  }
+  startTimer(playQuiz.timeLimit);
+}
+function showExpMedia(q){
+  if(q.explanationImage){const ei=document.getElementById('play-exp-img');ei.src=q.explanationImage;ei.style.display='';}
+  if(q.explanationAudio){const ea=document.getElementById('play-exp-audio');ea.src=q.explanationAudio;ea.style.display='';}
+}
+function answer(idx){
+  if(playAnswered)return;playAnswered=true;clearInterval(timerInterval);
+  const q=playQuiz.questions[playIdx],choices=document.querySelectorAll('.play-choice');
+  choices.forEach(b=>b.classList.add('answered'));
+  const fb=document.getElementById('play-fb');
+  if(idx===q.correct){
+    playScore++;choices[idx].classList.add('correct');
+    fb.className='play-feedback ok show';fb.textContent='✓ 正解！'+(q.explanation?' — '+q.explanation:'');
+  }else{
+    choices[idx].classList.add('wrong');choices[q.correct].classList.add('show-correct');
+    fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.choices[q.correct]+'」'+(q.explanation?' — '+q.explanation:'');
+  }
+  showExpMedia(q);
+  const nextBtn=document.getElementById('play-next');
+  nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuiz.questions.length?'次の問題 →':'結果を見る';
+}
+function answerText(){
+  if(playAnswered)return;
+  const inp=document.getElementById('play-text-inp');if(!inp)return;
+  const userAns=inp.value.trim();if(!userAns)return toast('❗ 答えを入力してください');
+  playAnswered=true;clearInterval(timerInterval);
+  const q=playQuiz.questions[playIdx];
+  const norm=s=>s.toLowerCase().replace(/\s/g,'');
+  const correct=norm(userAns).includes(norm(q.textAnswer))||norm(q.textAnswer).includes(norm(userAns));
+  inp.disabled=true;document.querySelector('.play-text-submit').disabled=true;
+  const fb=document.getElementById('play-fb');
+  if(correct){playScore++;inp.style.borderColor='var(--green)';fb.className='play-feedback ok show';fb.textContent='✓ 正解！'+(q.explanation?' — '+q.explanation:'');}
+  else{inp.style.borderColor='var(--red)';fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.textAnswer+'」'+(q.explanation?' — '+q.explanation:'');}
+  showExpMedia(q);
+  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuiz.questions.length?'次の問題 →':'結果を見る';
+}
+function nextQ(){playIdx++;if(playIdx>=playQuiz.questions.length){showResult();return;}showQuestion();}
+function showResult(){
+  clearInterval(timerInterval);
+  const total=playQuiz.questions.length;
+  document.getElementById('prog-fill').style.width='100%';document.getElementById('prog-text').textContent=`${total}/${total}`;
+  document.getElementById('play-game').style.display='none';document.getElementById('play-result').classList.add('show');
+  const pct=Math.round(playScore/total*100);
+  document.getElementById('res-score').textContent=playScore*10;document.getElementById('res-total').textContent=total*10;
+  document.getElementById('res-correct').textContent=playScore+'問';document.getElementById('res-wrong').textContent=(total-playScore)+'問';
+  document.getElementById('res-rate').textContent=pct+'%';
+  let stars='⭐',msg;
+  if(pct>=90){stars='🌟🌟🌟';msg='完璧！天才クイズマスター！'}
+  else if(pct>=70){stars='⭐⭐⭐';msg='素晴らしい！よく勉強してるね！'}
+  else if(pct>=50){stars='⭐⭐';msg='惜しい！もう一度チャレンジ！'}
+  else{stars='⭐';msg='まだまだ！もう一度頑張ろう！'}
+  document.getElementById('res-stars').textContent=stars;document.getElementById('res-msg').textContent=msg;
+}
+function closePlay(){clearInterval(timerInterval);closeOv('play-ov');}
+function restartPlay(){if(!playQuiz)return;startPlay(playQuiz.id);}
+
+// toast
 let tt;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2800);}
 
-render();
+// ═══════════════════════════════════════
+//  初期化
+// ═══════════════════════════════════════
+(async()=>{
+  initSupabase();
+  if(isOnline){await checkSession();await loadOnlineQuizzes();}
+  render();
+})();
 </script>
 </body>
 </html>
