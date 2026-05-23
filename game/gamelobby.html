@@ -544,37 +544,30 @@ const GAMES = [
   // ↓ ここからゲームを追加してください ↓
   {
      title:      "クイズ",
-     genre:      "battle",
+     genre:      "battle",      // battle/puzzle/minigame/card/rpg/other
      genreLabel: "対戦",
      emoji:      "❓",
      color:      "#ef4444",
      desc:       "世界中のプレイヤーのクイズをプレイ作成しよう！",
-     badge:      "TOP",
-     diff:       3,
-     featured:   true,
+     badge:      "NEW",         // "NEW"/"HOT"/"TOP"/null
+     diff:       3,             // 1〜5
+     featured:   true,          // ヒーロー候補にする場合
      url:        "https://killer0428penjp-star.github.io/days/game/Quizu.html",
    },
    {
-     title:      "ルーレット", // タイトルを内容に合わせて変更
-     genre:      "minigame",
+     title:      "ルーレット",
+     genre:      "minigame",      // battle/puzzle/minigame/card/rpg/other
      genreLabel: "ミニゲーム",
      emoji:      "🕕",
      color:      "#ef4444",
      desc:       "賭け事はこれで決めよう",
-     badge:      null,         // 文字列の"null"ではなく、値としてのnullまたはundefinedを推奨
-     diff:       3,
-     featured:   false,
+     badge:      null,         // "NEW"/"HOT"/"TOP"/null
+     diff:       3,             // 1〜5
+     featured:   true,          // ヒーロー候補にする場合
      url:        "https://killer0428penjp-star.github.io/days/game/roulette.html",
    },
+   
 ];
-
-
-
-
-
-
-];
-
 
 /* ジャンル定義 */
 const GENRES = [
