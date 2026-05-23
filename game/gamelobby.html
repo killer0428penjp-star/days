@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAME LOBBY</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+/*
+=================================================================
+  🎮 GAME LOBBY v4.0 — カスタマイズガイド
+=================================================================
+
+  ▼ ゲームを追加する方法
+  下の GAMES 配列にコピペするだけ:
+
+  {
+    title:      "タイトル",
+    genre:      "battle",   // battle / puzzle / minigame / card / rpg / other
+    genreLabel: "対戦",     // 表示名（上記に合わせる）
+    emoji:      "⚔️",
+    color:      "#ef4444",  // テーマカラー（16進数）
+    desc:       "ゲームの説明文。",
+    badge:      "NEW",      // "NEW" / "HOT" / "TOP" / null
+    diff:       3,          // 難易度 1〜5
+    featured:   true,       // true = ヒーロー候補になる（省略可）
+    url:        "https://claude.ai/new?q=...",
+  },
+
+  ▼ ジャンル一覧
+    battle    → 対戦
+    puzzle    → パズル
+    minigame  → ミニゲーム
+    card      → カード
+    rpg       → RPG
+    other     → その他
+
+  ▼ ヒーロー（上部スライダー）に出す方法
+    featured: true を付けるか、右上🎨→「ヒーロー設定」で選択
+
+  ▼ 背景の保存
+    右上🎨パネルで選んだ背景はlocalStorageに自動保存されます
+
+=================================================================
+*/
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f0f0f8;
+  --white:#ffffff;
+  --off:#f7f7f9;
+  --border:#e2e2ea;
+  --text:#1a1a2e;
+  --muted:#7a7a9a;
+  --accent:#4f46e5;
+  --card-bg:rgba(255,255,255,0.94);
+  --shadow:0 4px 24px rgba(0,0,0,0.10);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Noto Sans JP',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* テキストアウトライン共通ユーティリティ */
+.outlined{
+  text-shadow:
+    -1px -1px 0 #fff,1px -1px 0 #fff,
+    -1px  1px 0 #fff,1px  1px 0 #fff,
+    0 -2px 0 #fff,0 2px 0 #fff,
+    -2px 0 0 #fff,2px 0 0 #fff,
+    0 0 6px rgba(255,255,255,0.9);
+}
+.outlined-dark{
+  text-shadow:
+    -1px -1px 0 rgba(0,0,0,0.55),1px -1px 0 rgba(0,0,0,0.55),
+    -1px  1px 0 rgba(0,0,0,0.55),1px  1px 0 rgba(0,0,0,0.55),
+    0 0 8px rgba(0,0,0,0.3);
+}
+
+/* ─── 背景 ─── */
+#bg-layer{position:fixed;inset:0;z-index:0}
+#bg-canvas{position:absolute;inset:0;width:100%;height:100%}
+#bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+#bg-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+#dino-frame{position:absolute;inset:0;width:100%;height:100%;border:none;display:none}
+.bg-overlay{
+  position:absolute;inset:0;
+  background:rgba(255,255,255,0.48);
+  backdrop-filter:blur(1px);
+}
+
+/* ─── トップバー ─── */
+.topbar{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,255,255,0.90);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  height:58px;
+  display:flex;align-items:center;
+  padding:0 1.5rem;gap:1rem;
+}
+.logo-mark{
+  font-family:'Orbitron',monospace;
+  font-size:1rem;font-weight:900;letter-spacing:.05em;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;white-space:nowrap;flex-shrink:0;
+}
+.topbar-search{
+  position:relative;width:220px;flex-shrink:0;
+}
+.topbar-search input{
+  width:100%;padding:.42rem .9rem .42rem 2.2rem;
+  border:1.5px solid var(--border);border-radius:999px;
+  font-size:.8rem;background:#fff;color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;outline:none;
+  transition:border-color .2s;
+}
+.topbar-search input:focus{border-color:#4f46e5}
+.topbar-search .si{
+  position:absolute;left:.7rem;top:50%;transform:translateY(-50%);
+  color:var(--muted);font-size:.8rem;pointer-events:none;
+}
+.s-cnt{
+  position:absolute;right:.7rem;top:50%;transform:translateY(-50%);
+  font-size:.62rem;color:var(--muted);font-family:'Orbitron',monospace;
+}
+.topbar-nav{
+  flex:1;display:flex;gap:.2rem;overflow-x:auto;scrollbar-width:none;
+}
+.topbar-nav::-webkit-scrollbar{display:none}
+.tnav{
+  padding:.32rem .8rem;border-radius:999px;border:none;
+  background:transparent;color:var(--muted);cursor:pointer;
+  white-space:nowrap;font-size:.75rem;
+  font-family:'Noto Sans JP',sans-serif;transition:all .2s;
+}
+.tnav:hover{background:var(--off);color:var(--text)}
+.tnav.active{
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;
+}
+.topbar-right{display:flex;gap:.4rem;flex-shrink:0}
+.icon-btn{
+  width:34px;height:34px;border-radius:50%;
+  border:1.5px solid var(--border);background:#fff;
+  cursor:pointer;display:flex;align-items:center;
+  justify-content:center;font-size:.85rem;
+  transition:all .2s;color:var(--text);
+}
+.icon-btn:hover{background:#4f46e5;color:#fff;border-color:#4f46e5}
+
+/* ─── メイン ─── */
+.main{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 1.5rem 4rem}
+
+/* ─── ヒーロースライダー ─── */
+.hero-wrap{
+  position:relative;height:280px;
+  margin:1.4rem 0 2rem;border-radius:22px;
+  overflow:hidden;box-shadow:0 12px 50px rgba(0,0,0,.18);
+}
+.hero-slides{display:flex;height:100%;transition:transform .55s cubic-bezier(.77,0,.18,1)}
+.hero-slide{
+  min-width:100%;height:100%;
+  display:flex;align-items:center;padding:2.5rem 3rem;
+  position:relative;overflow:hidden;
+}
+.hs-bg-emoji{
+  position:absolute;inset:0;font-size:13rem;
+  display:flex;align-items:center;justify-content:flex-end;
+  padding-right:2rem;opacity:.15;line-height:1;pointer-events:none;
+}
+.hs-body{position:relative;z-index:1}
+.hs-badge{
+  display:inline-block;padding:.28rem .9rem;border-radius:999px;
+  font-size:.6rem;letter-spacing:.2em;font-weight:700;
+  background:rgba(255,255,255,.25);color:#fff;
+  margin-bottom:.6rem;
+  text-shadow:0 1px 2px rgba(0,0,0,.3);
+}
+.hs-title{
+  font-family:'Orbitron',monospace;
+  font-size:clamp(1.3rem,3vw,2rem);font-weight:900;
+  color:#fff;line-height:1.15;margin-bottom:.5rem;
+  text-shadow:
+    -1px -1px 0 rgba(0,0,0,.4),1px -1px 0 rgba(0,0,0,.4),
+    -1px  1px 0 rgba(0,0,0,.4),1px  1px 0 rgba(0,0,0,.4),
+    0 2px 12px rgba(0,0,0,.5);
+}
+.hs-desc{
+  font-size:.82rem;color:rgba(255,255,255,.88);
+  max-width:420px;line-height:1.6;margin-bottom:1.1rem;
+  text-shadow:0 1px 4px rgba(0,0,0,.5);
+}
+.hs-cta{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.6rem 1.4rem;background:#fff;border-radius:999px;
+  font-size:.78rem;font-weight:700;text-decoration:none;
+  border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+}
+.hs-cta:hover{transform:scale(1.04);box-shadow:0 6px 22px rgba(0,0,0,.28)}
+.hero-nav{
+  position:absolute;bottom:.9rem;left:50%;transform:translateX(-50%);
+  display:flex;gap:5px;z-index:10;
+}
+.hero-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,.4);
+  transition:all .3s;cursor:pointer;border:none;
+}
+.hero-dot.on{width:18px;border-radius:3px;background:#fff}
+.ha{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.22);backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.35);
+  color:#fff;font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .2s;z-index:10;
+}
+.ha:hover{background:rgba(255,255,255,.42)}
+.ha.l{left:.9rem}.ha.r{right:.9rem}
+
+/* hero empty */
+.hero-empty{
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);
+  height:280px;margin:1.4rem 0 2rem;border-radius:22px;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:.8rem;
+  box-shadow:0 12px 50px rgba(0,0,0,.18);
+}
+.hero-empty p{
+  font-size:.85rem;color:rgba(255,255,255,.8);
+  text-align:center;line-height:1.6;
+}
+
+/* ─── セクション ─── */
+.section{margin-bottom:2.4rem}
+.sec-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1rem;
+}
+.sec-title{
+  font-family:'Orbitron',monospace;
+  font-size:.74rem;font-weight:700;letter-spacing:.22em;
+  color:var(--muted);text-transform:uppercase;
+  display:flex;align-items:center;gap:.5rem;
+}
+.sec-title::before{
+  content:'';display:block;width:3px;height:13px;border-radius:2px;
+  background:linear-gradient(#4f46e5,#7c3aed);
+}
+.see-all{
+  font-size:.72rem;color:#4f46e5;background:none;border:none;
+  cursor:pointer;font-family:'Noto Sans JP',sans-serif;
+  transition:opacity .2s;
+}
+.see-all:hover{opacity:.6}
+
+/* ─── グリッド／行 ─── */
+.games-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  gap:1rem;
+}
+.games-row{
+  display:flex;gap:.9rem;overflow-x:auto;
+  padding-bottom:.4rem;scrollbar-width:none;
+}
+.games-row::-webkit-scrollbar{display:none}
+.games-row .game-card{min-width:210px;flex-shrink:0}
+
+/* ─── ゲームカード ─── */
+.game-card{
+  background:var(--card-bg);
+  border:1px solid rgba(255,255,255,.95);
+  border-radius:18px;overflow:hidden;cursor:pointer;
+  box-shadow:var(--shadow);
+  transition:transform .26s cubic-bezier(.34,1.56,.64,1),
+             box-shadow .25s,border-color .25s;
+  animation:cin .4s ease both;
+}
+@keyframes cin{
+  from{opacity:0;transform:translateY(14px) scale(.97)}
+  to{opacity:1;transform:none}
+}
+.game-card:hover{
+  transform:translateY(-5px) scale(1.018);
+  box-shadow:0 18px 55px rgba(79,70,229,.18);
+  border-color:rgba(79,70,229,.4);
+}
+.game-card:hover .play-btn{opacity:1;transform:translateY(0)}
+.card-art{
+  height:125px;display:flex;align-items:center;
+  justify-content:center;position:relative;overflow:hidden;
+}
+.card-art-bg{position:absolute;inset:0}
+.art-emoji{
+  position:relative;z-index:1;font-size:3.8rem;
+  filter:drop-shadow(0 4px 14px rgba(0,0,0,.22));
+  animation:fi 3.5s ease-in-out infinite;
+}
+@keyframes fi{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.card-badge{
+  position:absolute;top:9px;right:9px;z-index:2;
+  padding:2px 8px;border-radius:999px;
+  font-size:.57rem;letter-spacing:.18em;font-weight:700;
+}
+.badge-NEW{background:rgba(74,222,128,.2);border:1px solid rgba(74,222,128,.55);color:#15803d}
+.badge-HOT{background:rgba(251,146,60,.2);border:1px solid rgba(251,146,60,.55);color:#c2410c}
+.badge-TOP{background:rgba(250,204,21,.2);border:1px solid rgba(250,204,21,.55);color:#a16207}
+.card-body{padding:.9rem 1.05rem 1rem}
+.card-genre{font-size:.59rem;letter-spacing:.24em;color:var(--muted);text-transform:uppercase;margin-bottom:.22rem}
+.card-title{
+  font-family:'Orbitron',monospace;font-size:.86rem;
+  font-weight:700;color:var(--text);margin-bottom:.38rem;line-height:1.25;
+}
+.card-desc{font-size:.71rem;color:#6b6b8a;line-height:1.55;margin-bottom:.8rem}
+.card-diff{display:flex;gap:3px;margin-bottom:.7rem}
+.dd{width:7px;height:7px;border-radius:50%;background:#e5e5f0}
+.dd.on{background:linear-gradient(135deg,#4f46e5,#7c3aed)}
+.play-btn{
+  display:block;width:100%;padding:.5rem;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);
+  border:none;border-radius:9px;color:#fff;
+  font-family:'Orbitron',monospace;font-size:.63rem;
+  letter-spacing:.25em;cursor:pointer;text-align:center;
+  text-decoration:none;opacity:0;transform:translateY(5px);
+  transition:opacity .2s,transform .25s cubic-bezier(.34,1.56,.64,1),filter .2s;
+}
+.play-btn:hover{filter:brightness(1.1)}
+.game-card:hover .play-btn{opacity:1;transform:none}
+.empty-state{
+  grid-column:1/-1;text-align:center;padding:4rem;
+  color:var(--muted);font-size:.85rem;
+}
+.empty-state span{display:block;font-size:3rem;opacity:.3;margin-bottom:1rem}
+
+/* ─── 右パネル共通 ─── */
+.side-panel{
+  position:fixed;top:58px;right:0;
+  width:320px;height:calc(100vh - 58px);
+  background:rgba(255,255,255,.97);backdrop-filter:blur(24px);
+  border-left:1px solid var(--border);z-index:200;
+  padding:1.5rem;overflow-y:auto;
+  transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.77,0,.18,1);
+  box-shadow:-6px 0 40px rgba(0,0,0,.1);
+}
+.side-panel.open{transform:none}
+.panel-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:1.2rem;
+}
+.panel-title{
+  font-family:'Orbitron',monospace;font-size:.72rem;
+  letter-spacing:.22em;color:var(--muted);
+}
+.panel-close{
+  width:28px;height:28px;border-radius:50%;
+  border:1.5px solid var(--border);background:none;
+  cursor:pointer;font-size:.85rem;color:var(--muted);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.panel-close:hover{background:#ef4444;color:#fff;border-color:#ef4444}
+.panel-sep{border:none;border-top:1px solid var(--border);margin:1rem 0}
+.panel-sub{
+  font-size:.65rem;color:var(--muted);
+  letter-spacing:.15em;margin-bottom:.7rem;text-transform:uppercase;
+}
+
+/* 背景パネル */
+.bg-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.bg-thumb{
+  aspect-ratio:16/9;border-radius:10px;overflow:hidden;
+  cursor:pointer;border:2px solid transparent;
+  transition:all .2s;position:relative;
+}
+.bg-thumb:hover{transform:scale(1.04)}
+.bg-thumb.selected{border-color:#4f46e5;box-shadow:0 0 0 3px rgba(79,70,229,.22)}
+.bg-thumb canvas{width:100%;height:100%}
+.bg-lbl{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:.22rem .38rem;background:rgba(0,0,0,.55);
+  color:#fff;font-size:.58rem;text-align:center;
+}
+.upload-btn{
+  display:block;width:100%;padding:.6rem;
+  border-radius:10px;border:1.5px dashed var(--border);
+  background:var(--off);font-size:.74rem;color:var(--muted);
+  cursor:pointer;text-align:center;transition:all .2s;margin-bottom:.45rem;
+}
+.upload-btn:hover{border-color:#4f46e5;color:#4f46e5;background:rgba(79,70,229,.05)}
+#fileInput{display:none}
+.url-row{display:flex;gap:.45rem;margin-top:.45rem}
+.url-row input{
+  flex:1;padding:.38rem .65rem;border:1.5px solid var(--border);
+  border-radius:8px;font-size:.71rem;color:var(--text);
+  font-family:'Noto Sans JP',sans-serif;outline:none;
+}
+.url-row input:focus{border-color:#4f46e5}
+.url-row button{
+  padding:.38rem .65rem;background:#4f46e5;color:#fff;
+  border:none;border-radius:8px;font-size:.71rem;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;
+}
+.saved-tag{
+  display:inline-block;margin-top:.5rem;
+  padding:.18rem .6rem;background:rgba(74,222,128,.15);
+  border:1px solid rgba(74,222,128,.4);border-radius:999px;
+  font-size:.6rem;color:#15803d;
+}
+
+/* ヒーロー設定パネル */
+.hero-cfg-list{display:flex;flex-direction:column;gap:.55rem}
+.hci{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.6rem .8rem;background:var(--off);
+  border-radius:10px;cursor:pointer;transition:all .2s;
+  border:1.5px solid transparent;
+}
+.hci:hover{border-color:rgba(79,70,229,.3)}
+.hci.selected{
+  background:rgba(79,70,229,.08);
+  border-color:rgba(79,70,229,.5);
+}
+.hci-emoji{font-size:1.5rem;flex-shrink:0}
+.hci-info{flex:1;min-width:0}
+.hci-title{
+  font-family:'Orbitron',monospace;font-size:.75rem;
+  font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.hci-genre{font-size:.62rem;color:var(--muted);margin-top:1px}
+.hci-check{
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;transition:all .2s;
+}
+.hci.selected .hci-check{
+  background:#4f46e5;border-color:#4f46e5;color:#fff;
+}
+.hero-apply-btn{
+  width:100%;margin-top:1rem;padding:.65rem;
+  background:linear-gradient(135deg,#4f46e5,#7c3aed);
+  color:#fff;border:none;border-radius:10px;
+  font-family:'Orbitron',monospace;font-size:.72rem;
+  letter-spacing:.2em;cursor:pointer;transition:filter .2s;
+}
+.hero-apply-btn:hover{filter:brightness(1.08)}
+
+/* ─── footer ─── */
+.footer{text-align:center;margin-top:1.5rem;font-size:.6rem;letter-spacing:.28em;color:#bbbbd8;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+<div id="bg-layer">
+  <canvas id="bg-canvas"></canvas>
+  <video id="bg-video" autoplay muted loop playsinline></video>
+  <img id="bg-image" alt="">
+  <iframe id="dino-frame"></iframe>
+  <div class="bg-overlay" id="bg-overlay"></div>
+</div>
+
+<!-- トップバー -->
+<div class="topbar">
+  <span class="logo-mark">🎮 LOBBY</span>
+  <div class="topbar-search">
+    <span class="si">🔍</span>
+    <input id="searchInput" type="text" placeholder="ゲームを検索...">
+    <span class="s-cnt" id="sCnt"></span>
+  </div>
+  <nav class="topbar-nav" id="topbarNav"></nav>
+  <div class="topbar-right">
+    <button class="icon-btn" id="heroBtn" title="ヒーロー設定">⭐</button>
+    <button class="icon-btn" id="bgBtn" title="背景を変更">🎨</button>
+    <button class="icon-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="トップへ">↑</button>
+  </div>
+</div>
+
+<!-- 背景パネル -->
+<div class="side-panel" id="bgPanel">
+  <div class="panel-hd">
+    <div class="panel-title">BACKGROUND</div>
+    <button class="panel-close" onclick="closePanel('bgPanel')">✕</button>
+  </div>
+  <div class="bg-grid" id="bgGrid"></div>
+  <div id="savedTag"></div>
+  <hr class="panel-sep">
+  <div class="panel-sub">ファイルを追加</div>
+  <label class="upload-btn" for="fileInput">📁 動画 / 画像を選択</label>
+  <input type="file" id="fileInput" accept="video/*,image/*">
+  <div class="panel-sub" style="margin-top:.8rem">URLから追加</div>
+  <div class="url-row">
+    <input type="text" id="urlInput" placeholder="https://...">
+    <button onclick="addUrlBg()">追加</button>
+  </div>
+</div>
+
+<!-- ヒーロー設定パネル -->
+<div class="side-panel" id="heroPanel">
+  <div class="panel-hd">
+    <div class="panel-title">HERO GAMES</div>
+    <button class="panel-close" onclick="closePanel('heroPanel')">✕</button>
+  </div>
+  <p style="font-size:.75rem;color:var(--muted);line-height:1.6;margin-bottom:1rem">
+    上部スライダーに表示するゲームを選んでください。
+  </p>
+  <div class="hero-cfg-list" id="heroCfgList"></div>
+  <button class="hero-apply-btn" onclick="applyHeroSelection()">✓ 適用する</button>
+</div>
+
+<!-- メイン -->
+<div class="main" id="main">
+  <div id="heroArea"></div>
+  <div id="contentArea"></div>
+  <div class="footer">CLAUDE ARCADE v4.0 · Your Personal Game Center</div>
+</div>
+
+<script>
+/* ============================================================
+   🎮 ゲームデータ — ここを編集してください
+   ============================================================
+
+   【追加例】
+   {
+     title:      "MY NEW GAME",
+     genre:      "battle",      // battle/puzzle/minigame/card/rpg/other
+     genreLabel: "対戦",
+     emoji:      "🥊",
+     color:      "#ef4444",
+     desc:       "友達と白熱の対戦ができるゲーム。",
+     badge:      "NEW",         // "NEW"/"HOT"/"TOP"/null
+     diff:       3,             // 1〜5
+     featured:   true,          // ヒーロー候補にする場合
+     url:        "https://claude.ai/new?q=...",
+   },
+   ============================================================ */
+const GAMES = [
+  // ↓ ここからゲームを追加してください ↓
+];
+
+/* ジャンル定義 */
+const GENRES = [
+  {id:"all",      label:"すべて",    icon:"🏠"},
+  {id:"battle",   label:"対戦",      icon:"⚔️"},
+  {id:"puzzle",   label:"パズル",    icon:"🧩"},
+  {id:"minigame", label:"ミニゲーム",icon:"🎯"},
+  {id:"card",     label:"カード",    icon:"🃏"},
+  {id:"rpg",      label:"RPG",       icon:"🗡️"},
+  {id:"other",    label:"その他",    icon:"🎲"},
+];
+
+/* ============================================================
+   背景プリセット
+   ============================================================ */
+const BG_PRESETS = [
+  {id:"city3d",  label:"3D都市",    type:"webgl", shader:"city"},
+  {id:"aurora",  label:"オーロラ",  type:"webgl", shader:"aurora"},
+  {id:"space",   label:"宇宙",      type:"webgl", shader:"space"},
+  {id:"ocean",   label:"海中",      type:"webgl", shader:"ocean"},
+  {id:"matrix",  label:"Matrix",    type:"webgl", shader:"matrix"},
+  {id:"dino",    label:"DinoGame",  type:"dino"},
+];
+
+/* ============================================================
+   状態
+   ============================================================ */
+let activeFilter    = "all";
+let searchQuery     = "";
+let heroIdx         = 0;
+let heroTimer       = null;
+let currentBgId     = localStorage.getItem("lobby_bg") || "city3d";
+let userBgList      = JSON.parse(localStorage.getItem("lobby_user_bg")||"[]");
+let featuredIds     = JSON.parse(localStorage.getItem("lobby_featured")||"null");
+let heroSelectedTmp = [];
+let glTimer         = null;
+let glStart         = null;
+
+/* ============================================================
+   パネル開閉
+   ============================================================ */
+function openPanel(id){
+  ["bgPanel","heroPanel"].forEach(p=>{
+    document.getElementById(p).classList.toggle("open", p===id);
+  });
+}
+function closePanel(id){ document.getElementById(id).classList.remove("open"); }
+document.getElementById("bgBtn").addEventListener("click",()=>openPanel("bgPanel"));
+document.getElementById("heroBtn").addEventListener("click",()=>{
+  buildHeroCfg(); openPanel("heroPanel");
+});
+document.addEventListener("click",e=>{
+  if(!e.target.closest(".side-panel")&&!e.target.closest(".icon-btn")){
+    document.querySelectorAll(".side-panel").forEach(p=>p.classList.remove("open"));
+  }
+});
+
+/* ============================================================
+   ナビ
+   ============================================================ */
+function buildNav(){
+  const nav = document.getElementById("topbarNav");
+  GENRES.forEach(g=>{
+    const b = document.createElement("button");
+    b.className = "tnav"+(g.id==="all"?" active":"");
+    b.textContent = g.icon+" "+g.label;
+    b.dataset.id = g.id;
+    b.addEventListener("click",()=>{
+      document.querySelectorAll(".tnav").forEach(x=>x.classList.remove("active"));
+      b.classList.add("active");
+      activeFilter = g.id;
+      searchQuery  = "";
+      document.getElementById("searchInput").value="";
+      renderContent();
+      if(g.id!=="all"){
+        setTimeout(()=>{
+          const s=document.getElementById("sec-"+g.id);
+          if(s) s.scrollIntoView({behavior:"smooth",block:"start"});
+        },60);
+      } else { window.scrollTo({top:0,behavior:"smooth"}); }
+    });
+    nav.appendChild(b);
+  });
+}
+
+/* ============================================================
+   ヒーロースライダー
+   ============================================================ */
+function getFeaturedGames(){
+  if(!featuredIds||featuredIds.length===0){
+    return GAMES.filter(g=>g.featured);
+  }
+  return featuredIds.map(id=>GAMES.find(g=>g.title===id)).filter(Boolean);
+}
+
+function buildHero(){
+  const area = document.getElementById("heroArea");
+  const featured = getFeaturedGames();
+
+  if(featured.length===0){
+    area.innerHTML=`<div class="hero-empty">
+      <span style="font-size:2.5rem">⭐</span>
+      <p>ヒーローに表示するゲームがありません。<br>右上⭐ボタンで選択するか、<br>ゲームに <code style="background:rgba(255,255,255,0.15);padding:1px 6px;border-radius:4px">featured:true</code> を追加してください。</p>
+    </div>`;
+    return;
+  }
+
+  area.innerHTML=`
+    <div class="hero-wrap" id="heroWrap">
+      <div class="hero-slides" id="heroSlides"></div>
+      <button class="ha l" id="haL">‹</button>
+      <button class="ha r" id="haR">›</button>
+      <div class="hero-nav" id="heroDots"></div>
+    </div>`;
+
+  const slides = document.getElementById("heroSlides");
+  const dots   = document.getElementById("heroDots");
+
+  featured.forEach((g,i)=>{
+    const s=document.createElement("div");
+    s.className="hero-slide";
+    s.style.background=`linear-gradient(135deg,${g.color}ee,${g.color}88)`;
+    s.innerHTML=`
+      <div class="hs-bg-emoji">${g.emoji}</div>
+      <div class="hs-body">
+        ${g.badge?`<span class="hs-badge">${g.badge}</span>`:""}
+        <div class="hs-title">${g.title}</div>
+        <div class="hs-desc">${g.desc}</div>
+        <a class="hs-cta" href="${g.url}" target="_blank" rel="noopener" style="color:${g.color}">▶ PLAY NOW</a>
+      </div>`;
+    slides.appendChild(s);
+    const d=document.createElement("button");
+    d.className="hero-dot"+(i===0?" on":"");
+    d.addEventListener("click",()=>goHero(i));
+    dots.appendChild(d);
+  });
+
+  function goHero(idx){
+    heroIdx=idx;
+    slides.style.transform=`translateX(-${idx*100}%)`;
+    document.querySelectorAll(".hero-dot").forEach((d,i)=>d.classList.toggle("on",i===idx));
+    resetHT();
+  }
+  function resetHT(){
+    clearInterval(heroTimer);
+    if(featured.length>1) heroTimer=setInterval(()=>goHero((heroIdx+1)%featured.length),4200);
+  }
+  document.getElementById("haL").onclick=()=>goHero((heroIdx-1+featured.length)%featured.length);
+  document.getElementById("haR").onclick=()=>goHero((heroIdx+1)%featured.length);
+  resetHT();
+}
+
+/* ヒーロー設定パネル */
+function buildHeroCfg(){
+  const list = document.getElementById("heroCfgList");
+  const current = getFeaturedGames().map(g=>g.title);
+  heroSelectedTmp = [...current];
+  list.innerHTML="";
+
+  if(GAMES.length===0){
+    list.innerHTML=`<p style="font-size:.75rem;color:var(--muted)">ゲームがまだ追加されていません。</p>`;
+    return;
+  }
+
+  GAMES.forEach(g=>{
+    const item=document.createElement("div");
+    item.className="hci"+(heroSelectedTmp.includes(g.title)?" selected":"");
+    item.innerHTML=`
+      <div class="hci-emoji">${g.emoji}</div>
+      <div class="hci-info">
+        <div class="hci-title">${g.title}</div>
+        <div class="hci-genre">${g.genreLabel}</div>
+      </div>
+      <div class="hci-check">${heroSelectedTmp.includes(g.title)?"✓":""}</div>
+    `;
+    item.addEventListener("click",()=>{
+      const idx=heroSelectedTmp.indexOf(g.title);
+      if(idx>=0){ heroSelectedTmp.splice(idx,1); item.classList.remove("selected"); item.querySelector(".hci-check").textContent=""; }
+      else       { heroSelectedTmp.push(g.title); item.classList.add("selected");    item.querySelector(".hci-check").textContent="✓"; }
+    });
+    list.appendChild(item);
+  });
+}
+
+function applyHeroSelection(){
+  featuredIds = [...heroSelectedTmp];
+  localStorage.setItem("lobby_featured",JSON.stringify(featuredIds));
+  buildHero();
+  closePanel("heroPanel");
+}
+
+/* ============================================================
+   カード
+   ============================================================ */
+function makeCard(g,delay=0){
+  const el=document.createElement("div");
+  el.className="game-card";
+  el.style.animationDelay=delay+"s";
+  const r=parseInt(g.color.slice(1,3),16),
+        gr=parseInt(g.color.slice(3,5),16),
+        b=parseInt(g.color.slice(5,7),16);
+  const bg=`radial-gradient(ellipse at center,rgba(${r},${gr},${b},.2) 0%,rgba(${r},${gr},${b},.05) 65%,transparent 100%)`;
+  const dots=Array.from({length:5},(_,i)=>`<div class="dd ${i<g.diff?"on":""}"></div>`).join("");
+  el.innerHTML=`
+    <div class="card-art">
+      <div class="card-art-bg" style="background:${bg}"></div>
+      ${g.badge?`<span class="card-badge badge-${g.badge}">${g.badge}</span>`:""}
+      <span class="art-emoji">${g.emoji}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-genre">${g.genreLabel}</div>
+      <div class="card-title">${g.title}</div>
+      <div class="card-desc">${g.desc}</div>
+      <div class="card-diff">${dots}</div>
+      <a class="play-btn" href="${g.url}" target="_blank" rel="noopener">▶ PLAY NOW</a>
+    </div>`;
+  return el;
+}
+
+/* ============================================================
+   コンテンツ描画
+   ============================================================ */
+function renderContent(){
+  const area=document.getElementById("contentArea");
+  area.innerHTML="";
+
+  if(searchQuery){
+    const q=searchQuery.toLowerCase();
+    const res=GAMES.filter(g=>
+      g.title.toLowerCase().includes(q)||
+      g.genreLabel.toLowerCase().includes(q)||
+      g.desc.toLowerCase().includes(q)
+    );
+    document.getElementById("sCnt").textContent=res.length+"件";
+    const sec=document.createElement("div"); sec.className="section";
+    const hd=document.createElement("div");  hd.className="sec-head";
+    hd.innerHTML=`<div class="sec-title">検索 「${searchQuery}」</div>`;
+    sec.appendChild(hd);
+    const grid=document.createElement("div"); grid.className="games-grid";
+    if(res.length===0){
+      grid.innerHTML=`<div class="empty-state"><span>🔎</span>見つかりません</div>`;
+    } else {
+      res.forEach((g,i)=>grid.appendChild(makeCard(g,i*.05)));
+    }
+    sec.appendChild(grid); area.appendChild(sec);
+    return;
+  }
+
+  document.getElementById("sCnt").textContent="";
+  const genres=activeFilter==="all"
+    ? GENRES.filter(g=>g.id!=="all")
+    : GENRES.filter(g=>g.id===activeFilter);
+
+  genres.forEach(genre=>{
+    const list=GAMES.filter(g=>g.genre===genre.id);
+    if(list.length===0) return;
+    const sec=document.createElement("div"); sec.className="section"; sec.id="sec-"+genre.id;
+    const hd=document.createElement("div");  hd.className="sec-head";
+    hd.innerHTML=`
+      <div class="sec-title">${genre.icon} ${genre.label}</div>
+      <button class="see-all" data-g="${genre.id}">すべて見る →</button>`;
+    hd.querySelector(".see-all").addEventListener("click",()=>{
+      document.querySelectorAll(".tnav").forEach(x=>x.classList.remove("active"));
+      document.querySelector(`.tnav[data-id="${genre.id}"]`)?.classList.add("active");
+      activeFilter=genre.id; renderContent();
+    });
+    sec.appendChild(hd);
+    if(activeFilter==="all"){
+      const row=document.createElement("div"); row.className="games-row";
+      list.forEach((g,i)=>row.appendChild(makeCard(g,i*.05)));
+      sec.appendChild(row);
+    } else {
+      const grid=document.createElement("div"); grid.className="games-grid";
+      list.forEach((g,i)=>grid.appendChild(makeCard(g,i*.06)));
+      sec.appendChild(grid);
+    }
+    area.appendChild(sec);
+  });
+
+  if(area.children.length===0){
+    area.innerHTML=`<div class="empty-state" style="text-align:center;padding:4rem;color:var(--muted)"><span style="display:block;font-size:3rem;opacity:.3;margin-bottom:1rem">🎮</span>まだゲームがありません。<br>GAMES 配列にゲームを追加してください。</div>`;
+  }
+}
+
+/* ============================================================
+   検索
+   ============================================================ */
+document.getElementById("searchInput").addEventListener("input",e=>{
+  searchQuery=e.target.value.trim();
+  activeFilter="all";
+  document.querySelectorAll(".tnav").forEach(x=>x.classList.remove("active"));
+  document.querySelector(".tnav[data-id='all']")?.classList.add("active");
+  renderContent();
+});
+
+/* ============================================================
+   背景パネル
+   ============================================================ */
+function buildBgPanel(){
+  const grid=document.getElementById("bgGrid");
+  grid.innerHTML="";
+  const all=[...BG_PRESETS,...userBgList];
+  all.forEach(p=>{
+    const th=document.createElement("div");
+    th.className="bg-thumb"+(p.id===currentBgId?" selected":"");
+    const cv=document.createElement("canvas"); cv.width=160; cv.height=90;
+    drawThumb(cv,p);
+    const lbl=document.createElement("div"); lbl.className="bg-lbl"; lbl.textContent=p.label;
+    th.appendChild(cv); th.appendChild(lbl);
+    th.addEventListener("click",()=>{
+      currentBgId=p.id;
+      localStorage.setItem("lobby_bg",currentBgId);
+      applyBg(p);
+      document.querySelectorAll(".bg-thumb").forEach(x=>x.classList.remove("selected"));
+      th.classList.add("selected");
+      updateSavedTag();
+    });
+    grid.appendChild(th);
+  });
+  updateSavedTag();
+}
+
+function updateSavedTag(){
+  document.getElementById("savedTag").innerHTML=
+    `<span class="saved-tag">✓ 選択中の背景を自動保存中</span>`;
+}
+
+function drawThumb(cv,p){
+  const ctx=cv.getContext("2d");
+  const palettes={
+    city3d:  ["#0a0a20","#1a083a","#3a1a6a"],
+    aurora:  ["#020c1a","#0a2a1a","#1a0a2a"],
+    space:   ["#000010","#001030","#000020"],
+    ocean:   ["#001030","#002050","#c8eaf8"],
+    matrix:  ["#000a00","#002000","#004000"],
+    dino:    ["#f7f7f9","#e0e0f0","#c8c8e8"],
+  };
+  const icons={city3d:"🏙️",aurora:"🌌",space:"🚀",ocean:"🌊",matrix:"💻",dino:"🦖"};
+  const c=palettes[p.shader||p.id]||["#4f46e5","#7c3aed","#2d1b69"];
+  const g=ctx.createLinearGradient(0,0,160,90);
+  g.addColorStop(0,c[0]);g.addColorStop(.5,c[1]);g.addColorStop(1,c[2]);
+  ctx.fillStyle=g;ctx.fillRect(0,0,160,90);
+  ctx.font="22px serif";ctx.textAlign="center";
+  ctx.fillText(icons[p.shader||p.id]||p.emoji||"🎨",80,52);
+}
+
+document.getElementById("fileInput").addEventListener("change",e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const url=URL.createObjectURL(f);
+  const type=f.type.startsWith("video")?"video":"image";
+  const p={id:"u_"+Date.now(),label:f.name.slice(0,12),type,url};
+  userBgList.push(p);
+  saveUserBg();
+  buildBgPanel();
+  applyBg(p);
+  currentBgId=p.id;
+  localStorage.setItem("lobby_bg",currentBgId);
+});
+
+function addUrlBg(){
+  const url=document.getElementById("urlInput").value.trim(); if(!url) return;
+  const isV=/\.(mp4|webm|ogg|mov)/i.test(url);
+  const p={id:"u_"+Date.now(),label:"URL背景",type:isV?"video":"image",url};
+  userBgList.push(p);
+  saveUserBg();
+  buildBgPanel();
+  applyBg(p);
+  currentBgId=p.id;
+  localStorage.setItem("lobby_bg",currentBgId);
+  document.getElementById("urlInput").value="";
+}
+
+function saveUserBg(){
+  try{ localStorage.setItem("lobby_user_bg",JSON.stringify(
+    userBgList.filter(b=>!b.url.startsWith("blob:"))
+  )); } catch(e){}
+}
+
+/* ============================================================
+   背景適用
+   ============================================================ */
+function applyBg(p){
+  if(glTimer){ cancelAnimationFrame(glTimer); glTimer=null; }
+  document.getElementById("bg-canvas").style.display="none";
+  document.getElementById("bg-video").style.display="none";
+  document.getElementById("bg-image").style.display="none";
+  document.getElementById("dino-frame").style.display="none";
+  document.getElementById("bg-layer").style.background="";
+  const overlay=document.getElementById("bg-overlay");
+  overlay.style.background="rgba(255,255,255,0.48)";
+
+  if(p.type==="video"){
+    const v=document.getElementById("bg-video");
+    v.src=p.url; v.style.display="block";
+  } else if(p.type==="image"){
+    const im=document.getElementById("bg-image");
+    im.src=p.url; im.style.display="block";
+  } else if(p.type==="dino"){
+    overlay.style.background="rgba(255,255,255,0)";
+    document.getElementById("bg-layer").style.background="#f7f7f9";
+    const fr=document.getElementById("dino-frame");
+    fr.srcdoc=getDinoHTML();
+    fr.style.display="block";
+  } else {
+    document.getElementById("bg-canvas").style.display="block";
+    startShader(p.shader||"city");
+  }
+}
+
+function applyBgById(id){
+  const all=[...BG_PRESETS,...userBgList];
+  const p=all.find(x=>x.id===id);
+  if(p) applyBg(p);
+  else  applyBg(BG_PRESETS[0]);
+}
+
+/* ============================================================
+   DinoGame
+   ============================================================ */
+function getDinoHTML(){
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f7f7f9;display:flex;align-items:center;justify-content:center;height:100vh;overflow:hidden;font-family:monospace}
+#g{position:relative;width:760px;height:260px}
+#ground{position:absolute;bottom:36px;left:0;right:0;height:2px;background:#888}
+#dino{position:absolute;bottom:38px;left:70px;width:40px;height:48px;background:#555;border-radius:3px 3px 0 0}
+#dino::before{content:'';position:absolute;top:-9px;right:0;width:18px;height:11px;background:#555;border-radius:2px}
+#dino::after{content:'●';position:absolute;top:-7px;right:2px;font-size:5px;color:#f7f7f9}
+#dino .la{position:absolute;bottom:-11px;width:9px;height:11px;background:#555;border-radius:0 0 2px 2px}
+#dino .ll{left:7px}#dino .lr{right:7px}
+#sc{position:absolute;top:16px;right:16px;font-size:13px;color:#888;letter-spacing:2px}
+#msg{position:absolute;top:70px;left:50%;transform:translateX(-50%);font-size:12px;color:#aaa;letter-spacing:2px;white-space:nowrap}
+</style></head><body>
+<div id="g">
+  <div id="ground"></div>
+  <div id="dino"><div class="la ll" id="ll"></div><div class="la lr" id="lr"></div></div>
+  <div id="sc">HI <span id="hi">00000</span> <span id="s">00000</span></div>
+  <div id="msg">SPACE / クリックでジャンプ</div>
+</div>
+<script>
+var d=document.getElementById('dino'),sc=document.getElementById('s'),hi=document.getElementById('hi'),msg=document.getElementById('msg'),ll=document.getElementById('ll'),lr=document.getElementById('lr');
+var vy=0,y=0,onG=true,score=0,hiSc=0,spd=5,fr=0,cacts=[],running=false,af;
+function jump(){if(onG){vy=-15;onG=false;msg.style.display='none';if(!running){running=true;loop();}}}
+document.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp')jump()});
+document.addEventListener('click',jump);
+function fmt(n){return String(Math.floor(n)).padStart(5,'0')}
+function spawnC(){
+  var c=document.createElement('div');
+  var h=38+Math.random()*25;
+  c.style.cssText='position:absolute;bottom:38px;right:-20px;width:13px;background:#888;border-radius:2px 2px 0 0;height:'+h+'px';
+  document.getElementById('g').appendChild(c);
+  cacts.push({el:c,x:760});
+}
+function loop(){
+  fr++;score+=.1;spd=5+score/180;
+  sc.textContent=fmt(score);
+  if(score>hiSc){hiSc=score;hi.textContent=fmt(hiSc);}
+  if(!onG){vy+=1.1;y-=vy;if(y<=0){y=0;vy=0;onG=true;}}
+  d.style.bottom=(38+y)+'px';
+  if(onG){ll.style.height=fr%12<6?'13px':'7px';lr.style.height=fr%12<6?'7px':'13px';}
+  if(fr%Math.max(38,110-spd*4)===0) spawnC();
+  cacts=cacts.filter(c=>{
+    c.x-=spd;c.el.style.right=(760-c.x)+'px';
+    if(70<c.x+13&&70+40>c.x&&38+y<38+50){
+      cancelAnimationFrame(af);running=false;
+      msg.textContent='GAME OVER — クリックでリスタート';msg.style.display='block';
+      score=0;spd=5;cacts.forEach(x=>x.el.remove());cacts=[];y=0;vy=0;onG=true;d.style.bottom='38px';
+      return false;
+    }
+    if(c.x<-30){c.el.remove();return false;}
+    return true;
+  });
+  af=requestAnimationFrame(loop);
+}
+<\/script></body></html>`;
+}
+
+/* ============================================================
+   WebGL シェーダー
+   ============================================================ */
+function startShader(name){
+  const canvas=document.getElementById("bg-canvas");
+  const gl=canvas.getContext("webgl")||canvas.getContext("experimental-webgl");
+  if(!gl) return;
+
+  function resize(){ canvas.width=innerWidth; canvas.height=innerHeight; gl.viewport(0,0,canvas.width,canvas.height); }
+  resize(); window.onresize=resize;
+
+  const vs=`attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+  const prog=gl.createProgram();
+  function sh(t,s){const x=gl.createShader(t);gl.shaderSource(x,s);gl.compileShader(x);return x;}
+  gl.attachShader(prog,sh(gl.VERTEX_SHADER,vs));
+  gl.attachShader(prog,sh(gl.FRAGMENT_SHADER,getFS(name)));
+  gl.linkProgram(prog); gl.useProgram(prog);
+  const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const ap=gl.getAttribLocation(prog,"p");
+  gl.enableVertexAttribArray(ap); gl.vertexAttribPointer(ap,2,gl.FLOAT,false,0,0);
+  const uT=gl.getUniformLocation(prog,"T");
+  const uR=gl.getUniformLocation(prog,"R");
+  const uM=gl.getUniformLocation(prog,"M");
+  let mx=.5,my=.5;
+  window.addEventListener("mousemove",e=>{mx=e.clientX/innerWidth;my=e.clientY/innerHeight;});
+  glStart=performance.now();
+  function frame(ts){
+    gl.uniform1f(uT,(ts-glStart)*.001);
+    gl.uniform2f(uR,canvas.width,canvas.height);
+    gl.uniform2f(uM,mx,my);
+    gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+    glTimer=requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function getFS(name){
+  const C=`precision highp float;
+uniform float T;uniform vec2 R,M;
+float h(vec2 p){p=fract(p*vec2(234.34,435.345));p+=dot(p,p+34.23);return fract(p.x*p.y);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.;a*=.5;}return v;}`;
+
+  if(name==="city") return C+`
+void main(){
+  vec2 uv=gl_FragCoord.xy/R;
+  vec2 ndc=uv*2.-1.;ndc.x*=R.x/R.y;
+  float t=T*.3+M.x*.4;
+  vec3 ro=vec3(sin(t*.3)*2.,1.6+M.y*.4,t*3.);
+  vec3 rd=normalize(vec3(ndc*.8,-1.5));
+  vec3 col=vec3(.03,.02,.07);
+  if(rd.y<-.04){
+    float d=-ro.y/rd.y;
+    vec3 hit=ro+rd*d;
+    vec2 gp=hit.xz;
+    vec2 gf=fract(gp*.7)-.5;
+    float gl2=min(abs(gf.x),abs(gf.y));
+    float fade=1.-clamp(d/40.,0.,1.);
+    col+=smoothstep(.07,.0,gl2)*fade*fade*mix(vec3(.15,.05,.35),vec3(.02,.08,.4),h(floor(gp*.7)))*1.2;
+    float win=float(fract(gp.x*2.5)<2.&&fract(gp.y*5.)<4.5&&h(floor(gp*2.)+vec2(3.))>.5)*fade*.09;
+    col+=win*vec3(.85,.92,1.);
+  }
+  col=mix(col,vec3(.01,.005,.04),smoothstep(-.2,.8,uv.y)*.5);
+  float st=h(floor(uv*80.));float sd=length(fract(uv*80.)-.5);
+  col+=smoothstep(.18,.0,sd)*st*vec3(.7,.8,1.)*.5;
+  col+=vec3(0.,.4,.8)*fbm(vec2(uv.x*2.+T*.02,T*.05))*smoothstep(.6,.9,uv.y)*.3;
+  float sp=fract(uv.x*5.+T*.8+h(vec2(floor(uv.x*5.),0.))*3.);
+  col+=smoothstep(.99,.995,sp)*smoothstep(.4,.6,uv.y)*.25*vec3(.3,.1,1.);
+  gl_FragColor=vec4(pow(clamp(col,0.,1.),vec3(.85)),1.);
+}`;
+
+  if(name==="aurora") return C+`
+void main(){
+  vec2 uv=gl_FragCoord.xy/R;float t=T*.4;
+  vec3 col=vec3(.01,.02,.05);
+  float st=h(floor(uv*120.));float sd=length(fract(uv*120.)-.5);
+  col+=smoothstep(.2,.0,sd)*st*vec3(.7,.85,1.)*.6*(1.+.5*sin(T*st*3.));
+  for(int i=0;i<3;i++){
+    float fi=float(i);
+    float wave=fbm(vec2(uv.x*1.5+t*.08+fi*.7,t*.06+fi*.5));
+    float y=.55+fi*.12+wave*.15+sin(uv.x*3.+t*.3+fi)*.04;
+    float band=exp(-pow((uv.y-y)*10.,2.));
+    vec3 ac=i==0?vec3(0.,.9,.5):i==1?vec3(.2,.3,1.):vec3(.9,0.,.8);
+    col+=band*ac*(.4+.3*sin(t+fi*2.));
+  }
+  vec2 moon=vec2(.8,.85);float md=length(uv-moon);
+  col+=smoothstep(.05,.03,md)*vec3(.95,.9,.8)*.8+smoothstep(.08,.05,md)*vec3(.2,.15,.05)*.3;
+  gl_FragColor=vec4(pow(clamp(col,0.,1.),vec3(.82)),1.);
+}`;
+
+  if(name==="space") return C+`
+void main(){
+  vec2 uv=gl_FragCoord.xy/R;
+  vec2 ndc=uv*2.-1.;ndc.x*=R.x/R.y;
+  float t=T*.15;vec3 rd=normalize(vec3(ndc,1.5));
+  vec3 col=vec3(0.);
+  for(int i=0;i<3;i++){
+    float l=float(i)*.3+.5;
+    vec2 sv=fract((rd.xy/rd.z)*l+vec2(T*.005*l))*200.;
+    col+=smoothstep(.18,.0,length(fract(sv)-.5))*h(floor(sv))*vec3(.8,.9,1.)*l*.4;
+  }
+  vec2 np=uv+vec2(T*.005,T*.003);
+  col+=vec3(.05,.0,.2)*fbm(np*1.5)*.8+vec3(.0,.02,.15)*fbm(np*2.+3.)*.6;
+  col+=smoothstep(.06,.04,length(uv-vec2(.2,.7)))*vec3(.8,.4,.1);
+  col+=smoothstep(.035,.02,length(uv-vec2(.75,.3)))*vec3(.4,.6,.9);
+  float sst=fract(T*.2+.5);
+  col+=smoothstep(.003,.0,length(uv-vec2(sst*1.5-.2,.8-sst*.6)))*smoothstep(0.,.3,sst)*smoothstep(.7,1.,1.-sst)*vec3(1.,.9,.7)*2.;
+  gl_FragColor=vec4(pow(clamp(col,0.,1.),vec3(.85)),1.);
+}`;
+
+  if(name==="ocean") return C+`
+void main(){
+  vec2 uv=gl_FragCoord.xy/R;float t=T*.5;
+  vec3 col;
+  if(uv.y>.42){
+    col=mix(vec3(.4,.65,.95),vec3(.75,.88,1.),uv.y);
+    col=mix(col,vec3(1.),smoothstep(.55,.7,fbm(uv*3.+vec2(t*.05,0.)))*.6);
+    float sd=length(uv-vec2(.7,.75));
+    col+=smoothstep(.07,.04,sd)*vec3(1.,.95,.7)+smoothstep(.15,.07,sd)*vec3(1.,.8,.3)*.3;
+  }else{
+    vec2 op=vec2(uv.x,.42-uv.y);
+    float w=fbm(op*vec2(4.,2.)+vec2(t*.3,t*.1)),w2=fbm(op*vec2(6.,3.)+vec2(-t*.2,t*.15)+5.);
+    col=mix(vec3(0.,.1,.35),vec3(0.,.4,.7),w*.8);
+    col=mix(col,vec3(.8,.9,1.),smoothstep(.7,.85,w+w2*.3)*.5);
+    col+=n(op*8.+vec2(t*.5,t*.3))*vec3(.1,.3,.5)*.3;
+    col+=smoothstep(.15,.0,length(uv-vec2(.7,.42)))*vec3(1.,.95,.7)*.6;
+  }
+  col+=smoothstep(.008,.0,abs(uv.y-.42))*vec3(1.,.95,.8)*.4;
+  gl_FragColor=vec4(pow(clamp(col,0.,1.),vec3(.9)),1.);
+}`;
+
+  if(name==="matrix") return C+`
+void main(){
+  vec2 uv=gl_FragCoord.xy/R;
+  float ci=floor(uv.x*80.),spd=.5+h(vec2(ci,0.))*1.5,off=h(vec2(ci,1.))*10.;
+  float ry=fract(uv.y*40.-T*spd+off),ri=floor(uv.y*40.-T*spd+off);
+  float ch=h(vec2(ci,ri));
+  vec3 col=vec3(0.,.8,.2)*smoothstep(.05,.0,ry)*(ch>.3?1.:0.);
+  col+=vec3(0.,.5,.1)*smoothstep(.0,.5,ry)*(1.-ry)*.6*(ch>.2?1.:0.);
+  col+=vec3(.0,.03,.01);
+  gl_FragColor=vec4(clamp(col,0.,1.),1.);
+}`;
+
+  return getFS("aurora");
+}
+
+/* ============================================================
+   初期化
+   ============================================================ */
+buildNav();
+buildBgPanel();
+buildHero();
+renderContent();
+applyBgById(currentBgId);
+</script>
+</body>
+</html>
