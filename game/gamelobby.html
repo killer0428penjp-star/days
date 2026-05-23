@@ -542,6 +542,18 @@ body{
    ============================================================ */
 const GAMES = [
   // ↓ ここからゲームを追加してください ↓
+  {
+     title:      "クイズ",
+     genre:      "battle",      // battle/puzzle/minigame/card/rpg/other
+     genreLabel: "対戦",
+     emoji:      "🥊",
+     color:      "#ef4444",
+     desc:       "世界中のプレイヤーのクイズをプレイ作成しよう！",
+     badge:      "NEW",         // "NEW"/"HOT"/"TOP"/null
+     diff:       3,             // 1〜5
+     featured:   true,          // ヒーロー候補にする場合
+     url:        "https://killer0428penjp-star.github.io/days/game/Quizu.html",
+   },
 ];
 
 /* ジャンル定義 */
@@ -1175,6 +1187,10 @@ buildBgPanel();
 buildHero();
 renderContent();
 applyBgById(currentBgId);
+
+/* ============================================================
+   ５４３行目にゲームを追加情報がある
+   ============================================================ */
 </script>
 </body>
 </html>
