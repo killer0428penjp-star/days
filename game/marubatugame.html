@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI対戦ゲーム</title>
+<style>
+    body {
+        font-family: sans-serif;
+        background: #222;
+        color: white;
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 20px;
+    }
+
+    #menu {
+        margin: 20px;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 5px;
+        font-size: 18px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        background-color: #444;
+        color: white;
+        transition: background-color 0.2s;
+    }
+
+    button:hover {
+        background-color: #666;
+    }
+
+    #board {
+        display: grid;
+        gap: 2px;
+        justify-content: center;
+        margin-top: 20px;
+    }
+
+    .cell {
+        width: 45px;
+        height: 45px;
+        background: white;
+        color: black;
+        font-size: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        user-select: none;
+        font-weight: bold;
+    }
+
+    #status {
+        margin-top: 20px;
+        font-size: 24px;
+    }
+</style>
+</head>
+<body>
+
+<h1>AI対戦ゲーム</h1>
+
+<div id="menu">
+    <button onclick="startGame(3,3)">3×3 丸罰ゲーム</button>
+    <!-- ここを 5,4 に変更しました -->
+    <button onclick="startGame(5,4)">5×5 4目並べ</button>
+    <button onclick="startGame(12,5)">12×12 五目並べ</button>
+</div>
+
+<div id="board"></div>
+<div id="status"></div>
+
+<script>
+let board = [];
+let size = 3;
+let winLength = 3;
+let gameOver = false;
+
+const boardDiv = document.getElementById("board");
+const statusDiv = document.getElementById("status");
+
+function startGame(s, w) {
+    size = s;
+    winLength = w;
+    gameOver = false;
+
+    board = [];
+    for(let y = 0; y < size; y++) {
+        board[y] = [];
+        for(let x = 0; x < size; x++) {
+            board[y][x] = "";
+        }
+    }
+
+    drawBoard();
+    statusDiv.textContent = "あなたの番です ○";
+}
+
+function drawBoard() {
+    boardDiv.innerHTML = "";
+    boardDiv.style.gridTemplateColumns = `repeat(${size}, 45px)`;
+
+    for(let y = 0; y < size; y++) {
+        for(let x = 0; x < size; x++) {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.textContent = board[y][x];
+            
+            if(board[y][x] === "○") cell.style.color = "blue";
+            if(board[y][x] === "×") cell.style.color = "red";
+
+            cell.onclick = () => playerMove(x, y);
+
+            boardDiv.appendChild(cell);
+        }
+    }
+}
+
+function playerMove(x, y) {
+    if(gameOver) return;
+    if(board[y][x] !== "") return;
+
+    board[y][x] = "○";
+    drawBoard();
+
+    if(checkWin("○")) {
+        statusDiv.textContent = "あなたの勝ち！";
+        gameOver = true;
+        return;
+    }
+
+    if(isFull()) {
+        statusDiv.textContent = "引き分け";
+        gameOver = true;
+        return;
+    }
+
+    statusDiv.textContent = "AIの番...";
+    setTimeout(aiMove, 300);
+}
+
+function aiMove() {
+    if(gameOver) return;
+
+    let bestScore = -Infinity;
+    let bestMoves = [];
+
+    for(let y = 0; y < size; y++) {
+        for(let x = 0; x < size; x++) {
+            if(board[y][x] === "") {
+                let score = evaluateCell(x, y);
+                if(score > bestScore) {
+                    bestScore = score;
+                    bestMoves = [{x, y}];
+                } else if (score === bestScore) {
+                    bestMoves.push({x, y});
+                }
+            }
+        }
+    }
+
+    if(bestMoves.length === 0) return;
+
+    const move = bestMoves[Math.floor(Math.random() * bestMoves.length)];
+
+    board[move.y][move.x] = "×";
+    drawBoard();
+
+    if(checkWin("×")) {
+        statusDiv.textContent = "AIの勝ち！";
+        gameOver = true;
+        return;
+    }
+
+    if(isFull()) {
+        statusDiv.textContent = "引き分け";
+        gameOver = true;
+        return;
+    }
+
+    statusDiv.textContent = "あなたの番です ○";
+}
+
+function evaluateCell(x, y) {
+    let score = 0;
+    
+    score += evaluateDirection(x, y, 1, 0);   
+    score += evaluateDirection(x, y, 0, 1);   
+    score += evaluateDirection(x, y, 1, 1);   
+    score += evaluateDirection(x, y, 1, -1);  
+
+    const centerX = (size - 1) / 2;
+    const centerY = (size - 1) / 2;
+    const distanceToCenter = Math.abs(x - centerX) + Math.abs(y - centerY);
+    score -= distanceToCenter; 
+
+    return score;
+}
+
+function evaluateDirection(x, y, dx, dy) {
+    let attackScore = 0;
+    let defenseScore = 0;
+
+    for(let offset = 0; offset < winLength; offset++) {
+        let startX = x - offset * dx;
+        let startY = y - offset * dy;
+        let endX = startX + (winLength - 1) * dx;
+        let endY = startY + (winLength - 1) * dy;
+
+        if(startX >= 0 && startX < size && startY >= 0 && startY < size &&
+           endX >= 0 && endX < size && endY >= 0 && endY < size) {
+            
+            let aiCount = 0;
+            let playerCount = 0;
+
+            for(let i = 0; i < winLength; i++) {
+                let cx = startX + i * dx;
+                let cy = startY + i * dy;
+                if(cx === x && cy === y) continue; 
+                
+                if(board[cy][cx] === "×") aiCount++;
+                else if(board[cy][cx] === "○") playerCount++;
+            }
+
+            if(aiCount > 0 && playerCount === 0) {
+                if(aiCount === winLength - 1) attackScore += 100000; 
+                else attackScore += Math.pow(10, aiCount);           
+            } else if (playerCount > 0 && aiCount === 0) {
+                if(playerCount === winLength - 1) defenseScore += 50000; 
+                else defenseScore += Math.pow(10, playerCount) * 1.5;    
+            }
+        }
+    }
+
+    return attackScore + defenseScore;
+}
+
+function isFull() {
+    for(let y = 0; y < size; y++) {
+        for(let x = 0; x < size; x++) {
+            if(board[y][x] === "") {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function checkWin(symbol) {
+    for(let y = 0; y < size; y++) {
+        for(let x = 0; x <= size - winLength; x++) {
+            let ok = true;
+            for(let i = 0; i < winLength; i++) {
+                if(board[y][x+i] !== symbol) {
+                    ok = false;
+                    break;
+                }
+            }
+            if(ok) return true;
+        }
+    }
+
+    for(let x = 0; x < size; x++) {
+        for(let y = 0; y <= size - winLength; y++) {
+            let ok = true;
+            for(let i = 0; i < winLength; i++) {
+                if(board[y+i][x] !== symbol) {
+                    ok = false;
+                    break;
+                }
+            }
+            if(ok) return true;
+        }
+    }
+
+    for(let y = 0; y <= size - winLength; y++) {
+        for(let x = 0; x <= size - winLength; x++) {
+            let ok = true;
+            for(let i = 0; i < winLength; i++) {
+                if(board[y+i][x+i] !== symbol) {
+                    ok = false;
+                    break;
+                }
+            }
+            if(ok) return true;
+        }
+    }
+
+    for(let y = 0; y <= size - winLength; y++) {
+        for(let x = winLength - 1; x < size; x++) {
+            let ok = true;
+            for(let i = 0; i < winLength; i++) {
+                if(board[y+i][x-i] !== symbol) {
+                    ok = false;
+                    break;
+                }
+            }
+            if(ok) return true;
+        }
+    }
+
+    return false;
+}
+
+startGame(3,3);
+</script>
+
+</body>
+</html>
