@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>カスタム・テトリス (マルチモード＆スマホ対応)</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #1a202c;
+            color: #fff;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .game-container {
+            display: flex;
+            gap: 15px;
+            background: #2d3748;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 110px;
+        }
+        .side-box {
+            background: #1a202c;
+            border: 2px solid #4a5568;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+        .side-title {
+            font-size: 11px;
+            color: #a0aec0;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .mode-select {
+            width: 100%;
+            padding: 5px;
+            background: #4a5568;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .record-value { font-size: 14px; font-weight: bold; color: #f6e05e; font-family: monospace; }
+        .stat-value { font-size: 16px; font-weight: bold; color: #e2e8f0; font-family: monospace; }
+        
+        canvas {
+            border: 4px solid #4a5568;
+            background: #111;
+            border-radius: 4px;
+        }
+        .btn-general {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            width: 100%;
+        }
+        .btn-general.on { background: #3182ce; }
+
+        .right-panels {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 260px;
+        }
+        .panel {
+            background: #2d3748;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        h2 { margin-top: 0; font-size: 16px; color: #cbd5e0; text-align: center; border-bottom: 2px solid #4a5568; padding-bottom: 5px; }
+        .key-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+        .key-btn {
+            background: #4a5568;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            min-width: 80px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+        .key-btn.waiting { background: #e53e3e; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.5; } }
+        
+        /* スマホ用コントローラーのスタイル */
+        .mobile-controls {
+            display: none;
+            width: 100%;
+            max-width: 400px;
+            background: #2d3748;
+            padding: 10px;
+            border-radius: 12px;
+            box-sizing: border-box;
+            gap: 10px;
+            flex-direction: column;
+        }
+        .mobile-controls.active {
+            display: flex;
+        }
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .m-btn {
+            background: #4a5568;
+            border: 2px solid #718096;
+            color: #fff;
+            flex: 1;
+            padding: 15px 0;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            touch-action: none; /* スマホでのズーム防止 */
+        }
+        .m-btn:active { background: #3182ce; }
+        .m-btn.btn-hard { background: #e53e3e; border-color: #fc8181; }
+        .m-btn.btn-hard:active { background: #c53030; }
+        
+        @media (max-width: 700px) {
+            .right-panels { width: 100%; max-width: 400px; }
+            .game-container { padding: 10px; gap: 10px; }
+            canvas { width: 100%; height: auto; max-width: 240px; }
+            #holdCanvas, #nextCanvas { max-width: 70px; }
+            .sidebar { width: 80px; }
+            .stat-value { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+    <div class="game-container">
+        <div class="sidebar">
+            <div class="side-box">
+                <div class="side-title">MODE</div>
+                <select id="gameMode" class="mode-select" onchange="updateRecordDisplay()">
+                    <option value="endless">エンドレス</option>
+                    <option value="20lines">20 ライン</option>
+                    <option value="40lines">40 ライン</option>
+                    <option value="100k">10万 スコア</option>
+                </select>
+            </div>
+            <div class="side-box">
+                <div class="side-title">BEST RECORD</div>
+                <div id="recordDisplay" class="record-value">-</div>
+            </div>
+            <div class="side-box">
+                <div class="side-title">HOLD</div>
+                <canvas id="holdCanvas" width="90" height="90"></canvas>
+            </div>
+            <div class="side-box">
+                <div class="side-title">SCORE</div>
+                <div id="scoreDisplay" class="stat-value">0</div>
+            </div>
+            <div class="side-box">
+                <div class="side-title">LINES</div>
+                <div id="linesDisplay" class="stat-value">0</div>
+            </div>
+            <div class="side-box">
+                <div class="side-title">TIME</div>
+                <div id="timeDisplay" class="stat-value">00:00.00</div>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas" width="300" height="600"></canvas>
+
+        <div class="sidebar">
+            <div class="side-box">
+                <div class="side-title">NEXT</div>
+                <canvas id="nextCanvas" width="90" height="340"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- スマホ操作パネル -->
+    <div id="mobileControls" class="mobile-controls">
+        <div class="control-row">
+            <button class="m-btn" data-action="hold">HOLD</button>
+            <button class="m-btn btn-hard" data-action="hardDrop">HARD ↑</button>
+            <button class="m-btn" data-action="restart">🔄</button>
+        </div>
+        <div class="control-row">
+            <button class="m-btn" data-action="moveLeft">◀</button>
+            <button class="m-btn" data-action="softDrop">SOFT ▼</button>
+            <button class="m-btn" data-action="moveRight">▶</button>
+        </div>
+        <div class="control-row">
+            <button class="m-btn" data-action="rotateCCW">↺ 左回転</button>
+            <button class="m-btn" data-action="rotateCW">右回転 ↻</button>
+        </div>
+    </div>
+</div>
+
+<div class="right-panels">
+    <div class="panel">
+        <h2>🛠️ オプション</h2>
+        <button id="soundToggle" class="btn-general" onclick="toggleSound()" style="margin-bottom:10px;">🎵 音声: OFF</button>
+        <button id="mobileToggle" class="btn-general" onclick="toggleMobileControls()">📱 スマホ操作切替: OFF</button>
+    </div>
+
+    <div class="panel">
+        <h2>⌨️ 操作設定</h2>
+        <div id="configList"></div>
+    </div>
+</div>
+
+<script>
+    const COLS = 10;
+    const ROWS = 20;
+    const BLOCK_SIZE = 30;
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const holdCanvas = document.getElementById("holdCanvas");
+    const holdCtx = holdCanvas.getContext("2d");
+    const nextCanvas = document.getElementById("nextCanvas");
+    const nextCtx = nextCanvas.getContext("2d");
+
+    const SHAPES = {
+        I: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+        O: [[2,2],[2,2]],
+        S: [[0,3,3],[3,3,0],[0,0,0]],
+        Z: [[4,4,0],[0,4,4],[0,0,0]],
+        J: [[5,0,0],[5,5,5],[0,0,0]],
+        L: [[0,0,6],[6,6,6],[0,0,0]],
+        T: [[0,7,0],[7,7,7],[0,0,0]]
+    };
+
+    const COLORS = [null, "#00f0f0", "#f0f000", "#00f000", "#f00000", "#0000f0", "#f0a000", "#a000f0"];
+
+    // キー設定
+    const DEFAULT_KEYS = {
+        moveLeft:  { label: "左に移動", key: "ArrowLeft" },
+        moveRight: { label: "右に移動", key: "ArrowRight" },
+        softDrop:  { label: "ソフトドロップ", key: "ArrowDown" },
+        hardDrop:  { label: "ハードドロップ", key: "Space" },
+        rotateCW:  { label: "右回転", key: "KeyX" },
+        rotateCCW: { label: "左回転", key: "KeyZ" },
+        hold:      { label: "ホールド", key: "ShiftLeft" },
+        restart:   { label: "リスタート", key: "KeyR" }
+    };
+    let keySettings = JSON.parse(localStorage.getItem("tetris_keys_v2")) || DEFAULT_KEYS;
+
+    // ★ セーブデータ (最高記録)
+    let records = JSON.parse(localStorage.getItem("tetris_records_v1")) || {
+        endless: { score: 0 },
+        "20lines": { time: Infinity },
+        "40lines": { time: Infinity },
+        "100k": { time: Infinity }
+    };
+
+    let keyStates = {};
+    let keyCooldowns = {};
+    let keyPressTimers = { moveLeft: 0, moveRight: 0 };
+    let keyRepeatTimers = { moveLeft: 0, moveRight: 0 };
+    const DAS_DELAY = 160; 
+    const ARR_SPEED = 40;  
+
+    let audioCtx = null;
+    let isSoundOn = false;
+    let isMobileControlsOn = false;
+
+    let gameState = "startScreen";
+    let grid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+    let bag = [];
+    let nextPieces = [];
+    let currentPiece = null;
+    let holdPiece = null;
+    let hasHeld = false;
+    
+    let score = 0;
+    let totalLines = 0;
+    let startTime = 0;
+    let timeElapsed = 0;
+
+    let lastDropTime = 0;
+    let lastSoftDropTime = 0;
+    let waitingKeyAction = null;
+    let lastMoveWasRotation = false; 
+
+    let actionText = "";
+    let actionTextTimer = 0;
+
+    let lockDelayTimeout = 0;
+    let isTouchingFloor = false;
+    let lockResetCount = 0;
+    let isSoftDroppingTouch = false;
+    const MAX_LOCK_RESETS = 15;
+
+    // --- レコード表示処理 ---
+    function formatTime(ms) {
+        if (ms === Infinity) return "-";
+        const m = Math.floor(ms / 60000).toString().padStart(2, '0');
+        const s = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+        const msec = Math.floor((ms % 1000) / 10).toString().padStart(2, '0');
+        return `${m}:${s}.${msec}`;
+    }
+
+    function updateRecordDisplay() {
+        const mode = document.getElementById("gameMode").value;
+        const display = document.getElementById("recordDisplay");
+        if (mode === "endless") {
+            display.textContent = records.endless.score > 0 ? records.endless.score : "-";
+        } else {
+            display.textContent = formatTime(records[mode].time);
+        }
+    }
+
+    function saveRecord(mode, currentScore, currentTime) {
+        let isNewRecord = false;
+        if (mode === "endless") {
+            if (currentScore > records.endless.score) {
+                records.endless.score = currentScore;
+                isNewRecord = true;
+            }
+        } else {
+            if (currentTime < records[mode].time) {
+                records[mode].time = currentTime;
+                isNewRecord = true;
+            }
+        }
+        
+        if (isNewRecord) {
+            localStorage.setItem("tetris_records_v1", JSON.stringify(records));
+            updateRecordDisplay();
+        }
+        return isNewRecord;
+    }
+
+    function getKeyLabel(key) {
+        if (key === " ") return "Space";
+        if (key === "ArrowUp") return "↑";
+        if (key === "ArrowDown") return "↓";
+        if (key === "ArrowLeft") return "←";
+        if (key === "ArrowRight") return "→";
+        if (key.startsWith("Key")) return key.replace("Key", "");
+        if (key.startsWith("Shift")) return "Shift";
+        return key;
+    }
+
+    // --- 音声関連 (略) ---
+    function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    function playSound(type) { /* Previous sound logic */ }
+    function startBGM() { /* Previous BGM logic */ }
+    function stopBGM() { /* Previous BGM logic */ }
+    function toggleSound() {
+        initAudio();
+        isSoundOn = !isSoundOn;
+        const btn = document.getElementById("soundToggle");
+        if (isSoundOn) {
+            btn.textContent = "🎵 音声: ON";
+            btn.classList.add("on");
+        } else {
+            btn.textContent = "🎵 音声: OFF";
+            btn.classList.remove("on");
+        }
+    }
+
+    // --- スマホ操作切替 ---
+    function toggleMobileControls() {
+        isMobileControlsOn = !isMobileControlsOn;
+        const btn = document.getElementById("mobileToggle");
+        const panel = document.getElementById("mobileControls");
+        if (isMobileControlsOn) {
+            btn.textContent = "📱 スマホ操作: ON";
+            btn.classList.add("on");
+            panel.classList.add("active");
+        } else {
+            btn.textContent = "📱 スマホ操作: OFF";
+            btn.classList.remove("on");
+            panel.classList.remove("active");
+        }
+    }
+
+    // スマホタッチイベントの登録
+    document.querySelectorAll('.m-btn').forEach(btn => {
+        const action = btn.getAttribute('data-action');
+        
+        // タッチ開始・マウスダウン
+        const press = (e) => {
+            e.preventDefault(); // デフォルトの動作(スクロール等)を防止
+            
+            // startScreen等でのアクション代用
+            if (action === "hardDrop" || action === "restart") {
+                if (gameState === "startScreen" || gameState === "gameOver" || gameState === "gameClear") {
+                    startGame();
+                    return;
+                }
+            }
+            keyStates[action] = true;
+        };
+        
+        // タッチ終了・マウスアップ
+        const release = (e) => {
+            e.preventDefault();
+            keyStates[action] = false;
+            keyCooldowns[action] = false;
+        };
+
+        btn.addEventListener('touchstart', press, {passive: false});
+        btn.addEventListener('touchend', release, {passive: false});
+        btn.addEventListener('mousedown', press);
+        btn.addEventListener('mouseup', release);
+        btn.addEventListener('mouseleave', release);
+    });
+
+    // --- ゲームロジック ---
+    function showActionPopup(text) { actionText = text; actionTextTimer = 80; }
+    function generateBag() {
+        const types = ['I', 'O', 'S', 'Z', 'J', 'L', 'T'];
+        for (let i = types.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [types[i], types[j]] = [types[j], types[i]];
+        }
+        return types;
+    }
+    function getNextPieceType() { if (bag.length === 0) bag = generateBag(); return bag.pop(); }
+    function fillNextPieces() { while (nextPieces.length < 5) nextPieces.push(getNextPieceType()); }
+    function createPiece(type) {
+        const shape = SHAPES[type];
+        return {
+            type: type, shape: JSON.parse(JSON.stringify(shape)), 
+            x: Math.floor((COLS - shape[0].length) / 2), y: type === 'I' ? -1 : 0,
+            colorIndex: Object.keys(SHAPES).indexOf(type) + 1, rotationState: 0
+        };
+    }
+
+    function validPosition() {
+        for (let r = 0; r < currentPiece.shape.length; r++) {
+            for (let c = 0; c < currentPiece.shape[r].length; c++) {
+                if (currentPiece.shape[r][c]) {
+                    let nx = currentPiece.x + c, ny = currentPiece.y + r;
+                    if (nx < 0 || nx >= COLS || ny >= ROWS) return false;
+                    if (ny >= 0 && grid[ny][nx]) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    function checkFloorTouch() {
+        currentPiece.y++;
+        const touched = !validPosition();
+        currentPiece.y--;
+        return touched;
+    }
+
+    function resetLockDelay(timestamp) {
+        if (isTouchingFloor && lockResetCount < MAX_LOCK_RESETS) {
+            lockDelayTimeout = timestamp;
+            lockResetCount++;
+        }
+    }
+
+    function rotatePiece(dir, timestamp) {
+        if (currentPiece.type === 'O') return;
+        const shape = currentPiece.shape;
+        const N = shape.length;
+        let rotated = Array.from({length: N}, () => Array(N).fill(0));
+        
+        if (dir === 1) {
+            for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) rotated[c][N - 1 - r] = shape[r][c];
+        } else {
+            for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) rotated[N - 1 - c][r] = shape[r][c];
+        }
+
+        const oldShape = currentPiece.shape, oldX = currentPiece.x, oldY = currentPiece.y, oldState = currentPiece.rotationState;
+        const newState = (oldState + dir + 4) % 4;
+
+        currentPiece.shape = rotated; currentPiece.rotationState = newState;
+
+        const transition = `${oldState}_${newState}`;
+        let kicks = currentPiece.type === 'I' ? 
+            {'0_1':[[0,0],[-2,0],[1,0],[-2,1],[1,-2]], '1_0':[[0,0],[2,0],[-1,0],[2,-1],[-1,2]], '1_2':[[0,0],[-1,0],[2,0],[-1,-2],[2,1]], '2_1':[[0,0],[1,0],[-2,0],[1,2],[-2,-1]], '2_3':[[0,0],[2,0],[-1,0],[2,-1],[-1,2]], '3_2':[[0,0],[-2,0],[1,0],[-2,1],[1,-2]], '3_0':[[0,0],[1,0],[-2,0],[1,2],[-2,-1]], '0_3':[[0,0],[-1,0],[2,0],[-1,-2],[2,1]]}[transition] :
+            {'0_1':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]], '1_0':[[0,0],[1,0],[1,1],[0,-2],[1,-2]], '1_2':[[0,0],[1,0],[1,1],[0,-2],[1,-2]], '2_1':[[0,0],[-1,0],[-1,-1],[0,2],[-1,2]], '2_3':[[0,0],[1,0],[1,-1],[0,2],[1,2]], '3_2':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]], '3_0':[[0,0],[-1,0],[-1,1],[0,-2],[-1,-2]], '0_3':[[0,0],[1,0],[1,-1],[0,2],[1,2]]}[transition];
+
+        let success = false;
+        for (let offset of kicks) {
+            currentPiece.x = oldX + offset[0]; currentPiece.y = oldY + offset[1];
+            if (validPosition()) { success = true; break; }
+        }
+
+        if (!success) {
+            currentPiece.shape = oldShape; currentPiece.rotationState = oldState; currentPiece.x = oldX; currentPiece.y = oldY;
+        } else {
+            resetLockDelay(timestamp);
+            lastMoveWasRotation = true; 
+        }
+    }
+
+    function lockPiece() {
+        for (let r = 0; r < currentPiece.shape.length; r++) {
+            for (let c = 0; c < currentPiece.shape[r].length; c++) {
+                if (currentPiece.shape[r][c]) {
+                    if (currentPiece.y + r < 0) { triggerGameOver(); return; }
+                    grid[currentPiece.y + r][currentPiece.x + c] = currentPiece.colorIndex;
+                }
+            }
+        }
+        clearLines();
+        
+        if (checkWinCondition()) {
+            triggerGameClear();
+            return;
+        }
+
+        spawnNext();
+        hasHeld = false; isTouchingFloor = false; isSoftDroppingTouch = false; lockResetCount = 0;
+    }
+
+    function clearLines() {
+        let linesCleared = 0;
+        for (let r = ROWS - 1; r >= 0; r--) {
+            if (grid[r].every(val => val > 0)) {
+                grid.splice(r, 1); grid.unshift(Array(COLS).fill(0)); linesCleared++; r++;
+            }
+        }
+        if (linesCleared > 0) {
+            const scoreTable = [0, 100, 300, 500, 800];
+            score += scoreTable[linesCleared];
+            totalLines += linesCleared;
+            if(linesCleared === 4) showActionPopup("TETRIS!");
+            document.getElementById("scoreDisplay").textContent = score;
+            document.getElementById("linesDisplay").textContent = totalLines;
+        }
+    }
+
+    function checkWinCondition() {
+        const mode = document.getElementById("gameMode").value;
+        if (mode === "20lines" && totalLines >= 20) return true;
+        if (mode === "40lines" && totalLines >= 40) return true;
+        if (mode === "100k" && score >= 100000) return true;
+        return false;
+    }
+
+    function spawnNext() {
+        currentPiece = createPiece(nextPieces.shift());
+        fillNextPieces();
+        lastMoveWasRotation = false;
+        if (!validPosition()) triggerGameOver();
+    }
+
+    function handleHold() {
+        if (hasHeld) return;
+        const temp = currentPiece.type;
+        if (holdPiece === null) { holdPiece = temp; spawnNext(); } 
+        else { currentPiece = createPiece(holdPiece); holdPiece = temp; lastMoveWasRotation = false; }
+        hasHeld = true; isTouchingFloor = false; isSoftDroppingTouch = false; lockResetCount = 0;
+        drawSingleSideCanvas(holdPiece, holdCtx, holdCanvas);
+    }
+
+    function updateInput(timestamp) {
+        if (gameState !== "playing" || waitingKeyAction) return;
+
+        if (keyStates["restart"] && !keyCooldowns["restart"]) {
+            keyCooldowns["restart"] = true; startGame(); return;
+        }
+
+        ['moveLeft', 'moveRight'].forEach(action => {
+            if (keyStates[action]) {
+                if (keyPressTimers[action] === 0) {
+                    keyPressTimers[action] = timestamp;
+                    currentPiece.x += action === 'moveLeft' ? -1 : 1;
+                    if (!validPosition()) currentPiece.x -= action === 'moveLeft' ? -1 : 1;
+                    else { resetLockDelay(timestamp); lastMoveWasRotation = false; }
+                } else if (timestamp - keyPressTimers[action] >= DAS_DELAY && timestamp - keyRepeatTimers[action] > ARR_SPEED) {
+                    currentPiece.x += action === 'moveLeft' ? -1 : 1;
+                    if (!validPosition()) currentPiece.x -= action === 'moveLeft' ? -1 : 1;
+                    else { resetLockDelay(timestamp); lastMoveWasRotation = false; }
+                    keyRepeatTimers[action] = timestamp;
+                }
+            } else { keyPressTimers[action] = 0; keyRepeatTimers[action] = 0; }
+        });
+
+        if (keyStates["softDrop"]) {
+            if (timestamp - lastSoftDropTime > 60) {
+                currentPiece.y++;
+                if (!validPosition()) {
+                    currentPiece.y--; isSoftDroppingTouch = true;
+                    if (!isTouchingFloor) { isTouchingFloor = true; lockDelayTimeout = timestamp; }
+                } else { isTouchingFloor = false; isSoftDroppingTouch = false; lastMoveWasRotation = false; }
+                lastSoftDropTime = timestamp;
+            }
+        }
+
+        if (keyStates["rotateCW"] && !keyCooldowns["rotateCW"]) { rotatePiece(1, timestamp); keyCooldowns["rotateCW"] = true; }
+        if (keyStates["rotateCCW"] && !keyCooldowns["rotateCCW"]) { rotatePiece(-1, timestamp); keyCooldowns["rotateCCW"] = true; }
+        if (keyStates["hold"] && !keyCooldowns["hold"]) { handleHold(); keyCooldowns["hold"] = true; }
+        if (keyStates["hardDrop"] && !keyCooldowns["hardDrop"]) {
+            let startY = currentPiece.y;
+            while (validPosition()) currentPiece.y++;
+            currentPiece.y--;
+            if (currentPiece.y !== startY) lastMoveWasRotation = false;
+            lockPiece();
+            keyCooldowns["hardDrop"] = true;
+        }
+    }
+
+    // --- 描画処理 ---
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                if (grid[r][c]) drawBlock(ctx, c, r, COLORS[grid[r][c]]);
+            }
+        }
+
+        if ((gameState === "playing" || gameState === "gameClear") && currentPiece) {
+            let ghostY = currentPiece.y;
+            while (validPosition()) currentPiece.y++;
+            currentPiece.y--;
+            const finalY = currentPiece.y; currentPiece.y = ghostY;
+
+            for (let r = 0; r < currentPiece.shape.length; r++) {
+                for (let c = 0; c < currentPiece.shape[r].length; c++) {
+                    if (currentPiece.shape[r][c]) {
+                        ctx.fillStyle = "rgba(255,255,255,0.2)";
+                        ctx.fillRect((currentPiece.x + c) * BLOCK_SIZE, (finalY + r) * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+                        drawBlock(ctx, currentPiece.x + c, currentPiece.y + r, COLORS[currentPiece.colorIndex]);
+                    }
+                }
+            }
+        }
+
+        ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
+        if (gameState === "startScreen") {
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#3182ce"; ctx.font = "bold 24px Arial"; ctx.fillText("TETRIS", canvas.width/2 - 45, canvas.height/2 - 40);
+            ctx.fillStyle = "#fff"; ctx.font = "14px Arial"; ctx.fillText("[Space] でスタート", canvas.width/2 - 65, canvas.height/2 + 10);
+        } else if (gameState === "gameOver" || gameState === "gameClear") {
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = gameState === "gameClear" ? "#f6e05e" : "#e53e3e";
+            ctx.font = "bold 26px Arial"; ctx.fillText(gameState === "gameClear" ? "CLEAR!" : "GAME OVER", canvas.width/2 - 65, canvas.height/2 - 40);
+            ctx.fillStyle = "#fff"; ctx.font = "bold 16px Arial";
+            ctx.fillText(`SCORE: ${score}`, canvas.width/2 - 45, canvas.height/2 + 5);
+            ctx.font = "12px Arial"; ctx.fillStyle = "#a0aec0";
+            ctx.fillText(`[Space] でリスタート`, canvas.width/2 - 65, canvas.height/2 + 45);
+        }
+    }
+
+    function drawBlock(context, x, y, color) {
+        if (y < 0) return;
+        context.fillStyle = color;
+        context.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+        context.strokeStyle = "rgba(0,0,0,0.15)";
+        context.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+    }
+
+    function drawSingleSideCanvas(type, sideCtx, sideCanvas) {
+        sideCtx.clearRect(0, 0, sideCanvas.width, sideCanvas.height);
+        if (!type) return;
+        const shape = SHAPES[type], color = COLORS[Object.keys(SHAPES).indexOf(type) + 1], size = 18;
+        const offsetX = (sideCanvas.width - shape[0].length * size) / 2, offsetY = (sideCanvas.height - shape.length * size) / 2;
+        for (let r = 0; r < shape.length; r++) for (let c = 0; c < shape[r].length; c++) 
+            if (shape[r][c]) { sideCtx.fillStyle = color; sideCtx.fillRect(offsetX + c * size, offsetY + r * size, size - 1, size - 1); }
+    }
+
+    function drawNextCanvasArray(types, sideCtx, sideCanvas) {
+        sideCtx.clearRect(0, 0, sideCanvas.width, sideCanvas.height);
+        const size = 18;
+        for (let i = 0; i < types.length; i++) {
+            if (!types[i]) continue;
+            const shape = SHAPES[types[i]], color = COLORS[Object.keys(SHAPES).indexOf(types[i]) + 1];
+            const offsetX = (sideCanvas.width - shape[0].length * size) / 2, offsetY = 15 + i * 65;
+            for (let r = 0; r < shape.length; r++) for (let c = 0; c < shape[r].length; c++)
+                if (shape[r][c]) { sideCtx.fillStyle = color; sideCtx.fillRect(offsetX + c * size, offsetY + r * size, size - 1, size - 1); }
+        }
+    }
+
+    // --- ゲーム進行制御 ---
+    function updateTimerDisplay() {
+        if (gameState === "playing") timeElapsed = Date.now() - startTime;
+        document.getElementById("timeDisplay").textContent = formatTime(timeElapsed);
+    }
+
+    function startGame() {
+        document.getElementById("gameMode").blur();
+        grid = Array.from({length: ROWS}, () => Array(COLS).fill(0));
+        bag = generateBag(); nextPieces = []; fillNextPieces();
+        currentPiece = createPiece(nextPieces.shift()); fillNextPieces();
+        holdPiece = null; hasHeld = false;
+        score = 0; totalLines = 0;
+        document.getElementById("scoreDisplay").textContent = score;
+        document.getElementById("linesDisplay").textContent = totalLines;
+        drawSingleSideCanvas(null, holdCtx, holdCanvas);
+        
+        isTouchingFloor = false; isSoftDroppingTouch = false; lockResetCount = 0; lastMoveWasRotation = false;
+        startTime = Date.now(); timeElapsed = 0; updateTimerDisplay();
+        gameState = "playing";
+    }
+
+    function triggerGameOver() {
+        gameState = "gameOver";
+        const mode = document.getElementById("gameMode").value;
+        if (mode === "endless") saveRecord(mode, score, timeElapsed);
+    }
+
+    function triggerGameClear() {
+        gameState = "gameClear";
+        timeElapsed = Date.now() - startTime; 
+        const mode = document.getElementById("gameMode").value;
+        saveRecord(mode, score, timeElapsed);
+    }
+
+    function gameLoop(timestamp) {
+        if (!lastDropTime) lastDropTime = timestamp;
+        updateInput(timestamp); updateTimerDisplay();
+
+        if (gameState === "playing" && !waitingKeyAction) {
+            const currentlyTouching = checkFloorTouch();
+            if (currentlyTouching) {
+                if (!isTouchingFloor) { isTouchingFloor = true; lockDelayTimeout = timestamp; } 
+                else if (timestamp - lockDelayTimeout > (isSoftDroppingTouch ? 3000 : 7000)) lockPiece();
+            } else { isTouchingFloor = false; isSoftDroppingTouch = false; }
+
+            if (!currentlyTouching && timestamp - lastDropTime > 2000) { moveDown(); lastDropTime = timestamp; }
+        }
+
+        draw();
+        if (nextPieces.length > 0) drawNextCanvasArray(nextPieces, nextCtx, nextCanvas);
+        requestAnimationFrame(gameLoop);
+    }
+
+    function moveDown() {
+        currentPiece.y++;
+        if (!validPosition()) { currentPiece.y--; if (!isTouchingFloor) isTouchingFloor = true; } 
+        else { isTouchingFloor = false; lastMoveWasRotation = false; }
+    }
+
+    // --- キーコンフィグUI ---
+    function initKeyConfigUI() {
+        const container = document.getElementById("configList");
+        container.innerHTML = "";
+        Object.keys(keySettings).forEach(action => {
+            const row = document.createElement("div"); row.className = "key-row";
+            const label = document.createElement("span"); label.textContent = keySettings[action].label;
+            const btn = document.createElement("button"); btn.className = "key-btn"; btn.id = `btn-${action}`;
+            btn.textContent = getKeyLabel(keySettings[action].key);
+            btn.onclick = () => startWaitingForKey(action);
+            row.appendChild(label); row.appendChild(btn); container.appendChild(row);
+        });
+    }
+
+    function startWaitingForKey(action) {
+        keyStates = {}; waitingKeyAction = action; initKeyConfigUI();
+        const btn = document.getElementById(`btn-${action}`);
+        btn.textContent = "入力待..."; btn.classList.add("waiting");
+    }
+
+    function getActionFromCode(code, key) {
+        for (let action in keySettings) {
+            if (keySettings[action].key === code) return action;
+            if (keySettings[action].key === "Space" && key === " ") return action;
+        }
+        return null;
+    }
+
+    window.addEventListener("keydown", (e) => {
+        if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code) || e.key === " ") {
+            if (e.target.tagName !== 'SELECT') e.preventDefault();
+        }
+        if (waitingKeyAction) {
+            let pressedKey = e.code; if (pressedKey === "Space" || e.key === " ") pressedKey = "Space";
+            keySettings[waitingKeyAction].key = pressedKey;
+            localStorage.setItem("tetris_keys_v2", JSON.stringify(keySettings));
+            waitingKeyAction = null; initKeyConfigUI(); return;
+        }
+
+        const action = getActionFromCode(e.code, e.key);
+        if (action === "restart" && gameState !== "startScreen") { keyStates["restart"] = true; return; }
+        if ((e.code === "Space" || e.key === " ") && (gameState === "startScreen" || gameState === "gameOver" || gameState === "gameClear")) {
+            startGame(); return;
+        }
+        if (action) keyStates[action] = true;
+    });
+
+    window.addEventListener("keyup", (e) => {
+        const action = getActionFromCode(e.code, e.key);
+        if (action) { keyStates[action] = false; keyCooldowns[action] = false; }
+    });
+
+    updateRecordDisplay();
+    initKeyConfigUI();
+    requestAnimationFrame(gameLoop);
+</script>
+
+</body>
+</html>
