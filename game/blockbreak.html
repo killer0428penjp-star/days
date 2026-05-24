@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ブロック崩し - 10 Stages</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #121212;
+        color: #ffffff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        overflow: hidden;
+        touch-action: none; /* スマホでのスクロール防止 */
+    }
+
+    #game-container {
+        position: relative;
+        box-shadow: 0 0 30px rgba(0,0,0,1);
+        background-color: #1e1e1e;
+        border: 2px solid #444;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    canvas {
+        display: block;
+    }
+
+    /* UIレイヤーのベース設定 */
+    #ui-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        backdrop-filter: blur(3px); /* 背景を少しぼかす */
+    }
+
+    /* メニュー画面とメッセージ画面の中央揃え */
+    #menu-screen, #message-screen {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        text-align: center;
+    }
+
+    h1 {
+        margin: 0 0 10px 0;
+        font-size: 32px;
+        letter-spacing: 3px;
+        color: #f1f2f6;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    p {
+        margin: 0 0 25px 0;
+        font-size: 14px;
+        color: #a4b0be;
+        letter-spacing: 1px;
+    }
+
+    /* ボタンのレイアウトを綺麗に縦並びに */
+    .button-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* ボタン同士の隙間 */
+        width: 200px;
+    }
+
+    .btn {
+        background-color: #2f3542;
+        color: #ffffff;
+        border: 1px solid #57606f;
+        padding: 15px 0;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .btn:hover {
+        background-color: #f1f2f6;
+        color: #2f3542;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* 上部のステータスバー */
+    #hud {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 400px;
+        padding: 12px 20px;
+        box-sizing: border-box;
+        background-color: #000000;
+        border: 2px solid #444;
+        border-bottom: none;
+        border-radius: 4px 4px 0 0;
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        color: #dfe4ea;
+    }
+</style>
+</head>
+<body>
+
+<!-- ステータスバー（残機表示を削除） -->
+<div id="hud">
+    <span id="score-display">SCORE: 0</span>
+    <span id="level-display">STAGE: 1</span>
+</div>
+
+<div id="game-container">
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+    
+    <div id="ui-layer">
+        <!-- タイトル・メニュー画面 -->
+        <div id="menu-screen">
+            <h1>BLOCK BREAKER</h1>
+            <p>SELECT DIFFICULTY</p>
+            <div class="button-group">
+                <button class="btn" onclick="startGame('easy')">EASY</button>
+                <button class="btn" onclick="startGame('normal')">NORMAL</button>
+                <button class="btn" onclick="startGame('hard')">HARD</button>
+            </div>
+        </div>
+
+        <!-- ゲームオーバー / クリア 画面 -->
+        <div id="message-screen" class="hidden">
+            <h1 id="message-title" style="color: #ff4757;">GAME OVER</h1>
+            <p id="final-score">SCORE: 0</p>
+            <div class="button-group">
+                <button class="btn" onclick="showMenu()">MENU</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const uiLayer = document.getElementById("ui-layer");
+    const menuScreen = document.getElementById("menu-screen");
+    const messageScreen = document.getElementById("message-screen");
+    const messageTitle = document.getElementById("message-title");
+    const finalScore = document.getElementById("final-score");
+
+    const scoreDisplay = document.getElementById("score-display");
+    const levelDisplay = document.getElementById("level-display");
+
+    let animationId;
+    let gameState = "menu"; // menu, playing, gameover, clear
+    let difficultySettings = {
+        easy: { speed: 3.5, paddleWidth: 100 },
+        normal: { speed: 5.5, paddleWidth: 75 },
+        hard: { speed: 7.5, paddleWidth: 50 }
+    };
+    let currentDifficulty = 'normal';
+
+    let score = 0;
+    let currentLevel = 0;
+    
+    let paddle = { x: 160, y: 470, width: 75, height: 10 };
+    let ball = { x: 200, y: 450, dx: 0, dy: 0, radius: 6 };
+
+    const brickRowCount = 6;
+    const brickColumnCount = 8;
+    const brickWidth = 44;
+    const brickHeight = 20;
+    const brickPadding = 5;
+    const brickOffsetTop = 50;
+    const brickOffsetLeft = 9;
+    let bricks = [];
+
+    // マップデータ (0:空, 1:通常, 2:硬いブロック(2回), 3:超硬い(3回))
+    const maps = [
+        [ [1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1], [0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0] ],
+        [ [1,0,1,0,1,0,1,0], [0,1,0,1,0,1,0,1], [1,0,1,0,1,0,1,0], [0,1,0,1,0,1,0,1], [0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0] ],
+        [ [2,0,0,0,0,0,0,2], [1,0,0,0,0,0,0,1], [1,1,0,0,0,0,1,1], [1,1,1,0,0,1,1,1], [1,1,1,1,1,1,1,1], [0,0,0,0,0,0,0,0] ],
+        [ [0,0,0,2,2,0,0,0], [0,0,1,1,1,1,0,0], [0,1,1,1,1,1,1,0], [1,1,1,1,1,1,1,1], [0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0] ],
+        [ [2,2,2,2,2,2,2,2], [0,0,0,0,0,0,0,0], [1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1], [0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0] ],
+        [ [0,1,0,2,2,0,1,0], [1,1,1,1,1,1,1,1], [1,0,1,1,1,1,0,1], [1,1,0,0,0,0,1,1], [0,1,1,0,0,1,1,0], [0,0,0,0,0,0,0,0] ],
+        [ [2,0,0,1,1,0,0,2], [0,2,0,1,1,0,2,0], [0,0,2,1,1,2,0,0], [0,0,0,2,2,0,0,0], [0,0,2,1,1,2,0,0], [0,2,0,1,1,0,2,0] ],
+        [ [3,3,3,3,3,3,3,3], [2,2,2,2,2,2,2,2], [1,1,1,1,1,1,1,1], [1,1,1,1,1,1,1,1], [0,0,0,0,0,0,0,0], [0,0,0,0,0,0,0,0] ],
+        [ [3,0,2,0,3,0,2,0], [0,1,0,1,0,1,0,1], [2,0,3,0,2,0,3,0], [0,1,0,1,0,1,0,1], [1,0,1,0,1,0,1,0], [0,0,0,0,0,0,0,0] ],
+        [ [3,3,3,3,3,3,3,3], [3,0,2,2,2,2,0,3], [3,2,1,1,1,1,2,3], [3,2,1,0,0,1,2,3], [3,0,2,2,2,2,0,3], [3,3,3,3,3,3,3,3] ]
+    ];
+
+    function initBricks() {
+        bricks = [];
+        let map = maps[currentLevel];
+        for(let c=0; c<brickColumnCount; c++) {
+            bricks[c] = [];
+            for(let r=0; r<brickRowCount; r++) {
+                let status = map[r][c];
+                bricks[c][r] = { x: 0, y: 0, status: status };
+            }
+        }
+    }
+
+    function showMenu() {
+        cancelAnimationFrame(animationId);
+        uiLayer.classList.remove("hidden");
+        menuScreen.classList.remove("hidden");
+        messageScreen.classList.add("hidden");
+        gameState = "menu";
+    }
+
+    function startGame(difficulty) {
+        currentDifficulty = difficulty;
+        paddle.width = difficultySettings[difficulty].paddleWidth;
+        score = 0;
+        currentLevel = 0;
+        startLevel();
+        
+        uiLayer.classList.add("hidden");
+        menuScreen.classList.add("hidden");
+        messageScreen.classList.add("hidden");
+        gameState = "playing";
+        gameLoop();
+    }
+
+    function startLevel() {
+        initBricks();
+        resetBall();
+        updateHUD();
+    }
+
+    function resetBall() {
+        paddle.x = (canvas.width - paddle.width) / 2;
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height - 40;
+        let speed = difficultySettings[currentDifficulty].speed;
+        ball.dx = speed * (Math.random() > 0.5 ? 1 : -1) * 0.7; 
+        ball.dy = -speed;
+    }
+
+    function updateHUD() {
+        scoreDisplay.innerText = "SCORE: " + score;
+        levelDisplay.innerText = "STAGE: " + (currentLevel + 1);
+    }
+
+    function movePaddle(e) {
+        if (gameState !== "playing") return;
+        e.preventDefault(); 
+        
+        let clientX;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+        } else {
+            clientX = e.clientX;
+        }
+
+        let rect = canvas.getBoundingClientRect();
+        let relativeX = clientX - rect.left;
+
+        if(relativeX > 0 && relativeX < canvas.width) {
+            paddle.x = relativeX - paddle.width / 2;
+            if (paddle.x < 0) paddle.x = 0;
+            if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
+        }
+    }
+
+    canvas.addEventListener("mousemove", movePaddle, false);
+    canvas.addEventListener("touchmove", movePaddle, { passive: false });
+
+    function collisionDetection() {
+        let activeBricks = 0;
+        for(let c=0; c<brickColumnCount; c++) {
+            for(let r=0; r<brickRowCount; r++) {
+                let b = bricks[c][r];
+                if(b.status > 0) {
+                    activeBricks++;
+                    if(ball.x > b.x && ball.x < b.x + brickWidth && ball.y > b.y && ball.y < b.y + brickHeight) {
+                        ball.dy = -ball.dy;
+                        b.status--;
+                        score += 10;
+                        updateHUD();
+                    }
+                }
+            }
+        }
+
+        if(activeBricks === 0) {
+            currentLevel++;
+            if(currentLevel >= maps.length) {
+                gameEnd("ALL STAGES CLEAR!", "#2ed573");
+            } else {
+                startLevel();
+            }
+        }
+    }
+
+    function drawBall() {
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function drawPaddle() {
+        ctx.beginPath();
+        ctx.rect(paddle.x, paddle.y, paddle.width, paddle.height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    function drawBricks() {
+        for(let c=0; c<brickColumnCount; c++) {
+            for(let r=0; r<brickRowCount; r++) {
+                if(bricks[c][r].status > 0) {
+                    let brickX = (c*(brickWidth+brickPadding)) + brickOffsetLeft;
+                    let brickY = (r*(brickHeight+brickPadding)) + brickOffsetTop;
+                    bricks[c][r].x = brickX;
+                    bricks[c][r].y = brickY;
+                    ctx.beginPath();
+                    ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                    
+                    if(bricks[c][r].status === 3) ctx.fillStyle = "#57606f"; 
+                    else if(bricks[c][r].status === 2) ctx.fillStyle = "#a4b0be"; 
+                    else ctx.fillStyle = "#ffffff"; 
+                    
+                    ctx.fill();
+                    ctx.strokeStyle = "#1e1e1e";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(brickX, brickY, brickWidth, brickHeight);
+                    ctx.closePath();
+                }
+            }
+        }
+    }
+
+    function gameEnd(message, color = "#ff4757") {
+        gameState = "gameover";
+        uiLayer.classList.remove("hidden");
+        messageScreen.classList.remove("hidden");
+        messageTitle.innerText = message;
+        messageTitle.style.color = color;
+        finalScore.innerText = "SCORE: " + score;
+    }
+
+    function draw() {
+        if(gameState !== "playing") return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBricks();
+        drawBall();
+        drawPaddle();
+        collisionDetection();
+
+        // 左右・上の壁との当たり判定
+        if(ball.x + ball.dx > canvas.width - ball.radius || ball.x + ball.dx < ball.radius) {
+            ball.dx = -ball.dx;
+        }
+        if(ball.y + ball.dy < ball.radius) {
+            ball.dy = -ball.dy;
+        } else if(ball.y + ball.dy > canvas.height - ball.radius) {
+            // 一度でも落としたら即ゲームオーバー
+            gameEnd("GAME OVER");
+        }
+
+        // パドルとの当たり判定
+        if(ball.y + ball.radius > paddle.y && ball.y - ball.radius < paddle.y + paddle.height) {
+            if(ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+                let hitPoint = ball.x - (paddle.x + paddle.width/2);
+                let normalizedHitPoint = hitPoint / (paddle.width/2);
+                let speed = difficultySettings[currentDifficulty].speed;
+                
+                ball.dx = normalizedHitPoint * speed;
+                ball.dy = -Math.sqrt(speed*speed - ball.dx*ball.dx); 
+                
+                ball.y = paddle.y - ball.radius; // めり込み防止
+            }
+        }
+
+        ball.x += ball.dx;
+        ball.y += ball.dy;
+    }
+
+    function gameLoop() {
+        draw();
+        if(gameState === "playing") {
+            animationId = requestAnimationFrame(gameLoop);
+        }
+    }
+
+</script>
+</body>
+</html>

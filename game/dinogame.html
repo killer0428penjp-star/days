@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Chrome Dino Game - Complete Edition</title>
+<style>
+    :root {
+        --bg-color: #f7f7f7;
+        --text-color: #535353;
+        --line-color: #e7e7e7;
+        --btn-bg: #e0e0e0;
+        --btn-active: #c5c5c5;
+        --key-bg: #ffffff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg-color: #202124;
+            --text-color: #e8eaed;
+            --line-color: #5f6368;
+            --btn-bg: #3c4043;
+            --btn-active: #5f6368;
+            --key-bg: #303134;
+        }
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-family: 'Courier New', Courier, monospace;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        overflow: hidden;
+        user-select: none;
+        touch-action: none;
+    }
+
+    /* ゲーム外枠（横4:縦1） */
+    #game-container {
+        position: relative;
+        width: 92vw;
+        max-width: 1000px;
+        aspect-ratio: 4 / 1;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
+    canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* 操作エリア全体のコンテナ */
+    #controls-container {
+        width: 92vw;
+        max-width: 1000px;
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+
+    /* スマホ用ボタンレイアウト（必ず表示） */
+    #mobile-buttons {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+    .action-btn {
+        flex: 1;
+        height: 60px;
+        border: none;
+        border-radius: 8px;
+        background-color: var(--btn-bg);
+        color: var(--text-color);
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 18px;
+        font-weight: bold;
+        outline: none;
+        box-shadow: 0 4px 0 var(--line-color);
+        transition: transform 0.05s, box-shadow 0.05s;
+        -webkit-tap-highlight-color: transparent;
+        cursor: pointer;
+    }
+
+    .action-btn:active {
+        background-color: var(--btn-active);
+        transform: translateY(4px);
+        box-shadow: none;
+    }
+
+    /* PC用操作設定ボード（必ず表示） */
+    #pc-instructions {
+        display: flex;
+        gap: 20px;
+        background-color: var(--line-color);
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: bold;
+        opacity: 0.85;
+    }
+
+    .key-guide {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .kbd {
+        background-color: var(--key-bg);
+        border: 1px solid var(--text-color);
+        border-radius: 4px;
+        padding: 2px 6px;
+        box-shadow: 0 2px 0 var(--text-color);
+        font-size: 11px;
+    }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="dinoCanvas" width="1200" height="300"></canvas>
+</div>
+
+<div id="controls-container">
+    <!-- スマホ専用物理風ボタン -->
+    <div id="mobile-buttons">
+        <button id="btn-jump" class="action-btn">JUMP</button>
+        <button id="btn-duck" class="action-btn">DUCK</button>
+    </div>
+
+    <!-- PC専用キーボード操作案内 -->
+    <div id="pc-instructions">
+        <div class="key-guide">
+            <span class="kbd">Space</span> / <span class="kbd">↑</span> <span>JUMP / START</span>
+        </div>
+        <div class="key-guide">
+            <span class="kbd">↓</span> <span>DUCK (HOLD)</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById("dinoCanvas");
+    const ctx = canvas.getContext("2d");
+    const btnJump = document.getElementById("btn-jump");
+    const btnDuck = document.getElementById("btn-duck");
+
+    // 物理演算・システム定数
+    const GRAVITY = 1.1;
+    let gameSpeed = 10;
+    const MAX_SPEED = 24;
+    let score = 0;
+    
+    // ローカルストレージからハイスコアを取得
+    let highScore = localStorage.getItem('dino_highscore') ? parseFloat(localStorage.getItem('dino_highscore')) : 0;
+    
+    let isGameOver = false;
+    let isGameStarted = false;
+    let distanceRun = 0;
+
+    function getColors() {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        return {
+            main: isDark ? "#e8eaed" : "#535353",
+            ground: isDark ? "#5f6368" : "#e7e7e7"
+        };
+    }
+
+    // プレイヤー（恐竜）
+    const dino = {
+        x: 100,
+        y: 0,
+        width: 88,
+        height: 94,
+        baseY: 260,
+        vy: 0,
+        isJumping: false,
+        isDucking: false,
+        animFrame: 0,
+        animTimer: 0,
+
+        reset() {
+            this.width = 88;
+            this.height = 94;
+            this.y = this.baseY - this.height;
+            this.vy = 0;
+            this.isJumping = false;
+            this.isDucking = false;
+        },
+
+        jump() {
+            if (!this.isJumping && !this.isDucking) {
+                this.vy = -21;
+                this.isJumping = true;
+            }
+        },
+
+        duck(state) {
+            if (this.isJumping) return;
+            this.isDucking = state;
+            if (state) {
+                this.width = 118;
+                this.height = 60;
+                this.y = this.baseY - this.height;
+            } else {
+                this.width = 88;
+                this.height = 94;
+                this.y = this.baseY - this.height;
+            }
+        },
+
+        update() {
+            if (this.isJumping) {
+                this.vy += GRAVITY;
+                this.y += this.vy;
+
+                if (this.y >= this.baseY - this.height) {
+                    this.y = this.baseY - this.height;
+                    this.vy = 0;
+                    this.isJumping = false;
+                }
+            }
+
+            if (isGameStarted && !isGameOver) {
+                this.animTimer++;
+                if (this.animTimer > 5) {
+                    this.animFrame = this.animFrame === 0 ? 1 : 0;
+                    this.animTimer = 0;
+                }
+            }
+        },
+
+        draw() {
+            ctx.fillStyle = getColors().main;
+            if (isGameOver) {
+                drawDinoShape(this.x, this.y, this.isDucking, true);
+            } else if (this.isJumping) {
+                drawDinoShape(this.x, this.y, this.isDucking, false, 'still');
+            } else {
+                drawDinoShape(this.x, this.y, this.isDucking, false, this.animFrame === 0 ? 'left' : 'right');
+            }
+        }
+    };
+
+    // 障害物クラス
+    class Obstacle {
+        constructor() {
+            this.type = Math.random() > 0.35 ? 'cactus' : 'bird';
+            this.x = canvas.width + 100;
+            
+            if (this.type === 'cactus') {
+                this.variant = Math.floor(Math.random() * 3);
+                this.width = [40, 70, 90][this.variant];
+                this.height = [80, 90, 100][this.variant];
+                this.y = dino.baseY - this.height;
+            } else {
+                this.width = 84;
+                this.height = 72;
+                const birdHeights = [dino.baseY - 80, dino.baseY - 140, dino.baseY - 200];
+                this.y = birdHeights[Math.floor(Math.random() * birdHeights.length)];
+                this.animFrame = 0;
+                this.animTimer = 0;
+            }
+        }
+
+        update() {
+            this.x -= gameSpeed;
+            if (this.type === 'bird' && !isGameOver) {
+                this.animTimer++;
+                if (this.animTimer > 12) {
+                    this.animFrame = this.animFrame === 0 ? 1 : 0;
+                    this.animTimer = 0;
+                }
+            }
+        }
+
+        draw() {
+            ctx.fillStyle = getColors().main;
+            if (this.type === 'cactus') {
+                drawCactusShape(this.x, this.y, this.variant);
+            } else {
+                drawBirdShape(this.x, this.y, this.animFrame === 0);
+            }
+        }
+    }
+
+    let obstacles = [];
+    let obstacleTimer = 0;
+
+    // 背景の雲
+    class Cloud {
+        constructor() {
+            this.x = canvas.width + 100;
+            this.y = Math.random() * 80 + 40;
+            this.speed = gameSpeed * 0.15;
+            this.width = 92;
+            this.height = 26;
+        }
+        update() { this.x -= this.speed; }
+        draw() {
+            ctx.fillStyle = getColors().ground;
+            drawCloudShape(this.x, this.y);
+        }
+    }
+    let clouds = [];
+    let cloudTimer = 0;
+
+    function init() {
+        score = 0;
+        distanceRun = 0;
+        gameSpeed = 10;
+        isGameOver = false;
+        obstacles = [];
+        clouds = [];
+        dino.reset();
+    }
+
+    function checkCollision(rect1, rect2) {
+        const pX = 12;
+        const pY = 12;
+        return (
+            rect1.x + pX < rect2.x + rect2.width &&
+            rect1.x + rect1.width - pX > rect2.x &&
+            rect1.y + pY < rect2.y + rect2.height &&
+            rect1.y + rect1.height - pY > rect2.y
+        );
+    }
+
+    // --- 高解像度ドットグラフィックス ---
+    function drawDinoShape(x, y, isDucked, isDead, legState = 'still') {
+        ctx.save();
+        ctx.scale(2, 2);
+        const sx = x / 2;
+        const sy = y / 2;
+
+        if (!isDucked) {
+            ctx.fillRect(sx+22, sy, 20, 14);
+            ctx.fillRect(sx+36, sy+2, 4, 4);
+            ctx.fillRect(sx, sy+12, 24, 26);
+            ctx.fillRect(sx+22, sy+14, 14, 16);
+            ctx.fillRect(sx+4, sy+38, 12, 4);
+            
+            ctx.fillStyle = window.matchMedia('(prefers-color-scheme: dark)').matches ? "#202124" : "#f7f7f7";
+            if(isDead) { ctx.fillRect(sx+26, sy+4, 4, 4); } 
+            else { ctx.fillRect(sx+26, sy+2, 4, 4); }
+            
+            ctx.fillStyle = getColors().main;
+            ctx.fillRect(sx+32, sy+18, 4, 4);
+            ctx.fillRect(sx+34, sy+22, 2, 2);
+            
+            if (legState === 'still' || legState === 'left') ctx.fillRect(sx+12, sy+38, 4, 9);
+            if (legState === 'still' || legState === 'right') ctx.fillRect(sx+20, sy+38, 4, 9);
+        } else {
+            ctx.fillRect(sx, sy+6, 35, 18);
+            ctx.fillRect(sx+32, sy, 25, 14);
+            ctx.fillRect(sx+8, sy+24, 20, 4);
+            if (legState === 'left' || legState === 'still') ctx.fillRect(sx+14, sy+22, 4, 8);
+            if (legState === 'right' || legState === 'still') ctx.fillRect(sx+24, sy+22, 4, 8);
+        }
+        ctx.restore();
+    }
+
+    function drawCactusShape(x, y, variant) {
+        ctx.save();
+        ctx.scale(2, 2);
+        const sx = x / 2;
+        const sy = y / 2;
+        if (variant === 0) {
+            ctx.fillRect(sx+6, sy, 8, 40);
+            ctx.fillRect(sx, sy+10, 6, 15); ctx.fillRect(sx, sy+10, 12, 6);
+            ctx.fillRect(sx+12, sy+15, 8, 12); ctx.fillRect(sx+8, sy+15, 8, 6);
+        } else if (variant === 1) {
+            ctx.fillRect(sx+4, sy+5, 8, 40); ctx.fillRect(sx, sy+15, 6, 12);
+            ctx.fillRect(sx+18, sy, 8, 45); ctx.fillRect(sx+24, sy+12, 6, 15);
+        } else {
+            ctx.fillRect(sx+15, sy, 10, 50); ctx.fillRect(sx+2, sy+12, 28, 6);
+            ctx.fillRect(sx+2, sy+12, 6, 20); ctx.fillRect(sx+27, sy+16, 6, 18);
+        }
+        ctx.restore();
+    }
+
+    function drawBirdShape(x, y, wingUp) {
+        ctx.save();
+        ctx.scale(2, 2);
+        const sx = x / 2;
+        const sy = y / 2;
+        ctx.fillRect(sx+12, sy+10, 20, 12);
+        ctx.fillRect(sx, sy+14, 12, 6);
+        if (wingUp) { ctx.fillRect(sx+18, sy, 6, 10); } 
+        else { ctx.fillRect(sx+18, sy+20, 6, 12); }
+        ctx.restore();
+    }
+
+    function drawCloudShape(x, y) {
+        ctx.save();
+        ctx.scale(2, 2);
+        ctx.fillRect(x/2+12, y/2, 24, 4); ctx.fillRect(x/2+6, y/2+4, 34, 4); ctx.fillRect(x/2, y/2+8, 46, 5);
+        ctx.restore();
+    }
+
+    function pad(num, size) {
+        let s = Math.floor(num) + "";
+        while (s.length < size) s = "0" + s;
+        return s;
+    }
+
+    function drawUI() {
+        ctx.font = "bold 22px 'Courier New', Courier, monospace";
+        ctx.fillStyle = getColors().main;
+        
+        const scoreStr = pad(score, 5);
+        const hiScoreStr = pad(highScore, 5);
+        
+        if (highScore > 0) {
+            ctx.fillText(`HI ${hiScoreStr}  ${scoreStr}`, canvas.width - 240, 45);
+        } else {
+            ctx.fillText(`${scoreStr}`, canvas.width - 100, 45);
+        }
+
+        if (isGameOver) {
+            ctx.font = "bold 26px 'Courier New', Courier, monospace";
+            ctx.fillText("G A M E  O V E R", canvas.width / 2 - 110, canvas.height / 2 - 30);
+            
+            // リトライアイコン
+            const rx = canvas.width / 2 - 20;
+            const ry = canvas.height / 2 + 10;
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = getColors().main;
+            ctx.beginPath();
+            ctx.arc(rx + 20, ry + 20, 16, -Math.PI / 2, Math.PI, false);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(rx + 20, ry + 4); ctx.lineTo(rx + 12, ry - 3); ctx.lineTo(rx + 20, ry + 11);
+            ctx.fillStyle = getColors().main;
+            ctx.fill();
+        }
+    }
+
+    // メインゲームループ
+    function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 地面線
+        ctx.strokeStyle = getColors().ground;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, dino.baseY);
+        ctx.lineTo(canvas.width, dino.baseY);
+        ctx.stroke();
+
+        // 雲の生成と処理
+        if (isGameStarted && !isGameOver) {
+            cloudTimer++;
+            if (cloudTimer > 120) {
+                clouds.push(new Cloud());
+                cloudTimer = 0;
+            }
+        }
+        clouds.forEach((cloud, index) => {
+            if (!isGameOver) cloud.update();
+            cloud.draw();
+            if (cloud.x + cloud.width < 0) clouds.splice(index, 1);
+        });
+
+        dino.update();
+        dino.draw();
+
+        if (isGameStarted) {
+            if (!isGameOver) {
+                obstacleTimer++;
+                const spawnInterval = Math.max(45, 90 - Math.floor(gameSpeed * 2));
+                if (obstacleTimer > spawnInterval + Math.random() * 35) {
+                    obstacles.push(new Obstacle());
+                    obstacleTimer = 0;
+                }
+            }
+
+            obstacles.forEach((obs, index) => {
+                if (!isGameOver) obs.update();
+                obs.draw();
+
+                // 衝突チェック
+                if (checkCollision(dino, obs)) {
+                    isGameOver = true;
+                    if (score > highScore) {
+                        highScore = score;
+                        localStorage.setItem('dino_highscore', highScore);
+                    }
+                }
+                if (obs.x + obs.width < 0) obstacles.splice(index, 1);
+            });
+
+            if (!isGameOver) {
+                distanceRun += 0.15;
+                score = distanceRun;
+                if (gameSpeed < MAX_SPEED) gameSpeed += 0.0015;
+            }
+        } else {
+            // ゲーム開始前の案内テキスト
+            ctx.fillStyle = getColors().main;
+            ctx.font = "bold 16px 'Courier New'";
+            ctx.fillText("PRESS SPACE / TAP 'JUMP' TO START", canvas.width / 2 - 165, canvas.height / 2 + 50);
+        }
+
+        drawUI();
+        requestAnimationFrame(loop);
+    }
+
+    // --- コントロール中継処理 ---
+    function triggerJump() {
+        if (!isGameStarted) {
+            isGameStarted = true;
+            init();
+        } else if (isGameOver) {
+            init();
+        } else {
+            dino.jump();
+        }
+    }
+
+    // PCキーボード入力イベント
+    window.addEventListener("keydown", (e) => {
+        if (e.code === "Space" || e.code === "ArrowUp") {
+            e.preventDefault();
+            triggerJump();
+        }
+        if (e.code === "ArrowDown") {
+            e.preventDefault();
+            if (isGameStarted && !isGameOver) dino.duck(true);
+        }
+    });
+
+    window.addEventListener("keyup", (e) => {
+        if (e.code === "ArrowDown") {
+            dino.duck(false);
+        }
+    });
+
+    // スマホタッチイベント（PCマウスとの重複を防ぐため preventDefault を適用）
+    btnJump.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        triggerJump();
+    }, { passive: false });
+
+    btnDuck.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        if (isGameStarted && !isGameOver) dino.duck(true);
+    }, { passive: false });
+
+    btnDuck.addEventListener("touchend", (e) => {
+        e.preventDefault();
+        dino.duck(false);
+    }, { passive: false });
+
+    // PCマウス・開発者ツール用クリックイベント
+    btnJump.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        triggerJump();
+    });
+    btnDuck.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        if (isGameStarted && !isGameOver) dino.duck(true);
+    });
+    window.addEventListener("mouseup", () => dino.duck(false));
+
+    init();
+    loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ぷよぷよ風パズル（やり直し機能・高速スライド版）</title>
+    <style>
+        body { 
+            background: #ffe3e3; 
+            color: #333; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            margin: 0; 
+            padding: 20px 10px; 
+            font-family: 'Hiragino Rounded Gothic Pro', 'Meiryo', sans-serif; 
+            touch-action: manipulation; 
+        }
+        h1 { margin: 0 0 15px 0; font-size: 24px; color: #ff6b6b; text-shadow: 2px 2px #fff; }
+        
+        /* スコアを右上に固定 */
+        .score-fixed {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #fff3cd;
+            border: 3px solid #ffe69c;
+            color: #856404;
+            padding: 8px 15px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        /* 画面上部のコントロールボタン群 */
+        .top-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .top-controls button {
+            padding: 8px 15px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px rgba(0,0,0,0.1);
+            transition: 0.1s;
+        }
+        .top-controls button:active { transform: translateY(4px); box-shadow: 0 0 rgba(0,0,0,0); }
+        
+        #btnUndo { background: #ff922b; box-shadow: 0 4px #e8590c; }
+        #btnUndo:disabled { background: #ced4da; box-shadow: 0 4px #adb5bd; cursor: not-allowed; transform: none;}
+        #btnRestart { background: #74c0fc; box-shadow: 0 4px #228be6; }
+        #soundToggle { background: #69db7c; box-shadow: 0 4px #40c057; }
+
+        .game-wrapper { display: flex; gap: 15px; }
+        .board-container { position: relative; }
+        canvas { 
+            background: #e9ecef; 
+            border: 6px solid #ff8787; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar { display: flex; flex-direction: column; gap: 15px; width: 80px; }
+        .side-box { 
+            background: #fff; 
+            padding: 10px; 
+            border-radius: 12px; 
+            text-align: center; 
+            border: 3px solid #ffc9c9;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-weight: bold;
+        }
+
+        /* 操作切り替えタブ */
+        .control-toggle {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            background: #fff;
+            padding: 5px;
+            border-radius: 12px;
+            border: 3px solid #ffc9c9;
+        }
+        .control-toggle button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #adb5bd;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: none;
+        }
+        .control-toggle button.active {
+            background: #ff8787;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* 各操作パネルの表示制御 */
+        .control-panel { display: none; width: 100%; max-width: 320px; }
+        .control-panel.active { display: block; }
+
+        .mobile-controls { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-top: 15px; 
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .mobile-controls button { 
+            padding: 15px; border-radius: 12px; border: none; 
+            background: #74c0fc; color: white; font-weight: bold; font-size: 16px;
+            box-shadow: 0 4px #4dabf7; cursor: pointer; transition: 0.1s;
+        }
+        .mobile-controls button:active { transform: translateY(4px); box-shadow: 0 0 #4dabf7; }
+        .btn-full { grid-column: span 2; background: #ff8787 !important; box-shadow: 0 4px #fa5252 !important; }
+        .btn-full:active { box-shadow: 0 0 #fa5252 !important; }
+        
+        .ranking, .config-section { 
+            margin-top: 15px; 
+            background: white; 
+            padding: 15px; 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            border: 3px solid #ffc9c9;
+        }
+        .ranking h2, .config-section h2 { margin: 0 0 10px 0; font-size: 18px; text-align: center; color: #ff6b6b; }
+        .ranking ol { margin: 0; padding-left: 25px; }
+        .ranking li { margin-bottom: 5px; font-family: monospace; font-size: 16px;}
+
+        .config-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .config-item button {
+            flex: none;
+            width: 140px;
+            padding: 8px;
+            font-size: 14px;
+            background: #e9ecef;
+            color: #495057;
+            border: 2px solid #ced4da;
+            box-shadow: 0 2px #adb5bd;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .config-item button.waiting {
+            background: #ffe8cc;
+            border-color: #ffa94d;
+            color: #d9480f;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 50% { opacity: 0.6; } }
+    </style>
+</head>
+<body>
+
+<!-- スコア右上固定 -->
+<div class="score-fixed">
+    SCORE<br><span id="scoreDisplay">0</span>
+</div>
+
+<h1>ぷよパズル</h1>
+
+<!-- 上部コントロール（やり直し、リセット、サウンド） -->
+<div class="top-controls">
+    <button id="btnUndo" onclick="undo()" disabled>↩ 1手戻る</button>
+    <button id="btnRestart" onclick="resetGame()">🔄 最初から</button>
+    <button id="soundToggle" onclick="toggleSound()">🔊 サウンド: ON</button>
+</div>
+
+<div class="game-wrapper">
+    <div class="board-container">
+        <canvas id="gameCanvas" width="240" height="480"></canvas>
+    </div>
+    <div class="sidebar">
+        <div class="side-box">NEXT<canvas id="nextCanvas" width="60" height="180"></canvas></div>
+    </div>
+</div>
+
+<!-- 操作切り替えタブ -->
+<div class="control-toggle">
+    <button id="tabMobile" class="active" onclick="switchControl('mobile')">📱 スマホ操作</button>
+    <button id="tabPC" onclick="switchControl('pc')">💻 PC操作</button>
+</div>
+
+<!-- スマホ操作パネル -->
+<div id="panelMobile" class="control-panel active">
+    <div class="mobile-controls">
+        <button onclick="input(0, -1)">↺ 左回転</button>
+        <button onclick="input(0, 1)">↻ 右回転</button>
+        <button id="btnLeft">◀ 左移動</button>
+        <button id="btnRight">右移動 ▶</button>
+        <button class="btn-full" id="btnDrop">⏬ 加速</button>
+    </div>
+</div>
+
+<!-- PC操作パネル（キー設定） -->
+<div id="panelPC" class="control-panel">
+    <div class="config-section">
+        <h2>⚙️ キーボード設定</h2>
+        <p style="font-size: 12px; text-align: center; color: #888; margin-top: 0;">※やり直しは「Backspace」キーでも可能です</p>
+        <div class="config-item">
+            <span>左に移動:</span>
+            <button id="key-moveLeft" onclick="startKeyConfig('moveLeft')">読み込み中...</button>
+        </div>
+        <div class="config-item">
+            <span>右に移動:</span>
+            <button id="key-moveRight" onclick="startKeyConfig('moveRight')">読み込み中...</button>
+        </div>
+        <div class="config-item">
+            <span>左回転:</span>
+            <button id="key-rotateLeft" onclick="startKeyConfig('rotateLeft')">読み込み中...</button>
+        </div>
+        <div class="config-item">
+            <span>右回転:</span>
+            <button id="key-rotateRight" onclick="startKeyConfig('rotateRight')">読み込み中...</button>
+        </div>
+        <div class="config-item">
+            <span>高速落下:</span>
+            <button id="key-fastDrop" onclick="startKeyConfig('fastDrop')">読み込み中...</button>
+        </div>
+    </div>
+</div>
+
+<div class="ranking" style="width: 100%; max-width: 320px;">
+    <h2>🏆 ランキング</h2>
+    <ol id="rankingList"></ol>
+</div>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const COLS = 6, ROWS = 12, SIZE = 40;
+    const COLORS = ["#FF3B30", "#007AFF", "#34C759", "#FFCC00"]; 
+    
+    let grid = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+    let nextQueue = [randomPair(), randomPair()];
+    let current = null;
+    let score = 0, chainCount = 0;
+    let state = 'SPAWN'; 
+    let animations = []; 
+    let lastTime = 0;
+    let history = []; // やり直し用の履歴配列
+    
+    const DROP_SPEED_NORMAL = 1000;
+    const DROP_SPEED_FAST = 50;
+    let dropCounter = 0, dropInterval = DROP_SPEED_NORMAL;
+    let lockTimer = 0, lockLimit = 1000;
+    let soundEnabled = true;
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // 【変更】長押し移動用のパラメータ（スライド速度UP）
+    let keys = { left: false, right: false, down: false };
+    let moveTimers = { left: 0, right: 0 };
+    const DAS = 180; // 長押し判定になるまでのタメ時間を短縮(250→180)
+    const ARR = 60;  // 連続移動のスピードを大幅にアップ(180→60)
+
+    const defaultKeys = {
+        moveLeft: 'ArrowLeft',
+        moveRight: 'ArrowRight',
+        rotateLeft: 'z',
+        rotateRight: 'ArrowUp',
+        fastDrop: 'ArrowDown'
+    };
+    let keyConfig = JSON.parse(localStorage.getItem('puyoKeyConfig')) || { ...defaultKeys };
+    let configuringKeyType = null;
+
+    // --- やり直し（Undo）機能 ---
+    function saveState() {
+        history.push({
+            grid: grid.map(row => [...row]),
+            score: score,
+            nextQueue: JSON.parse(JSON.stringify(nextQueue))
+        });
+        if (history.length > 10) history.shift(); // 最大10手まで保存
+        document.getElementById('btnUndo').disabled = false;
+    }
+
+    function undo() {
+        if (history.length === 0) return;
+        
+        // 状態を1つ前に戻す
+        let lastState = history.pop();
+        grid = lastState.grid.map(row => [...row]);
+        score = lastState.score;
+        document.getElementById("scoreDisplay").innerText = score;
+        nextQueue = JSON.parse(JSON.stringify(lastState.nextQueue));
+        
+        // アニメーション中や落下中の状態をリセット
+        animations = [];
+        current = null;
+        state = 'SPAWN';
+        
+        // ボタンの無効化判定
+        if (history.length === 0) document.getElementById('btnUndo').disabled = true;
+    }
+
+    // --- タブ・UI切り替え ---
+    function switchControl(mode) {
+        document.getElementById('tabMobile').classList.remove('active');
+        document.getElementById('tabPC').classList.remove('active');
+        document.getElementById('panelMobile').classList.remove('active');
+        document.getElementById('panelPC').classList.remove('active');
+        if(mode === 'mobile') {
+            document.getElementById('tabMobile').classList.add('active');
+            document.getElementById('panelMobile').classList.add('active');
+        } else {
+            document.getElementById('tabPC').classList.add('active');
+            document.getElementById('panelPC').classList.add('active');
+        }
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        document.getElementById("soundToggle").innerText = soundEnabled ? "🔊 サウンド: ON" : "🔇 サウンド: OFF";
+        if(soundEnabled && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+        if (!soundEnabled) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        
+        if (type === 'drop') {
+            osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } else if (type === 'pop') {
+            osc.type = 'sine';
+            const baseFreq = 400 + (chainCount * 100);
+            osc.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+        }
+    }
+
+    function randomPair() { return [COLORS[Math.floor(Math.random() * COLORS.length)], COLORS[Math.floor(Math.random() * COLORS.length)]]; }
+
+    // --- 描画処理 ---
+    function drawPuyo(x, y, color, scale = 1, alpha = 1) {
+        const px = x * SIZE + SIZE / 2;
+        const py = y * SIZE + SIZE / 2;
+        const r = (SIZE / 2 - 2) * scale;
+        
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (scale > 0.5) {
+            const colorIdx = COLORS.indexOf(color);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+            const markY = py + 6; 
+            
+            ctx.beginPath();
+            if (colorIdx === 0) { ctx.arc(px, markY, 5, 0, Math.PI*2); } 
+            else if (colorIdx === 1) { 
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.4)"; ctx.lineWidth = 2.5;
+                ctx.moveTo(px - 4, markY - 4); ctx.lineTo(px + 4, markY + 4);
+                ctx.moveTo(px + 4, markY - 4); ctx.lineTo(px - 4, markY + 4); ctx.stroke();
+            } 
+            else if (colorIdx === 2) { 
+                ctx.moveTo(px, markY - 5); ctx.lineTo(px - 5, markY + 4); ctx.lineTo(px + 5, markY + 4);
+            } 
+            else if (colorIdx === 3) { ctx.rect(px - 4, markY - 4, 8, 8); }
+            ctx.fill();
+
+            ctx.fillStyle = "white";
+            ctx.beginPath(); ctx.arc(px - 5, py - 6, 4, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(px + 5, py - 6, 4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "black";
+            ctx.beginPath(); ctx.arc(px - 5, py - 6, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(px + 5, py - 6, 2, 0, Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    function drawGrid() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = "rgba(0, 0, 0, 0.1)"; ctx.lineWidth = 1;
+        for(let r = 0; r <= ROWS; r++) { ctx.beginPath(); ctx.moveTo(0, r * SIZE); ctx.lineTo(canvas.width, r * SIZE); ctx.stroke(); }
+        for(let c = 0; c <= COLS; c++) { ctx.beginPath(); ctx.moveTo(c * SIZE, 0); ctx.lineTo(c * SIZE, canvas.height); ctx.stroke(); }
+
+        ctx.strokeStyle = "rgba(255, 0, 0, 0.4)"; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(2 * SIZE + 8, 8); ctx.lineTo(3 * SIZE - 8, SIZE - 8); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(3 * SIZE - 8, 8); ctx.lineTo(2 * SIZE + 8, SIZE - 8); ctx.stroke();
+
+        for(let r=0; r<ROWS; r++){
+            for(let c=0; c<COLS; c++){
+                if(!grid[r][c]) continue;
+                ctx.fillStyle = grid[r][c];
+                if(r < ROWS-1 && grid[r+1][c] === grid[r][c]) { ctx.fillRect(c*SIZE + 4, r*SIZE + SIZE/2, SIZE - 8, SIZE); }
+                if(c < COLS-1 && grid[r][c+1] === grid[r][c]) { ctx.fillRect(c*SIZE + SIZE/2, r*SIZE + 4, SIZE, SIZE - 8); }
+            }
+        }
+        for(let r=0; r<ROWS; r++){
+            for(let c=0; c<COLS; c++){
+                if(grid[r][c]) drawPuyo(c, r, grid[r][c]);
+            }
+        }
+    }
+
+    function drawNext() {
+        const nc = document.getElementById("nextCanvas").getContext("2d");
+        nc.clearRect(0, 0, 60, 180);
+        drawNextPuyo(nc, 30, 30, nextQueue[0][0]);
+        drawNextPuyo(nc, 30, 70, nextQueue[0][1]);
+        drawNextPuyo(nc, 30, 130, nextQueue[1][0], 0.7);
+        drawNextPuyo(nc, 30, 160, nextQueue[1][1], 0.7);
+    }
+    
+    function drawNextPuyo(ctxNext, x, y, color, scale = 1) {
+        ctxNext.fillStyle = color;
+        ctxNext.beginPath(); ctxNext.arc(x, y, 18 * scale, 0, Math.PI*2); ctxNext.fill();
+        ctxNext.fillStyle = "white";
+        ctxNext.beginPath(); ctxNext.arc(x - 4*scale, y - 6*scale, 3*scale, 0, Math.PI*2); ctxNext.fill();
+        ctxNext.beginPath(); ctxNext.arc(x + 4*scale, y - 6*scale, 3*scale, 0, Math.PI*2); ctxNext.fill();
+        ctxNext.fillStyle = "black";
+        ctxNext.beginPath(); ctxNext.arc(x - 4*scale, y - 6*scale, 1.5*scale, 0, Math.PI*2); ctxNext.fill();
+        ctxNext.beginPath(); ctxNext.arc(x + 4*scale, y - 6*scale, 1.5*scale, 0, Math.PI*2); ctxNext.fill();
+    }
+
+    class ActivePiece {
+        constructor(colors) {
+            this.x = 2; this.y = 0;
+            this.colors = colors;
+            this.rotIndex = 0; 
+            this.visualY = 0;
+            this.visualRot = 0;
+        }
+        
+        get rot() { return ((this.rotIndex % 4) + 4) % 4; }
+
+        get subPos() {
+            let r = this.rot;
+            if(r === 0) return {x: this.x, y: this.y - 1};
+            if(r === 1) return {x: this.x + 1, y: this.y};
+            if(r === 2) return {x: this.x, y: this.y + 1};
+            return {x: this.x - 1, y: this.y};
+        }
+
+        isValid(x, y, rot) {
+            if(x < 0 || x >= COLS || y >= ROWS || (y >= 0 && grid[y][x])) return false;
+            let sx = x + (rot === 1 ? 1 : rot === 3 ? -1 : 0);
+            let sy = y + (rot === 2 ? 1 : rot === 0 ? -1 : 0);
+            if(sx < 0 || sx >= COLS || sy >= ROWS || (sy >= 0 && grid[sy][sx])) return false;
+            return true;
+        }
+
+        rotate(dir) {
+            let nextRotIndex = this.rotIndex + dir;
+            let nextRot = ((nextRotIndex % 4) + 4) % 4;
+            
+            if(this.isValid(this.x, this.y, nextRot)) { this.rotIndex = nextRotIndex; return true; }
+            if(this.isValid(this.x + 1, this.y, nextRot)) { this.x += 1; this.rotIndex = nextRotIndex; return true; }
+            if(this.isValid(this.x - 1, this.y, nextRot)) { this.x -= 1; this.rotIndex = nextRotIndex; return true; }
+            if(this.isValid(this.x, this.y - 1, nextRot)) { this.y -= 1; this.rotIndex = nextRotIndex; return true; }
+            return false;
+        }
+
+        draw() {
+            this.visualRot += (this.rotIndex * Math.PI/2 - this.visualRot) * 0.4;
+            this.visualY += (this.y - this.visualY) * 0.4;
+            const px = this.x * SIZE + SIZE/2;
+            const py = this.visualY * SIZE + SIZE/2;
+            const subX = px + Math.sin(this.visualRot) * SIZE;
+            const subY = py - Math.cos(this.visualRot) * SIZE;
+            drawPuyo(subX/SIZE - 0.5, subY/SIZE - 0.5, this.colors[0]); 
+            drawPuyo(this.x, this.visualY, this.colors[1]); 
+        }
+    }
+
+    function handleInputRepeat(dt) {
+        if (state !== 'FALL' || !current) return;
+        if (keys.left) {
+            moveTimers.left += dt;
+            if (moveTimers.left >= ARR) { input(-1, 0); moveTimers.left -= ARR; }
+        }
+        if (keys.right) {
+            moveTimers.right += dt;
+            if (moveTimers.right >= ARR) { input(1, 0); moveTimers.right -= ARR; }
+        }
+    }
+
+    function update(time) {
+        const dt = time - lastTime;
+        lastTime = time;
+
+        handleInputRepeat(dt);
+        drawGrid();
+
+        if (state === 'SPAWN') {
+            if(grid[0][2]) { 
+                saveRanking(); 
+                alert("ゲームオーバー！ スコア: " + score); 
+                resetGame(); 
+                return; 
+            }
+            saveState(); // 新しいピースが出る前に状態を保存
+            
+            current = new ActivePiece(nextQueue.shift());
+            nextQueue.push(randomPair());
+            drawNext();
+            state = 'FALL';
+            chainCount = 0;
+            
+            dropInterval = keys.down ? DROP_SPEED_FAST : DROP_SPEED_NORMAL;
+            lockTimer = 0;
+            lockLimit = 1000;
+        } 
+        else if (state === 'FALL') {
+            let canFall = current.isValid(current.x, current.y + 1, current.rot);
+            dropCounter += dt;
+
+            if (canFall) {
+                if(dropCounter > dropInterval) {
+                    current.y++;
+                    dropCounter = 0;
+                    lockTimer = 0; 
+                    lockLimit = 1000;
+                }
+            } else {
+                lockTimer += dt;
+                if(dropInterval < 100) lockTimer += 10000;
+                if (lockTimer >= lockLimit) {
+                    lockPiece();
+                    lockTimer = 0;
+                    lockLimit = 1000;
+                }
+            }
+            if(current) current.draw();
+        } 
+        else if (state === 'ANIMATING') {
+            let allDone = true;
+            animations.forEach(anim => {
+                anim.progress += dt / anim.duration;
+                if(anim.progress < 1) allDone = false;
+                anim.render(anim.progress);
+            });
+            if(allDone) {
+                animations = [];
+                resolveGravity();
+            }
+        }
+        
+        requestAnimationFrame(update);
+    }
+
+    function lockPiece() {
+        playSound('drop');
+        if(current.y >= 0) grid[current.y][current.x] = current.colors[1];
+        let sub = current.subPos;
+        if(sub.y >= 0) grid[sub.y][sub.x] = current.colors[0];
+        current = null;
+        resolveGravity();
+    }
+
+    function resolveGravity() {
+        let moved = false;
+        for(let c=0; c<COLS; c++){
+            let writeY = ROWS - 1;
+            for(let r=ROWS-1; r>=0; r--){
+                if(grid[r][c]) {
+                    if(r !== writeY) {
+                        grid[writeY][c] = grid[r][c];
+                        grid[r][c] = null;
+                        moved = true;
+                    }
+                    writeY--;
+                }
+            }
+        }
+        if(moved) {
+            state = 'ANIMATING';
+            animations.push({ progress: 0, duration: 200, render: () => {} });
+        } else {
+            checkMatches();
+        }
+    }
+
+    function checkMatches() {
+        let visited = Array.from({length: ROWS}, () => Array(COLS).fill(false));
+        let toRemove = [];
+
+        for(let r=0; r<ROWS; r++){
+            for(let c=0; c<COLS; c++){
+                if(!grid[r][c] || visited[r][c]) continue;
+                let color = grid[r][c];
+                let queue = [{r, c}];
+                let group = [];
+                
+                while(queue.length > 0) {
+                    let {r: currR, c: currC} = queue.shift();
+                    if(visited[currR][currC]) continue;
+                    visited[currR][currC] = true;
+                    group.push({r: currR, c: currC});
+                    
+                    const dirs = [[-1,0],[1,0],[0,-1],[0,1]];
+                    for(let [dr, dc] of dirs) {
+                        let nr = currR + dr, nc = currC + dc;
+                        if(nr>=0 && nr<ROWS && nc>=0 && nc<COLS && grid[nr][nc] === color && !visited[nr][nc]) {
+                            queue.push({r: nr, c: nc});
+                        }
+                    }
+                }
+                if(group.length >= 4) toRemove.push(...group);
+            }
+        }
+
+        if(toRemove.length > 0) {
+            chainCount++;
+            playSound('pop');
+            
+            const chainBonus = Math.pow(2, chainCount - 1);
+            score += 10 * toRemove.length * chainBonus;
+            document.getElementById("scoreDisplay").innerText = score;
+
+            state = 'ANIMATING';
+            toRemove.forEach(p => {
+                let color = grid[p.r][p.c];
+                grid[p.r][p.c] = null;
+                animations.push({
+                    progress: 0, duration: 400,
+                    render: (t) => { drawPuyo(p.c, p.r, color, 1 + t*0.5, 1 - t); }
+                });
+            });
+        } else {
+            state = 'SPAWN';
+        }
+    }
+
+    function input(dx, rotDir) {
+        if(state !== 'FALL' || !current) return;
+        if (dx !== 0) {
+            if(current.isValid(current.x + dx, current.y, current.rot)) {
+                current.x += dx;
+                if(!current.isValid(current.x, current.y + 1, current.rot)) lockTimer = 0;
+            }
+        }
+        if (rotDir !== 0) {
+            if (current.rotate(rotDir)) {
+                if(!current.isValid(current.x, current.y + 1, current.rot)) {
+                    lockTimer = 0;
+                    lockLimit = 3000;
+                }
+            }
+        }
+    }
+
+    function fastDrop() {
+        if(state !== 'FALL') return;
+        dropInterval = DROP_SPEED_FAST; 
+    }
+
+    function updateKeyConfigDisplay() {
+        const formatKey = (k) => k === ' ' ? 'Space' : k;
+        document.getElementById('key-moveLeft').innerText = formatKey(keyConfig.moveLeft);
+        document.getElementById('key-moveRight').innerText = formatKey(keyConfig.moveRight);
+        document.getElementById('key-rotateLeft').innerText = formatKey(keyConfig.rotateLeft);
+        document.getElementById('key-rotateRight').innerText = formatKey(keyConfig.rotateRight);
+        document.getElementById('key-fastDrop').innerText = formatKey(keyConfig.fastDrop);
+    }
+
+    function startKeyConfig(type) {
+        if(configuringKeyType) { document.getElementById(`key-${configuringKeyType}`).classList.remove('waiting'); }
+        configuringKeyType = type;
+        const btn = document.getElementById(`key-${type}`);
+        btn.innerText = "キーを入力..."; btn.classList.add('waiting');
+    }
+
+    function setupTouchButtons() {
+        const bindRepeat = (id, type) => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            const start = (e) => {
+                e.preventDefault();
+                if(type === 'left' && !keys.left) { keys.left = true; input(-1, 0); moveTimers.left = -DAS; }
+                if(type === 'right' && !keys.right) { keys.right = true; input(1, 0); moveTimers.right = -DAS; }
+                if(type === 'down' && !keys.down) { keys.down = true; fastDrop(); }
+            };
+            const end = (e) => {
+                e.preventDefault();
+                if(type === 'left') keys.left = false;
+                if(type === 'right') keys.right = false;
+                if(type === 'down') { keys.down = false; dropInterval = DROP_SPEED_NORMAL; }
+            };
+            btn.addEventListener('touchstart', start, {passive: false}); btn.addEventListener('touchend', end, {passive: false});
+            btn.addEventListener('mousedown', start, {passive: false}); btn.addEventListener('mouseup', end, {passive: false});
+            btn.addEventListener('mouseleave', end, {passive: false});
+        };
+        bindRepeat('btnLeft', 'left'); bindRepeat('btnRight', 'right'); bindRepeat('btnDrop', 'down');
+    }
+    setupTouchButtons();
+
+    document.addEventListener('keydown', (e) => {
+        if (configuringKeyType) {
+            e.preventDefault();
+            keyConfig[configuringKeyType] = e.key;
+            localStorage.setItem('puyoKeyConfig', JSON.stringify(keyConfig));
+            document.getElementById(`key-${configuringKeyType}`).classList.remove('waiting');
+            configuringKeyType = null;
+            updateKeyConfigDisplay();
+            return;
+        }
+        
+        // やり直しのショートカットキー
+        if (e.key === 'Backspace' && !e.repeat) { e.preventDefault(); undo(); return; }
+
+        if(e.key === keyConfig.moveLeft) { e.preventDefault(); if(!keys.left) { keys.left = true; input(-1, 0); moveTimers.left = -DAS; } }
+        if(e.key === keyConfig.moveRight) { e.preventDefault(); if(!keys.right) { keys.right = true; input(1, 0); moveTimers.right = -DAS; } }
+        if(e.key === keyConfig.rotateLeft) { e.preventDefault(); input(0, -1); }
+        if(e.key === keyConfig.rotateRight) { e.preventDefault(); input(0, 1); }
+        if(e.key === keyConfig.fastDrop) { e.preventDefault(); if(!keys.down) { keys.down = true; fastDrop(); } }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if(e.key === keyConfig.moveLeft) { keys.left = false; }
+        if(e.key === keyConfig.moveRight) { keys.right = false; }
+        if(e.key === keyConfig.fastDrop) { keys.down = false; dropInterval = DROP_SPEED_NORMAL; }
+    });
+
+    function saveRanking() {
+        let ranks = JSON.parse(localStorage.getItem('puyoRanking')) || [];
+        ranks.push(score);
+        ranks.sort((a,b) => b - a);
+        ranks = ranks.slice(0, 5); 
+        localStorage.setItem('puyoRanking', JSON.stringify(ranks));
+        updateRankingDisplay();
+    }
+
+    function updateRankingDisplay() {
+        let ranks = JSON.parse(localStorage.getItem('puyoRanking')) || [];
+        const list = document.getElementById("rankingList");
+        list.innerHTML = "";
+        ranks.forEach((s, idx) => {
+            let li = document.createElement("li");
+            li.innerText = `${idx + 1}位: ${s.toString().padStart(6, '0')} PTS`;
+            list.appendChild(li);
+        });
+        if(ranks.length === 0) list.innerHTML = "<li>記録なし</li>";
+    }
+
+    function resetGame() {
+        grid = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+        score = 0; chainCount = 0;
+        document.getElementById("scoreDisplay").innerText = score;
+        nextQueue = [randomPair(), randomPair()];
+        history = []; // 履歴もリセット
+        document.getElementById('btnUndo').disabled = true;
+        state = 'SPAWN';
+    }
+
+    if(window.innerWidth > 768) switchControl('pc'); 
+    
+    updateKeyConfigDisplay();
+    updateRankingDisplay();
+    requestAnimationFrame(update);
+
+</script>
+</body>
+</html>
