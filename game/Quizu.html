@@ -958,11 +958,11 @@ function openMediaPop(key,e){
   pop.style.left=Math.min(rect.left,window.innerWidth-220)+'px';
 
   // ↓↓↓ ここに追加 ↓↓↓
-  const hasMedia = !!mediaStore[key];
   const label = document.getElementById('mpop-change-label');
   const fi = document.getElementById('mpop-file-input');
   label.childNodes[0].textContent = hasMedia ? '変更' : '追加';
   fi.accept = key.includes('aud') ? 'audio/*' : 'image/*';
+  fi.dataset.key = key;  // ← これを追加
   fi.value = '';
   document.getElementById('mpop-del').style.display = hasMedia ? '' : 'none';
   // ↑↑↑ ここまで ↑↑↑
@@ -991,8 +991,10 @@ function deleteMedia(){
 // ↓↓↓ ここに追加 ↓↓↓
 function handleMediaPop(input){
   const file = input.files[0];
-  if(!file || !currentMediaKey) return;
-  const key = currentMediaKey;
+  if(!file) return;
+  // closeMediaPopの前にkeyを保存
+  const key = currentMediaKey || input.dataset.key;
+  if(!key) return;
   const reader = new FileReader();
   reader.onload = e => {
     mediaStore[key] = {dataUrl: e.target.result, name: file.name, type: file.type};
@@ -1000,7 +1002,8 @@ function handleMediaPop(input){
     toast('✅ メディアを設定しました');
   };
   reader.readAsDataURL(file);
-  closeMediaPop();
+  currentMediaKey = null;
+  document.getElementById('media-popover').classList.remove('open');
 }
 // ↑↑↑ ここまで ↑↑↑
 
