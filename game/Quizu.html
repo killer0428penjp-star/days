@@ -961,12 +961,18 @@ function openMediaPop(key,e){
 }
 function closeMediaPop(){document.getElementById('media-popover').classList.remove('open');currentMediaKey=null;}
 function changeMedia(){
-  if(!currentMediaKey)return;
+  if(!currentMediaKey) return;
   closeMediaPop();
-  const isAud=currentMediaKey.includes('aud');
-  const fileId=currentMediaKey+'-file';
-  const fi=document.getElementById(fileId);
-  if(fi){fi.accept=isAud?'audio/*':'image/*';fi.click();}
+  
+  // String() で囲むことで、数値などが来ても安全に文字列として判定します
+  const isAud = String(currentMediaKey).includes('aud');
+  
+  const fileId = currentMediaKey + '-file';
+  const fi = document.getElementById(fileId);
+  if(fi){
+    fi.accept = isAud ? 'audio/*' : 'image/*';
+    fi.click();
+  }
 }
 function deleteMedia(){
   if(!currentMediaKey)return;
