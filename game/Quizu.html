@@ -954,15 +954,16 @@ function openMediaPop(key,e){
   }else{
     prev.innerHTML=`<div style="font-size:12px;color:var(--hint);margin-bottom:8px;text-align:center">まだ設定されていません</div>`;
   }
-  pop.style.top=(rect.bottom+6)+'px';
+pop.style.top=(rect.bottom+6)+'px';
   pop.style.left=Math.min(rect.left,window.innerWidth-220)+'px';
 
   // ↓↓↓ ここに追加 ↓↓↓
+  const hasMedia = !!mediaStore[key];
   const label = document.getElementById('mpop-change-label');
   const fi = document.getElementById('mpop-file-input');
   label.childNodes[0].textContent = hasMedia ? '変更' : '追加';
   fi.accept = key.includes('aud') ? 'audio/*' : 'image/*';
-  fi.dataset.key = key;  // ← これを追加
+  fi.dataset.key = key;
   fi.value = '';
   document.getElementById('mpop-del').style.display = hasMedia ? '' : 'none';
   // ↑↑↑ ここまで ↑↑↑
