@@ -24,7 +24,6 @@
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5}
 
-/* ══ ログイン画面 ══ */
 #auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(135deg,#eef2ff 0%,#f7f6f2 60%,#fdf5e0 100%)}
 .auth-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:36px 32px;width:100%;max-width:400px;box-shadow:var(--shadow-lg)}
 .auth-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:28px}
@@ -49,7 +48,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pw-bar-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
 .pw-bar-lbl{font-size:11px;color:var(--hint)}
 
-/* ══ メイン画面 ══ */
 #main-screen{display:none;flex-direction:row;min-height:100vh}
 .sb{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:2px;z-index:200}
 .sb-logo{width:36px;height:36px;background:var(--a);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
@@ -135,60 +133,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .nores{text-align:center;padding:48px;color:var(--hint);font-size:13px}
 .nores svg{width:36px;height:36px;stroke:var(--hint);fill:none;stroke-width:1.2;margin:0 auto 10px;display:block}
 
-/* ══ フルスクリーンオーバーレイ ══ */
-.fs-overlay{
-  position:fixed;inset:0;z-index:400;
-  background:var(--bg);
-  display:none;flex-direction:column;
-  transform:translateY(100%);
-  transition:transform .35s cubic-bezier(.22,.68,0,1.1);
-}
+.fs-overlay{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column;transform:translateY(100%);transition:transform .35s cubic-bezier(.22,.68,0,1.1)}
 .fs-overlay.open{display:flex;transform:translateY(0)}
-.fs-hdr{
-  height:56px;background:var(--surface);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0;
-}
+.fs-hdr{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;flex-shrink:0}
 .fs-back{width:36px;height:36px;border:none;background:var(--surface2);border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);transition:background .15s;flex-shrink:0}
 .fs-back:hover{background:var(--border)}
 .fs-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
 .fs-title{font-size:1rem;font-weight:700;color:var(--text);flex:1}
 .fs-body{flex:1;overflow-y:auto;padding:24px 20px}
 .fs-body-inner{max-width:720px;margin:0 auto}
-.fs-footer{
-  height:60px;background:var(--surface);border-top:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;gap:10px;flex-shrink:0;justify-content:flex-end;
-}
 
-/* ══ クイズ作成フォーム ══ */
 .form-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px}
 .form-section-title{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
 .fg{margin-bottom:14px}
 .lbl{display:block;font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-
-/* メディア付き入力欄 */
 .inp-with-media{display:flex;align-items:center;gap:6px}
 .inp{flex:1;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:500 14px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;min-width:0}
 .inp:focus{border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
 .textarea-wrap{display:flex;align-items:flex-start;gap:6px}
 .textarea{flex:1;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font:500 13px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;resize:vertical;min-height:70px;line-height:1.6;min-width:0}
 .textarea:focus{border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
-.media-icon-btn{
-  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
-  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--hint);transition:all .15s;flex-shrink:0;position:relative;
-}
+.media-icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--hint);transition:all .15s;flex-shrink:0;position:relative}
 .media-icon-btn:hover{border-color:var(--a);color:var(--a);background:var(--al)}
 .media-icon-btn.has-media{border-color:var(--a);color:var(--a);background:var(--al)}
 .media-icon-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
-.media-icon-btn .media-dot{
-  position:absolute;top:4px;right:4px;width:6px;height:6px;
-  border-radius:50%;background:var(--a);display:none;
-}
+.media-icon-btn .media-dot{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--a);display:none}
 .media-icon-btn.has-media .media-dot{display:block}
 .media-icon-btn-group{display:flex;flex-direction:column;gap:4px}
 .hidden-file{display:none}
 
-/* カテゴリ */
 .cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .co{display:flex;align-items:center;justify-content:center;gap:4px;padding:10px 4px;border:1px solid var(--border);border-radius:8px;font:600 11px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;transition:all .15s;background:var(--surface);flex-direction:column}
 .co:hover{border-color:var(--border2);color:var(--sub)}
@@ -199,7 +172,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .co[data-c=sports].on{background:#047857}.co[data-c=anime].on{background:#b91c1c}
 .co[data-c=other].on{background:#4b5563}
 
-/* 時間 */
 .time-input-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .time-num-input{width:88px;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:600 14px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;text-align:center;transition:border-color .15s}
 .time-num-input:focus{border-color:var(--a)}
@@ -208,8 +180,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .time-inf.on{border-color:var(--a);color:var(--a);background:var(--al)}
 .time-inf svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
 
-/* ══ 問題追加画面 ══ */
-.q-editor-wrap{display:flex;gap:20px;height:calc(100vh - 116px)}
+.q-editor-wrap{display:flex;gap:20px;height:calc(100vh - 56px);overflow:hidden}
 .q-editor-left{flex:1;overflow-y:auto;padding:20px}
 .q-editor-right{width:320px;background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
 .q-list-hdr{padding:16px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -235,7 +206,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .q-add-row button:hover{border-color:var(--a);color:var(--a)}
 .q-add-row button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2}
 
-/* 問題エディタ */
 .type-toggle{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:16px}
 .type-btn{flex:1;height:32px;border:none;background:transparent;font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;border-radius:6px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
 .type-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
@@ -250,11 +220,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .correct-btn:hover{border-color:var(--green);color:var(--green)}
 .correct-btn.on{background:var(--green);border-color:var(--green);color:#fff}
 
-/* メディアプレビューポップオーバー */
+/* ポップオーバー：スマホでも見切れない */
 .media-popover{
   position:fixed;background:var(--surface);border:1px solid var(--border);
   border-radius:12px;padding:12px;box-shadow:var(--shadow-lg);
-  z-index:600;display:none;min-width:200px;
+  z-index:9000;display:none;min-width:200px;max-width:260px;
 }
 .media-popover.open{display:block}
 .media-popover-title{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
@@ -262,13 +232,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .media-preview-audio{width:100%;height:32px;margin-bottom:6px}
 .media-preview-name{font-size:11px;color:var(--sub);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .media-popover-actions{display:flex;gap:6px}
-.media-popover-actions button{flex:1;height:28px;border-radius:7px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s}
+.media-popover-actions label,.media-popover-actions button{flex:1;height:28px;border-radius:7px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .mpop-change{background:var(--surface2);color:var(--sub)}
 .mpop-change:hover{background:var(--border)}
 .mpop-del{background:var(--red-bg);color:var(--red)}
 .mpop-del:hover{background:#fcd5d0}
 
-/* ══ プレイモーダル ══ */
 .ov{position:fixed;inset:0;background:rgba(26,25,23,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
 .ov.open{opacity:1;pointer-events:all}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:26px;width:100%;box-shadow:var(--shadow-lg);transform:translateY(12px) scale(.98);transition:transform .22s cubic-bezier(.22,.68,0,1.2);max-height:92vh;overflow-y:auto}
@@ -325,15 +294,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .result-stat-l{font-size:11px;color:var(--hint);margin-top:2px}
 .result-actions{display:flex;gap:8px;justify-content:center}
 
-/* toast */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--text);color:#fff;padding:8px 18px;border-radius:20px;font:600 13px 'DM Sans',sans-serif;z-index:9999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%)}
 .loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 @media(max-width:768px){
-  .q-editor-wrap{flex-direction:column;height:auto}
-  .q-editor-right{width:100%;border-left:none;border-top:1px solid var(--border)}
+  .q-editor-wrap{flex-direction:column;height:auto;overflow:visible}
+  .q-editor-left{overflow-y:visible}
+  .q-editor-right{width:100%;border-left:none;border-top:1px solid var(--border);height:auto;max-height:50vh}
 }
 @media(max-width:640px){
   .grid{grid-template-columns:1fr}
@@ -474,7 +443,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- ══ クイズ作成 フルスクリーン ══ -->
+<!-- クイズ作成 フルスクリーン -->
 <div class="fs-overlay" id="create-screen">
   <div class="fs-hdr">
     <button class="fs-back" onclick="closeCreateScreen()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -488,7 +457,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
   <div class="fs-body">
     <div class="fs-body-inner">
-      <!-- タイトル -->
       <div class="form-section">
         <div class="form-section-title">基本情報</div>
         <div class="fg">
@@ -505,8 +473,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
                 <div class="media-dot"></div>
               </button>
             </div>
-            <input type="file" accept="image/*" class="hidden-file" id="title-img-file" onchange="handleMedia(this,'title-img')">
-            <input type="file" accept="audio/*" class="hidden-file" id="title-aud-file" onchange="handleMedia(this,'title-aud')">
           </div>
         </div>
         <div class="fg">
@@ -532,8 +498,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           </div>
         </div>
       </div>
-
-      <!-- 問題追加ボタン -->
       <div style="text-align:center;margin-bottom:12px">
         <button class="btn bp" onclick="openQScreen()">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>問題を追加・編集する
@@ -544,7 +508,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- ══ 問題追加 フルスクリーン ══ -->
+<!-- 問題追加 フルスクリーン -->
 <div class="fs-overlay" id="qscreen">
   <div class="fs-hdr">
     <button class="fs-back" onclick="closeQScreen()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -554,13 +518,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </button>
   </div>
   <div class="q-editor-wrap">
-    <!-- 左：エディタ -->
     <div class="q-editor-left" id="q-editor-left">
       <div class="type-toggle">
         <button class="type-btn on" id="type-choice-btn" onclick="setQType('choice')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>選択式</button>
         <button class="type-btn" id="type-text-btn" onclick="setQType('text')"><svg viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>記述式</button>
       </div>
-
       <div class="fg">
         <label class="lbl">問題文 *</label>
         <div class="textarea-wrap">
@@ -579,7 +541,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <input type="file" accept="audio/*" class="hidden-file" id="qaud-file" onchange="handleMedia(this,'qaud')">
         </div>
       </div>
-
       <div id="choice-area">
         <div class="fg">
           <label class="lbl">選択肢（A〜D）*</label>
@@ -632,7 +593,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           </div>
         </div>
       </div>
-
       <div id="text-area" style="display:none">
         <div class="fg">
           <label class="lbl">正解（模範解答）*</label>
@@ -640,7 +600,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div style="font-size:11px;color:var(--hint);margin-top:5px">※ 部分一致で採点します</div>
         </div>
       </div>
-
       <div class="fg">
         <label class="lbl">解説（任意）</label>
         <div class="textarea-wrap">
@@ -660,7 +619,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         </div>
       </div>
     </div>
-
     <!-- 右：問題リスト -->
     <div class="q-editor-right">
       <div class="q-list-hdr">
@@ -677,20 +635,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- メディアポップオーバー -->
+<!-- メディアポップオーバー（単独のdivとして正しく閉じる） -->
 <div class="media-popover" id="media-popover">
   <div class="media-popover-title" id="mpop-title">メディア</div>
   <div id="mpop-preview"></div>
-  <!-- 変更後 -->
-<div class="media-popover-actions">
-  <label class="mpop-change" id="mpop-change-label" style="display:flex;align-items:center;justify-content:center;cursor:pointer">
-    追加
-    <input type="file" id="mpop-file-input" class="hidden-file" onchange="handleMediaPop(this)">
-  </label>
-  <button class="mpop-del" id="mpop-del" onclick="deleteMedia()">削除</button>
+  <div class="media-popover-actions">
+    <label class="mpop-change" id="mpop-change-label">
+      追加
+      <input type="file" id="mpop-file-input" class="hidden-file" onchange="handleMediaPop(this)">
+    </label>
+    <button class="mpop-del" id="mpop-del" onclick="deleteMedia()">削除</button>
+  </div>
 </div>
-</div>  ← これを追加（media-popoverの閉じタグ）
-<!-- プレイモーダル -->
+
+<!-- プレイモーダル（media-popoverの外に正しく配置） -->
 <div class="ov" id="play-ov" onclick="ovClick('play-ov',event)">
   <div class="modal" style="max-width:540px">
     <div id="play-game">
@@ -766,7 +724,6 @@ const tl=v=>v===0?'∞':v+'秒';
 function ago(ts){const m=Math.floor((Date.now()-new Date(ts).getTime())/60000);if(m<1)return'たった今';if(m<60)return m+'分前';const h=Math.floor(m/60);if(h<24)return h+'時間前';return Math.floor(h/24)+'日前';}
 function getUserName(){return currentUser?.user_metadata?.display_name||currentUser?.email?.split('@')[0]||'ユーザー';}
 
-// 画面切り替え
 function showAuthScreen(){document.getElementById('auth-screen').style.display='flex';document.getElementById('main-screen').style.display='none';}
 function showMainScreen(){
   document.getElementById('auth-screen').style.display='none';
@@ -778,7 +735,6 @@ function showMainScreen(){
   document.getElementById('um-name').textContent=name;document.getElementById('um-email').textContent=email;
 }
 
-// 認証
 function switchAuthTab(tab){
   currentAuthTab=tab;
   document.getElementById('atab-login').classList.toggle('on',tab==='login');
@@ -824,7 +780,6 @@ async function doAuth(){
 }
 async function doLogout(){await sb.auth.signOut();currentUser=null;onlineQuizzes=[];showAuthScreen();toast('👋 ログアウトしました');}
 
-// データ
 async function loadOnlineQuizzes(){
   try{
     let q=sb.from('quizzes').select('*').order('created_at',{ascending:false});
@@ -835,7 +790,6 @@ async function loadOnlineQuizzes(){
   }catch(e){console.error(e);}
 }
 
-// カード
 function cardHTML(z){
   const ci=CATS[z.cat]||{};const isMine=currentUser&&z.userId===currentUser.id;
   return`<div class="card">
@@ -886,7 +840,6 @@ function closeUserMenu(){document.getElementById('user-menu').classList.remove('
 document.addEventListener('click',e=>{
   const m=document.getElementById('user-menu');
   if(m&&m.classList.contains('open')&&!m.contains(e.target)&&e.target.id!=='sb-user-btn')closeUserMenu();
-  // ポップオーバーを閉じる
   const pop=document.getElementById('media-popover');
   if(pop&&pop.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest('.media-icon-btn'))closeMediaPop();
 });
@@ -895,7 +848,6 @@ function ovClick(id,e){if(e.target===document.getElementById(id))closeOv(id);}
 function openOv(id){document.getElementById(id).classList.add('open');}
 function closeOv(id){document.getElementById(id).classList.remove('open');}
 
-// ══ フルスクリーン ══
 function openCreateScreen(){
   mCat=null;mInfinite=false;draftQs=[];
   document.getElementById('m-title').value='';
@@ -904,7 +856,6 @@ function openCreateScreen(){
   document.getElementById('m-time-sec').style.opacity='1';
   document.getElementById('time-inf-btn').classList.remove('on');
   document.querySelectorAll('.co').forEach(el=>el.classList.remove('on'));
-  // メディアリセット
   ['title-img','title-aud'].forEach(k=>{delete mediaStore[k];updateMediaBtn(k);});
   updateQCountBadge();
   const el=document.getElementById('create-screen');
@@ -918,7 +869,6 @@ function closeCreateScreen(){
 }
 
 function openQScreen(){
-  // 新規問題で開く
   currentQIdx=null;
   resetQEditor();
   const el=document.getElementById('qscreen');
@@ -937,7 +887,7 @@ function updateQCountBadge(){
   document.getElementById('q-count-badge').textContent=draftQs.length+'問';
 }
 
-// ══ メディアポップオーバー ══
+// メディアポップオーバー（スマホ対応：画面外にはみ出さない）
 function openMediaPop(key,e){
   e.stopPropagation();
   currentMediaKey=key;
@@ -952,38 +902,49 @@ function openMediaPop(key,e){
     const isAud=mediaStore[key].type.startsWith('audio/');
     if(isImg)prev.innerHTML=`<img class="media-preview-thumb" src="${mediaStore[key].dataUrl}" alt=""><div class="media-preview-name">${esc(mediaStore[key].name)}</div>`;
     else if(isAud)prev.innerHTML=`<audio class="media-preview-audio" controls src="${mediaStore[key].dataUrl}"></audio><div class="media-preview-name">${esc(mediaStore[key].name)}</div>`;
+    else prev.innerHTML='';
   }else{
     prev.innerHTML=`<div style="font-size:12px;color:var(--hint);margin-bottom:8px;text-align:center">まだ設定されていません</div>`;
   }
-const popH = 180;
-const topPos = rect.bottom + 6 + popH > window.innerHeight
-  ? rect.top - popH - 6
-  : rect.bottom + 6;
-pop.style.top = Math.max(6, topPos) + 'px';
-pop.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
-  // ↓↓↓ ここに追加 ↓↓↓
-  const hasMedia = !!mediaStore[key];
-  const label = document.getElementById('mpop-change-label');
-  const fi = document.getElementById('mpop-file-input');
-  label.childNodes[0].textContent = hasMedia ? '変更' : '追加';
-  fi.accept = key.includes('aud') ? 'audio/*' : 'image/*';
-  fi.dataset.key = key;
-  fi.value = '';
-  document.getElementById('mpop-del').style.display = hasMedia ? '' : 'none';
-  // ↑↑↑ ここまで ↑↑↑
+
+  // スマホでも見切れないよう位置を計算
+  pop.style.visibility='hidden';
+  pop.style.display='block';
+  const popW=pop.offsetWidth||220;
+  const popH=pop.offsetHeight||120;
+  pop.style.display='none';
+  pop.style.visibility='';
+
+  const margin=8;
+  let left=rect.left;
+  let top=rect.bottom+margin;
+
+  // 右端はみ出し防止
+  if(left+popW>window.innerWidth-margin) left=window.innerWidth-popW-margin;
+  if(left<margin) left=margin;
+
+  // 下端はみ出し → 上に表示
+  if(top+popH>window.innerHeight-margin) top=rect.top-popH-margin;
+  if(top<margin) top=margin;
+
+  pop.style.left=left+'px';
+  pop.style.top=top+'px';
+
+  // ボタン表示切り替え
+  const hasMedia=!!mediaStore[key];
+  const label=document.getElementById('mpop-change-label');
+  const fi=document.getElementById('mpop-file-input');
+  label.childNodes[0].textContent=hasMedia?'変更':'追加';
+  fi.accept=key.includes('aud')?'audio/*':'image/*';
+  fi.dataset.key=key;
+  fi.value='';
+  document.getElementById('mpop-del').style.display=hasMedia?'':'none';
 
   pop.classList.add('open');
 }
-function closeMediaPop(){document.getElementById('media-popover').classList.remove('open');currentMediaKey=null;}
-function changeMedia(){
-  if(!currentMediaKey) return;
-  const key = currentMediaKey;
-  closeMediaPop();
-  
-  setTimeout(() => {
-    const fi = document.getElementById(key + '-file');
-    if(fi) fi.click();
-  }, 100);
+function closeMediaPop(){
+  document.getElementById('media-popover').classList.remove('open');
+  currentMediaKey=null;
 }
 function deleteMedia(){
   if(!currentMediaKey)return;
@@ -992,26 +953,21 @@ function deleteMedia(){
   closeMediaPop();
   toast('🗑️ 削除しました');
 }
-
-// ↓↓↓ ここに追加 ↓↓↓
 function handleMediaPop(input){
-  const file = input.files[0];
-  if(!file) return;
-  // closeMediaPopの前にkeyを保存
-  const key = currentMediaKey || input.dataset.key;
-  if(!key) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    mediaStore[key] = {dataUrl: e.target.result, name: file.name, type: file.type};
+  const file=input.files[0];
+  if(!file)return;
+  const key=currentMediaKey||input.dataset.key;
+  if(!key)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    mediaStore[key]={dataUrl:e.target.result,name:file.name,type:file.type};
     updateMediaBtn(key);
     toast('✅ メディアを設定しました');
   };
   reader.readAsDataURL(file);
-  currentMediaKey = null;
+  currentMediaKey=null;
   document.getElementById('media-popover').classList.remove('open');
 }
-// ↑↑↑ ここまで ↑↑↑
-
 function handleMedia(input,key){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
@@ -1019,12 +975,10 @@ function handleMedia(input,key){
   reader.readAsDataURL(file);
 }
 function updateMediaBtn(key){
-  const btnId='btn-'+key;
-  const btn=document.getElementById(btnId);
+  const btn=document.getElementById('btn-'+key);
   if(btn)btn.classList.toggle('has-media',!!mediaStore[key]);
 }
 
-// ══ 問題エディタ ══
 function setQType(t){
   qType=t;
   document.getElementById('type-choice-btn').classList.toggle('on',t==='choice');
@@ -1134,7 +1088,6 @@ function renderQList(){
 }
 function removeQ(i,e){e.stopPropagation();draftQs.splice(i,1);if(currentQIdx===i){currentQIdx=null;resetQEditor();}else if(currentQIdx>i)currentQIdx--;renderQList();updateQCountBadge();toast('🗑️ 削除しました');}
 
-// 試しプレイ
 function startTrialPlay(){
   if(!draftQs.length)return toast('❗ 問題を1つ以上追加してください');
   const title=document.getElementById('m-title').value.trim()||'プレビュークイズ';
@@ -1172,7 +1125,6 @@ async function delQuiz(id,e){
   await loadOnlineQuizzes();render();toast('🗑️ 削除しました');
 }
 
-// プレイ
 function startPlay(id){
   const z=onlineQuizzes.find(z=>z.id===id);
   if(!z||!z.questions||!z.questions.length)return toast('❗ 問題がありません');
@@ -1260,7 +1212,6 @@ function showResult(){
 function closePlay(){clearInterval(timerInterval);closeOv('play-ov');}
 function restartPlay(){if(!playQuiz)return;startPlayFromObj(playQuiz);}
 
-// タイマー
 function startTimer(sec){
   clearInterval(timerInterval);
   if(sec===0){document.getElementById('timer-wrap').style.display='none';return;}
@@ -1286,11 +1237,9 @@ function timeUp(){
   const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuiz.questions.length?'次の問題 →':'結果を見る';
 }
 
-// toast
 let tt;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2800);}
 
-// 初期化
 (async()=>{
   const{data:{session}}=await sb.auth.getSession();
   if(session&&session.user){currentUser=session.user;await loadOnlineQuizzes();showMainScreen();render();}
