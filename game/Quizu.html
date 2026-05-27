@@ -689,6 +689,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </label>
   <button class="mpop-del" id="mpop-del" onclick="deleteMedia()">削除</button>
 </div>
+</div>  ← これを追加（media-popoverの閉じタグ）
 <!-- プレイモーダル -->
 <div class="ov" id="play-ov" onclick="ovClick('play-ov',event)">
   <div class="modal" style="max-width:540px">
@@ -839,8 +840,8 @@ function cardHTML(z){
   const ci=CATS[z.cat]||{};const isMine=currentUser&&z.userId===currentUser.id;
   return`<div class="card">
     <div class="card-actions">
-      <button class="icon-btn ib-play" onclick="startPlay('${z.id}')" title="プレイ"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg></button>
-      ${isMine?`<button class="icon-btn ib-del" onclick="delQuiz('${z.id}',event)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
+      <button class="icon-btn ib-play" onclick="event.stopPropagation();startPlay('${z.id}')" title="プレイ"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg></button>
+      ${isMine?`<button class="icon-btn ib-del" onclick="event.stopPropagation();delQuiz('${z.id}',event)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
     </div>
     <div class="card-badge-row"><div class="card-cat ${ci.c}">${ci.e} ${ci.l}</div></div>
     <div class="card-title">${esc(z.title)}</div>
@@ -954,8 +955,12 @@ function openMediaPop(key,e){
   }else{
     prev.innerHTML=`<div style="font-size:12px;color:var(--hint);margin-bottom:8px;text-align:center">まだ設定されていません</div>`;
   }
-pop.style.top=(rect.bottom+6)+'px';
-  pop.style.left=Math.min(rect.left,window.innerWidth-220)+'px';
+const popH = 180;
+const topPos = rect.bottom + 6 + popH > window.innerHeight
+  ? rect.top - popH - 6
+  : rect.bottom + 6;
+pop.style.top = Math.max(6, topPos) + 'px';
+pop.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
   // ↓↓↓ ここに追加 ↓↓↓
   const hasMedia = !!mediaStore[key];
   const label = document.getElementById('mpop-change-label');
