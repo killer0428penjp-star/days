@@ -962,16 +962,17 @@ function openMediaPop(key,e){
 function closeMediaPop(){document.getElementById('media-popover').classList.remove('open');currentMediaKey=null;}
 function changeMedia(){
   if(!currentMediaKey) return;
+  
+  const key = currentMediaKey;   // closeする前に保存
   closeMediaPop();
   
-  // String() で囲むことで、数値などが来ても安全に文字列として判定します
-  const isAud = String(currentMediaKey).includes('aud');
+  const isAud = key.includes('aud');
+  const fi = document.getElementById(key + '-file');
   
-  const fileId = currentMediaKey + '-file';
-  const fi = document.getElementById(fileId);
   if(fi){
     fi.accept = isAud ? 'audio/*' : 'image/*';
-    fi.click();
+    // setTimeout で非同期にすることでイベント干渉を回避
+    setTimeout(() => fi.click(), 50);
   }
 }
 function deleteMedia(){
