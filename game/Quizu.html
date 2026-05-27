@@ -681,12 +681,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <div class="media-popover" id="media-popover">
   <div class="media-popover-title" id="mpop-title">メディア</div>
   <div id="mpop-preview"></div>
-  <div class="media-popover-actions">
-    <button class="mpop-change" onclick="changeMedia()">変更</button>
-    <button class="mpop-del" onclick="deleteMedia()">削除</button>
-  </div>
+  <!-- 変更後 -->
+<div class="media-popover-actions">
+  <label class="mpop-change" id="mpop-change-label" style="display:flex;align-items:center;justify-content:center;cursor:pointer">
+    追加
+    <input type="file" id="mpop-file-input" class="hidden-file" onchange="handleMediaPop(this)">
+  </label>
+  <button class="mpop-del" onclick="deleteMedia()">削除</button>
 </div>
-
 <!-- プレイモーダル -->
 <div class="ov" id="play-ov" onclick="ovClick('play-ov',event)">
   <div class="modal" style="max-width:540px">
@@ -941,10 +943,8 @@ function openMediaPop(key,e){
   const pop=document.getElementById('media-popover');
   const btn=e.currentTarget;
   const rect=btn.getBoundingClientRect();
-  // タイトル
   const titles={'title-img':'タイトル画像','title-aud':'タイトル音声','qimg':'問題画像','qaud':'問題音声','cha-img':'選択肢A画像','chb-img':'選択肢B画像','chc-img':'選択肢C画像','chd-img':'選択肢D画像','expimg':'解説画像','expaud':'解説音声'};
   document.getElementById('mpop-title').textContent=titles[key]||key;
-  // プレビュー
   const prev=document.getElementById('mpop-preview');
   if(mediaStore[key]){
     const isImg=mediaStore[key].type.startsWith('image/');
@@ -954,26 +954,31 @@ function openMediaPop(key,e){
   }else{
     prev.innerHTML=`<div style="font-size:12px;color:var(--hint);margin-bottom:8px;text-align:center">まだ設定されていません</div>`;
   }
-  // 位置調整
   pop.style.top=(rect.bottom+6)+'px';
   pop.style.left=Math.min(rect.left,window.innerWidth-220)+'px';
+
+  // ↓↓↓ ここに追加 ↓↓↓
+  const hasMedia = !!mediaStore[key];
+  const label = document.getElementById('mpop-change-label');
+  const fi = document.getElementById('mpop-file-input');
+  label.childNodes[0].textContent = hasMedia ? '変更' : '追加';
+  fi.accept = key.includes('aud') ? 'audio/*' : 'image/*';
+  fi.value = '';
+  document.getElementById('mpop-del').style.display = hasMedia ? '' : 'none';
+  // ↑↑↑ ここまで ↑↑↑
+
   pop.classList.add('open');
 }
 function closeMediaPop(){document.getElementById('media-popover').classList.remove('open');currentMediaKey=null;}
 function changeMedia(){
   if(!currentMediaKey) return;
-  
-  const key = currentMediaKey;   // closeする前に保存
+  const key = currentMediaKey;
   closeMediaPop();
   
-  const isAud = key.includes('aud');
-  const fi = document.getElementById(key + '-file');
-  
-  if(fi){
-    fi.accept = isAud ? 'audio/*' : 'image/*';
-    // setTimeout で非同期にすることでイベント干渉を回避
-    setTimeout(() => fi.click(), 50);
-  }
+  setTimeout(() => {
+    const fi = document.getElementById(key + '-file');
+    if(fi) fi.click();
+  }, 100);
 }
 function deleteMedia(){
   if(!currentMediaKey)return;
@@ -982,6 +987,23 @@ function deleteMedia(){
   closeMediaPop();
   toast('🗑️ 削除しました');
 }
+
+// ↓↓↓ ここに追加 ↓↓↓
+function handleMediaPop(input){
+  const file = input.files[0];
+  if(!file || !currentMediaKey) return;
+  const key = currentMediaKey;
+  const reader = new FileReader();
+  reader.onload = e => {
+    mediaStore[key] = {dataUrl: e.target.result, name: file.name, type: file.type};
+    updateMediaBtn(key);
+    toast('✅ メディアを設定しました');
+  };
+  reader.readAsDataURL(file);
+  closeMediaPop();
+}
+// ↑↑↑ ここまで ↑↑↑
+
 function handleMedia(input,key){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
