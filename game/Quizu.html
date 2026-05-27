@@ -83,6 +83,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .btn{height:34px;padding:0 14px;border-radius:8px;font:600 13px 'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .bp{background:var(--a);color:#fff}.bp:hover{background:var(--a2)}
 .bg{background:var(--surface);color:var(--sub);border:1px solid var(--border)}.bg:hover{border-color:var(--border2);color:var(--text)}
+.bv{background:#7c3aed;color:#fff}.bv:hover{background:#6d28d9}
 .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.2}
 .btn-sm{height:28px;padding:0 10px;font-size:12px}
 .profile-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px}
@@ -128,6 +129,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .icon-btn{width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .icon-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
 .ib-play{background:var(--a);color:#fff}.ib-play:hover{background:var(--a2)}
+.ib-battle{background:#7c3aed;color:#fff}.ib-battle:hover{background:#6d28d9}
 .ib-del{background:var(--red-bg);color:var(--red)}.ib-del:hover{background:#fcd5d0}
 .empty{background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius-lg);padding:52px 24px;text-align:center}
 .empty svg{width:36px;height:36px;stroke:var(--hint);fill:none;stroke-width:1.2;margin:0 auto 12px;display:block}
@@ -154,41 +156,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .fs-title{font-size:1rem;font-weight:700;color:var(--text);flex:1}
 .fs-body{flex:1;overflow-y:auto;padding:24px 20px}
 .fs-body-inner{max-width:720px;margin:0 auto}
-.fs-footer{
-  height:60px;background:var(--surface);border-top:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;gap:10px;flex-shrink:0;justify-content:flex-end;
-}
 
 /* ══ クイズ作成フォーム ══ */
 .form-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px}
 .form-section-title{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px}
 .fg{margin-bottom:14px}
 .lbl{display:block;font-size:11px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-
-/* メディア付き入力欄 */
 .inp-with-media{display:flex;align-items:center;gap:6px}
 .inp{flex:1;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:500 14px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;min-width:0}
 .inp:focus{border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
 .textarea-wrap{display:flex;align-items:flex-start;gap:6px}
 .textarea{flex:1;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font:500 13px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;transition:border-color .15s;resize:vertical;min-height:70px;line-height:1.6;min-width:0}
 .textarea:focus{border-color:var(--a);box-shadow:0 0 0 3px var(--al)}
-.media-icon-btn{
-  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
-  background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--hint);transition:all .15s;flex-shrink:0;position:relative;
-}
+.media-icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--hint);transition:all .15s;flex-shrink:0;position:relative}
 .media-icon-btn:hover{border-color:var(--a);color:var(--a);background:var(--al)}
 .media-icon-btn.has-media{border-color:var(--a);color:var(--a);background:var(--al)}
 .media-icon-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8}
-.media-icon-btn .media-dot{
-  position:absolute;top:4px;right:4px;width:6px;height:6px;
-  border-radius:50%;background:var(--a);display:none;
-}
+.media-icon-btn .media-dot{position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--a);display:none}
 .media-icon-btn.has-media .media-dot{display:block}
 .media-icon-btn-group{display:flex;flex-direction:column;gap:4px}
 .hidden-file{display:none}
-
-/* カテゴリ */
 .cgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .co{display:flex;align-items:center;justify-content:center;gap:4px;padding:10px 4px;border:1px solid var(--border);border-radius:8px;font:600 11px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;transition:all .15s;background:var(--surface);flex-direction:column}
 .co:hover{border-color:var(--border2);color:var(--sub)}
@@ -198,8 +185,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .co[data-c=sns].on{background:#be185d}.co[data-c=music].on{background:#b45309}
 .co[data-c=sports].on{background:#047857}.co[data-c=anime].on{background:#b91c1c}
 .co[data-c=other].on{background:#4b5563}
-
-/* 時間 */
 .time-input-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .time-num-input{width:88px;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:600 14px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;text-align:center;transition:border-color .15s}
 .time-num-input:focus{border-color:var(--a)}
@@ -207,6 +192,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .time-inf{display:flex;align-items:center;gap:4px;padding:5px 11px;border:1px solid var(--border);border-radius:8px;font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;background:var(--surface);transition:all .15s}
 .time-inf.on{border-color:var(--a);color:var(--a);background:var(--al)}
 .time-inf svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* 問題点数 */
+.score-input-wrap{display:flex;align-items:center;gap:8px}
+.score-num-input{width:80px;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:600 14px 'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;text-align:center;transition:border-color .15s}
+.score-num-input:focus{border-color:var(--gold)}
+.score-presets{display:flex;gap:5px;flex-wrap:wrap}
+.score-preset-btn{padding:4px 10px;border:1px solid var(--border);border-radius:6px;font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;background:var(--surface);transition:all .15s}
+.score-preset-btn:hover{border-color:var(--gold);color:var(--gold)}
+.score-preset-btn.on{background:var(--gold);border-color:var(--gold);color:#fff}
 
 /* ══ 問題追加画面 ══ */
 .q-editor-wrap{display:flex;gap:20px;height:calc(100vh - 116px)}
@@ -227,6 +221,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .qt-choice{background:var(--blue-bg);color:var(--blue)}.qt-text{background:var(--green-bg);color:var(--green)}
 .q-ans{font-size:11px;color:var(--green);display:flex;align-items:center;gap:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .q-ans svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2.5;flex-shrink:0}
+.q-score-badge{font-size:10px;color:var(--gold);font-weight:700;margin-left:auto;flex-shrink:0}
 .q-del-btn{width:22px;height:22px;border-radius:5px;border:none;background:transparent;color:var(--hint);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
 .q-del-btn:hover{background:var(--red-bg);color:var(--red)}
 .q-del-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
@@ -234,8 +229,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .q-add-row button{width:100%;height:36px;border:1.5px dashed var(--border);border-radius:8px;background:transparent;color:var(--hint);font:600 12px 'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:all .15s}
 .q-add-row button:hover{border-color:var(--a);color:var(--a)}
 .q-add-row button svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2}
-
-/* 問題エディタ */
 .type-toggle{display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:3px;margin-bottom:16px}
 .type-btn{flex:1;height:32px;border:none;background:transparent;font:600 12px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;border-radius:6px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px}
 .type-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
@@ -249,13 +242,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .correct-btn{padding:5px 14px;border:1px solid var(--border);border-radius:7px;font:600 13px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;background:var(--surface);transition:all .15s}
 .correct-btn:hover{border-color:var(--green);color:var(--green)}
 .correct-btn.on{background:var(--green);border-color:var(--green);color:#fff}
-
-/* メディアプレビューポップオーバー */
-.media-popover{
-  position:fixed;background:var(--surface);border:1px solid var(--border);
-  border-radius:12px;padding:12px;box-shadow:var(--shadow-lg);
-  z-index:600;display:none;min-width:200px;
-}
+.media-popover{position:fixed;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;box-shadow:var(--shadow-lg);z-index:600;display:none;min-width:200px}
 .media-popover.open{display:block}
 .media-popover-title{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
 .media-preview-thumb{width:100%;max-height:120px;object-fit:cover;border-radius:7px;border:1px solid var(--border);display:block;margin-bottom:6px}
@@ -263,12 +250,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .media-preview-name{font-size:11px;color:var(--sub);margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .media-popover-actions{display:flex;gap:6px}
 .media-popover-actions button{flex:1;height:28px;border-radius:7px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s}
-.mpop-change{background:var(--surface2);color:var(--sub)}
+.mpop-change{background:var(--surface2);color:var(--sub);flex:1;height:28px;border-radius:7px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;border:none;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .mpop-change:hover{background:var(--border)}
 .mpop-del{background:var(--red-bg);color:var(--red)}
 .mpop-del:hover{background:#fcd5d0}
 
-/* ══ プレイモーダル ══ */
+/* ══ オンライン対戦 ══ */
 .ov{position:fixed;inset:0;background:rgba(26,25,23,.5);backdrop-filter:blur(4px);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
 .ov.open{opacity:1;pointer-events:all}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:26px;width:100%;box-shadow:var(--shadow-lg);transform:translateY(12px) scale(.98);transition:transform .22s cubic-bezier(.22,.68,0,1.2);max-height:92vh;overflow-y:auto}
@@ -277,6 +264,43 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .mt{font-size:1rem;font-weight:700;color:var(--text)}
 .mc{width:28px;height:28px;border:none;background:var(--surface2);border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--sub);transition:background .15s}
 .mc:hover{background:var(--border)}.mc svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ロビー */
+.lobby-screen{display:none}.lobby-screen.show{display:block}
+.room-code-display{background:linear-gradient(135deg,#2d5be3,#7c3aed);border-radius:var(--radius-lg);padding:20px;text-align:center;margin-bottom:20px;color:#fff}
+.room-code-label{font-size:11px;font-weight:600;opacity:.8;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.room-code-val{font-family:'DM Serif Display',serif;font-size:2.5rem;letter-spacing:8px;font-weight:700}
+.room-code-hint{font-size:11px;opacity:.7;margin-top:4px}
+.lobby-players{margin-bottom:16px}
+.lobby-players-title{font-size:12px;font-weight:600;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.lobby-player-list{display:flex;flex-direction:column;gap:6px}
+.lobby-player-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border-radius:9px;border:1px solid var(--border)}
+.lobby-player-ava{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.lobby-player-name{font-size:13px;font-weight:600;color:var(--text);flex:1}
+.lobby-player-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px}
+.badge-leader{background:#fef3c7;color:#b45309}
+.badge-ready{background:var(--green-bg);color:var(--green)}
+.badge-waiting{background:var(--surface2);color:var(--hint)}
+.lobby-quiz-info{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:16px}
+.lobby-quiz-info-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.lobby-quiz-info-sub{font-size:11px;color:var(--hint)}
+.lobby-settings{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:16px}
+.lobby-settings-title{font-size:11px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.lobby-setting-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.lobby-setting-row:last-child{margin-bottom:0}
+.lobby-setting-label{font-size:12px;font-weight:600;color:var(--sub);flex:1}
+.lobby-setting-val{font-size:13px;font-weight:700;color:var(--text);width:40px;text-align:right}
+.slider{-webkit-appearance:none;appearance:none;width:120px;height:4px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--a);cursor:pointer}
+.order-toggle{display:flex;background:var(--border);border-radius:6px;padding:2px}
+.order-opt{padding:3px 9px;border-radius:5px;font:600 11px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;border:none;background:transparent;transition:all .15s}
+.order-opt.on{background:var(--surface);color:var(--a);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+
+/* ルーム参加 */
+.join-code-inp{width:100%;height:52px;border:2px solid var(--border);border-radius:10px;font:700 24px 'DM Sans',sans-serif;color:var(--text);text-align:center;letter-spacing:6px;text-transform:uppercase;outline:none;transition:border-color .15s}
+.join-code-inp:focus{border-color:var(--a)}
+
+/* ══ プレイモーダル ══ */
 .play-progress{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .progress-bar{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
 .progress-fill{height:100%;background:var(--a);border-radius:3px;transition:width .4s ease}
@@ -287,7 +311,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .play-timer-num{font-size:13px;font-weight:700;color:var(--text);width:32px;text-align:right;font-variant-numeric:tabular-nums}
 .play-timer-num.warn{color:var(--red)}
 .play-cat-label{font-size:11px;font-weight:700;color:var(--a);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
-.play-quiz-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:16px;line-height:1.4}
+.play-quiz-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.4}
+/* 右上問題カウンター */
+.play-q-counter{position:absolute;top:12px;right:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:4px 10px;font:700 13px 'DM Sans',sans-serif;color:var(--text);font-variant-numeric:tabular-nums}
 .play-q-num{font-size:11px;font-weight:600;color:var(--hint);margin-bottom:8px}
 .play-q-text{font-size:1rem;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:14px}
 .play-media-img{max-width:100%;max-height:180px;border-radius:9px;margin-bottom:10px;object-fit:contain;border:1px solid var(--border)}
@@ -313,6 +339,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .play-feedback.ng{background:var(--red-bg);color:var(--red);border:1px solid #fecaca}
 .play-next{width:100%;height:42px;margin-top:14px;border-radius:9px;border:none;background:var(--a);color:#fff;font:700 14px 'DM Sans',sans-serif;cursor:pointer;transition:background .15s;display:none}
 .play-next.show{display:block}.play-next:hover{background:var(--a2)}
+
+/* スコアボード（プレイ中下部） */
+.play-scoreboard{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}
+.play-scoreboard-title{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.play-scoreboard-list{display:flex;gap:8px;flex-wrap:wrap}
+.play-score-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:8px 10px;min-width:60px}
+.play-score-item.me{border-color:var(--a);background:var(--al)}
+.play-score-ava{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff}
+.play-score-name{font-size:10px;font-weight:600;color:var(--sub);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60px}
+.play-score-pts{font-size:13px;font-weight:700;color:var(--text)}
+.play-score-pts.updated{color:var(--green);animation:scoreup .5s ease}
+@keyframes scoreup{0%{transform:scale(1.3)}100%{transform:scale(1)}}
+
+/* 結果・ランキング */
 .result-screen{display:none;text-align:center;padding:8px 0}
 .result-screen.show{display:block}
 .result-score{font-family:'DM Serif Display',serif;font-size:3.5rem;color:var(--a);line-height:1;margin-bottom:4px}
@@ -325,11 +365,37 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .result-stat-l{font-size:11px;color:var(--hint);margin-top:2px}
 .result-actions{display:flex;gap:8px;justify-content:center}
 
+/* マルチプレイヤーランキング演出 */
+.ranking-screen{display:none;text-align:center;padding:8px 0}
+.ranking-screen.show{display:block}
+.ranking-title{font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--text);margin-bottom:6px}
+.ranking-subtitle{font-size:13px;color:var(--hint);margin-bottom:24px}
+.ranking-list{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;text-align:left}
+.ranking-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);transform:translateX(120%);opacity:0;transition:all .5s cubic-bezier(.22,.68,0,1.1)}
+.ranking-item.show{transform:translateX(0);opacity:1}
+.ranking-item.rank-1{background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#f59e0b}
+.ranking-item.rank-2{background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border-color:#94a3b8}
+.ranking-item.rank-3{background:linear-gradient(135deg,#fef0e6,#fed7aa);border-color:#f97316}
+.ranking-medal{font-size:1.5rem;width:32px;text-align:center;flex-shrink:0}
+.ranking-rank-num{font-size:1.1rem;font-weight:700;color:var(--hint);width:24px;text-align:center;flex-shrink:0}
+.ranking-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.ranking-name{font-size:14px;font-weight:700;color:var(--text);flex:1}
+.ranking-stats{text-align:right}
+.ranking-pts{font-size:1.1rem;font-weight:700;color:var(--a)}
+.ranking-correct{font-size:11px;color:var(--hint)}
+.ranking-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.confetti-container{position:fixed;inset:0;pointer-events:none;z-index:9000;overflow:hidden}
+.confetti-piece{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettifall linear forwards}
+@keyframes confettifall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
 /* toast */
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--text);color:#fff;padding:8px 18px;border-radius:20px;font:600 13px 'DM Sans',sans-serif;z-index:9999;opacity:0;transition:all .25s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%)}
 .loading-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
+
+/* モーダルのrelative */
+.modal-relative{position:relative}
 
 @media(max-width:768px){
   .q-editor-wrap{flex-direction:column;height:auto}
@@ -396,6 +462,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="sb-btn" id="sb1" onclick="goTab(1)">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>作品</span>
     </button>
+    <button class="sb-btn" id="sb2" onclick="goTab(2)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>対戦</span>
+    </button>
     <div class="sb-sp"></div>
     <button class="sb-user" id="sb-user-btn" onclick="toggleUserMenu()">?</button>
   </aside>
@@ -433,6 +502,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="tab" id="t1" onclick="goTab(1)">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>自分の作品</span>
       </button>
+      <button class="tab" id="t2" onclick="goTab(2)">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>オンライン対戦</span>
+      </button>
     </div>
     <div class="cats" id="cat-bar">
       <button class="pill p-all on" data-c="all" onclick="setCat('all')">すべて</button>
@@ -445,6 +517,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <button class="pill p-other" data-c="other" onclick="setCat('other')"><span>✨</span>その他</button>
     </div>
     <div class="content">
+      <!-- みんなのクイズ -->
       <div class="pane on" id="p0">
         <div class="ph"><div class="pt" id="com-label">みんなのクイズ</div></div>
         <div class="grid" id="com-grid"></div>
@@ -458,6 +531,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           該当するクイズが見つかりませんでした
         </div>
       </div>
+      <!-- 自分の作品 -->
       <div class="pane" id="p1">
         <div class="ph">
           <div class="pt">自分の作品 <span id="mine-cnt" style="color:var(--hint);font-weight:400">(0)</span></div>
@@ -468,6 +542,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           <p>まだ作品がありません。</p>
           <button class="btn bp" style="margin:0 auto" onclick="openCreateScreen()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>最初のクイズを作る</button>
+        </div>
+      </div>
+      <!-- オンライン対戦 -->
+      <div class="pane" id="p2">
+        <div style="max-width:480px;margin:0 auto;padding-top:8px">
+          <div style="text-align:center;margin-bottom:28px">
+            <div style="font-size:2rem;margin-bottom:8px">🎮</div>
+            <div style="font-family:'DM Serif Display',serif;font-size:1.5rem;color:var(--text);margin-bottom:6px">オンライン対戦</div>
+            <div style="font-size:13px;color:var(--hint)">友達と一緒にクイズで対決しよう！</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <button class="btn bv" style="height:52px;font-size:15px;border-radius:12px;justify-content:center" onclick="openCreateRoomModal()">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              部屋を作る（リーダー）
+            </button>
+            <button class="btn bg" style="height:52px;font-size:15px;border-radius:12px;justify-content:center" onclick="openJoinRoomModal()">
+              <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              部屋に参加する
+            </button>
+          </div>
+          <div style="margin-top:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px">
+            <div style="font-size:12px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">遊び方</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">1️⃣</span><div style="font-size:13px;color:var(--sub)"><b>リーダー</b>が部屋を作り、クイズを選ぶ</div></div>
+              <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">2️⃣</span><div style="font-size:13px;color:var(--sub)">友達に<b>ルームコード</b>を教える</div></div>
+              <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">3️⃣</span><div style="font-size:13px;color:var(--sub)">全員がロビーに集まったら<b>スタート！</b></div></div>
+              <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">4️⃣</span><div style="font-size:13px;color:var(--sub)">最後に<b>ランキング発表！</b>🏆</div></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -488,7 +591,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
   <div class="fs-body">
     <div class="fs-body-inner">
-      <!-- タイトル -->
       <div class="form-section">
         <div class="form-section-title">基本情報</div>
         <div class="fg">
@@ -532,8 +634,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           </div>
         </div>
       </div>
-
-      <!-- 問題追加ボタン -->
       <div style="text-align:center;margin-bottom:12px">
         <button class="btn bp" onclick="openQScreen()">
           <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>問題を追加・編集する
@@ -554,13 +654,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </button>
   </div>
   <div class="q-editor-wrap">
-    <!-- 左：エディタ -->
     <div class="q-editor-left" id="q-editor-left">
       <div class="type-toggle">
         <button class="type-btn on" id="type-choice-btn" onclick="setQType('choice')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>選択式</button>
         <button class="type-btn" id="type-text-btn" onclick="setQType('text')"><svg viewBox="0 0 24 24"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>記述式</button>
       </div>
-
       <div class="fg">
         <label class="lbl">問題文 *</label>
         <div class="textarea-wrap">
@@ -580,46 +678,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         </div>
       </div>
 
+      <!-- 問題点数設定 -->
+      <div class="fg">
+        <label class="lbl">この問題の点数</label>
+        <div class="score-input-wrap">
+          <input type="number" class="score-num-input" id="aq-score" min="1" max="1000" value="10" oninput="syncScorePreset(this.value)">
+          <span class="time-unit">点</span>
+          <div class="score-presets">
+            <button class="score-preset-btn on" data-v="10" onclick="setScorePreset(10)">10</button>
+            <button class="score-preset-btn" data-v="20" onclick="setScorePreset(20)">20</button>
+            <button class="score-preset-btn" data-v="50" onclick="setScorePreset(50)">50</button>
+            <button class="score-preset-btn" data-v="100" onclick="setScorePreset(100)">100</button>
+          </div>
+        </div>
+      </div>
+
       <div id="choice-area">
         <div class="fg">
           <label class="lbl">選択肢（A〜D）*</label>
           <div class="choices-grid">
-            <div class="choice-row">
-              <span class="choice-label">A</span>
-              <input class="choice-inp" id="ch-a" placeholder="選択肢A">
-              <button class="media-icon-btn" style="width:30px;height:30px" id="btn-cha-img" onclick="openMediaPop('cha-img',event)" title="A画像">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <div class="media-dot"></div>
-              </button>
-              <input type="file" accept="image/*" class="hidden-file" id="cha-img-file" onchange="handleMedia(this,'cha-img')">
-            </div>
-            <div class="choice-row">
-              <span class="choice-label">B</span>
-              <input class="choice-inp" id="ch-b" placeholder="選択肢B">
-              <button class="media-icon-btn" style="width:30px;height:30px" id="btn-chb-img" onclick="openMediaPop('chb-img',event)" title="B画像">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <div class="media-dot"></div>
-              </button>
-              <input type="file" accept="image/*" class="hidden-file" id="chb-img-file" onchange="handleMedia(this,'chb-img')">
-            </div>
-            <div class="choice-row">
-              <span class="choice-label">C</span>
-              <input class="choice-inp" id="ch-c" placeholder="選択肢C">
-              <button class="media-icon-btn" style="width:30px;height:30px" id="btn-chc-img" onclick="openMediaPop('chc-img',event)" title="C画像">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <div class="media-dot"></div>
-              </button>
-              <input type="file" accept="image/*" class="hidden-file" id="chc-img-file" onchange="handleMedia(this,'chc-img')">
-            </div>
-            <div class="choice-row">
-              <span class="choice-label">D</span>
-              <input class="choice-inp" id="ch-d" placeholder="選択肢D">
-              <button class="media-icon-btn" style="width:30px;height:30px" id="btn-chd-img" onclick="openMediaPop('chd-img',event)" title="D画像">
-                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <div class="media-dot"></div>
-              </button>
-              <input type="file" accept="image/*" class="hidden-file" id="chd-img-file" onchange="handleMedia(this,'chd-img')">
-            </div>
+            <div class="choice-row"><span class="choice-label">A</span><input class="choice-inp" id="ch-a" placeholder="選択肢A"><button class="media-icon-btn" style="width:30px;height:30px" id="btn-cha-img" onclick="openMediaPop('cha-img',event)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="media-dot"></div></button><input type="file" accept="image/*" class="hidden-file" id="cha-img-file" onchange="handleMedia(this,'cha-img')"></div>
+            <div class="choice-row"><span class="choice-label">B</span><input class="choice-inp" id="ch-b" placeholder="選択肢B"><button class="media-icon-btn" style="width:30px;height:30px" id="btn-chb-img" onclick="openMediaPop('chb-img',event)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="media-dot"></div></button><input type="file" accept="image/*" class="hidden-file" id="chb-img-file" onchange="handleMedia(this,'chb-img')"></div>
+            <div class="choice-row"><span class="choice-label">C</span><input class="choice-inp" id="ch-c" placeholder="選択肢C"><button class="media-icon-btn" style="width:30px;height:30px" id="btn-chc-img" onclick="openMediaPop('chc-img',event)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="media-dot"></div></button><input type="file" accept="image/*" class="hidden-file" id="chc-img-file" onchange="handleMedia(this,'chc-img')"></div>
+            <div class="choice-row"><span class="choice-label">D</span><input class="choice-inp" id="ch-d" placeholder="選択肢D"><button class="media-icon-btn" style="width:30px;height:30px" id="btn-chd-img" onclick="openMediaPop('chd-img',event)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="media-dot"></div></button><input type="file" accept="image/*" class="hidden-file" id="chd-img-file" onchange="handleMedia(this,'chd-img')"></div>
           </div>
         </div>
         <div class="fg">
@@ -632,7 +713,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           </div>
         </div>
       </div>
-
       <div id="text-area" style="display:none">
         <div class="fg">
           <label class="lbl">正解（模範解答）*</label>
@@ -640,28 +720,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
           <div style="font-size:11px;color:var(--hint);margin-top:5px">※ 部分一致で採点します</div>
         </div>
       </div>
-
       <div class="fg">
         <label class="lbl">解説（任意）</label>
         <div class="textarea-wrap">
           <input class="inp" id="aq-exp" placeholder="例：ルフィはゴムゴムの実を食べた海賊です" style="flex:1">
           <div class="media-icon-btn-group">
-            <button class="media-icon-btn" id="btn-expimg" onclick="openMediaPop('expimg',event)" title="解説画像">
-              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              <div class="media-dot"></div>
-            </button>
-            <button class="media-icon-btn" id="btn-expaud" onclick="openMediaPop('expaud',event)" title="解説音声">
-              <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
-              <div class="media-dot"></div>
-            </button>
+            <button class="media-icon-btn" id="btn-expimg" onclick="openMediaPop('expimg',event)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><div class="media-dot"></div></button>
+            <button class="media-icon-btn" id="btn-expaud" onclick="openMediaPop('expaud',event)"><svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg><div class="media-dot"></div></button>
           </div>
           <input type="file" accept="image/*" class="hidden-file" id="expimg-file" onchange="handleMedia(this,'expimg')">
           <input type="file" accept="audio/*" class="hidden-file" id="expaud-file" onchange="handleMedia(this,'expaud')">
         </div>
       </div>
     </div>
-
-    <!-- 右：問題リスト -->
     <div class="q-editor-right">
       <div class="q-list-hdr">
         <div class="q-list-hdr-title">問題一覧</div>
@@ -669,9 +740,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       </div>
       <div class="q-list-scroll" id="q-list-scroll"></div>
       <div class="q-add-row">
-        <button onclick="addNewQ()">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新しい問題を追加
-        </button>
+        <button onclick="addNewQ()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新しい問題を追加</button>
       </div>
     </div>
   </div>
@@ -681,18 +750,101 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <div class="media-popover" id="media-popover">
   <div class="media-popover-title" id="mpop-title">メディア</div>
   <div id="mpop-preview"></div>
-  <!-- 変更後 -->
-<div class="media-popover-actions">
-  <label class="mpop-change" id="mpop-change-label" style="display:flex;align-items:center;justify-content:center;cursor:pointer">
-    追加
-    <input type="file" id="mpop-file-input" class="hidden-file" onchange="handleMediaPop(this)">
-  </label>
-  <button class="mpop-del" id="mpop-del" onclick="deleteMedia()">削除</button>
+  <div class="media-popover-actions">
+    <label class="mpop-change" id="mpop-change-label" style="cursor:pointer">
+      追加
+      <input type="file" id="mpop-file-input" class="hidden-file" onchange="handleMediaPop(this)">
+    </label>
+    <button class="mpop-del" id="mpop-del" onclick="deleteMedia()">削除</button>
+  </div>
 </div>
-</div>  ← これを追加（media-popoverの閉じタグ）
-<!-- プレイモーダル -->
+
+<!-- ══ 部屋作成モーダル ══ -->
+<div class="ov" id="create-room-ov" onclick="ovClick('create-room-ov',event)">
+  <div class="modal" style="max-width:500px">
+    <div class="mh">
+      <div class="mt">🎮 部屋を作る</div>
+      <button class="mc" onclick="closeOv('create-room-ov')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="margin-bottom:14px">
+      <label class="lbl">クイズを選ぶ *</label>
+      <select id="room-quiz-select" style="width:100%;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:500 14px 'DM Sans',sans-serif;background:var(--surface);outline:none;color:var(--text)">
+        <option value="">-- クイズを選択 --</option>
+      </select>
+    </div>
+    <div style="margin-bottom:14px">
+      <label class="lbl">問題数</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="range" class="slider" id="room-q-count" min="1" max="20" value="10" oninput="document.getElementById('room-q-count-val').textContent=this.value+'問'">
+        <span id="room-q-count-val" style="font:700 14px 'DM Sans',sans-serif;color:var(--text);width:40px">10問</span>
+      </div>
+    </div>
+    <div style="margin-bottom:18px">
+      <label class="lbl">出題順</label>
+      <div class="order-toggle">
+        <button class="order-opt on" id="order-random" onclick="setOrderOpt('random')">🔀 ランダム</button>
+        <button class="order-opt" id="order-fixed" onclick="setOrderOpt('fixed')">📋 作成順</button>
+      </div>
+    </div>
+    <button class="btn bp" style="width:100%;height:42px;justify-content:center;font-size:14px" onclick="createRoom()">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>部屋を作成
+    </button>
+  </div>
+</div>
+
+<!-- ══ 部屋参加モーダル ══ -->
+<div class="ov" id="join-room-ov" onclick="ovClick('join-room-ov',event)">
+  <div class="modal" style="max-width:400px">
+    <div class="mh">
+      <div class="mt">🚪 部屋に参加</div>
+      <button class="mc" onclick="closeOv('join-room-ov')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="margin-bottom:20px">
+      <label class="lbl" style="margin-bottom:10px">ルームコードを入力</label>
+      <input class="join-code-inp" id="join-code-inp" placeholder="XXXX" maxlength="6" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+    </div>
+    <button class="btn bp" style="width:100%;height:42px;justify-content:center;font-size:14px" onclick="joinRoom()">
+      <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>参加する
+    </button>
+  </div>
+</div>
+
+<!-- ══ ロビーモーダル ══ -->
+<div class="ov" id="lobby-ov">
+  <div class="modal" style="max-width:520px">
+    <div class="mh">
+      <div class="mt">🏠 ロビー</div>
+      <button class="mc" id="lobby-close-btn" onclick="leaveLobby()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="room-code-display">
+      <div class="room-code-label">ルームコード</div>
+      <div class="room-code-val" id="lobby-room-code">----</div>
+      <div class="room-code-hint">このコードを友達に教えよう</div>
+    </div>
+    <div class="lobby-quiz-info">
+      <div class="lobby-quiz-info-title" id="lobby-quiz-title">—</div>
+      <div class="lobby-quiz-info-sub" id="lobby-quiz-sub">—</div>
+    </div>
+    <div class="lobby-players">
+      <div class="lobby-players-title">参加者 (<span id="lobby-player-cnt">0</span>人)</div>
+      <div class="lobby-player-list" id="lobby-player-list"></div>
+    </div>
+    <div id="lobby-leader-controls" style="display:none">
+      <button class="btn bp" style="width:100%;height:44px;justify-content:center;font-size:14px" id="lobby-start-btn" onclick="startBattle()">
+        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>ゲームスタート！
+      </button>
+    </div>
+    <div id="lobby-member-status" style="display:none;text-align:center;padding:12px;color:var(--hint);font-size:13px">
+      リーダーがゲームを開始するまでお待ちください...
+    </div>
+  </div>
+</div>
+
+<!-- ══ プレイモーダル（ソロ＋マルチ共用） ══ -->
 <div class="ov" id="play-ov" onclick="ovClick('play-ov',event)">
-  <div class="modal" style="max-width:540px">
+  <div class="modal modal-relative" style="max-width:560px">
+    <!-- 右上問題カウンター -->
+    <div class="play-q-counter" id="play-q-counter">1/10</div>
     <div id="play-game">
       <div class="mh" style="margin-bottom:6px">
         <div>
@@ -718,7 +870,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <img id="play-exp-img" class="play-media-img" style="display:none;margin-top:9px" src="" alt="">
       <audio id="play-exp-audio" class="play-media-audio" controls style="display:none;margin-top:7px"></audio>
       <button class="play-next" id="play-next" onclick="nextQ()">次の問題 →</button>
+      <!-- スコアボード（マルチのみ表示） -->
+      <div class="play-scoreboard" id="play-scoreboard" style="display:none">
+        <div class="play-scoreboard-title">🏆 スコア</div>
+        <div class="play-scoreboard-list" id="play-scoreboard-list"></div>
+      </div>
     </div>
+    <!-- ソロ結果 -->
     <div class="result-screen" id="play-result">
       <div class="result-score" id="res-score"></div>
       <div class="result-label">点 / <span id="res-total"></span>点</div>
@@ -734,44 +892,56 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <button class="btn bp" onclick="restartPlay()"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>もう一度</button>
       </div>
     </div>
+    <!-- マルチランキング結果 -->
+    <div class="ranking-screen" id="play-ranking">
+      <div class="ranking-title">🏆 最終ランキング</div>
+      <div class="ranking-subtitle" id="ranking-subtitle">お疲れ様でした！</div>
+      <div class="ranking-list" id="ranking-list"></div>
+      <div class="ranking-actions">
+        <button class="btn bg" onclick="closePlay();leaveLobby()">ロビーに戻る</button>
+        <button class="btn bp" onclick="restartBattle()"><svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>もう一度</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="confetti-container" id="confetti-container"></div>
 
 <script>
 const SB_URL='https://uftjafldmtkoxusezqyh.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmdGphZmxkbXRrb3h1c2V6cXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjU3ODAsImV4cCI6MjA5NDg0MTc4MH0.Ufu7IFq7rCKDduYf-hdv-6Ie5YwnPypCiZ_nlEqEVDE';
 const sb=window.supabase.createClient(SB_URL,SB_KEY);
 
-const CATS={
-  trivia:{l:'雑学',e:'🧠',c:'cc-trivia'},general:{l:'一般常識',e:'📚',c:'cc-general'},
-  sns:{l:'SNS',e:'📱',c:'cc-sns'},music:{l:'音楽',e:'🎵',c:'cc-music'},
-  sports:{l:'スポーツ',e:'⚽',c:'cc-sports'},anime:{l:'アニメ',e:'🎌',c:'cc-anime'},
-  other:{l:'その他',e:'✨',c:'cc-other'},
-};
+const CATS={trivia:{l:'雑学',e:'🧠',c:'cc-trivia'},general:{l:'一般常識',e:'📚',c:'cc-general'},sns:{l:'SNS',e:'📱',c:'cc-sns'},music:{l:'音楽',e:'🎵',c:'cc-music'},sports:{l:'スポーツ',e:'⚽',c:'cc-sports'},anime:{l:'アニメ',e:'🎌',c:'cc-anime'},other:{l:'その他',e:'✨',c:'cc-other'}};
 const COLORS=['#2d5be3','#e05b2e','#1a8a50','#be185d','#b45309','#0369a1','#b91c1c','#7c3aed'];
 
 let currentUser=null,onlineQuizzes=[],filterCat='all',searchQ='';
 let mCat=null,mInfinite=false,draftQs=[];
 let currentQIdx=null,qType='choice',correctIdx=null;
-let playQuiz=null,playIdx=0,playScore=0,playAnswered=false;
+let playQuiz=null,playQuestions=[],playIdx=0,playScore=0,playAnswered=false;
 let timerSec=0,timerRemain=0,timerInterval=null;
 const mediaStore={};
 let currentAuthTab='login';
 let currentMediaKey=null;
+let isMultiPlay=false;
+// オンライン対戦
+let currentRoom=null,isLeader=false,battleOrderMode='random',battleQCount=10;
+let multiPlayers={};// userId -> {name,color,score,correctCount}
+let realtimeChannel=null;
 
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const tl=v=>v===0?'∞':v+'秒';
 function ago(ts){const m=Math.floor((Date.now()-new Date(ts).getTime())/60000);if(m<1)return'たった今';if(m<60)return m+'分前';const h=Math.floor(m/60);if(h<24)return h+'時間前';return Math.floor(h/24)+'日前';}
 function getUserName(){return currentUser?.user_metadata?.display_name||currentUser?.email?.split('@')[0]||'ユーザー';}
+function getUserColor(){return COLORS[getUserName().charCodeAt(0)%COLORS.length];}
 
 // 画面切り替え
 function showAuthScreen(){document.getElementById('auth-screen').style.display='flex';document.getElementById('main-screen').style.display='none';}
 function showMainScreen(){
   document.getElementById('auth-screen').style.display='none';
   document.getElementById('main-screen').style.display='flex';
-  const name=getUserName(),email=currentUser.email||'',initial=name[0].toUpperCase(),color=COLORS[name.charCodeAt(0)%COLORS.length];
+  const name=getUserName(),email=currentUser.email||'',initial=name[0].toUpperCase(),color=getUserColor();
   document.getElementById('profile-ava').textContent=initial;document.getElementById('profile-ava').style.background=color;
   document.getElementById('profile-name').textContent=name;document.getElementById('profile-email').textContent=email;
   document.getElementById('sb-user-btn').textContent=initial;document.getElementById('sb-user-btn').style.background=color;
@@ -814,11 +984,8 @@ async function doAuth(){
     const name=document.getElementById('auth-name').value.trim();
     const{data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name||email.split('@')[0]}}});
     if(error){errEl.textContent=error.message;btn.textContent='アカウント作成';btn.disabled=false;return;}
-    if(data.user&&data.session){
-      currentUser=data.user;await loadOnlineQuizzes();showMainScreen();render();toast('✅ 登録してログインしました！');
-    }else{
-      errEl.style.color='var(--green)';errEl.textContent='確認メールを送りました。確認後ログインしてください。';btn.textContent='アカウント作成';
-    }
+    if(data.user&&data.session){currentUser=data.user;await loadOnlineQuizzes();showMainScreen();render();toast('✅ 登録してログインしました！');}
+    else{errEl.style.color='var(--green)';errEl.textContent='確認メールを送りました。確認後ログインしてください。';btn.textContent='アカウント作成';}
   }
   btn.disabled=false;
 }
@@ -840,7 +1007,8 @@ function cardHTML(z){
   const ci=CATS[z.cat]||{};const isMine=currentUser&&z.userId===currentUser.id;
   return`<div class="card">
     <div class="card-actions">
-      <button class="icon-btn ib-play" onclick="event.stopPropagation();startPlay('${z.id}')" title="プレイ"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg></button>
+      <button class="icon-btn ib-play" onclick="event.stopPropagation();startPlay('${z.id}')" title="ソロプレイ"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg></button>
+      <button class="icon-btn ib-battle" onclick="event.stopPropagation();quickBattle('${z.id}')" title="対戦部屋作成"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></button>
       ${isMine?`<button class="icon-btn ib-del" onclick="event.stopPropagation();delQuiz('${z.id}',event)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
     </div>
     <div class="card-badge-row"><div class="card-cat ${ci.c}">${ci.e} ${ci.l}</div></div>
@@ -876,7 +1044,11 @@ function renderMine(){
 function render(){renderCom();renderMine();}
 
 function goTab(i){
-  [0,1].forEach(n=>{document.getElementById('t'+n).classList.toggle('on',n===i);document.getElementById('p'+n).classList.toggle('on',n===i);document.getElementById('sb'+n).classList.toggle('on',n===i);});
+  [0,1,2].forEach(n=>{
+    document.getElementById('t'+n).classList.toggle('on',n===i);
+    document.getElementById('p'+n).classList.toggle('on',n===i);
+    document.getElementById('sb'+n).classList.toggle('on',n===i);
+  });
   document.getElementById('cat-bar').style.display=i===0?'flex':'none';
 }
 function setCat(c){filterCat=c;document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on',p.dataset.c===c));loadOnlineQuizzes().then(render);}
@@ -886,7 +1058,6 @@ function closeUserMenu(){document.getElementById('user-menu').classList.remove('
 document.addEventListener('click',e=>{
   const m=document.getElementById('user-menu');
   if(m&&m.classList.contains('open')&&!m.contains(e.target)&&e.target.id!=='sb-user-btn')closeUserMenu();
-  // ポップオーバーを閉じる
   const pop=document.getElementById('media-popover');
   if(pop&&pop.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest('.media-icon-btn'))closeMediaPop();
 });
@@ -904,7 +1075,6 @@ function openCreateScreen(){
   document.getElementById('m-time-sec').style.opacity='1';
   document.getElementById('time-inf-btn').classList.remove('on');
   document.querySelectorAll('.co').forEach(el=>el.classList.remove('on'));
-  // メディアリセット
   ['title-img','title-aud'].forEach(k=>{delete mediaStore[k];updateMediaBtn(k);});
   updateQCountBadge();
   const el=document.getElementById('create-screen');
@@ -916,11 +1086,8 @@ function closeCreateScreen(){
   el.classList.remove('open');
   setTimeout(()=>{el.style.display='none';},350);
 }
-
 function openQScreen(){
-  // 新規問題で開く
-  currentQIdx=null;
-  resetQEditor();
+  currentQIdx=null;resetQEditor();
   const el=document.getElementById('qscreen');
   el.style.display='flex';
   requestAnimationFrame(()=>el.classList.add('open'));
@@ -932,15 +1099,11 @@ function closeQScreen(){
   setTimeout(()=>{el.style.display='none';},350);
   updateQCountBadge();
 }
+function updateQCountBadge(){document.getElementById('q-count-badge').textContent=draftQs.length+'問';}
 
-function updateQCountBadge(){
-  document.getElementById('q-count-badge').textContent=draftQs.length+'問';
-}
-
-// ══ メディアポップオーバー ══
+// ══ メディア ══
 function openMediaPop(key,e){
-  e.stopPropagation();
-  currentMediaKey=key;
+  e.stopPropagation();currentMediaKey=key;
   const pop=document.getElementById('media-popover');
   const btn=e.currentTarget;
   const rect=btn.getBoundingClientRect();
@@ -952,126 +1115,67 @@ function openMediaPop(key,e){
     const isAud=mediaStore[key].type.startsWith('audio/');
     if(isImg)prev.innerHTML=`<img class="media-preview-thumb" src="${mediaStore[key].dataUrl}" alt=""><div class="media-preview-name">${esc(mediaStore[key].name)}</div>`;
     else if(isAud)prev.innerHTML=`<audio class="media-preview-audio" controls src="${mediaStore[key].dataUrl}"></audio><div class="media-preview-name">${esc(mediaStore[key].name)}</div>`;
-  }else{
-    prev.innerHTML=`<div style="font-size:12px;color:var(--hint);margin-bottom:8px;text-align:center">まだ設定されていません</div>`;
-  }
-const popH = 180;
-const topPos = rect.bottom + 6 + popH > window.innerHeight
-  ? rect.top - popH - 6
-  : rect.bottom + 6;
-pop.style.top = Math.max(6, topPos) + 'px';
-pop.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
-  // ↓↓↓ ここに追加 ↓↓↓
-  const hasMedia = !!mediaStore[key];
-  const label = document.getElementById('mpop-change-label');
-  const fi = document.getElementById('mpop-file-input');
-  label.childNodes[0].textContent = hasMedia ? '変更' : '追加';
-  fi.accept = key.includes('aud') ? 'audio/*' : 'image/*';
-  fi.dataset.key = key;
-  fi.value = '';
-  document.getElementById('mpop-del').style.display = hasMedia ? '' : 'none';
-  // ↑↑↑ ここまで ↑↑↑
-
+  }else{prev.innerHTML=`<div style="font-size:12px;color:var(--hint);margin-bottom:8px;text-align:center">まだ設定されていません</div>`;}
+  const popH=180;
+  const topPos=rect.bottom+6+popH>window.innerHeight?rect.top-popH-6:rect.bottom+6;
+  pop.style.top=Math.max(6,topPos)+'px';
+  pop.style.left=Math.min(rect.left,window.innerWidth-220)+'px';
+  const hasMedia=!!mediaStore[key];
+  const label=document.getElementById('mpop-change-label');
+  const fi=document.getElementById('mpop-file-input');
+  label.childNodes[0].textContent=hasMedia?'変更':'追加';
+  fi.accept=key.includes('aud')?'audio/*':'image/*';
+  fi.dataset.key=key;fi.value='';
+  document.getElementById('mpop-del').style.display=hasMedia?'':'none';
   pop.classList.add('open');
 }
 function closeMediaPop(){document.getElementById('media-popover').classList.remove('open');currentMediaKey=null;}
-function changeMedia(){
-  if(!currentMediaKey) return;
-  const key = currentMediaKey;
-  closeMediaPop();
-  
-  setTimeout(() => {
-    const fi = document.getElementById(key + '-file');
-    if(fi) fi.click();
-  }, 100);
-}
-function deleteMedia(){
-  if(!currentMediaKey)return;
-  delete mediaStore[currentMediaKey];
-  updateMediaBtn(currentMediaKey);
-  closeMediaPop();
-  toast('🗑️ 削除しました');
-}
-
-// ↓↓↓ ここに追加 ↓↓↓
+function deleteMedia(){if(!currentMediaKey)return;delete mediaStore[currentMediaKey];updateMediaBtn(currentMediaKey);closeMediaPop();toast('🗑️ 削除しました');}
 function handleMediaPop(input){
-  const file = input.files[0];
-  if(!file) return;
-  // closeMediaPopの前にkeyを保存
-  const key = currentMediaKey || input.dataset.key;
-  if(!key) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    mediaStore[key] = {dataUrl: e.target.result, name: file.name, type: file.type};
-    updateMediaBtn(key);
-    toast('✅ メディアを設定しました');
-  };
-  reader.readAsDataURL(file);
-  currentMediaKey = null;
-  document.getElementById('media-popover').classList.remove('open');
+  const file=input.files[0];if(!file)return;
+  const key=currentMediaKey||input.dataset.key;if(!key)return;
+  const reader=new FileReader();
+  reader.onload=e=>{mediaStore[key]={dataUrl:e.target.result,name:file.name,type:file.type};updateMediaBtn(key);toast('✅ メディアを設定しました');};
+  reader.readAsDataURL(file);currentMediaKey=null;document.getElementById('media-popover').classList.remove('open');
 }
-// ↑↑↑ ここまで ↑↑↑
-
 function handleMedia(input,key){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{mediaStore[key]={dataUrl:e.target.result,name:file.name,type:file.type};updateMediaBtn(key);};
   reader.readAsDataURL(file);
 }
-function updateMediaBtn(key){
-  const btnId='btn-'+key;
-  const btn=document.getElementById(btnId);
-  if(btn)btn.classList.toggle('has-media',!!mediaStore[key]);
-}
+function updateMediaBtn(key){const btn=document.getElementById('btn-'+key);if(btn)btn.classList.toggle('has-media',!!mediaStore[key]);}
 
 // ══ 問題エディタ ══
-function setQType(t){
-  qType=t;
-  document.getElementById('type-choice-btn').classList.toggle('on',t==='choice');
-  document.getElementById('type-text-btn').classList.toggle('on',t==='text');
-  document.getElementById('choice-area').style.display=t==='choice'?'':'none';
-  document.getElementById('text-area').style.display=t==='text'?'':'none';
-}
+function setQType(t){qType=t;document.getElementById('type-choice-btn').classList.toggle('on',t==='choice');document.getElementById('type-text-btn').classList.toggle('on',t==='text');document.getElementById('choice-area').style.display=t==='choice'?'':'none';document.getElementById('text-area').style.display=t==='text'?'':'none';}
 function selCorrect(i){correctIdx=i;document.querySelectorAll('.correct-btn').forEach((b,j)=>b.classList.toggle('on',j===i));}
 function selCat(c){mCat=c;document.querySelectorAll('.co').forEach(el=>el.classList.toggle('on',el.dataset.c===c));}
-function toggleInfinite(){
-  mInfinite=!mInfinite;
-  document.getElementById('time-inf-btn').classList.toggle('on',mInfinite);
-  document.getElementById('m-time-sec').disabled=mInfinite;
-  document.getElementById('m-time-sec').style.opacity=mInfinite?'0.4':'1';
-}
+function toggleInfinite(){mInfinite=!mInfinite;document.getElementById('time-inf-btn').classList.toggle('on',mInfinite);document.getElementById('m-time-sec').disabled=mInfinite;document.getElementById('m-time-sec').style.opacity=mInfinite?'0.4':'1';}
+function setScorePreset(v){document.getElementById('aq-score').value=v;document.querySelectorAll('.score-preset-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)===v));}
+function syncScorePreset(v){document.querySelectorAll('.score-preset-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)===parseInt(v)));}
+function setOrderOpt(v){battleOrderMode=v;document.getElementById('order-random').classList.toggle('on',v==='random');document.getElementById('order-fixed').classList.toggle('on',v==='fixed');}
 
 function resetQEditor(){
   qType='choice';correctIdx=null;
   document.getElementById('aq-text').value='';
+  document.getElementById('aq-score').value='10';
+  syncScorePreset(10);
   ['ch-a','ch-b','ch-c','ch-d','aq-exp','text-ans'].forEach(id=>document.getElementById(id).value='');
   document.querySelectorAll('.correct-btn').forEach(b=>b.classList.remove('on'));
   setQType('choice');
-  ['qimg','qaud','cha-img','chb-img','chc-img','chd-img','expimg','expaud'].forEach(k=>{
-    delete mediaStore[k];updateMediaBtn(k);
-    const f=document.getElementById(k+'-file');if(f)f.value='';
-  });
+  ['qimg','qaud','cha-img','chb-img','chc-img','chd-img','expimg','expaud'].forEach(k=>{delete mediaStore[k];updateMediaBtn(k);const f=document.getElementById(k+'-file');if(f)f.value='';});
 }
 
 function loadQToEditor(idx){
-  currentQIdx=idx;
-  const q=draftQs[idx];
-  resetQEditor();
-  setQType(q.type);
+  currentQIdx=idx;const q=draftQs[idx];resetQEditor();setQType(q.type);
   document.getElementById('aq-text').value=q.text||'';
   document.getElementById('aq-exp').value=q.explanation||'';
+  document.getElementById('aq-score').value=q.score||10;syncScorePreset(q.score||10);
   if(q.type==='choice'){
     ['ch-a','ch-b','ch-c','ch-d'].forEach((id,i)=>document.getElementById(id).value=q.choices[i]||'');
-    correctIdx=q.correct;
-    document.querySelectorAll('.correct-btn').forEach((b,j)=>b.classList.toggle('on',j===correctIdx));
-    if(q.choiceImages){
-      ['cha-img','chb-img','chc-img','chd-img'].forEach((k,i)=>{
-        if(q.choiceImages[i]){mediaStore[k]={dataUrl:q.choiceImages[i],name:'image',type:'image/jpeg'};updateMediaBtn(k);}
-      });
-    }
-  }else{
-    document.getElementById('text-ans').value=q.textAnswer||'';
-  }
+    correctIdx=q.correct;document.querySelectorAll('.correct-btn').forEach((b,j)=>b.classList.toggle('on',j===correctIdx));
+    if(q.choiceImages){['cha-img','chb-img','chc-img','chd-img'].forEach((k,i)=>{if(q.choiceImages[i]){mediaStore[k]={dataUrl:q.choiceImages[i],name:'image',type:'image/jpeg'};updateMediaBtn(k);}});}
+  }else{document.getElementById('text-ans').value=q.textAnswer||'';}
   if(q.questionImage){mediaStore['qimg']={dataUrl:q.questionImage,name:'image',type:'image/jpeg'};updateMediaBtn('qimg');}
   if(q.questionAudio){mediaStore['qaud']={dataUrl:q.questionAudio,name:'audio',type:'audio/mpeg'};updateMediaBtn('qaud');}
   if(q.explanationImage){mediaStore['expimg']={dataUrl:q.explanationImage,name:'image',type:'image/jpeg'};updateMediaBtn('expimg');}
@@ -1079,18 +1183,14 @@ function loadQToEditor(idx){
   renderQList();
 }
 
-function addNewQ(){
-  currentQIdx=null;
-  resetQEditor();
-  renderQList();
-  document.getElementById('q-editor-left').scrollTop=0;
-}
+function addNewQ(){currentQIdx=null;resetQEditor();renderQList();document.getElementById('q-editor-left').scrollTop=0;}
 
 function saveCurrentQ(){
   const text=document.getElementById('aq-text').value.trim();
   if(!text)return toast('❗ 問題文を入力してください');
   const exp=document.getElementById('aq-exp').value.trim();
-  const q={type:qType,text,explanation:exp,
+  const score=parseInt(document.getElementById('aq-score').value)||10;
+  const q={type:qType,text,explanation:exp,score,
     questionImage:mediaStore['qimg']?.dataUrl||null,questionAudio:mediaStore['qaud']?.dataUrl||null,
     explanationImage:mediaStore['expimg']?.dataUrl||null,explanationAudio:mediaStore['expaud']?.dataUrl||null,
   };
@@ -1105,13 +1205,9 @@ function saveCurrentQ(){
     if(!ans)return toast('❗ 模範解答を入力してください');
     q.textAnswer=ans;
   }
-  if(currentQIdx!==null){
-    draftQs[currentQIdx]=q;toast('✅ 問題を更新しました');
-  }else{
-    draftQs.push(q);currentQIdx=draftQs.length-1;toast(`✅ 問題${draftQs.length}を追加しました`);
-  }
-  renderQList();
-  updateQCountBadge();
+  if(currentQIdx!==null){draftQs[currentQIdx]=q;toast('✅ 問題を更新しました');}
+  else{draftQs.push(q);currentQIdx=draftQs.length-1;toast(`✅ 問題${draftQs.length}を追加しました`);}
+  renderQList();updateQCountBadge();
 }
 
 function renderQList(){
@@ -1119,12 +1215,14 @@ function renderQList(){
   document.getElementById('q-list-cnt').textContent=draftQs.length+'問';
   if(!draftQs.length){scroll.innerHTML=`<div style="text-align:center;padding:32px 16px;color:var(--hint);font-size:12px">まだ問題がありません<br>左のエディタで作成して保存してください</div>`;return;}
   scroll.innerHTML=draftQs.map((q,i)=>{
-    const isChoice=q.type==='choice';const ansText=isChoice?q.choices[q.correct]:q.textAnswer;
-    const isActive=currentQIdx===i;
+    const isChoice=q.type==='choice';const ansText=isChoice?q.choices[q.correct]:q.textAnswer;const isActive=currentQIdx===i;
     return`<div class="q-item${isActive?' active':''}" onclick="loadQToEditor(${i})">
       <div class="q-num">${i+1}</div>
       <div class="q-body">
-        <span class="q-type-badge ${isChoice?'qt-choice':'qt-text'}">${isChoice?'選択式':'記述式'}</span>
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+          <span class="q-type-badge ${isChoice?'qt-choice':'qt-text'}">${isChoice?'選択式':'記述式'}</span>
+          <span style="font-size:10px;color:var(--gold);font-weight:700">${q.score||10}pt</span>
+        </div>
         <div class="q-text">${esc(q.text)}</div>
         <div class="q-ans"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${esc(ansText)}</div>
       </div>
@@ -1134,14 +1232,13 @@ function renderQList(){
 }
 function removeQ(i,e){e.stopPropagation();draftQs.splice(i,1);if(currentQIdx===i){currentQIdx=null;resetQEditor();}else if(currentQIdx>i)currentQIdx--;renderQList();updateQCountBadge();toast('🗑️ 削除しました');}
 
-// 試しプレイ
+// ══ 保存・提出 ══
 function startTrialPlay(){
   if(!draftQs.length)return toast('❗ 問題を1つ以上追加してください');
   const title=document.getElementById('m-title').value.trim()||'プレビュークイズ';
   const cat=mCat||'other';
   const timeSec=mInfinite?0:parseInt(document.getElementById('m-time-sec').value)||30;
-  const trialQuiz={id:'trial',title,cat,timeLimit:timeSec,questions:draftQs};
-  startPlayFromObj(trialQuiz);
+  startPlayFromObj({id:'trial',title,cat,timeLimit:timeSec,questions:draftQs},false);
 }
 
 async function submitQuiz(){
@@ -1153,15 +1250,10 @@ async function submitQuiz(){
   if(!draftQs.length)return toast('❗ 問題を1つ以上追加してください');
   const btn=document.getElementById('submit-quiz-btn');
   btn.innerHTML='<span class="loading-spinner"></span>';btn.disabled=true;
-  const{error}=await sb.from('quizzes').insert({
-    title,cat:mCat,time_limit:timeSec,questions:draftQs,
-    author:getUserName(),author_color:COLORS[Math.floor(Math.random()*COLORS.length)],
-    user_id:currentUser.id,
-  });
+  const{error}=await sb.from('quizzes').insert({title,cat:mCat,time_limit:timeSec,questions:draftQs,author:getUserName(),author_color:COLORS[Math.floor(Math.random()*COLORS.length)],user_id:currentUser.id});
   btn.textContent='保存して投稿';btn.disabled=false;
   if(error){toast('❌ 保存失敗: '+error.message);return;}
-  await loadOnlineQuizzes();
-  closeCreateScreen();render();toast('✅ オンラインに投稿しました！');
+  await loadOnlineQuizzes();closeCreateScreen();render();toast('✅ オンラインに投稿しました！');
 }
 
 async function delQuiz(id,e){
@@ -1172,24 +1264,208 @@ async function delQuiz(id,e){
   await loadOnlineQuizzes();render();toast('🗑️ 削除しました');
 }
 
-// プレイ
+// ══ オンライン対戦 ══
+function genRoomCode(){return Math.random().toString(36).substr(2,4).toUpperCase();}
+
+function openCreateRoomModal(){
+  // クイズリストをセレクトボックスに
+  const sel=document.getElementById('room-quiz-select');
+  sel.innerHTML='<option value="">-- クイズを選択 --</option>';
+  onlineQuizzes.forEach(z=>{
+    const op=document.createElement('option');
+    op.value=z.id;op.textContent=`${z.title} (${(z.questions||[]).length}問)`;
+    sel.appendChild(op);
+  });
+  openOv('create-room-ov');
+}
+
+function openJoinRoomModal(){
+  document.getElementById('join-code-inp').value='';
+  openOv('join-room-ov');
+}
+
+function quickBattle(quizId){
+  openOv('create-room-ov');
+  setTimeout(()=>{
+    const sel=document.getElementById('room-quiz-select');
+    sel.innerHTML='<option value="">-- クイズを選択 --</option>';
+    onlineQuizzes.forEach(z=>{
+      const op=document.createElement('option');
+      op.value=z.id;op.textContent=`${z.title} (${(z.questions||[]).length}問)`;
+      sel.appendChild(op);
+    });
+    sel.value=quizId;
+  },100);
+}
+
+async function createRoom(){
+  const quizId=document.getElementById('room-quiz-select').value;
+  if(!quizId)return toast('❗ クイズを選択してください');
+  const quiz=onlineQuizzes.find(z=>z.id===quizId);
+  if(!quiz)return toast('❗ クイズが見つかりません');
+  battleQCount=parseInt(document.getElementById('room-q-count').value)||10;
+  const roomCode=genRoomCode();
+  isLeader=true;
+  currentRoom={code:roomCode,quizId,quizTitle:quiz.title,quizCat:quiz.cat,timeLimit:quiz.timeLimit,allQuestions:quiz.questions,qCount:battleQCount,orderMode:battleOrderMode};
+  // 自分をプレイヤーに
+  multiPlayers={};
+  addPlayer(currentUser.id,getUserName(),getUserColor(),true);
+  closeOv('create-room-ov');
+  openLobby();
+  subscribeRoom(roomCode);
+  toast('✅ 部屋を作りました！コード: '+roomCode);
+}
+
+async function joinRoom(){
+  const code=document.getElementById('join-code-inp').value.trim().toUpperCase();
+  if(!code||code.length<4)return toast('❗ ルームコードを入力してください');
+  // ここでは簡易的にブロードキャストチャンネルで参加
+  isLeader=false;
+  currentRoom={code,quizId:null,quizTitle:'参加中...',quizCat:'other',timeLimit:30,allQuestions:[],qCount:10,orderMode:'random'};
+  multiPlayers={};
+  addPlayer(currentUser.id,getUserName(),getUserColor(),false);
+  closeOv('join-room-ov');
+  openLobby();
+  subscribeRoom(code);
+  // リーダーに参加通知
+  broadcastToRoom({type:'player_join',userId:currentUser.id,name:getUserName(),color:getUserColor()});
+  toast('✅ 部屋に参加しました！');
+}
+
+function subscribeRoom(code){
+  if(realtimeChannel)realtimeChannel.unsubscribe();
+  realtimeChannel=sb.channel('room-'+code,{config:{broadcast:{self:false}}});
+  realtimeChannel.on('broadcast',{event:'room_event'},({payload})=>{handleRoomEvent(payload);});
+  realtimeChannel.subscribe();
+}
+
+function broadcastToRoom(data){
+  if(!realtimeChannel||!currentRoom)return;
+  realtimeChannel.send({type:'broadcast',event:'room_event',payload:data});
+}
+
+function handleRoomEvent(payload){
+  if(payload.type==='player_join'){
+    if(!multiPlayers[payload.userId])addPlayer(payload.userId,payload.name,payload.color,false);
+    renderLobbyPlayers();
+    // リーダーならルーム情報を全員に送る
+    if(isLeader){
+      broadcastToRoom({type:'room_info',quizId:currentRoom.quizId,quizTitle:currentRoom.quizTitle,quizCat:currentRoom.quizCat,timeLimit:currentRoom.timeLimit,qCount:currentRoom.qCount,orderMode:currentRoom.orderMode,players:Object.values(multiPlayers)});
+    }
+  }else if(payload.type==='room_info'){
+    if(!isLeader){
+      currentRoom.quizTitle=payload.quizTitle;currentRoom.quizCat=payload.quizCat;currentRoom.timeLimit=payload.timeLimit;currentRoom.qCount=payload.qCount;currentRoom.orderMode=payload.orderMode;
+      // 既存プレイヤー同期
+      payload.players.forEach(p=>{if(!multiPlayers[p.id])addPlayer(p.id,p.name,p.color,p.isLeader);});
+      renderLobbyInfo();renderLobbyPlayers();
+    }
+  }else if(payload.type==='game_start'){
+    if(!isLeader){
+      currentRoom.questions=payload.questions;currentRoom.timeLimit=payload.timeLimit;
+      closeOv('lobby-ov');
+      // 問題を再構築してスタート
+      const fakeQuiz={id:'battle',title:currentRoom.quizTitle,cat:currentRoom.quizCat,timeLimit:payload.timeLimit,questions:payload.questions};
+      startPlayFromObj(fakeQuiz,true);
+    }
+  }else if(payload.type==='player_score'){
+    if(multiPlayers[payload.userId]){
+      multiPlayers[payload.userId].score=payload.score;multiPlayers[payload.userId].correctCount=payload.correctCount;
+      renderInGameScoreboard();
+    }
+  }else if(payload.type==='game_end'){
+    if(!isLeader){
+      // 全員の最終スコアを更新
+      payload.scores.forEach(s=>{if(multiPlayers[s.userId]){multiPlayers[s.userId].score=s.score;multiPlayers[s.userId].correctCount=s.correctCount;}});
+      showRanking();
+    }
+  }
+}
+
+function addPlayer(userId,name,color,leader){
+  multiPlayers[userId]={id:userId,name,color,isLeader:leader,score:0,correctCount:0};
+}
+
+function openLobby(){
+  renderLobbyInfo();renderLobbyPlayers();
+  document.getElementById('lobby-leader-controls').style.display=isLeader?'':'none';
+  document.getElementById('lobby-member-status').style.display=isLeader?'none':'';
+  openOv('lobby-ov');
+}
+
+function renderLobbyInfo(){
+  document.getElementById('lobby-room-code').textContent=currentRoom?.code||'----';
+  document.getElementById('lobby-quiz-title').textContent=currentRoom?.quizTitle||'—';
+  const cat=CATS[currentRoom?.quizCat]||{};
+  document.getElementById('lobby-quiz-sub').textContent=`${cat.e||''} ${cat.l||''} • ${currentRoom?.qCount||10}問 • ${currentRoom?.orderMode==='random'?'🔀ランダム':'📋作成順'}`;
+}
+
+function renderLobbyPlayers(){
+  const list=document.getElementById('lobby-player-list');
+  const players=Object.values(multiPlayers);
+  document.getElementById('lobby-player-cnt').textContent=players.length;
+  list.innerHTML=players.map(p=>`
+    <div class="lobby-player-item">
+      <div class="lobby-player-ava" style="background:${p.color}">${p.name[0].toUpperCase()}</div>
+      <div class="lobby-player-name">${esc(p.name)}</div>
+      <span class="lobby-player-badge ${p.isLeader?'badge-leader':'badge-waiting'}">${p.isLeader?'👑リーダー':'待機中'}</span>
+    </div>`).join('');
+}
+
+function leaveLobby(){
+  if(realtimeChannel)realtimeChannel.unsubscribe();realtimeChannel=null;
+  currentRoom=null;isLeader=false;multiPlayers={};
+  closeOv('lobby-ov');
+}
+
+function startBattle(){
+  if(!currentRoom)return;
+  // 問題を選定
+  let qs=[...currentRoom.allQuestions];
+  if(currentRoom.orderMode==='random')qs=qs.sort(()=>Math.random()-.5);
+  qs=qs.slice(0,currentRoom.qCount);
+  currentRoom.questions=qs;
+  // 全員に送信
+  broadcastToRoom({type:'game_start',questions:qs,timeLimit:currentRoom.timeLimit});
+  closeOv('lobby-ov');
+  const fakeQuiz={id:'battle',title:currentRoom.quizTitle,cat:currentRoom.quizCat,timeLimit:currentRoom.timeLimit,questions:qs};
+  startPlayFromObj(fakeQuiz,true);
+}
+
+function restartBattle(){
+  closePlay();
+  // スコアリセット
+  Object.values(multiPlayers).forEach(p=>{p.score=0;p.correctCount=0;});
+  if(isLeader)openLobby();
+  else{openLobby();}
+}
+
+// ══ プレイ ══
 function startPlay(id){
   const z=onlineQuizzes.find(z=>z.id===id);
   if(!z||!z.questions||!z.questions.length)return toast('❗ 問題がありません');
-  startPlayFromObj(z);
+  startPlayFromObj(z,false);
 }
-function startPlayFromObj(z){
-  playQuiz=z;playIdx=0;playScore=0;playAnswered=false;
+
+function startPlayFromObj(z,isMulti){
+  playQuiz=z;playIdx=0;playScore=0;playAnswered=false;isMultiPlay=!!isMulti;
+  // ソロの場合はすべての問題を使う、対戦は既にスライス済み
+  playQuestions=z.questions||[];
   document.getElementById('play-game').style.display='block';
   document.getElementById('play-result').classList.remove('show');
+  document.getElementById('play-ranking').classList.remove('show');
   const ci=CATS[z.cat]||{};
   document.getElementById('play-cat-label').textContent=ci.e+' '+ci.l;
   document.getElementById('play-quiz-title').textContent=z.title;
+  document.getElementById('play-scoreboard').style.display=isMultiPlay?'':'none';
+  if(isMultiPlay)renderInGameScoreboard();
   showQuestion();openOv('play-ov');
 }
+
 function showQuestion(){
   playAnswered=false;
-  const q=playQuiz.questions[playIdx],total=playQuiz.questions.length;
+  const q=playQuestions[playIdx],total=playQuestions.length;
+  // 右上カウンター更新
+  document.getElementById('play-q-counter').textContent=`${playIdx+1}/${total}`;
   document.getElementById('prog-fill').style.width=Math.round(playIdx/total*100)+'%';
   document.getElementById('prog-text').textContent=`${playIdx}/${total}`;
   document.getElementById('play-q-num').textContent=`Q${playIdx+1}`;
@@ -1204,7 +1480,7 @@ function showQuestion(){
   const labels=['A','B','C','D'],choicesEl=document.getElementById('play-choices');
   if(q.type==='choice'){
     choicesEl.innerHTML=q.choices.map((c,i)=>{
-      const imgHtml=q.choiceImages&&q.choiceImages[i]?`<img src="${q.choiceImages[i]}" style="width:44px;height:44px;object-fit:cover;border-radius:5px;border:1px solid var(--border);flex-shrink:0" alt="">`:'';
+      const imgHtml=q.choiceImages&&q.choiceImages[i]?`<img src="${q.choiceImages[i]}" style="width:44px;height:44px;object-fit:cover;border-radius:5px;border:1px solid var(--border);flex-shrink:0" alt="">`:'' ;
       return`<button class="play-choice" onclick="answer(${i})"><span class="choice-key">${labels[i]}</span>${imgHtml}${esc(c)}</button>`;
     }).join('');
   }else{
@@ -1212,53 +1488,143 @@ function showQuestion(){
   }
   startTimer(playQuiz.timeLimit);
 }
+
 function showExpMedia(q){
   if(q.explanationImage){const ei=document.getElementById('play-exp-img');ei.src=q.explanationImage;ei.style.display='';}
   if(q.explanationAudio){const ea=document.getElementById('play-exp-audio');ea.src=q.explanationAudio;ea.style.display='';}
 }
+
 function answer(idx){
   if(playAnswered)return;playAnswered=true;clearInterval(timerInterval);
-  const q=playQuiz.questions[playIdx],choices=document.querySelectorAll('.play-choice');
+  const q=playQuestions[playIdx],choices=document.querySelectorAll('.play-choice');
   choices.forEach(b=>b.classList.add('answered'));
   const fb=document.getElementById('play-fb');
-  if(idx===q.correct){playScore++;choices[idx].classList.add('correct');fb.className='play-feedback ok show';fb.textContent='✓ 正解！'+(q.explanation?' — '+q.explanation:'');}
+  const qScore=q.score||10;
+  if(idx===q.correct){playScore+=qScore;choices[idx].classList.add('correct');fb.className='play-feedback ok show';fb.textContent=`✓ 正解！ +${qScore}点`+(q.explanation?' — '+q.explanation:'');}
   else{choices[idx].classList.add('wrong');choices[q.correct].classList.add('show-correct');fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.choices[q.correct]+'」'+(q.explanation?' — '+q.explanation:'');}
   showExpMedia(q);
-  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuiz.questions.length?'次の問題 →':'結果を見る';
+  if(isMultiPlay){
+    const correct=idx===q.correct;
+    if(correct&&multiPlayers[currentUser?.id])multiPlayers[currentUser.id].correctCount=(multiPlayers[currentUser.id].correctCount||0)+1;
+    if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
+    broadcastToRoom({type:'player_score',userId:currentUser?.id||'solo',score:playScore,correctCount:multiPlayers[currentUser?.id]?.correctCount||0});
+    renderInGameScoreboard();
+  }
+  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';
 }
+
 function answerText(){
   if(playAnswered)return;const inp=document.getElementById('play-text-inp');if(!inp)return;
   const userAns=inp.value.trim();if(!userAns)return toast('❗ 答えを入力してください');
   playAnswered=true;clearInterval(timerInterval);
-  const q=playQuiz.questions[playIdx];
+  const q=playQuestions[playIdx];
   const norm=s=>s.toLowerCase().replace(/\s/g,'');
   const correct=norm(userAns).includes(norm(q.textAnswer))||norm(q.textAnswer).includes(norm(userAns));
   inp.disabled=true;document.querySelector('.play-text-submit').disabled=true;
   const fb=document.getElementById('play-fb');
-  if(correct){playScore++;inp.style.borderColor='var(--green)';fb.className='play-feedback ok show';fb.textContent='✓ 正解！'+(q.explanation?' — '+q.explanation:'');}
+  const qScore=q.score||10;
+  if(correct){playScore+=qScore;inp.style.borderColor='var(--green)';fb.className='play-feedback ok show';fb.textContent=`✓ 正解！ +${qScore}点`+(q.explanation?' — '+q.explanation:'');}
   else{inp.style.borderColor='var(--red)';fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.textAnswer+'」'+(q.explanation?' — '+q.explanation:'');}
   showExpMedia(q);
-  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuiz.questions.length?'次の問題 →':'結果を見る';
+  if(isMultiPlay){
+    if(correct&&multiPlayers[currentUser?.id])multiPlayers[currentUser.id].correctCount=(multiPlayers[currentUser.id].correctCount||0)+1;
+    if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
+    broadcastToRoom({type:'player_score',userId:currentUser?.id||'solo',score:playScore,correctCount:multiPlayers[currentUser?.id]?.correctCount||0});
+    renderInGameScoreboard();
+  }
+  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';
 }
-function nextQ(){playIdx++;if(playIdx>=playQuiz.questions.length){showResult();return;}showQuestion();}
+
+function nextQ(){
+  playIdx++;
+  if(playIdx>=playQuestions.length){
+    if(isMultiPlay)endBattle();
+    else showResult();
+    return;
+  }
+  showQuestion();
+}
+
+function endBattle(){
+  clearInterval(timerInterval);
+  const total=playQuestions.length;
+  document.getElementById('prog-fill').style.width='100%';document.getElementById('prog-text').textContent=`${total}/${total}`;
+  document.getElementById('play-q-counter').textContent=`${total}/${total}`;
+  // 最終スコアを全員に送信（リーダーの場合はgame_endも送る）
+  if(isLeader){
+    const scores=Object.values(multiPlayers).map(p=>({userId:p.id,score:p.score,correctCount:p.correctCount}));
+    broadcastToRoom({type:'game_end',scores});
+  }
+  showRanking();
+}
+
+function showRanking(){
+  document.getElementById('play-game').style.display='none';
+  document.getElementById('play-result').classList.remove('show');
+  document.getElementById('play-ranking').classList.add('show');
+  const players=Object.values(multiPlayers).sort((a,b)=>b.score-a.score);
+  const total=playQuestions.reduce((s,q)=>s+(q.score||10),0);
+  document.getElementById('ranking-subtitle').textContent=`全${playQuestions.length}問 / 最高${total}点`;
+  const medals=['🥇','🥈','🥉'];
+  const list=document.getElementById('ranking-list');
+  list.innerHTML=players.map((p,i)=>`
+    <div class="ranking-item ${i<3?'rank-'+(i+1):''}" id="rank-item-${i}">
+      <div class="ranking-medal">${medals[i]||''}</div>
+      <div class="ranking-rank-num">${i<3?'':i+1}</div>
+      <div class="ranking-ava" style="background:${p.color}">${p.name[0].toUpperCase()}</div>
+      <div class="ranking-name">${esc(p.name)}${p.id===currentUser?.id?' (あなた)':''}</div>
+      <div class="ranking-stats">
+        <div class="ranking-pts">${p.score}pt</div>
+        <div class="ranking-correct">${p.correctCount||0}問正解</div>
+      </div>
+    </div>`).join('');
+  // 演出：アイテムを順番に表示
+  players.forEach((_,i)=>{
+    setTimeout(()=>{
+      const el=document.getElementById('rank-item-'+i);
+      if(el)el.classList.add('show');
+    },300+i*200);
+  });
+  // 1位が自分ならクラッカー
+  if(players[0]&&players[0].id===currentUser?.id){setTimeout(launchConfetti,800);}
+}
+
 function showResult(){
   clearInterval(timerInterval);
-  const total=playQuiz.questions.length;
+  const total=playQuestions.length;
+  const maxScore=playQuestions.reduce((s,q)=>s+(q.score||10),0);
   document.getElementById('prog-fill').style.width='100%';document.getElementById('prog-text').textContent=`${total}/${total}`;
+  document.getElementById('play-q-counter').textContent=`${total}/${total}`;
   document.getElementById('play-game').style.display='none';document.getElementById('play-result').classList.add('show');
-  const pct=Math.round(playScore/total*100);
-  document.getElementById('res-score').textContent=playScore*10;document.getElementById('res-total').textContent=total*10;
-  document.getElementById('res-correct').textContent=playScore+'問';document.getElementById('res-wrong').textContent=(total-playScore)+'問';
-  document.getElementById('res-rate').textContent=pct+'%';
+  const correctCount=playQuestions.filter((q,i)=>{return false;}).length;// ダミー（スコアから逆算）
+  const pct=maxScore>0?Math.round(playScore/maxScore*100):0;
+  document.getElementById('res-score').textContent=playScore;document.getElementById('res-total').textContent=maxScore;
+  // 正解数は別途管理できないためスコアで表示
+  document.getElementById('res-correct').textContent=playScore+'pt';document.getElementById('res-wrong').textContent=(maxScore-playScore)+'pt';document.getElementById('res-rate').textContent=pct+'%';
   let stars='⭐',msg;
-  if(pct>=90){stars='🌟🌟🌟';msg='完璧！天才クイズマスター！'}
-  else if(pct>=70){stars='⭐⭐⭐';msg='素晴らしい！よく勉強してるね！'}
-  else if(pct>=50){stars='⭐⭐';msg='惜しい！もう一度チャレンジ！'}
-  else{stars='⭐';msg='まだまだ！もう一度頑張ろう！'}
+  if(pct>=90){stars='🌟🌟🌟';msg='完璧！天才クイズマスター！';launchConfetti();}
+  else if(pct>=70){stars='⭐⭐⭐';msg='素晴らしい！よく勉強してるね！';}
+  else if(pct>=50){stars='⭐⭐';msg='惜しい！もう一度チャレンジ！';}
+  else{stars='⭐';msg='まだまだ！もう一度頑張ろう！';}
   document.getElementById('res-stars').textContent=stars;document.getElementById('res-msg').textContent=msg;
 }
+
 function closePlay(){clearInterval(timerInterval);closeOv('play-ov');}
-function restartPlay(){if(!playQuiz)return;startPlayFromObj(playQuiz);}
+function restartPlay(){if(!playQuiz)return;startPlayFromObj(playQuiz,isMultiPlay);}
+
+// スコアボード（プレイ中）
+function renderInGameScoreboard(){
+  const list=document.getElementById('play-scoreboard-list');
+  const players=Object.values(multiPlayers).sort((a,b)=>b.score-a.score);
+  list.innerHTML=players.map(p=>{
+    const isMe=p.id===currentUser?.id;
+    return`<div class="play-score-item${isMe?' me':''}">
+      <div class="play-score-ava" style="background:${p.color}">${p.name[0].toUpperCase()}</div>
+      <div class="play-score-name">${esc(p.name.length>5?p.name.substring(0,5)+'…':p.name)}</div>
+      <div class="play-score-pts">${p.score}pt</div>
+    </div>`;
+  }).join('');
+}
 
 // タイマー
 function startTimer(sec){
@@ -1277,13 +1643,32 @@ function updateTimerUI(){
 function timeUp(){
   if(playAnswered)return;playAnswered=true;
   document.querySelectorAll('.play-choice').forEach(b=>b.classList.add('answered'));
-  const q=playQuiz.questions[playIdx];
+  const q=playQuestions[playIdx];
   const fb=document.getElementById('play-fb');
   fb.className='play-feedback ng show';
   fb.textContent='⏱ 時間切れ！正解は「'+(q.type==='choice'?q.choices[q.correct]:q.textAnswer)+'」'+(q.explanation?' — '+q.explanation:'');
   if(q.type==='choice'){const btns=document.querySelectorAll('.play-choice');if(btns[q.correct])btns[q.correct].classList.add('show-correct');}
   showExpMedia(q);
-  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuiz.questions.length?'次の問題 →':'結果を見る';
+  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';
+}
+
+// ══ クラッカー演出 ══
+function launchConfetti(){
+  const container=document.getElementById('confetti-container');
+  const colors=['#2d5be3','#e05b2e','#1a8a50','#fbbf24','#be185d','#7c3aed'];
+  for(let i=0;i<80;i++){
+    const el=document.createElement('div');
+    el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw';
+    el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration=(Math.random()*2+1.5)+'s';
+    el.style.animationDelay=Math.random()*1.5+'s';
+    el.style.transform=`rotate(${Math.random()*360}deg)`;
+    el.style.width=(Math.random()*10+5)+'px';
+    el.style.height=(Math.random()*10+5)+'px';
+    container.appendChild(el);
+    setTimeout(()=>el.remove(),(3500+Math.random()*1000));
+  }
 }
 
 // toast
