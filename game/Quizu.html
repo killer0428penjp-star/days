@@ -687,7 +687,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     追加
     <input type="file" id="mpop-file-input" class="hidden-file" onchange="handleMediaPop(this)">
   </label>
-  <button class="mpop-del" onclick="deleteMedia()">削除</button>
+  <button class="mpop-del" id="mpop-del" onclick="deleteMedia()">削除</button>
 </div>
 <!-- プレイモーダル -->
 <div class="ov" id="play-ov" onclick="ovClick('play-ov',event)">
@@ -956,7 +956,6 @@ function openMediaPop(key,e){
   }
 pop.style.top=(rect.bottom+6)+'px';
   pop.style.left=Math.min(rect.left,window.innerWidth-220)+'px';
-
   // ↓↓↓ ここに追加 ↓↓↓
   const hasMedia = !!mediaStore[key];
   const label = document.getElementById('mpop-change-label');
