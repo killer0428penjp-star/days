@@ -21,11 +21,11 @@
   --shadow-lg:0 4px 16px rgba(0,0,0,.1),0 12px 40px rgba(0,0,0,.08);
   --radius:10px;--radius-lg:14px;--radius-xl:18px;
   --sw:68px;--header-h:56px;
-  --lobby-bg:#0a0e1a;
-  --lobby-surface:rgba(255,255,255,0.06);
-  --lobby-border:rgba(255,255,255,0.12);
+  --lobby-bg:#0d1117;
+  --lobby-surface:rgba(255,255,255,0.05);
+  --lobby-border:rgba(255,255,255,0.10);
   --lobby-text:#e8eaf0;
-  --lobby-hint:#8890a8;
+  --lobby-hint:#6b7280;
   --lobby-accent:#4a9eff;
   --lobby-accent2:#7c4dff;
   --lobby-gold:#ffd54f;
@@ -59,12 +59,59 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pw-bar-fill{height:100%;border-radius:2px;transition:width .3s,background .3s}
 .pw-bar-lbl{font-size:11px;color:var(--hint)}
 
+/* ══ 通知バッジ ══ */
+.notif-badge{
+  position:absolute;top:-3px;right:-3px;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--red);color:#fff;
+  font:700 9px 'DM Sans',sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--bg);
+  animation:notifPop .3s cubic-bezier(.22,.68,0,1.3);
+}
+@keyframes notifPop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.notif-dot{
+  position:absolute;top:6px;right:6px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--red);border:1.5px solid var(--bg);
+  animation:notifPop .3s cubic-bezier(.22,.68,0,1.3);
+}
+
+/* 通知パネル */
+.notif-panel{
+  position:fixed;top:var(--header-h);right:16px;
+  width:300px;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);z-index:500;
+  display:none;overflow:hidden;
+  animation:slideDown .2s ease;
+}
+.notif-panel.open{display:block}
+@keyframes slideDown{0%{transform:translateY(-8px);opacity:0}100%{transform:none;opacity:1}}
+.notif-panel-hdr{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-panel-title{font-size:12px;font-weight:700;color:var(--text)}
+.notif-clear{font-size:11px;color:var(--a);background:none;border:none;cursor:pointer;font-weight:600}
+.notif-list{max-height:320px;overflow-y:auto}
+.notif-item{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;background:var(--surface);transition:background .15s}
+.notif-item:hover{background:var(--surface2)}
+.notif-item.unread{background:#f0f4ff}
+.notif-item-icon{width:32px;height:32px;border-radius:50%;background:var(--al);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.notif-item-body{flex:1;min-width:0}
+.notif-item-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.notif-item-sub{font-size:11px;color:var(--hint)}
+.notif-item-actions{display:flex;gap:5px;margin-top:7px}
+.notif-accept{height:26px;padding:0 10px;border-radius:6px;background:var(--a);color:#fff;font:600 11px 'DM Sans',sans-serif;border:none;cursor:pointer;transition:background .15s}
+.notif-accept:hover{background:var(--a2)}
+.notif-decline{height:26px;padding:0 10px;border-radius:6px;background:var(--surface2);color:var(--sub);font:600 11px 'DM Sans',sans-serif;border:1px solid var(--border);cursor:pointer;transition:background .15s}
+.notif-decline:hover{background:var(--border)}
+.notif-empty{padding:24px;text-align:center;font-size:12px;color:var(--hint)}
+
 /* ══ メイン画面 ══ */
 #main-screen{display:none;flex-direction:row;min-height:100vh}
 .sb{position:fixed;left:0;top:0;bottom:0;width:var(--sw);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:2px;z-index:200}
 .sb-logo{width:36px;height:36px;background:var(--a);border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
 .sb-logo svg{width:17px;height:17px;fill:#fff}
-.sb-btn{width:48px;height:48px;border:none;background:transparent;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--hint);transition:all .15s}
+.sb-btn{width:48px;height:48px;border:none;background:transparent;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--hint);transition:all .15s;position:relative}
 .sb-btn:hover{background:var(--surface2);color:var(--sub)}
 .sb-btn.on{background:var(--al);color:var(--a)}
 .sb-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8}
@@ -272,231 +319,162 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .order-opt{padding:3px 9px;border-radius:5px;font:600 11px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;border:none;background:transparent;transition:all .15s}
 .order-opt.on{background:var(--surface);color:var(--a);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 
-/* ══ APEX/フォートナイト風ロビー ══ */
+/* ══ シンプル・クリーンロビー ══ */
 #lobby-screen{
   position:fixed;inset:0;z-index:450;
   background:var(--lobby-bg);
-  display:none;
-  overflow:hidden;
+  display:none;flex-direction:column;
 }
-#lobby-screen.open{display:flex;flex-direction:column}
+#lobby-screen.open{display:flex}
 
 /* 上部バー */
 .lb-topbar{
   height:52px;
   background:rgba(255,255,255,0.04);
   border-bottom:1px solid var(--lobby-border);
-  display:flex;align-items:center;padding:0 16px;gap:12px;
-  flex-shrink:0;position:relative;z-index:10;
+  display:flex;align-items:center;padding:0 16px;gap:10px;
+  flex-shrink:0;
 }
 .lb-topbar-title{
-  font-family:'Orbitron',monospace;font-size:14px;font-weight:700;
+  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;
   color:var(--lobby-text);letter-spacing:2px;
 }
 .lb-topbar-code{
-  background:rgba(74,158,255,0.15);border:1px solid rgba(74,158,255,0.3);
+  background:rgba(74,158,255,0.12);border:1px solid rgba(74,158,255,0.25);
   border-radius:6px;padding:4px 12px;
   font-family:'Orbitron',monospace;font-size:13px;font-weight:700;
   color:var(--lobby-accent);letter-spacing:4px;
+  cursor:pointer;transition:background .15s;
 }
+.lb-topbar-code:hover{background:rgba(74,158,255,0.2)}
 .lb-topbar-sp{flex:1}
 .lb-topbar-btn{
-  height:34px;padding:0 14px;border-radius:7px;
+  height:32px;padding:0 12px;border-radius:7px;
   font:600 12px 'DM Sans',sans-serif;cursor:pointer;
   display:inline-flex;align-items:center;gap:5px;
   border:1px solid var(--lobby-border);
-  background:rgba(255,255,255,0.06);color:var(--lobby-text);
-  transition:all .15s;
+  background:transparent;color:var(--lobby-hint);
+  transition:all .15s;white-space:nowrap;
 }
-.lb-topbar-btn:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.2)}
-.lb-topbar-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
-.lb-topbar-btn.primary{background:var(--lobby-accent);border-color:var(--lobby-accent);color:#fff}
-.lb-topbar-btn.primary:hover{background:#66b0ff}
-.lb-topbar-btn.danger{border-color:rgba(239,83,80,0.4);color:var(--lobby-red)}
-.lb-topbar-btn.danger:hover{background:rgba(239,83,80,0.12)}
+.lb-topbar-btn:hover{background:rgba(255,255,255,0.08);color:var(--lobby-text)}
+.lb-topbar-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+.lb-topbar-btn.primary{background:rgba(74,158,255,0.15);border-color:rgba(74,158,255,0.3);color:var(--lobby-accent)}
+.lb-topbar-btn.primary:hover{background:rgba(74,158,255,0.25)}
+.lb-topbar-btn.danger{color:var(--lobby-red);border-color:rgba(239,83,80,0.25)}
+.lb-topbar-btn.danger:hover{background:rgba(239,83,80,0.1)}
 
-/* ランキングパネル（右上） */
-.lb-ranking{
-  position:absolute;top:60px;right:16px;
-  width:220px;
-  background:rgba(0,0,0,0.5);backdrop-filter:blur(12px);
-  border:1px solid var(--lobby-border);
-  border-radius:12px;padding:12px;z-index:20;
-}
-.lb-ranking-title{
-  font-size:10px;font-weight:700;color:var(--lobby-accent);
-  text-transform:uppercase;letter-spacing:1px;
-  margin-bottom:10px;display:flex;align-items:center;gap:5px;
-}
-.lb-ranking-title svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
-.lb-ranking-item{
-  display:flex;align-items:center;gap:8px;
-  padding:6px 0;
-  border-bottom:1px solid rgba(255,255,255,0.06);
-}
-.lb-ranking-item:last-child{border-bottom:none}
-.lb-rank-num{
-  font:700 11px 'Orbitron',monospace;
-  color:var(--lobby-hint);width:16px;text-align:center;
-}
-.lb-rank-num.top1{color:var(--lobby-gold)}
-.lb-rank-num.top2{color:#c0c0c0}
-.lb-rank-num.top3{color:#cd7f32}
-.lb-rank-ava{
-  width:24px;height:24px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:700;color:#fff;flex-shrink:0;
-  position:relative;
-}
-.lb-rank-name{font-size:11px;color:var(--lobby-text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lb-rank-pts{font:700 11px 'Orbitron',monospace;color:var(--lobby-accent)}
-.lb-rank-sub{font-size:10px;color:var(--lobby-hint);margin-top:1px}
-
-/* 3Dフィールド */
-.lb-field{
-  flex:1;
-  position:relative;
-  perspective:800px;
-  overflow:hidden;
-}
-/* 背景グリッド */
-.lb-grid-canvas{
-  position:absolute;inset:0;
-  background:
-    radial-gradient(ellipse at 50% 100%,rgba(74,158,255,0.08) 0%,transparent 70%),
-    linear-gradient(180deg,rgba(10,14,26,0) 0%,rgba(10,14,26,0.8) 100%);
-}
-/* プレイヤーシーン */
-.lb-scene{
-  position:absolute;
-  bottom:0;left:0;right:0;
-  height:100%;
-  transform-style:preserve-3d;
+/* メインエリア（左右分割） */
+.lb-body{
+  flex:1;display:flex;overflow:hidden;
 }
 
-/* プレイヤーカード（遠近法） */
-.lb-player{
-  position:absolute;
-  display:flex;flex-direction:column;align-items:center;
-  cursor:pointer;
-  transition:transform .3s cubic-bezier(.22,.68,0,1.1);
-  transform-origin:bottom center;
-}
-.lb-player:hover .lb-player-card{border-color:rgba(74,158,255,0.6)}
-.lb-player-card{
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.12);
-  background:rgba(255,255,255,0.06);
-  backdrop-filter:blur(8px);
-  display:flex;flex-direction:column;align-items:center;
-  padding:12px 10px 8px;
-  position:relative;
-  transition:border-color .2s;
-}
-.lb-player-card.me{
-  border-color:rgba(74,158,255,0.5);
-  background:rgba(74,158,255,0.08);
-  box-shadow:0 0 24px rgba(74,158,255,0.15),0 0 2px rgba(74,158,255,0.4);
-}
-.lb-player-card.leader{
-  border-color:rgba(255,213,79,0.5);
-  background:rgba(255,213,79,0.06);
-}
-/* アバター */
-.lb-ava-wrap{position:relative;margin-bottom:8px}
-.lb-ava{
-  border-radius:50%;display:flex;align-items:center;justify-content:center;
-  font-weight:700;color:#fff;
-  border:2px solid rgba(255,255,255,0.2);
-  overflow:hidden;
-  position:relative;
-}
-.lb-ava.me{border-color:var(--lobby-accent);box-shadow:0 0 12px rgba(74,158,255,0.5)}
-.lb-ava.leader{border-color:var(--lobby-gold)}
-.lb-ava-emoji{font-size:1.8em;line-height:1;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
-.lb-you-badge{
-  position:absolute;top:-8px;left:50%;transform:translateX(-50%);
-  background:var(--lobby-accent);color:#fff;
-  font:700 8px 'Orbitron',monospace;letter-spacing:1px;
-  padding:2px 6px;border-radius:4px;white-space:nowrap;
-}
-.lb-leader-crown{
-  position:absolute;top:-10px;left:50%;transform:translateX(-50%);
-  font-size:14px;
-}
-.lb-player-name{
-  font-size:11px;font-weight:700;color:var(--lobby-text);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:80px;text-align:center;
-  margin-bottom:2px;
-}
-.lb-player-role{font-size:9px;color:var(--lobby-hint);text-align:center}
-.lb-player-pts{
-  font:700 10px 'Orbitron',monospace;
-  color:var(--lobby-accent);text-align:center;
-  margin-top:3px;
-}
-/* プラスボタン（空きスロット） */
-.lb-player-plus{
-  position:absolute;
-  display:flex;flex-direction:column;align-items:center;
-  cursor:pointer;
-  opacity:0.4;
-  transition:opacity .2s,transform .2s;
-}
-.lb-player-plus:hover{opacity:0.8;transform:scale(1.05) !important}
-.lb-plus-circle{
-  width:60px;height:60px;border-radius:50%;
-  border:2px dashed rgba(255,255,255,0.2);
-  display:flex;align-items:center;justify-content:center;
-  color:rgba(255,255,255,0.4);margin-bottom:6px;
-  transition:border-color .2s;
-}
-.lb-player-plus:hover .lb-plus-circle{border-color:rgba(74,158,255,0.5);color:var(--lobby-accent)}
-.lb-plus-circle svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2}
-.lb-plus-label{font-size:9px;color:rgba(255,255,255,0.3);font-weight:600}
-
-/* 左上:全員サムネ */
-.lb-thumbs{
-  position:absolute;top:8px;left:8px;
-  display:flex;flex-wrap:wrap;gap:4px;
-  max-width:140px;z-index:20;
-}
-.lb-thumb{
-  width:28px;height:28px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font:700 10px 'DM Sans',sans-serif;color:#fff;
-  border:1.5px solid rgba(255,255,255,0.2);
-  cursor:pointer;position:relative;overflow:hidden;
+/* 左側：プレイヤーリスト */
+.lb-players-panel{
+  width:260px;
+  border-right:1px solid var(--lobby-border);
+  display:flex;flex-direction:column;
   flex-shrink:0;
 }
-.lb-thumb.me{border-color:var(--lobby-accent)}
-.lb-thumb-emoji{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2em}
-.lb-thumb-tip{
-  position:absolute;left:0;top:32px;
-  background:rgba(0,0,0,0.9);color:var(--lobby-text);
-  font:500 10px 'DM Sans',sans-serif;
-  padding:3px 7px;border-radius:5px;
-  white-space:nowrap;pointer-events:none;
-  opacity:0;transition:opacity .15s;z-index:30;
+.lb-panel-hdr{
+  padding:14px 16px 10px;
+  border-bottom:1px solid var(--lobby-border);
+  display:flex;align-items:center;justify-content:space-between;
 }
-.lb-thumb:hover .lb-thumb-tip{opacity:1}
+.lb-panel-hdr-title{
+  font-size:11px;font-weight:700;
+  color:var(--lobby-hint);text-transform:uppercase;letter-spacing:.8px;
+}
+.lb-panel-hdr-cnt{
+  font-size:11px;color:var(--lobby-hint);
+  font-variant-numeric:tabular-nums;
+}
+.lb-player-list{flex:1;overflow-y:auto;padding:8px}
+.lb-player-list::-webkit-scrollbar{width:4px}
+.lb-player-list::-webkit-scrollbar-track{background:transparent}
+.lb-player-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+.lb-player-row{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:8px;
+  transition:background .15s;
+  cursor:default;
+}
+.lb-player-row:hover{background:rgba(255,255,255,0.04)}
+.lb-player-row.me{background:rgba(74,158,255,0.08)}
+.lb-pr-ava{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;
+  border:1.5px solid rgba(255,255,255,0.15);
+  overflow:hidden;position:relative;
+}
+.lb-pr-ava.me{border-color:rgba(74,158,255,0.5)}
+.lb-pr-ava.leader{border-color:rgba(255,213,79,0.5)}
+.lb-pr-info{flex:1;min-width:0}
+.lb-pr-name{
+  font-size:12px;font-weight:600;color:var(--lobby-text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  display:flex;align-items:center;gap:4px;
+}
+.lb-pr-tag{
+  font-size:9px;font-weight:700;
+  padding:1px 5px;border-radius:3px;
+  flex-shrink:0;
+}
+.lb-pr-tag.you{background:rgba(74,158,255,0.2);color:var(--lobby-accent)}
+.lb-pr-tag.leader{background:rgba(255,213,79,0.2);color:var(--lobby-gold)}
+.lb-pr-score{font:600 11px 'Orbitron',monospace;color:var(--lobby-accent)}
+.lb-invite-btn{
+  width:100%;margin:8px 0;height:32px;
+  border:1.5px dashed rgba(255,255,255,0.12);
+  border-radius:8px;background:transparent;
+  color:var(--lobby-hint);font:600 11px 'DM Sans',sans-serif;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all .15s;
+}
+.lb-invite-btn:hover{border-color:rgba(74,158,255,0.4);color:var(--lobby-accent)}
+.lb-invite-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
 
-/* 下部：クイズ選択バー */
-.lb-quiz-bar{
-  height:72px;
-  background:rgba(0,0,0,0.5);backdrop-filter:blur(12px);
-  border-top:1px solid var(--lobby-border);
-  display:flex;align-items:center;padding:0 16px;gap:12px;
-  flex-shrink:0;position:relative;z-index:10;
+/* 右側：メインコンテンツ */
+.lb-main{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
 }
-.lb-quiz-label{
-  font-size:10px;font-weight:700;color:var(--lobby-hint);
-  text-transform:uppercase;letter-spacing:.8px;
-  white-space:nowrap;
+
+/* クイズ情報エリア */
+.lb-quiz-area{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:32px 24px;
+}
+.lb-quiz-icon{
+  font-size:48px;margin-bottom:16px;
+}
+.lb-quiz-name{
+  font-family:'DM Serif Display',serif;
+  font-size:1.8rem;color:var(--lobby-text);
+  text-align:center;margin-bottom:6px;
+  line-height:1.3;
+}
+.lb-quiz-meta{
+  font-size:13px;color:var(--lobby-hint);
+  text-align:center;margin-bottom:32px;
+  display:flex;gap:16px;align-items:center;justify-content:center;
+}
+.lb-quiz-meta span{display:flex;align-items:center;gap:4px}
+.lb-quiz-meta svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+/* クイズ選択（リーダー） */
+.lb-select-wrap{
+  width:100%;max-width:420px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--lobby-border);
+  border-radius:12px;padding:20px;
+}
+.lb-select-label{
+  font-size:11px;font-weight:700;color:var(--lobby-hint);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;
 }
 .lb-quiz-select{
-  flex:1;height:38px;
+  width:100%;height:40px;
   background:rgba(255,255,255,0.06);
   border:1px solid var(--lobby-border);
   border-radius:8px;
@@ -504,89 +482,131 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   font:600 13px 'DM Sans',sans-serif;
   padding:0 10px;outline:none;
   transition:border-color .15s;
+  cursor:pointer;
 }
 .lb-quiz-select:focus{border-color:var(--lobby-accent)}
 .lb-quiz-select option{background:#1a1f2e;color:var(--lobby-text)}
-.lb-quiz-count{
-  font-size:11px;color:var(--lobby-hint);
-  white-space:nowrap;
+.lb-quiz-select:disabled{opacity:0.5;cursor:default}
+
+/* アバター選択 */
+.lb-avatar-area{
+  margin-top:16px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--lobby-border);
+  border-radius:12px;padding:16px;
+  width:100%;max-width:420px;
 }
+.lb-avatar-label{
+  font-size:11px;font-weight:700;color:var(--lobby-hint);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;
+}
+.avatar-selector{
+  display:grid;grid-template-columns:repeat(10,1fr);gap:4px;
+}
+.avatar-opt{
+  height:32px;border-radius:6px;
+  border:1.5px solid transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;transition:all .12s;
+  background:rgba(255,255,255,0.04);
+}
+.avatar-opt:hover{border-color:rgba(74,158,255,0.4);background:rgba(74,158,255,0.08)}
+.avatar-opt.selected{border-color:var(--lobby-accent);background:rgba(74,158,255,0.15)}
+
+/* 下部：コントロールバー */
+.lb-ctrl-bar{
+  height:64px;
+  background:rgba(0,0,0,0.3);
+  border-top:1px solid var(--lobby-border);
+  display:flex;align-items:center;padding:0 20px;gap:12px;
+  flex-shrink:0;
+}
+.lb-player-ready{
+  font-size:12px;color:var(--lobby-hint);
+  display:flex;align-items:center;gap:6px;
+  flex:1;
+}
+.lb-ready-dots{display:flex;gap:4px}
+.lb-ready-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,0.1);
+  transition:background .3s;
+}
+.lb-ready-dot.on{background:var(--lobby-green)}
 .lb-start-btn{
-  height:42px;padding:0 24px;
+  height:42px;padding:0 28px;
   background:linear-gradient(135deg,var(--lobby-accent),var(--lobby-accent2));
   border:none;border-radius:9px;
-  font:700 14px 'Orbitron',monospace;
+  font:700 13px 'Orbitron',monospace;
   color:#fff;cursor:pointer;
-  display:flex;align-items:center;gap:6px;
+  display:flex;align-items:center;gap:7px;
   transition:opacity .15s,transform .1s;
-  white-space:nowrap;letter-spacing:1px;
+  letter-spacing:1px;
   flex-shrink:0;
 }
 .lb-start-btn:hover{opacity:0.9;transform:scale(1.02)}
+.lb-start-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
 .lb-start-btn svg{width:14px;height:14px;stroke:#fff;fill:#fff;stroke-width:0}
 .lb-wait-msg{
-  font-size:12px;color:var(--lobby-hint);text-align:center;
-  flex:1;
+  font-size:12px;color:var(--lobby-hint);
+  display:flex;align-items:center;gap:8px;
 }
+.lb-wait-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--lobby-accent);
+  animation:waitPulse 1.4s ease-in-out infinite;
+}
+@keyframes waitPulse{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
 
-/* スライドオーバーレイ（プレイヤー一覧） */
-#lb-slide-panel{
-  position:absolute;top:0;left:0;bottom:0;right:0;
-  background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);
-  z-index:30;display:none;
-}
-#lb-slide-panel.open{display:flex;align-items:stretch}
-.lb-slide-rail{
-  display:flex;align-items:stretch;
-  overflow-x:auto;
-  scrollbar-width:none;
-  padding:20px 16px;gap:12px;
-  flex:1;
-}
-.lb-slide-rail::-webkit-scrollbar{display:none}
-.lb-slide-card{
-  min-width:140px;flex-shrink:0;
-  background:rgba(255,255,255,0.08);
+/* ランキング（ゲーム後のみ表示） */
+.lb-ranking-section{
+  margin-top:16px;width:100%;max-width:420px;
+  background:rgba(255,255,255,0.03);
   border:1px solid var(--lobby-border);
   border-radius:12px;padding:16px;
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  position:relative;
+  display:none;
 }
-.lb-slide-card.me{border-color:var(--lobby-accent);background:rgba(74,158,255,0.1)}
-.lb-slide-ava{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 22px 'DM Sans',sans-serif;color:#fff;position:relative;overflow:hidden}
-.lb-slide-ava-emoji{font-size:2em;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
-.lb-slide-name{font-size:12px;font-weight:700;color:var(--lobby-text);text-align:center}
-.lb-slide-stats{text-align:center}
-.lb-slide-stat-row{font-size:10px;color:var(--lobby-hint);margin-bottom:2px}
-.lb-slide-stat-val{font:700 11px 'Orbitron',monospace;color:var(--lobby-accent)}
-.lb-slide-close{
-  position:absolute;top:8px;right:8px;
-  width:28px;height:28px;border:none;
-  background:rgba(255,255,255,0.1);border-radius:6px;
-  color:var(--lobby-text);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
+.lb-ranking-section.show{display:block}
+.lb-ranking-title{
+  font-size:11px;font-weight:700;color:var(--lobby-hint);
+  text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;
 }
-.lb-slide-close svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2}
+.lb-rank-row{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.lb-rank-row:last-child{border-bottom:none}
+.lb-rank-pos{
+  font:700 11px 'Orbitron',monospace;
+  width:20px;text-align:center;color:var(--lobby-hint);
+}
+.lb-rank-pos.g1{color:var(--lobby-gold)}
+.lb-rank-pos.g2{color:#c0c0c0}
+.lb-rank-pos.g3{color:#cd7f32}
+.lb-rank-ava{width:24px;height:24px;border-radius:50%;overflow:hidden;position:relative;flex-shrink:0}
+.lb-rank-name{font-size:12px;color:var(--lobby-text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-rank-pts{font:700 11px 'Orbitron',monospace;color:var(--lobby-accent)}
 
-/* 招待モーダル */
+/* ══ 招待モーダル ══ */
 #invite-ov{
   position:fixed;inset:0;z-index:600;
   background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
   display:none;align-items:center;justify-content:center;
+  padding:16px;
 }
 #invite-ov.open{display:flex}
 .invite-modal{
-  background:#111827;border:1px solid var(--lobby-border);
+  background:#111827;border:1px solid rgba(255,255,255,0.1);
   border-radius:16px;padding:24px;width:100%;max-width:420px;
   max-height:80vh;overflow:hidden;display:flex;flex-direction:column;
 }
 .invite-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.invite-title{font:700 16px 'Orbitron',monospace;color:var(--lobby-text);letter-spacing:1px}
+.invite-title{font:700 15px 'DM Sans',sans-serif;color:var(--lobby-text)}
 .invite-close{width:28px;height:28px;border:none;background:rgba(255,255,255,0.08);border-radius:7px;color:var(--lobby-hint);cursor:pointer;display:flex;align-items:center;justify-content:center}
 .invite-close svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
 .invite-search{
   display:flex;align-items:center;gap:7px;
-  background:rgba(255,255,255,0.05);border:1px solid var(--lobby-border);
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
   border-radius:8px;padding:0 10px;height:36px;margin-bottom:12px;
 }
 .invite-search svg{width:12px;height:12px;stroke:var(--lobby-hint);fill:none;stroke-width:2;flex-shrink:0}
@@ -601,47 +621,42 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   padding:10px 12px;
   background:rgba(255,255,255,0.04);
   border:1px solid rgba(255,255,255,0.06);
-  border-radius:9px;cursor:pointer;
+  border-radius:9px;
   transition:all .15s;
 }
 .invite-item:hover{background:rgba(74,158,255,0.1);border-color:rgba(74,158,255,0.3)}
-.invite-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:700 14px 'DM Sans',sans-serif;color:#fff;flex-shrink:0}
+.invite-ava{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .invite-name{font:600 13px 'DM Sans',sans-serif;color:var(--lobby-text);flex:1}
 .invite-btn{
   height:28px;padding:0 12px;border-radius:6px;
-  background:var(--lobby-accent);border:none;
-  color:#fff;font:600 11px 'DM Sans',sans-serif;cursor:pointer;
-  transition:background .15s;white-space:nowrap;
+  background:rgba(74,158,255,0.2);border:1px solid rgba(74,158,255,0.3);
+  color:var(--lobby-accent);font:600 11px 'DM Sans',sans-serif;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
 }
-.invite-btn:hover{background:#66b0ff}
-.invite-btn.invited{background:rgba(76,175,80,0.3);color:var(--lobby-green);cursor:default}
+.invite-btn:hover{background:rgba(74,158,255,0.3)}
+.invite-btn.invited{background:rgba(76,175,80,0.15);border-color:rgba(76,175,80,0.3);color:var(--lobby-green);cursor:default}
 .invite-empty{text-align:center;padding:32px;font-size:12px;color:var(--lobby-hint)}
-
-/* アバター選択 */
-.avatar-selector{
-  display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:8px;
+.invite-share-row{
+  margin-top:12px;padding-top:12px;
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;gap:8px;
 }
-.avatar-opt{
-  width:44px;height:44px;border-radius:10px;
-  border:2px solid transparent;
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;cursor:pointer;transition:all .15s;
-  background:rgba(255,255,255,0.04);
+.invite-code-box{
+  flex:1;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;padding:8px 12px;
+  font:700 16px 'Orbitron',monospace;color:var(--lobby-accent);
+  letter-spacing:4px;text-align:center;
 }
-.avatar-opt:hover{border-color:var(--lobby-accent);background:rgba(74,158,255,0.08)}
-.avatar-opt.selected{border-color:var(--lobby-accent);background:rgba(74,158,255,0.15)}
-
-/* アバター設定パネル */
-.lb-avatar-panel{
-  position:absolute;bottom:82px;left:16px;
-  background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);
-  border:1px solid var(--lobby-border);border-radius:12px;
-  padding:14px;width:220px;z-index:25;display:none;
+.invite-copy-btn{
+  height:36px;padding:0 14px;border-radius:8px;
+  background:rgba(74,158,255,0.15);border:1px solid rgba(74,158,255,0.3);
+  color:var(--lobby-accent);font:600 12px 'DM Sans',sans-serif;
+  cursor:pointer;white-space:nowrap;transition:all .15s;
 }
-.lb-avatar-panel.open{display:block}
-.lb-avatar-panel-title{font-size:10px;font-weight:700;color:var(--lobby-accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.invite-copy-btn:hover{background:rgba(74,158,255,0.25)}
 
-/* ══ プレイモーダル（早押し対応） ══ */
+/* ══ プレイモーダル ══ */
 .play-progress{display:flex;align-items:center;gap:10px;margin-bottom:14px}
 .progress-bar{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
 .progress-fill{height:100%;background:var(--a);border-radius:3px;transition:width .4s ease}
@@ -680,34 +695,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .play-next{width:100%;height:42px;margin-top:14px;border-radius:9px;border:none;background:var(--a);color:#fff;font:700 14px 'DM Sans',sans-serif;cursor:pointer;transition:background .15s;display:none}
 .play-next.show{display:block}.play-next:hover{background:var(--a2)}
 
-/* 早押し表示 */
-.buzzer-wrap{
-  position:relative;
-  display:flex;flex-direction:column;gap:7px;
+/* リーダーコントロール（プレイ中） */
+.leader-controls{
+  display:flex;gap:7px;margin-top:10px;
 }
-.buzzer-first{
-  position:absolute;top:-8px;right:-8px;
-  background:#ff6b35;color:#fff;
-  font:700 9px 'Orbitron',monospace;
-  padding:2px 6px;border-radius:4px;
-  letter-spacing:1px;animation:flashIn .3s ease;
+.leader-ctrl-btn{
+  flex:1;height:34px;border-radius:8px;border:1px solid var(--border);
+  font:600 12px 'DM Sans',sans-serif;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  transition:all .15s;
 }
-@keyframes flashIn{0%{transform:scale(2);opacity:0}100%{transform:scale(1);opacity:1}}
+.leader-ctrl-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2}
+.lcb-skip{background:var(--surface2);color:var(--sub)}.lcb-skip:hover{border-color:var(--border2);color:var(--text)}
+.lcb-end{background:var(--red-bg);color:var(--red);border-color:rgba(192,57,43,0.2)}.lcb-end:hover{background:#fcd5d0}
 
-/* ロビーミニ表示（プレイ中） */
-.lobby-mini{
-  position:fixed;bottom:16px;left:calc(var(--sw) + 12px);
-  background:rgba(10,14,26,0.9);backdrop-filter:blur(8px);
-  border:1px solid var(--lobby-border);border-radius:10px;
-  padding:8px 10px;z-index:450;min-width:160px;
+/* 早押しバナー */
+#buzzer-banner{
   display:none;
+  background:linear-gradient(135deg,rgba(255,107,53,0.15),rgba(255,75,43,0.15));
+  border:1px solid rgba(255,107,53,0.3);
+  color:#ff6b35;border-radius:8px;
+  padding:8px 14px;font:700 11px 'Orbitron',monospace;
+  letter-spacing:1px;text-align:center;margin-bottom:10px;
 }
-.lobby-mini.show{display:block}
-.lobby-mini-title{font-size:9px;color:var(--lobby-hint);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.lobby-mini-players{display:flex;gap:4px;flex-wrap:wrap}
-.lobby-mini-ava{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,0.2)}
-.lobby-mini-emoji{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:.9em}
-.lobby-mini-score{font-size:11px;color:var(--lobby-text);font-weight:600;margin-top:5px;font-variant-numeric:tabular-nums}
 
 /* スコアボード（プレイ中） */
 .play-scoreboard{margin-top:14px;border-top:1px solid var(--border);padding-top:12px}
@@ -719,7 +729,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .play-score-ava-emoji{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.2em}
 .play-score-name{font-size:10px;font-weight:600;color:var(--sub);text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60px}
 .play-score-pts{font-size:13px;font-weight:700;color:var(--text)}
-@keyframes scoreup{0%{transform:scale(1.3)}100%{transform:scale(1)}}
 
 /* 結果 */
 .result-screen{display:none;text-align:center;padding:8px 0}
@@ -769,6 +778,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 @media(max-width:768px){
   .q-editor-wrap{flex-direction:column;height:auto}
   .q-editor-right{width:100%;border-left:none;border-top:1px solid var(--border)}
+  .lb-players-panel{width:200px}
+  .avatar-selector{grid-template-columns:repeat(5,1fr)}
 }
 @media(max-width:640px){
   .grid{grid-template-columns:1fr}
@@ -776,6 +787,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   .choices-grid{grid-template-columns:1fr}
   .hdr-title{display:none}
   .auth-card{padding:28px 20px}
+  .lb-players-panel{display:none}
 }
 @media(max-width:480px){
   :root{--sw:56px}
@@ -834,8 +846,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg><span>対戦</span>
     </button>
     <div class="sb-sp"></div>
+    <!-- 通知ボタン -->
+    <button class="sb-btn" id="notif-btn" onclick="toggleNotifPanel()" style="position:relative">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span>通知</span>
+      <div class="notif-dot" id="notif-dot" style="display:none"></div>
+    </button>
     <button class="sb-user" id="sb-user-btn" onclick="toggleUserMenu()">?</button>
   </aside>
+
+  <!-- 通知パネル -->
+  <div class="notif-panel" id="notif-panel">
+    <div class="notif-panel-hdr">
+      <div class="notif-panel-title">通知</div>
+      <button class="notif-clear" onclick="clearNotifs()">すべて既読</button>
+    </div>
+    <div class="notif-list" id="notif-list">
+      <div class="notif-empty">通知はありません</div>
+    </div>
+  </div>
+
   <div class="user-menu" id="user-menu">
     <div class="user-menu-info">
       <div class="user-menu-name" id="um-name">—</div>
@@ -845,6 +875,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>ログアウト
     </button>
   </div>
+
   <div class="main">
     <header class="hdr">
       <div class="hdr-title">Quiz<em>Hub</em></div>
@@ -931,7 +962,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
             <div style="font-size:12px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">遊び方</div>
             <div style="display:flex;flex-direction:column;gap:10px">
               <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">1️⃣</span><div style="font-size:13px;color:var(--sub)"><b>リーダー</b>が部屋を作り、クイズを選ぶ</div></div>
-              <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">2️⃣</span><div style="font-size:13px;color:var(--sub)">友達に<b>ルームコード</b>を教える</div></div>
+              <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">2️⃣</span><div style="font-size:13px;color:var(--sub)">友達に<b>ルームコード</b>を教える（または招待を送る）</div></div>
               <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">3️⃣</span><div style="font-size:13px;color:var(--sub)">全員がロビーに集まったら<b>スタート！</b></div></div>
               <div style="display:flex;gap:10px;align-items:flex-start"><span style="font-size:1.1rem">4️⃣</span><div style="font-size:13px;color:var(--sub)">最後に<b>ランキング発表！</b>🏆</div></div>
             </div>
@@ -1122,7 +1153,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <button class="order-opt" id="order-fixed" onclick="setOrderOpt('fixed')">📋 作成順</button>
       </div>
     </div>
-    <button class="btn bp" style="width:100%;height:42px;justify-content:center;font-size:14px" onclick="createRoom()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>部屋を作成</button>
+    <button class="btn bp" style="width:100%;height:42px;justify-content:center;font-size:14px" onclick="createRoom()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>部屋を作成してロビーへ</button>
   </div>
 </div>
 
@@ -1138,16 +1169,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- ════ APEX風ロビー画面 ════ -->
+<!-- ════ クリーン・シンプルロビー画面 ════ -->
 <div id="lobby-screen">
-  <!-- 上部バー -->
   <div class="lb-topbar">
-    <div class="lb-topbar-title">QUIZHUB LOBBY</div>
-    <div class="lb-topbar-code" id="lb-code-display">----</div>
+    <div class="lb-topbar-title">QUIZHUB</div>
+    <div class="lb-topbar-code" id="lb-code-display" onclick="copyRoomCode()" title="クリックでコピー">----</div>
     <div class="lb-topbar-sp"></div>
-    <button class="lb-topbar-btn" onclick="openSlidePanel()">
-      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-      全員を見る
+    <button class="lb-topbar-btn primary" onclick="openInviteModal()">
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      招待
     </button>
     <button class="lb-topbar-btn danger" onclick="leaveLobby()">
       <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -1155,55 +1185,66 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     </button>
   </div>
 
-  <!-- ランキング（右上） -->
-  <div class="lb-ranking" id="lb-ranking">
-    <div class="lb-ranking-title">
-      <svg viewBox="0 0 24 24"><path d="M8 6l4-4 4 4M8 18l4 4 4-4"/></svg>
-      累計ランキング
+  <div class="lb-body">
+    <!-- 左：プレイヤー一覧 -->
+    <div class="lb-players-panel">
+      <div class="lb-panel-hdr">
+        <div class="lb-panel-hdr-title">プレイヤー</div>
+        <div class="lb-panel-hdr-cnt" id="lb-player-cnt">0人</div>
+      </div>
+      <div class="lb-player-list" id="lb-player-list"></div>
     </div>
-    <div id="lb-ranking-list"></div>
-  </div>
 
-  <!-- 3Dフィールド -->
-  <div class="lb-field" id="lb-field">
-    <div class="lb-grid-canvas"></div>
-    <!-- SVGグリッドライン -->
-    <svg id="lb-grid-svg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" preserveAspectRatio="none"></svg>
-    <!-- 全員サムネ（左上） -->
-    <div class="lb-thumbs" id="lb-thumbs"></div>
-    <!-- プレイヤーシーン -->
-    <div class="lb-scene" id="lb-scene"></div>
-    <!-- アバターパネル -->
-    <div class="lb-avatar-panel" id="lb-avatar-panel">
-      <div class="lb-avatar-panel-title">アバターを変更</div>
-      <div class="avatar-selector" id="lb-avatar-selector"></div>
-    </div>
-  </div>
+    <!-- 右：メインコンテンツ -->
+    <div class="lb-main">
+      <div class="lb-quiz-area">
+        <div class="lb-quiz-icon" id="lb-quiz-icon">🎮</div>
+        <div class="lb-quiz-name" id="lb-quiz-name">クイズを選択してください</div>
+        <div class="lb-quiz-meta" id="lb-quiz-meta">
+          <span><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-5-3z"/></svg>— 問</span>
+        </div>
 
-  <!-- クイズ選択バー（下部） -->
-  <div class="lb-quiz-bar">
-    <div class="lb-quiz-label">QUIZ</div>
-    <select class="lb-quiz-select" id="lb-quiz-select" onchange="onLbQuizChange(this.value)">
-      <option value="">-- クイズを選択 --</option>
-    </select>
-    <div class="lb-quiz-count" id="lb-quiz-count"></div>
-    <div id="lb-leader-area">
-      <button class="lb-start-btn" id="lb-start-btn" onclick="startBattle()">
-        <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        START
-      </button>
-    </div>
-    <div id="lb-member-area" style="display:none">
-      <div class="lb-wait-msg">リーダーがゲームを開始するまでお待ちください...</div>
-    </div>
-  </div>
+        <!-- クイズ選択（リーダーのみ） -->
+        <div class="lb-select-wrap" id="lb-select-wrap">
+          <div class="lb-select-label">クイズを選ぶ</div>
+          <select class="lb-quiz-select" id="lb-quiz-select" onchange="onLbQuizChange(this.value)">
+            <option value="">-- クイズを選択 --</option>
+          </select>
+        </div>
 
-  <!-- スライドパネル（全員一覧） -->
-  <div id="lb-slide-panel">
-    <div style="position:absolute;top:10px;right:10px;z-index:35">
-      <button class="lb-slide-close" onclick="closeSlidePanel()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <!-- アバター選択 -->
+        <div class="lb-avatar-area">
+          <div class="lb-avatar-label">アバター</div>
+          <div class="avatar-selector" id="lb-avatar-selector"></div>
+        </div>
+
+        <!-- ランキング（前回あれば表示） -->
+        <div class="lb-ranking-section" id="lb-ranking-section">
+          <div class="lb-ranking-title">🏆 前回の結果</div>
+          <div id="lb-rank-list"></div>
+        </div>
+      </div>
+
+      <!-- 下部コントロールバー -->
+      <div class="lb-ctrl-bar">
+        <div class="lb-player-ready" id="lb-ready-area">
+          <div class="lb-ready-dots" id="lb-ready-dots"></div>
+          <span id="lb-ready-text">参加者が集まるのを待っています...</span>
+        </div>
+        <div id="lb-leader-area">
+          <button class="lb-start-btn" id="lb-start-btn" onclick="startBattle()">
+            <svg viewBox="0 0 24 24" style="fill:white;stroke:none"><polygon points="5 3 19 12 5 21"/></svg>
+            START
+          </button>
+        </div>
+        <div id="lb-member-area" style="display:none">
+          <div class="lb-wait-msg">
+            <div class="lb-wait-dot"></div>
+            リーダーがゲームを開始するまでお待ちください
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="lb-slide-rail" id="lb-slide-rail"></div>
   </div>
 </div>
 
@@ -1211,7 +1252,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <div id="invite-ov">
   <div class="invite-modal">
     <div class="invite-hdr">
-      <div class="invite-title">INVITE PLAYER</div>
+      <div class="invite-title">👥 プレイヤーを招待</div>
       <button class="invite-close" onclick="closeInviteModal()"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div class="invite-search">
@@ -1219,6 +1260,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <input type="text" id="invite-search-inp" placeholder="名前で検索..." oninput="filterInviteList(this.value)">
     </div>
     <div class="invite-list" id="invite-list"></div>
+    <div class="invite-share-row">
+      <div class="invite-code-box" id="invite-code-box">----</div>
+      <button class="invite-copy-btn" onclick="copyRoomCode()">コードをコピー</button>
+    </div>
   </div>
 </div>
 
@@ -1242,10 +1287,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <div class="play-timer-bar"><div class="play-timer-fill" id="timer-fill"></div></div>
         <div class="play-timer-num" id="timer-num"></div>
       </div>
-      <!-- 早押し表示 -->
-      <div id="buzzer-banner" style="display:none;background:linear-gradient(135deg,#ff6b35,#ff4b2b);color:#fff;border-radius:8px;padding:8px 14px;font:700 12px 'Orbitron',monospace;letter-spacing:1px;text-align:center;margin-bottom:10px">
-        ⚡ 早押し形式 ⚡ 最速回答者がボーナスポイント！
-      </div>
+      <div id="buzzer-banner">⚡ 早押し形式 ⚡ 最速正解者はボーナスポイント！</div>
       <div class="play-q-num" id="play-q-num"></div>
       <div class="play-q-text" id="play-q-text"></div>
       <img id="play-q-img" class="play-media-img" style="display:none" src="" alt="">
@@ -1254,6 +1296,15 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="play-feedback" id="play-fb"></div>
       <img id="play-exp-img" class="play-media-img" style="display:none;margin-top:9px" src="" alt="">
       <audio id="play-exp-audio" class="play-media-audio" controls style="display:none;margin-top:7px"></audio>
+      <!-- リーダーコントロール -->
+      <div class="leader-controls" id="leader-controls" style="display:none">
+        <button class="leader-ctrl-btn lcb-skip" onclick="leaderSkipQ()">
+          <svg viewBox="0 0 24 24"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>スキップ
+        </button>
+        <button class="leader-ctrl-btn lcb-end" onclick="leaderEndGame()">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>ゲーム終了
+        </button>
+      </div>
       <button class="play-next" id="play-next" onclick="nextQ()">次の問題 →</button>
       <div class="play-scoreboard" id="play-scoreboard" style="display:none">
         <div class="play-scoreboard-title">🏆 スコア</div>
@@ -1287,13 +1338,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- ミニロビー（プレイ中） -->
-<div class="lobby-mini" id="lobby-mini">
-  <div class="lobby-mini-title">ロビー</div>
-  <div class="lobby-mini-players" id="lobby-mini-players"></div>
-  <div class="lobby-mini-score" id="lobby-mini-score"></div>
-</div>
-
 <div class="toast" id="toast"></div>
 <div class="confetti-container" id="confetti-container"></div>
 
@@ -1302,12 +1346,10 @@ const SB_URL='https://uftjafldmtkoxusezqyh.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmdGphZmxkbXRrb3h1c2V6cXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjU3ODAsImV4cCI6MjA5NDg0MTc4MH0.Ufu7IFq7rCKDduYf-hdv-6Ie5YwnPypCiZ_nlEqEVDE';
 const sb=window.supabase.createClient(SB_URL,SB_KEY);
 
-// カテゴリ定義
 const CATS={trivia:{l:'雑学',e:'🧠',c:'cc-trivia'},general:{l:'一般常識',e:'📚',c:'cc-general'},sns:{l:'SNS',e:'📱',c:'cc-sns'},music:{l:'音楽',e:'🎵',c:'cc-music'},sports:{l:'スポーツ',e:'⚽',c:'cc-sports'},anime:{l:'アニメ',e:'🎌',c:'cc-anime'},other:{l:'その他',e:'✨',c:'cc-other'}};
 const COLORS=['#2d5be3','#e05b2e','#1a8a50','#be185d','#b45309','#0369a1','#b91c1c','#7c3aed'];
 const AVATARS=['🐱','🐶','🦊','🐼','🐨','🐸','🦁','🐯','🦄','🐺','🦅','🐙','🦋','🐲','🤖','👾','🧙','🧝','🕵️','🥷'];
 
-// 状態
 let currentUser=null,onlineQuizzes=[],filterCat='all',searchQ='';
 let mCat=null,mInfinite=false,draftQs=[];
 let currentQIdx=null,qType='choice',correctIdx=null;
@@ -1318,23 +1360,20 @@ let currentAuthTab='login';
 let currentMediaKey=null;
 let isMultiPlay=false;
 let currentRoom=null,isLeader=false,battleOrderMode='random',battleQCount=10;
-let multiPlayers={};// userId->{id,name,color,avatar,score,correctCount,totalCorrect,totalAnswered,lastRank,games}
+let multiPlayers={};
 let realtimeChannel=null;
 let myAvatar='🐱';
-// 早押しタイムスタンプ
 let questionStartTime=0;
 let firstAnswerUserId=null;
-// アカウント一覧（招待用）
 let allUsersCache=[];
+let notifications=[];
+let notifChannel=null;
 
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const tl=v=>v===0?'∞':v+'秒';
 function ago(ts){const m=Math.floor((Date.now()-new Date(ts).getTime())/60000);if(m<1)return'たった今';if(m<60)return m+'分前';const h=Math.floor(m/60);if(h<24)return h+'時間前';return Math.floor(h/24)+'日前';}
 function getUserName(){return currentUser?.user_metadata?.display_name||currentUser?.email?.split('@')[0]||'ユーザー';}
 function getUserColor(){return COLORS[getUserName().charCodeAt(0)%COLORS.length];}
-function avaHTML(avatar,color,size,classes=''){
-  return`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};position:relative;overflow:hidden;" class="${classes}"><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:${Math.round(size*0.55)}px;line-height:1">${avatar||'?'}</span></div>`;
-}
 
 // ══ 画面切り替え ══
 function showAuthScreen(){document.getElementById('auth-screen').style.display='flex';document.getElementById('main-screen').style.display='none';}
@@ -1346,8 +1385,8 @@ function showMainScreen(){
   document.getElementById('profile-name').textContent=name;document.getElementById('profile-email').textContent=email;
   document.getElementById('sb-user-btn').textContent=initial;document.getElementById('sb-user-btn').style.background=color;
   document.getElementById('um-name').textContent=name;document.getElementById('um-email').textContent=email;
-  // アバター初期化
   const saved=localStorage.getItem('qh_avatar');if(saved)myAvatar=saved;
+  subscribeNotifications();
 }
 
 // ══ 認証 ══
@@ -1403,6 +1442,73 @@ async function loadOnlineQuizzes(){
     onlineQuizzes=(data||[]).map(r=>({id:r.id,title:r.title,cat:r.cat,timeLimit:r.time_limit,questions:r.questions,author:r.author,authorColor:r.author_color,userId:r.user_id,createdAt:r.created_at}));
   }catch(e){console.error(e);}
 }
+
+// ══ 通知システム ══
+function subscribeNotifications(){
+  if(!currentUser)return;
+  // Supabase Realtimeで自分宛て通知チャンネルを購読
+  if(notifChannel)notifChannel.unsubscribe();
+  notifChannel=sb.channel('notif-'+currentUser.id,{config:{broadcast:{self:false}}});
+  notifChannel.on('broadcast',{event:'invite'},{
+    // eslint-disable-next-line no-unused-vars
+    callback:({payload})=>{
+      addNotification({
+        type:'invite',
+        from:payload.fromName,
+        fromColor:payload.fromColor,
+        fromAvatar:payload.fromAvatar||'🐱',
+        roomCode:payload.roomCode,
+        title:payload.quizTitle||'クイズ対戦',
+        id:Date.now()+Math.random(),
+        unread:true,
+      });
+    }
+  });
+  notifChannel.subscribe();
+}
+function addNotification(notif){
+  notifications.unshift(notif);
+  renderNotifList();
+  document.getElementById('notif-dot').style.display='block';
+  toast(`🔔 ${notif.from}さんから招待が届きました！`);
+}
+function toggleNotifPanel(){
+  const p=document.getElementById('notif-panel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')){
+    notifications.forEach(n=>n.unread=false);
+    document.getElementById('notif-dot').style.display='none';
+    renderNotifList();
+  }
+}
+function clearNotifs(){notifications=[];renderNotifList();document.getElementById('notif-dot').style.display='none';}
+function renderNotifList(){
+  const el=document.getElementById('notif-list');
+  if(!notifications.length){el.innerHTML='<div class="notif-empty">通知はありません</div>';return;}
+  el.innerHTML=notifications.map((n,i)=>{
+    if(n.type==='invite'){
+      return`<div class="notif-item${n.unread?' unread':''}">
+        <div class="notif-item-icon" style="background:${n.fromColor||'#2d5be3'};font-size:18px">${n.fromAvatar||'🐱'}</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">${esc(n.from)}さんから招待</div>
+          <div class="notif-item-sub">${esc(n.title)} · コード: <b>${n.roomCode}</b></div>
+          <div class="notif-item-actions">
+            <button class="notif-accept" onclick="acceptInvite('${n.roomCode}',${i})">参加する</button>
+            <button class="notif-decline" onclick="declineInvite(${i})">断る</button>
+          </div>
+        </div>
+      </div>`;
+    }
+    return'';
+  }).join('');
+}
+function acceptInvite(code,idx){
+  notifications.splice(idx,1);renderNotifList();
+  document.getElementById('notif-panel').classList.remove('open');
+  document.getElementById('join-code-inp').value=code;
+  joinRoom();
+}
+function declineInvite(idx){notifications.splice(idx,1);renderNotifList();toast('招待を断りました');}
 
 // ══ カード ══
 function cardHTML(z){
@@ -1461,8 +1567,8 @@ document.addEventListener('click',e=>{
   if(m&&m.classList.contains('open')&&!m.contains(e.target)&&e.target.id!=='sb-user-btn')closeUserMenu();
   const pop=document.getElementById('media-popover');
   if(pop&&pop.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest('.media-icon-btn'))closeMediaPop();
-  const ap=document.getElementById('lb-avatar-panel');
-  if(ap&&ap.classList.contains('open')&&!ap.contains(e.target)&&!e.target.closest('[onclick*="toggleAvatarPanel"]'))ap.classList.remove('open');
+  const np=document.getElementById('notif-panel');
+  if(np&&np.classList.contains('open')&&!np.contains(e.target)&&e.target.id!=='notif-btn'&&!e.target.closest('#notif-btn'))np.classList.remove('open');
 });
 
 function ovClick(id,e){if(e.target===document.getElementById(id))closeOv(id);}
@@ -1624,6 +1730,10 @@ async function delQuiz(id,e){
 
 // ══ オンライン対戦 ══
 function genRoomCode(){return Math.random().toString(36).substr(2,4).toUpperCase();}
+function copyRoomCode(){
+  const code=currentRoom?.code;if(!code)return;
+  navigator.clipboard.writeText(code).then(()=>toast('✅ コードをコピーしました: '+code)).catch(()=>toast('コード: '+code));
+}
 
 function openCreateRoomModal(){
   const sel=document.getElementById('room-quiz-select');sel.innerHTML='<option value="">-- クイズを選択 --</option>';
@@ -1639,6 +1749,8 @@ function quickBattle(quizId){
     sel.value=quizId;
   },100);
 }
+
+// ★ ロビーを即座に表示してから初期化
 async function createRoom(){
   const quizId=document.getElementById('room-quiz-select').value;
   if(!quizId)return toast('❗ クイズを選択してください');
@@ -1648,16 +1760,23 @@ async function createRoom(){
   const roomCode=genRoomCode();isLeader=true;
   currentRoom={code:roomCode,quizId,quizTitle:quiz.title,quizCat:quiz.cat,timeLimit:quiz.timeLimit,allQuestions:quiz.questions,qCount:battleQCount,orderMode:battleOrderMode};
   multiPlayers={};addPlayer(currentUser.id,getUserName(),getUserColor(),myAvatar,true);
-  closeOv('create-room-ov');openLobbyScreen();subscribeRoom(roomCode);
-  toast('✅ 部屋を作りました！コード: '+roomCode);
+  closeOv('create-room-ov');
+  // ★ ロビーを即座に開く
+  openLobbyScreen();
+  subscribeRoom(roomCode);
+  toast('✅ 部屋を作成しました！コード: '+roomCode);
 }
+
 async function joinRoom(){
   const code=document.getElementById('join-code-inp').value.trim().toUpperCase();
   if(!code||code.length<4)return toast('❗ ルームコードを入力してください');
   isLeader=false;
   currentRoom={code,quizId:null,quizTitle:'参加中...',quizCat:'other',timeLimit:30,allQuestions:[],qCount:10,orderMode:'random'};
   multiPlayers={};addPlayer(currentUser.id,getUserName(),getUserColor(),myAvatar,false);
-  closeOv('join-room-ov');openLobbyScreen();subscribeRoom(code);
+  closeOv('join-room-ov');
+  // ★ ロビーを即座に開く
+  openLobbyScreen();
+  subscribeRoom(code);
   broadcastToRoom({type:'player_join',userId:currentUser.id,name:getUserName(),color:getUserColor(),avatar:myAvatar});
   toast('✅ 部屋に参加しました！');
 }
@@ -1673,13 +1792,13 @@ function broadcastToRoom(data){if(!realtimeChannel||!currentRoom)return;realtime
 function handleRoomEvent(payload){
   if(payload.type==='player_join'){
     if(!multiPlayers[payload.userId])addPlayer(payload.userId,payload.name,payload.color,payload.avatar||'🐱',false);
-    renderLobbyScene();
+    renderLobbyPlayers();
     if(isLeader){broadcastToRoom({type:'room_info',quizId:currentRoom.quizId,quizTitle:currentRoom.quizTitle,quizCat:currentRoom.quizCat,timeLimit:currentRoom.timeLimit,qCount:currentRoom.qCount,orderMode:currentRoom.orderMode,players:Object.values(multiPlayers)});}
   }else if(payload.type==='room_info'){
     if(!isLeader){
-      currentRoom.quizTitle=payload.quizTitle;currentRoom.quizCat=payload.quizCat;currentRoom.timeLimit=payload.timeLimit;currentRoom.qCount=payload.qCount;currentRoom.orderMode=payload.orderMode;
+      currentRoom.quizId=payload.quizId;currentRoom.quizTitle=payload.quizTitle;currentRoom.quizCat=payload.quizCat;currentRoom.timeLimit=payload.timeLimit;currentRoom.qCount=payload.qCount;currentRoom.orderMode=payload.orderMode;
       payload.players.forEach(p=>{if(!multiPlayers[p.id])addPlayer(p.id,p.name,p.color,p.avatar||'🐱',p.isLeader);});
-      renderLobbyInfo();renderLobbyScene();
+      renderLobbyInfo();renderLobbyPlayers();
     }
   }else if(payload.type==='game_start'){
     if(!isLeader){
@@ -1690,16 +1809,32 @@ function handleRoomEvent(payload){
     }
   }else if(payload.type==='player_score'){
     if(multiPlayers[payload.userId]){multiPlayers[payload.userId].score=payload.score;multiPlayers[payload.userId].correctCount=payload.correctCount;}
-    renderInGameScoreboard();updateLobbyMini();
+    renderInGameScoreboard();renderLobbyPlayers();
   }else if(payload.type==='first_answer'){
-    if(!firstAnswerUserId){firstAnswerUserId=payload.userId;showBuzzerFirst(payload.userId,payload.name);}
+    // 誰かが正解→全員の画面で次の問題へ（早押し）
+    if(!firstAnswerUserId){
+      firstAnswerUserId=payload.userId;
+      if(payload.userId!==currentUser?.id){
+        // 他の人が正解した場合：現在の問題を終了して次へ
+        showBuzzerOther(payload.name,payload.score);
+      }
+    }
+  }else if(payload.type==='skip_question'){
+    if(!isLeader){
+      // リーダーがスキップ→メンバーも次の問題へ
+      forceNextQ();
+    }
+  }else if(payload.type==='end_game'){
+    if(!isLeader){
+      endBattleForced();
+    }
   }else if(payload.type==='game_end'){
     if(!isLeader){
       payload.scores.forEach(s=>{if(multiPlayers[s.userId]){multiPlayers[s.userId].score=s.score;multiPlayers[s.userId].correctCount=s.correctCount;}});
       updateCumulativeStats(payload.scores);showRanking();
     }
   }else if(payload.type==='avatar_change'){
-    if(multiPlayers[payload.userId]){multiPlayers[payload.userId].avatar=payload.avatar;renderLobbyScene();}
+    if(multiPlayers[payload.userId]){multiPlayers[payload.userId].avatar=payload.avatar;renderLobbyPlayers();}
   }
 }
 
@@ -1708,194 +1843,91 @@ function addPlayer(userId,name,color,avatar,leader){
   multiPlayers[userId]={id:userId,name,color,avatar:avatar||'🐱',isLeader:leader,score:0,correctCount:0,totalCorrect:existing.totalCorrect||0,totalAnswered:existing.totalAnswered||0,lastRank:existing.lastRank||null,games:existing.games||0};
 }
 
-// ══ ロビー画面（APEX風） ══
+// ══ ロビー画面 ══
 function openLobbyScreen(){
-  renderLobbyInfo();renderLobbyScene();renderLobbyRanking();
+  renderLobbyInfo();
+  renderLobbyPlayers();
   initAvatarSelector();
   document.getElementById('lb-leader-area').style.display=isLeader?'':'none';
   document.getElementById('lb-member-area').style.display=isLeader?'none':'';
+  document.getElementById('lb-select-wrap').style.display=isLeader?'':'none';
+  // ランキングは前回の結果があれば表示
+  const hasRanking=Object.values(multiPlayers).some(p=>p.lastRank!=null);
+  document.getElementById('lb-ranking-section').classList.toggle('show',hasRanking);
+  if(hasRanking)renderLobbyRanking();
   document.getElementById('lobby-screen').classList.add('open');
 }
+
 function renderLobbyInfo(){
   document.getElementById('lb-code-display').textContent=currentRoom?.code||'----';
+  document.getElementById('invite-code-box').textContent=currentRoom?.code||'----';
   const lbSel=document.getElementById('lb-quiz-select');
   lbSel.innerHTML='<option value="">-- クイズを選択 --</option>';
   onlineQuizzes.forEach(z=>{const op=document.createElement('option');op.value=z.id;op.textContent=`${z.title} (${(z.questions||[]).length}問)`;lbSel.appendChild(op);});
   if(currentRoom?.quizId)lbSel.value=currentRoom.quizId;
-  lbSel.disabled=!isLeader;
   const qz=currentRoom?.quizId?onlineQuizzes.find(z=>z.id===currentRoom.quizId):null;
-  document.getElementById('lb-quiz-count').textContent=qz?`${(qz.questions||[]).length}問`:'';
+  if(qz){
+    const ci=CATS[qz.cat]||{};
+    document.getElementById('lb-quiz-icon').textContent=ci.e||'🎮';
+    document.getElementById('lb-quiz-name').textContent=qz.title;
+    document.getElementById('lb-quiz-meta').innerHTML=`<span><svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-5-3z"/></svg>${(qz.questions||[]).length}問</span><span>${ci.l}</span>`;
+  }else{
+    document.getElementById('lb-quiz-icon').textContent='🎮';
+    document.getElementById('lb-quiz-name').textContent=isLeader?'クイズを選択してください':'リーダーがクイズを選択中...';
+    document.getElementById('lb-quiz-meta').innerHTML='';
+  }
 }
+
 function onLbQuizChange(v){
   if(!isLeader||!currentRoom)return;
   const quiz=onlineQuizzes.find(z=>z.id===v);if(!quiz)return;
   currentRoom.quizId=v;currentRoom.quizTitle=quiz.title;currentRoom.quizCat=quiz.cat;currentRoom.timeLimit=quiz.timeLimit;currentRoom.allQuestions=quiz.questions;
-  document.getElementById('lb-quiz-count').textContent=`${(quiz.questions||[]).length}問`;
+  renderLobbyInfo();
   broadcastToRoom({type:'room_info',quizId:v,quizTitle:quiz.title,quizCat:quiz.cat,timeLimit:quiz.timeLimit,qCount:currentRoom.qCount,orderMode:currentRoom.orderMode,players:Object.values(multiPlayers)});
 }
 
-// 3Dシーン描画
-function renderLobbyScene(){
-  const scene=document.getElementById('lb-scene');
-  const thumbsEl=document.getElementById('lb-thumbs');
+function renderLobbyPlayers(){
   const players=Object.values(multiPlayers);
   const meId=currentUser?.id;
-  const others=players.filter(p=>p.id!==meId);
-  const MAX_SLOTS=7;// 自分以外の最大表示数
-
-  // SVGグリッド
-  const svg=document.getElementById('lb-grid-svg');
-  const W=document.getElementById('lb-field').clientWidth||800;
-  const H=document.getElementById('lb-field').clientHeight||400;
-  let svgContent='';
-  const VP={x:W/2,y:H};
-  const lines=8;
-  for(let i=0;i<=lines;i++){
-    const t=i/lines;
-    const x1=VP.x+(t-0.5)*W*3;const y1=H*0.15;
-    svgContent+=`<line x1="${VP.x}" y1="${VP.y}" x2="${x1}" y2="${y1}" stroke="rgba(74,158,255,0.08)" stroke-width="1"/>`;
-  }
-  const hlines=5;
-  for(let i=0;i<=hlines;i++){
-    const t=Math.pow((i/hlines),1.5);
-    const y=H*0.15+t*(H*0.85);
-    const hw=W*0.5*(1-Math.pow(1-t,1.5)*0.8);
-    svgContent+=`<line x1="${VP.x-hw}" y1="${y}" x2="${VP.x+hw}" y2="${y}" stroke="rgba(74,158,255,0.05)" stroke-width="1"/>`;
-  }
-  svg.innerHTML=svgContent;
-
-  // 自分のカード（中央前）
-  const selfScale=1.3;
-  const selfW=110;const selfH=140;
-  scene.innerHTML='';
-
-  // 自分
-  const meP=players.find(p=>p.id===meId)||{id:meId,name:getUserName(),color:getUserColor(),avatar:myAvatar,isLeader,score:0};
-  const selfCard=document.createElement('div');
-  selfCard.className='lb-player';
-  selfCard.style.cssText=`left:50%;bottom:20px;transform:translateX(-50%) scale(${selfScale});width:${selfW}px;z-index:10;`;
-  selfCard.innerHTML=`
-    <div class="lb-player-card me">
-      <div class="lb-ava-wrap">
-        <div class="lb-ava me" style="width:56px;height:56px;background:${meP.color};font-size:28px">
-          <span class="lb-ava-emoji">${meP.avatar}</span>
-        </div>
-        <div class="lb-you-badge">YOU</div>
-        ${meP.isLeader?'<div class="lb-leader-crown">👑</div>':''}
+  document.getElementById('lb-player-cnt').textContent=players.length+'人';
+  const el=document.getElementById('lb-player-list');
+  el.innerHTML=players.map(p=>{
+    const isMe=p.id===meId;
+    return`<div class="lb-player-row${isMe?' me':''}">
+      <div class="lb-pr-ava${isMe?' me':''}${p.isLeader?' leader':''}" style="background:${p.color}">
+        <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px">${p.avatar}</span>
       </div>
-      <div class="lb-player-name">${esc(meP.name)}</div>
-      <div class="lb-player-role">${meP.isLeader?'LEADER':'PLAYER'}</div>
-      <div class="lb-player-pts">${meP.score}pt</div>
-    </div>
-    <div style="width:70px;height:4px;background:rgba(74,158,255,0.3);border-radius:2px;margin-top:4px;box-shadow:0 0 10px rgba(74,158,255,0.5)"></div>
-  `;
-  selfCard.querySelector('.lb-player-card').addEventListener('click',toggleAvatarPanel);
-  scene.appendChild(selfCard);
-
-  // 他プレイヤー（遠近法で配置）
-  const slotCount=Math.max(others.length,Math.min(others.length+2,MAX_SLOTS));
-  const depths=[0.62,0.62,0.5,0.5,0.38,0.38,0.28];// 各スロットの奥行き（0=遠、1=手前）
-  const xOffsets=[-0.25,0.25,-0.42,0.42,-0.55,0.55,0];// 横オフセット（中心からの割合）
-
-  for(let i=0;i<slotCount;i++){
-    const depth=depths[i]||0.4;
-    const xOff=xOffsets[i]||((i%2===0?-1:1)*0.35);
-    const scale=0.5+depth*0.7;
-    const x=50+xOff*100;
-    const bottomPct=10+depth*30;
-    const zIdx=Math.round(depth*8);
-
-    if(i<others.length){
-      const p=others[i];
-      const isLeaderP=p.isLeader;
-      const el=document.createElement('div');
-      el.className='lb-player';
-      el.style.cssText=`left:${x}%;bottom:${bottomPct}%;transform:translateX(-50%) scale(${scale});width:${selfW}px;z-index:${zIdx};`;
-      el.innerHTML=`
-        <div class="lb-player-card${isLeaderP?' leader':''}">
-          <div class="lb-ava-wrap">
-            <div class="lb-ava${isLeaderP?' leader':''}" style="width:56px;height:56px;background:${p.color};font-size:28px">
-              <span class="lb-ava-emoji">${p.avatar}</span>
-            </div>
-            ${isLeaderP?'<div class="lb-leader-crown">👑</div>':''}
-          </div>
-          <div class="lb-player-name">${esc(p.name)}</div>
-          <div class="lb-player-role">${isLeaderP?'LEADER':'PLAYER'}</div>
-          <div class="lb-player-pts">${p.score}pt</div>
+      <div class="lb-pr-info">
+        <div class="lb-pr-name">
+          ${esc(p.name)}
+          ${isMe?'<span class="lb-pr-tag you">YOU</span>':''}
+          ${p.isLeader?'<span class="lb-pr-tag leader">👑</span>':''}
         </div>
-      `;
-      scene.appendChild(el);
-    }else{
-      // 空きスロット（プラスボタン）
-      const el=document.createElement('div');
-      el.className='lb-player-plus';
-      el.style.cssText=`left:${x}%;bottom:${bottomPct}%;transform:translateX(-50%) scale(${scale});width:${selfW}px;z-index:${zIdx};`;
-      el.innerHTML=`
-        <div class="lb-plus-circle">
-          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        </div>
-        <div class="lb-plus-label">招待</div>
-      `;
-      el.addEventListener('click',openInviteModal);
-      scene.appendChild(el);
-    }
-  }
-
-  // サムネ（左上）
-  thumbsEl.innerHTML=players.map(p=>`
-    <div class="lb-thumb${p.id===meId?' me':''}" style="background:${p.color}" title="${esc(p.name)}">
-      <span class="lb-thumb-emoji">${p.avatar}</span>
-      <span class="lb-thumb-tip">${esc(p.name)}${p.isLeader?' 👑':''}</span>
-    </div>`).join('');
+        <div class="lb-pr-score">${p.score>0?p.score+'pt':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+  // レディドット
+  const dots=document.getElementById('lb-ready-dots');
+  dots.innerHTML=players.map(()=>'<div class="lb-ready-dot on"></div>').join('');
+  document.getElementById('lb-ready-text').textContent=`${players.length}人が参加中`;
 }
 
-// ランキング
 function renderLobbyRanking(){
-  const players=Object.values(multiPlayers).sort((a,b)=>b.score-a.score);
-  const el=document.getElementById('lb-ranking-list');
-  if(!players.length){el.innerHTML='<div style="font-size:11px;color:var(--lobby-hint);text-align:center;padding:8px">まだデータがありません</div>';return;}
-  el.innerHTML=players.slice(0,5).map((p,i)=>{
-    const rankClass=i===0?'top1':i===1?'top2':i===2?'top3':'';
-    const rate=p.totalAnswered>0?Math.round(p.totalCorrect/p.totalAnswered*100):0;
-    return`<div class="lb-ranking-item">
-      <div class="lb-rank-num ${rankClass}">${i+1}</div>
-      <div class="lb-rank-ava" style="background:${p.color};width:24px;height:24px;position:relative;overflow:hidden;border-radius:50%">
+  const players=Object.values(multiPlayers).filter(p=>p.lastRank!=null).sort((a,b)=>a.lastRank-b.lastRank);
+  const el=document.getElementById('lb-rank-list');
+  el.innerHTML=players.map((p,i)=>{
+    const posClass=i===0?'g1':i===1?'g2':i===2?'g3':'';
+    return`<div class="lb-rank-row">
+      <div class="lb-rank-pos ${posClass}">${p.lastRank}</div>
+      <div class="lb-rank-ava" style="background:${p.color};width:24px;height:24px;border-radius:50%;position:relative;overflow:hidden">
         <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px">${p.avatar}</span>
       </div>
-      <div style="flex:1;min-width:0">
-        <div class="lb-rank-name">${esc(p.name)}</div>
-        <div class="lb-rank-sub">正答率${rate}% ${p.lastRank!=null?'/ 前回'+p.lastRank+'位':''}</div>
-      </div>
+      <div class="lb-rank-name">${esc(p.name)}</div>
       <div class="lb-rank-pts">${p.score}pt</div>
     </div>`;
   }).join('');
 }
-
-// スライドパネル
-function openSlidePanel(){
-  const rail=document.getElementById('lb-slide-rail');
-  const players=Object.values(multiPlayers);
-  const meId=currentUser?.id;
-  rail.innerHTML=players.map(p=>{
-    const rate=p.totalAnswered>0?Math.round(p.totalCorrect/p.totalAnswered*100):0;
-    const isMe=p.id===meId;
-    return`<div class="lb-slide-card${isMe?' me':''}">
-      <div class="lb-slide-ava" style="background:${p.color}">
-        <span class="lb-slide-ava-emoji">${p.avatar}</span>
-      </div>
-      <div class="lb-slide-name">${esc(p.name)}${isMe?' (あなた)':''}${p.isLeader?' 👑':''}</div>
-      <div class="lb-slide-stats">
-        <div class="lb-slide-stat-row">累計得点</div>
-        <div class="lb-slide-stat-val">${p.score}pt</div>
-        <div class="lb-slide-stat-row" style="margin-top:4px">正答率</div>
-        <div class="lb-slide-stat-val">${rate}%</div>
-        ${p.lastRank!=null?`<div class="lb-slide-stat-row" style="margin-top:4px">前回順位</div><div class="lb-slide-stat-val">${p.lastRank}位</div>`:''}
-      </div>
-    </div>`;
-  }).join('');
-  document.getElementById('lb-slide-panel').classList.add('open');
-}
-function closeSlidePanel(){document.getElementById('lb-slide-panel').classList.remove('open');}
 
 // アバター選択
 function initAvatarSelector(){
@@ -1904,23 +1936,19 @@ function initAvatarSelector(){
     <div class="avatar-opt${a===myAvatar?' selected':''}" onclick="selectAvatar('${a}')">${a}</div>
   `).join('');
 }
-function toggleAvatarPanel(){
-  const p=document.getElementById('lb-avatar-panel');p.classList.toggle('open');
-}
 function selectAvatar(a){
   myAvatar=a;localStorage.setItem('qh_avatar',a);
   document.querySelectorAll('.avatar-opt').forEach(el=>el.classList.toggle('selected',el.textContent===a));
   if(currentUser&&multiPlayers[currentUser.id]){multiPlayers[currentUser.id].avatar=a;}
-  renderLobbyScene();
+  renderLobbyPlayers();
   broadcastToRoom({type:'avatar_change',userId:currentUser?.id,avatar:a});
-  toast('✅ アバターを変更しました');
 }
 
 // 招待モーダル
-async function openInviteModal(){
+function openInviteModal(){
   document.getElementById('invite-ov').classList.add('open');
   document.getElementById('invite-search-inp').value='';
-  // ダミーユーザーリスト（実際はDBから取得）
+  // ダミーユーザーリスト（実装時はDBから取得）
   allUsersCache=[
     {id:'u1',name:'クイズ太郎',color:'#2d5be3',avatar:'🐱'},
     {id:'u2',name:'トリビアマスター',color:'#e05b2e',avatar:'🦊'},
@@ -1931,32 +1959,44 @@ async function openInviteModal(){
   renderInviteList(allUsersCache);
 }
 function closeInviteModal(){document.getElementById('invite-ov').classList.remove('open');}
-function filterInviteList(v){
-  const filtered=allUsersCache.filter(u=>u.name.toLowerCase().includes(v.toLowerCase()));
-  renderInviteList(filtered);
-}
+function filterInviteList(v){renderInviteList(allUsersCache.filter(u=>u.name.toLowerCase().includes(v.toLowerCase())));}
 function renderInviteList(users){
   const el=document.getElementById('invite-list');
   if(!users.length){el.innerHTML=`<div class="invite-empty">ユーザーが見つかりません</div>`;return;}
   el.innerHTML=users.map(u=>`
     <div class="invite-item">
-      <div class="invite-ava" style="background:${u.color}">
-        <span style="font-size:18px">${u.avatar}</span>
-      </div>
+      <div class="invite-ava" style="background:${u.color}">${u.avatar}</div>
       <div class="invite-name">${esc(u.name)}</div>
-      <button class="invite-btn" onclick="sendInvite('${u.id}','${esc(u.name)}',this)">招待</button>
+      <button class="invite-btn" onclick="sendInvite('${u.id}','${esc(u.name)}','${u.color}','${u.avatar}',this)">招待する</button>
     </div>`).join('');
 }
-function sendInvite(userId,name,btn){
+function sendInvite(userId,name,color,avatar,btn){
   btn.textContent='✓ 送信済み';btn.className='invite-btn invited';
-  toast(`📨 ${name} に招待を送りました（コード: ${currentRoom?.code||'----'}）`);
+  // ★ 相手のNotificationチャンネルに招待を送信
+  const targetChannel=sb.channel('notif-'+userId,{config:{broadcast:{self:true}}});
+  targetChannel.subscribe((status)=>{
+    if(status==='SUBSCRIBED'){
+      targetChannel.send({
+        type:'broadcast',event:'invite',
+        payload:{
+          fromId:currentUser?.id,
+          fromName:getUserName(),
+          fromColor:getUserColor(),
+          fromAvatar:myAvatar,
+          roomCode:currentRoom?.code||'----',
+          quizTitle:currentRoom?.quizTitle||'クイズ対戦',
+        }
+      });
+      setTimeout(()=>targetChannel.unsubscribe(),3000);
+    }
+  });
+  toast(`📨 ${name} に招待を送りました`);
 }
 
 function leaveLobby(){
   if(realtimeChannel)realtimeChannel.unsubscribe();realtimeChannel=null;
   currentRoom=null;isLeader=false;multiPlayers={};
   document.getElementById('lobby-screen').classList.remove('open');
-  document.getElementById('lobby-mini').classList.remove('show');
 }
 
 // ══ バトル開始 ══
@@ -1970,14 +2010,44 @@ function startBattle(){
   const fakeQuiz={id:'battle',title:currentRoom.quizTitle,cat:currentRoom.quizCat,timeLimit:currentRoom.timeLimit,questions:qs};
   startPlayFromObj(fakeQuiz,true);
 }
-function restartBattle(){
-  closePlay();
-  Object.values(multiPlayers).forEach(p=>{p.score=0;p.correctCount=0;});
-  openLobbyScreen();
+function restartBattle(){closePlay();Object.values(multiPlayers).forEach(p=>{p.score=0;p.correctCount=0;});openLobbyScreen();}
+function returnToLobby(){closePlay();openLobbyScreen();}
+
+// リーダーのスキップ・終了
+function leaderSkipQ(){
+  if(!isLeader)return;
+  broadcastToRoom({type:'skip_question',qIdx:playIdx});
+  forceNextQ();
 }
-function returnToLobby(){
-  closePlay();
-  openLobbyScreen();
+function leaderEndGame(){
+  if(!isLeader||!confirm('ゲームを途中で終了しますか？'))return;
+  broadcastToRoom({type:'end_game'});
+  endBattleForced();
+}
+function forceNextQ(){
+  clearInterval(timerInterval);
+  playAnswered=true;
+  // 現在の正解を表示
+  const q=playQuestions[playIdx];
+  if(q&&q.type==='choice'){
+    const btns=document.querySelectorAll('.play-choice');
+    btns.forEach(b=>b.classList.add('answered'));
+    if(btns[q.correct])btns[q.correct].classList.add('show-correct');
+  }
+  setTimeout(()=>{
+    playIdx++;
+    if(playIdx>=playQuestions.length){if(isMultiPlay)endBattle();else showResult();}
+    else showQuestion();
+  },1200);
+}
+function endBattleForced(){
+  clearInterval(timerInterval);
+  if(isLeader){
+    const scores=Object.values(multiPlayers).map(p=>({userId:p.id,score:p.score,correctCount:p.correctCount}));
+    broadcastToRoom({type:'game_end',scores});
+    updateCumulativeStats(scores);
+  }
+  showRanking();
 }
 
 // ══ プレイ ══
@@ -1997,23 +2067,10 @@ function startPlayFromObj(z,isMulti){
   document.getElementById('play-quiz-title').textContent=z.title;
   document.getElementById('play-scoreboard').style.display=isMultiPlay?'':'none';
   document.getElementById('buzzer-banner').style.display=isMultiPlay?'':'none';
-  if(isMultiPlay){renderInGameScoreboard();showLobbyMini();}
+  // リーダーコントロール表示
+  document.getElementById('leader-controls').style.display=(isMultiPlay&&isLeader)?'':'none';
+  if(isMultiPlay)renderInGameScoreboard();
   showQuestion();openOv('play-ov');
-}
-function showLobbyMini(){
-  document.getElementById('lobby-mini').classList.add('show');
-  updateLobbyMini();
-}
-function updateLobbyMini(){
-  if(!isMultiPlay)return;
-  const players=Object.values(multiPlayers).sort((a,b)=>b.score-a.score);
-  const el=document.getElementById('lobby-mini-players');
-  el.innerHTML=players.map(p=>`
-    <div class="lobby-mini-ava" style="background:${p.color}" title="${esc(p.name)}">
-      <span class="lobby-mini-emoji">${p.avatar}</span>
-    </div>`).join('');
-  const me=multiPlayers[currentUser?.id];
-  document.getElementById('lobby-mini-score').textContent=me?`あなた: ${me.score}pt`:'';
 }
 
 function showQuestion(){
@@ -2046,44 +2103,82 @@ function showExpMedia(q){
   if(q.explanationImage){const ei=document.getElementById('play-exp-img');ei.src=q.explanationImage;ei.style.display='';}
   if(q.explanationAudio){const ea=document.getElementById('play-exp-audio');ea.src=q.explanationAudio;ea.style.display='';}
 }
-function showBuzzerFirst(userId,name){
-  const banner=document.getElementById('buzzer-banner');
-  banner.textContent=`⚡ ${name} が最速回答！+10ボーナス ⚡`;
-  banner.style.display='block';
+
+// ★ 早押し：他の人が正解したとき
+function showBuzzerOther(name,score){
+  clearInterval(timerInterval);
+  const fb=document.getElementById('play-fb');
+  fb.className='play-feedback ng show';
+  fb.textContent=`⚡ ${name} が最速正解！ 次の問題に移動します...`;
+  document.querySelectorAll('.play-choice').forEach(b=>b.classList.add('answered'));
+  const q=playQuestions[playIdx];
+  if(q&&q.type==='choice'){
+    const btns=document.querySelectorAll('.play-choice');
+    if(btns[q.correct])btns[q.correct].classList.add('show-correct');
+  }
+  showExpMedia(q);
+  setTimeout(()=>{nextQ();},2000);
 }
 
 function answer(idx){
   if(playAnswered)return;playAnswered=true;clearInterval(timerInterval);
-  // 早押しボーナス
-  const elapsed=Date.now()-questionStartTime;
   const q=playQuestions[playIdx];
   const choices=document.querySelectorAll('.play-choice');choices.forEach(b=>b.classList.add('answered'));
   const fb=document.getElementById('play-fb');const qScore=q.score||10;
   const isCorrect=idx===q.correct;
-  // 早押し判定：最初の正解者にボーナス
+
+  // ★ 早押し：正解した場合にブロードキャスト
   if(isMultiPlay&&isCorrect&&!firstAnswerUserId){
     firstAnswerUserId=currentUser?.id;
-    broadcastToRoom({type:'first_answer',userId:currentUser?.id,name:getUserName(),elapsed});
+    const penalty=Math.floor(qScore/2);
+    broadcastToRoom({type:'first_answer',userId:currentUser?.id,name:getUserName(),score:qScore,penalty});
   }
+
   let earned=0;
   if(isCorrect){
-    earned=qScore;
-    if(isMultiPlay&&firstAnswerUserId===currentUser?.id)earned+=10;
-    playScore+=earned;choices[idx].classList.add('correct');
-    fb.className='play-feedback ok show';fb.textContent=`✓ 正解！ +${earned}点${isMultiPlay&&firstAnswerUserId===currentUser?.id?' ⚡早押し+10':''}${q.explanation?' — '+q.explanation:''}`;
+    const isFirst=!isMultiPlay||(firstAnswerUserId===currentUser?.id);
+    const buzzerBonus=isMultiPlay&&isFirst?10:0;
+    earned=qScore+buzzerBonus;
+    playScore+=earned;
+    choices[idx].classList.add('correct');
+    fb.className='play-feedback ok show';
+    fb.textContent=`✓ 正解！ +${earned}点${buzzerBonus?' ⚡早押し+10':''}${q.explanation?' — '+q.explanation:''}`;
   }else{
+    // ★ 不正解ペナルティ：獲得ポイントの1/2減点（0以下なし）
+    if(isMultiPlay){
+      const penalty=Math.floor((q.score||10)/2);
+      const newScore=Math.max(0,playScore-penalty);
+      const lost=playScore-newScore;
+      playScore=newScore;
+      if(lost>0){
+        fb.className='play-feedback ng show';
+        fb.textContent=`✗ 不正解。-${lost}点ペナルティ。正解は「${q.choices[q.correct]}」${q.explanation?' — '+q.explanation:''}`;
+      }else{
+        fb.className='play-feedback ng show';
+        fb.textContent='✗ 不正解。正解は「'+q.choices[q.correct]+'」'+(q.explanation?' — '+q.explanation:'');
+      }
+    }else{
+      fb.className='play-feedback ng show';
+      fb.textContent='✗ 不正解。正解は「'+q.choices[q.correct]+'」'+(q.explanation?' — '+q.explanation:'');
+    }
     choices[idx].classList.add('wrong');choices[q.correct].classList.add('show-correct');
-    fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.choices[q.correct]+'」'+(q.explanation?' — '+q.explanation:'');
   }
   showExpMedia(q);
   if(isMultiPlay){
     if(isCorrect&&multiPlayers[currentUser?.id]){multiPlayers[currentUser.id].correctCount=(multiPlayers[currentUser.id].correctCount||0)+1;}
     if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
     broadcastToRoom({type:'player_score',userId:currentUser?.id||'solo',score:playScore,correctCount:multiPlayers[currentUser?.id]?.correctCount||0});
-    renderInGameScoreboard();updateLobbyMini();
+    renderInGameScoreboard();
   }
-  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';
+
+  // ★ 早押し：自分が正解したら全員を次の問題へ
+  if(isMultiPlay&&isCorrect&&firstAnswerUserId===currentUser?.id){
+    setTimeout(()=>{nextQ();},1800);
+  }else{
+    const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';
+  }
 }
+
 function answerText(){
   if(playAnswered)return;const inp=document.getElementById('play-text-inp');if(!inp)return;
   const userAns=inp.value.trim();if(!userAns)return toast('❗ 答えを入力してください');
@@ -2092,17 +2187,41 @@ function answerText(){
   const correct=norm(userAns).includes(norm(q.textAnswer))||norm(q.textAnswer).includes(norm(userAns));
   inp.disabled=true;document.querySelector('.play-text-submit').disabled=true;
   const fb=document.getElementById('play-fb');const qScore=q.score||10;
-  if(correct){playScore+=qScore;inp.style.borderColor='var(--green)';fb.className='play-feedback ok show';fb.textContent=`✓ 正解！ +${qScore}点`+(q.explanation?' — '+q.explanation:'');}
-  else{inp.style.borderColor='var(--red)';fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.textAnswer+'」'+(q.explanation?' — '+q.explanation:'');}
+  if(correct){
+    playScore+=qScore;inp.style.borderColor='var(--green)';
+    fb.className='play-feedback ok show';fb.textContent=`✓ 正解！ +${qScore}点`+(q.explanation?' — '+q.explanation:'');
+    if(isMultiPlay&&!firstAnswerUserId){
+      firstAnswerUserId=currentUser?.id;
+      broadcastToRoom({type:'first_answer',userId:currentUser?.id,name:getUserName(),score:qScore,penalty:Math.floor(qScore/2)});
+    }
+  }else{
+    // ★ 記述式も早押しペナルティ
+    if(isMultiPlay){
+      const penalty=Math.floor(qScore/2);
+      const newScore=Math.max(0,playScore-penalty);
+      const lost=playScore-newScore;playScore=newScore;
+      inp.style.borderColor='var(--red)';
+      fb.className='play-feedback ng show';
+      fb.textContent=`✗ 不正解。${lost>0?'-'+lost+'点。':''}正解は「${q.textAnswer}」${q.explanation?' — '+q.explanation:''}`;
+    }else{
+      inp.style.borderColor='var(--red)';
+      fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.textAnswer+'」'+(q.explanation?' — '+q.explanation:'');
+    }
+  }
   showExpMedia(q);
   if(isMultiPlay){
     if(correct&&multiPlayers[currentUser?.id])multiPlayers[currentUser.id].correctCount=(multiPlayers[currentUser.id].correctCount||0)+1;
     if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
     broadcastToRoom({type:'player_score',userId:currentUser?.id||'solo',score:playScore,correctCount:multiPlayers[currentUser?.id]?.correctCount||0});
-    renderInGameScoreboard();updateLobbyMini();
+    renderInGameScoreboard();
   }
-  const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';
+  if(isMultiPlay&&correct&&firstAnswerUserId===currentUser?.id){
+    setTimeout(()=>{nextQ();},1800);
+  }else{
+    const nextBtn=document.getElementById('play-next');nextBtn.className='play-next show';nextBtn.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';
+  }
 }
+
 function nextQ(){playIdx++;if(playIdx>=playQuestions.length){if(isMultiPlay)endBattle();else showResult();return;}showQuestion();}
 
 function endBattle(){
@@ -2133,7 +2252,6 @@ function showRanking(){
   document.getElementById('play-game').style.display='none';
   document.getElementById('play-result').classList.remove('show');
   document.getElementById('play-ranking').classList.add('show');
-  document.getElementById('lobby-mini').classList.remove('show');
   const players=Object.values(multiPlayers).sort((a,b)=>b.score-a.score);
   const total=playQuestions.reduce((s,q)=>s+(q.score||10),0);
   document.getElementById('ranking-subtitle').textContent=`全${playQuestions.length}問 / 最高${total}点`;
@@ -2173,7 +2291,6 @@ function showResult(){
   document.getElementById('res-stars').textContent=stars;document.getElementById('res-msg').textContent=msg;
 }
 
-// スコアボード（プレイ中）
 function renderInGameScoreboard(){
   const list=document.getElementById('play-scoreboard-list');
   const players=Object.values(multiPlayers).sort((a,b)=>b.score-a.score);
@@ -2189,7 +2306,7 @@ function renderInGameScoreboard(){
   }).join('');
 }
 
-function closePlay(){clearInterval(timerInterval);closeOv('play-ov');document.getElementById('lobby-mini').classList.remove('show');}
+function closePlay(){clearInterval(timerInterval);closeOv('play-ov');}
 function restartPlay(){if(!playQuiz)return;startPlayFromObj(playQuiz,isMultiPlay);}
 
 // タイマー
