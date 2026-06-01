@@ -326,7 +326,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   display:none;flex-direction:column;
 }
 #lobby-screen.open{display:flex}
-
 /* 上部バー */
 .lb-topbar{
   height:52px;
@@ -1446,23 +1445,20 @@ async function loadOnlineQuizzes(){
 // ══ 通知システム ══
 function subscribeNotifications(){
   if(!currentUser)return;
-  // Supabase Realtimeで自分宛て通知チャンネルを購読
   if(notifChannel)notifChannel.unsubscribe();
   notifChannel=sb.channel('notif-'+currentUser.id,{config:{broadcast:{self:false}}});
-  notifChannel.on('broadcast',{event:'invite'},{
-    // eslint-disable-next-line no-unused-vars
-    callback:({payload})=>{
-      addNotification({
-        type:'invite',
-        from:payload.fromName,
-        fromColor:payload.fromColor,
-        fromAvatar:payload.fromAvatar||'🐱',
-        roomCode:payload.roomCode,
-        title:payload.quizTitle||'クイズ対戦',
-        id:Date.now()+Math.random(),
-        unread:true,
-      });
-    }
+  notifChannel.on('broadcast',{event:'invite'},(msg)=>{
+    const payload=msg.payload;
+    addNotification({
+      type:'invite',
+      from:payload.fromName||'誰か',
+      fromColor:payload.fromColor||'#2d5be3',
+      fromAvatar:payload.fromAvatar||'🐱',
+      roomCode:payload.roomCode||'----',
+      title:payload.quizTitle||'クイズ対戦',
+      id:Date.now()+Math.random(),
+      unread:true,
+    });
   });
   notifChannel.subscribe();
 }
@@ -1831,6 +1827,8 @@ function handleRoomEvent(payload){
   }else if(payload.type==='game_end'){
     if(!isLeader){
       payload.scores.forEach(s=>{if(multiPlayers[s.userId]){multiPlayers[s.userId].score=s.score;multiPlayers[s.userId].correctCount=s.correctCount;}});
+      // 自分のローカルスコアも反映
+      if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
       updateCumulativeStats(payload.scores);showRanking();
     }
   }else if(payload.type==='avatar_change'){
@@ -1994,9 +1992,11 @@ function sendInvite(userId,name,color,avatar,btn){
 }
 
 function leaveLobby(){
+  if(!confirm('ロビーを退出しますか？'))return;
   if(realtimeChannel)realtimeChannel.unsubscribe();realtimeChannel=null;
   currentRoom=null;isLeader=false;multiPlayers={};
   document.getElementById('lobby-screen').classList.remove('open');
+  closePlay();
 }
 
 // ══ バトル開始 ══
@@ -2010,8 +2010,20 @@ function startBattle(){
   const fakeQuiz={id:'battle',title:currentRoom.quizTitle,cat:currentRoom.quizCat,timeLimit:currentRoom.timeLimit,questions:qs};
   startPlayFromObj(fakeQuiz,true);
 }
-function restartBattle(){closePlay();Object.values(multiPlayers).forEach(p=>{p.score=0;p.correctCount=0;});openLobbyScreen();}
-function returnToLobby(){closePlay();openLobbyScreen();}
+function restartBattle(){
+  closePlay();
+  Object.values(multiPlayers).forEach(p=>{p.score=0;p.correctCount=0;p.lastRank=null;});
+  openLobbyScreen();
+}
+function returnToLobby(){
+  closePlay();
+  // ランキング表示を更新してロビーへ
+  const hasRanking=Object.values(multiPlayers).some(p=>p.lastRank!=null);
+  document.getElementById('lb-ranking-section').classList.toggle('show',hasRanking);
+  if(hasRanking)renderLobbyRanking();
+  renderLobbyPlayers();
+  document.getElementById('lobby-screen').classList.add('open');
+}
 
 // リーダーのスキップ・終了
 function leaderSkipQ(){
@@ -2042,6 +2054,8 @@ function forceNextQ(){
 }
 function endBattleForced(){
   clearInterval(timerInterval);
+  // スコアを最終反映
+  if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
   if(isLeader){
     const scores=Object.values(multiPlayers).map(p=>({userId:p.id,score:p.score,correctCount:p.correctCount}));
     broadcastToRoom({type:'game_end',scores});
@@ -2106,17 +2120,28 @@ function showExpMedia(q){
 
 // ★ 早押し：他の人が正解したとき
 function showBuzzerOther(name,score){
+  if(playAnswered)return;// 既に自分が回答済みなら何もしない
   clearInterval(timerInterval);
+  playAnswered=true;
   const fb=document.getElementById('play-fb');
   fb.className='play-feedback ng show';
-  fb.textContent=`⚡ ${name} が最速正解！ 次の問題に移動します...`;
+  fb.textContent=`⚡ ${name} が最速正解！ 次の問題へ移動します...`;
   document.querySelectorAll('.play-choice').forEach(b=>b.classList.add('answered'));
   const q=playQuestions[playIdx];
   if(q&&q.type==='choice'){
     const btns=document.querySelectorAll('.play-choice');
     if(btns[q.correct])btns[q.correct].classList.add('show-correct');
+  }else if(q&&q.type==='text'){
+    const fb2=document.getElementById('play-fb');
+    fb2.textContent+=` 正解は「${q.textAnswer}」`;
+    const inp=document.getElementById('play-text-inp');
+    if(inp)inp.disabled=true;
+    const sub=document.querySelector('.play-text-submit');
+    if(sub)sub.disabled=true;
   }
   showExpMedia(q);
+  // 次の問題ボタンを非表示にして自動遷移
+  document.getElementById('play-next').className='play-next';
   setTimeout(()=>{nextQ();},2000);
 }
 
@@ -2229,6 +2254,8 @@ function endBattle(){
   const total=playQuestions.length;
   document.getElementById('prog-fill').style.width='100%';document.getElementById('prog-text').textContent=`${total}/${total}`;
   document.getElementById('play-q-counter').textContent=`${total}/${total}`;
+  // 自分のスコアを最終反映
+  if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
   if(isLeader){
     const scores=Object.values(multiPlayers).map(p=>({userId:p.id,score:p.score,correctCount:p.correctCount}));
     broadcastToRoom({type:'game_end',scores});
