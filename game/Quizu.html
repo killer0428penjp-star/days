@@ -1501,8 +1501,11 @@ function renderNotifList(){
 function acceptInvite(code,idx){
   notifications.splice(idx,1);renderNotifList();
   document.getElementById('notif-panel').classList.remove('open');
+  // join-code-inpにセットしてjoinRoom()を呼ぶ
+  // join-room-ovは開かず直接参加
   document.getElementById('join-code-inp').value=code;
   joinRoom();
+  toast('🚪 部屋に参加します...');
 }
 function declineInvite(idx){notifications.splice(idx,1);renderNotifList();toast('招待を断りました');}
 
@@ -1764,11 +1767,13 @@ async function createRoom(){
 }
 
 async function joinRoom(){
-  const code=document.getElementById('join-code-inp').value.trim().toUpperCase();
+  const codeEl=document.getElementById('join-code-inp');
+  const code=(codeEl?.value||'').trim().toUpperCase();
   if(!code||code.length<4)return toast('❗ ルームコードを入力してください');
   isLeader=false;
   currentRoom={code,quizId:null,quizTitle:'参加中...',quizCat:'other',timeLimit:30,allQuestions:[],qCount:10,orderMode:'random'};
   multiPlayers={};addPlayer(currentUser.id,getUserName(),getUserColor(),myAvatar,false);
+  // モーダルが開いていれば閉じる
   closeOv('join-room-ov');
   // ★ ロビーを即座に開く
   openLobbyScreen();
@@ -1943,52 +1948,93 @@ function selectAvatar(a){
 }
 
 // 招待モーダル
-function openInviteModal(){
+async function openInviteModal(){
   document.getElementById('invite-ov').classList.add('open');
   document.getElementById('invite-search-inp').value='';
-  // ダミーユーザーリスト（実装時はDBから取得）
-  allUsersCache=[
-    {id:'u1',name:'クイズ太郎',color:'#2d5be3',avatar:'🐱'},
-    {id:'u2',name:'トリビアマスター',color:'#e05b2e',avatar:'🦊'},
-    {id:'u3',name:'なんでも博士',color:'#1a8a50',avatar:'🐸'},
-    {id:'u4',name:'アニメ好き',color:'#7c3aed',avatar:'🐲'},
-    {id:'u5',name:'スポーツ王',color:'#b45309',avatar:'🦁'},
-  ].filter(u=>!multiPlayers[u.id]);
-  renderInviteList(allUsersCache);
+  document.getElementById('invite-list').innerHTML='<div class="invite-empty">読み込み中...</div>';
+
+  // quizzesテーブルから投稿者一覧を取得（実ユーザーのみ）
+  try{
+    const{data,error}=await sb.from('quizzes')
+      .select('user_id,author,author_color')
+      .neq('user_id',currentUser.id)// 自分以外
+      .limit(200);
+    if(error)throw error;
+
+    // user_idでユニーク化
+    const seen=new Set();
+    const users=[];
+    (data||[]).forEach(r=>{
+      if(!seen.has(r.user_id)&&!multiPlayers[r.user_id]){
+        seen.add(r.user_id);
+        users.push({
+          id:r.user_id,
+          name:r.author||'ユーザー',
+          color:r.author_color||COLORS[r.user_id?.charCodeAt(0)%COLORS.length]||'#2d5be3',
+          avatar:localStorage.getItem('qh_avatar_'+r.user_id)||'🐱',
+        });
+      }
+    });
+    allUsersCache=users;
+    renderInviteList(users);
+  }catch(e){
+    console.error(e);
+    document.getElementById('invite-list').innerHTML='<div class="invite-empty">ユーザーの取得に失敗しました</div>';
+  }
 }
 function closeInviteModal(){document.getElementById('invite-ov').classList.remove('open');}
-function filterInviteList(v){renderInviteList(allUsersCache.filter(u=>u.name.toLowerCase().includes(v.toLowerCase())));}
+function filterInviteList(v){
+  const q=v.trim().toLowerCase();
+  renderInviteList(q?allUsersCache.filter(u=>u.name.toLowerCase().includes(q)):allUsersCache);
+}
 function renderInviteList(users){
   const el=document.getElementById('invite-list');
-  if(!users.length){el.innerHTML=`<div class="invite-empty">ユーザーが見つかりません</div>`;return;}
+  if(!users.length){
+    el.innerHTML=`<div class="invite-empty">招待できるユーザーがいません<br><span style="font-size:10px;margin-top:4px;display:block">ルームコードを直接シェアしてください</span></div>`;
+    return;
+  }
   el.innerHTML=users.map(u=>`
     <div class="invite-item">
       <div class="invite-ava" style="background:${u.color}">${u.avatar}</div>
       <div class="invite-name">${esc(u.name)}</div>
-      <button class="invite-btn" onclick="sendInvite('${u.id}','${esc(u.name)}','${u.color}','${u.avatar}',this)">招待する</button>
+      <button class="invite-btn" id="inv-btn-${u.id}" onclick="sendInvite('${u.id}','${esc(u.name)}','${u.color}','${u.avatar}',this)">招待する</button>
     </div>`).join('');
 }
 function sendInvite(userId,name,color,avatar,btn){
-  btn.textContent='✓ 送信済み';btn.className='invite-btn invited';
-  // ★ 相手のNotificationチャンネルに招待を送信
-  const targetChannel=sb.channel('notif-'+userId,{config:{broadcast:{self:true}}});
-  targetChannel.subscribe((status)=>{
+  btn.textContent='送信中...';btn.disabled=true;
+
+  // 相手のNotificationチャンネル（notif-{相手のUUID}）にブロードキャスト
+  const chName='notif-'+userId;
+  const targetCh=sb.channel(chName,{config:{broadcast:{self:true}}});
+  targetCh.subscribe(status=>{
     if(status==='SUBSCRIBED'){
-      targetChannel.send({
-        type:'broadcast',event:'invite',
+      targetCh.send({
+        type:'broadcast',
+        event:'invite',
         payload:{
-          fromId:currentUser?.id,
+          fromId:currentUser.id,
           fromName:getUserName(),
           fromColor:getUserColor(),
           fromAvatar:myAvatar,
           roomCode:currentRoom?.code||'----',
           quizTitle:currentRoom?.quizTitle||'クイズ対戦',
         }
+      }).then(()=>{
+        btn.textContent='✓ 送信済み';btn.className='invite-btn invited';btn.disabled=false;
+        toast(`📨 ${name} に招待を送りました`);
+        // チャンネルを少し後に解放
+        setTimeout(()=>targetCh.unsubscribe(),2000);
+      }).catch(()=>{
+        btn.textContent='送信失敗';btn.disabled=false;
+        toast('❌ 送信に失敗しました');
+        setTimeout(()=>targetCh.unsubscribe(),1000);
       });
-      setTimeout(()=>targetChannel.unsubscribe(),3000);
+    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+      btn.textContent='招待する';btn.disabled=false;
+      toast('❌ 接続エラー。もう一度お試しください');
+      targetCh.unsubscribe();
     }
   });
-  toast(`📨 ${name} に招待を送りました`);
 }
 
 function leaveLobby(){
