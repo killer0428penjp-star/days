@@ -1395,7 +1395,1181 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 <script>
 const SB_URL='https://uftjafldmtkoxusezqyh.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmdGphZmxkbXRrb3h1c2V6cXloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyNjU3ODAsImV4cCI6MjA5NDg0MTc4MH0.Ufu7IFq7rCKDduYf-hdv-6Ie5YwnPypCiZ_nlEqEVDE';
-const sb=window.supabase.createClient(SB_URL,SB_KEY);
+const sb=window.supabase.createClient(SB_URL,SB_KEY,{
+  realtime:{params:{eventsPerSecond:10}}
+});
+
+const CATS={trivia:{l:'雑学',e:'🧠',c:'cc-trivia'},general:{l:'一般常識',e:'📚',c:'cc-general'},sns:{l:'SNS',e:'📱',c:'cc-sns'},music:{l:'音楽',e:'🎵',c:'cc-music'},sports:{l:'スポーツ',e:'⚽',c:'cc-sports'},anime:{l:'アニメ',e:'🎌',c:'cc-anime'},other:{l:'その他',e:'✨',c:'cc-other'}};
+const COLORS=['#2d5be3','#e05b2e','#1a8a50','#be185d','#b45309','#0369a1','#b91c1c','#7c3aed'];
+const AVATARS=['🐱','🐶','🦊','🐼','🐨','🐸','🦁','🐯','🦄','🐺','🦅','🐙','🦋','🐲','🤖','👾','🧙','🧝','🕵️','🥷'];
+
+// ── 状態 ──────────────────────────────────────────────────
+let currentUser=null;
+let myProfile=null;        // profiles テーブルの自分のレコード
+let onlineQuizzes=[];
+let filterCat='all',searchQ='';
+let mCat=null,mInfinite=false,draftQs=[];
+let currentQIdx=null,qType='choice',correctIdx=null;
+let playQuiz=null,playQuestions=[],playIdx=0,playScore=0,playAnswered=false;
+let timerSec=0,timerRemain=0,timerInterval=null;
+const mediaStore={};
+let currentAuthTab='login';
+let currentMediaKey=null;
+let isMultiPlay=false;
+let currentRoom=null;      // {id,code,quizId,...} DBのroomsレコード
+let isLeader=false;
+let battleOrderMode='random',battleQCount=10;
+let multiPlayers={};       // userId→{id,name,color,avatar,score,correctCount,...}
+let realtimeChannel=null;  // ゲーム用broadcast channel
+let roomsChannel=null;     // rooms テーブルのrealtime channel（部屋一覧）
+let notifChannel=null;     // 通知用broadcast channel
+let myAvatar='🐱';
+let questionStartTime=0;
+let firstAnswerUserId=null;
+let allUsersCache=[];
+let notifications=[];
+
+// ── ユーティリティ ────────────────────────────────────────
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const tl=v=>v===0?'∞':v+'秒';
+function ago(ts){const m=Math.floor((Date.now()-new Date(ts).getTime())/60000);if(m<1)return'たった今';if(m<60)return m+'分前';const h=Math.floor(m/60);if(h<24)return h+'時間前';return Math.floor(h/24)+'日前';}
+function getUserName(){return myProfile?.display_name||currentUser?.user_metadata?.display_name||currentUser?.email?.split('@')[0]||'ユーザー';}
+function getUserColor(){return myProfile?.color||COLORS[getUserName().charCodeAt(0)%COLORS.length];}
+function genCode(){return Math.random().toString(36).substr(2,4).toUpperCase();}
+
+// ── プロフィール ──────────────────────────────────────────
+async function loadProfile(){
+  if(!currentUser)return;
+  const{data}=await sb.from('profiles').select('*').eq('id',currentUser.id).single();
+  if(data){
+    myProfile=data;
+    myAvatar=data.avatar||myAvatar;
+  }else{
+    // プロフィールが無ければ作成（トリガーが失敗した場合のフォールバック）
+    const name=currentUser.user_metadata?.display_name||currentUser.email?.split('@')[0]||'ユーザー';
+    const color=COLORS[name.charCodeAt(0)%COLORS.length];
+    const{data:d2}=await sb.from('profiles').insert({id:currentUser.id,display_name:name,color,avatar:myAvatar}).select().single();
+    if(d2)myProfile=d2;
+  }
+}
+
+async function saveProfile(updates){
+  if(!currentUser)return;
+  const{data}=await sb.from('profiles').update(updates).eq('id',currentUser.id).select().single();
+  if(data)myProfile=data;
+}
+
+// ── 画面切り替え ──────────────────────────────────────────
+function showAuthScreen(){
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('main-screen').style.display='none';
+}
+async function showMainScreen(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('main-screen').style.display='flex';
+  await loadProfile();
+  const name=getUserName(),email=currentUser.email||'',
+        initial=name[0].toUpperCase(),color=getUserColor();
+  ['profile-ava','sb-user-btn'].forEach(id=>{
+    const el=document.getElementById(id);
+    el.textContent=initial;el.style.background=color;
+  });
+  document.getElementById('profile-name').textContent=name;
+  document.getElementById('profile-email').textContent=email;
+  document.getElementById('um-name').textContent=name;
+  document.getElementById('um-email').textContent=email;
+  subscribeNotifications();
+  subscribeRoomsList();
+}
+
+// ── 認証 ─────────────────────────────────────────────────
+function switchAuthTab(tab){
+  currentAuthTab=tab;
+  document.getElementById('atab-login').classList.toggle('on',tab==='login');
+  document.getElementById('atab-signup').classList.toggle('on',tab==='signup');
+  document.getElementById('auth-submit-btn').textContent=tab==='login'?'ログイン':'アカウント作成';
+  document.getElementById('auth-name-fg').style.display=tab==='signup'?'':'none';
+  document.getElementById('pw-wrap').style.display='none';
+  document.getElementById('auth-switch-text').textContent=tab==='login'?'アカウントをお持ちでない方は':'すでにアカウントをお持ちの方は';
+  document.getElementById('auth-switch-btn').textContent=tab==='login'?'新規登録':'ログイン';
+  document.getElementById('auth-err').textContent='';
+}
+function checkPwStrength(pw){
+  if(currentAuthTab!=='signup')return;
+  document.getElementById('pw-wrap').style.display=pw.length>0?'':'none';
+  let s=0;if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^a-zA-Z0-9]/.test(pw))s++;
+  const levels=[{w:'25%',c:'#e24b4a',t:'弱い'},{w:'50%',c:'#ef9f27',t:'まあまあ'},{w:'75%',c:'#97c459',t:'良い'},{w:'100%',c:'#1a8a50',t:'強い'}];
+  const l=levels[Math.min(s,3)];
+  document.getElementById('pw-bar-fill').style.cssText=`width:${l.w};background:${l.c}`;
+  document.getElementById('pw-bar-lbl').textContent=l.t;
+}
+async function doAuth(){
+  const email=document.getElementById('auth-email').value.trim();
+  const password=document.getElementById('auth-password').value;
+  const errEl=document.getElementById('auth-err');
+  errEl.textContent='';errEl.style.color='var(--red)';
+  if(!email||!password){errEl.textContent='メールアドレスとパスワードを入力してください';return;}
+  const btn=document.getElementById('auth-submit-btn');
+  btn.innerHTML='<span class="loading-spinner"></span>';btn.disabled=true;
+  if(currentAuthTab==='login'){
+    const{data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error){errEl.textContent=error.message;btn.textContent='ログイン';btn.disabled=false;return;}
+    currentUser=data.user;
+    await loadOnlineQuizzes();await showMainScreen();render();
+    toast('✅ ログインしました');
+  }else{
+    const name=document.getElementById('auth-name').value.trim();
+    const{data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name||email.split('@')[0]}}});
+    if(error){errEl.textContent=error.message;btn.textContent='アカウント作成';btn.disabled=false;return;}
+    if(data.user&&data.session){
+      currentUser=data.user;
+      await loadOnlineQuizzes();await showMainScreen();render();
+      toast('✅ 登録してログインしました！');
+    }else{
+      errEl.style.color='var(--green)';
+      errEl.textContent='確認メールを送りました。確認後ログインしてください。';
+      btn.textContent='アカウント作成';
+    }
+  }
+  btn.disabled=false;
+}
+async function doLogout(){
+  // 部屋に入っていたらクリーンアップ
+  if(currentRoom&&isLeader)await closeRoomInDB();
+  if(realtimeChannel)realtimeChannel.unsubscribe();
+  if(notifChannel)notifChannel.unsubscribe();
+  if(roomsChannel)roomsChannel.unsubscribe();
+  await sb.auth.signOut();
+  currentUser=null;myProfile=null;onlineQuizzes=[];
+  notifications=[];
+  showAuthScreen();
+  toast('👋 ログアウトしました');
+}
+
+// ── データ取得 ────────────────────────────────────────────
+async function loadOnlineQuizzes(){
+  try{
+    let q=sb.from('quizzes').select('*').order('created_at',{ascending:false});
+    if(filterCat!=='all')q=q.eq('cat',filterCat);
+    const{data,error}=await q.limit(200);
+    if(error)throw error;
+    onlineQuizzes=(data||[]).map(r=>({
+      id:r.id,title:r.title,cat:r.cat,timeLimit:r.time_limit,
+      questions:r.questions,author:r.author,authorColor:r.author_color,
+      userId:r.user_id,createdAt:r.created_at,playCount:r.play_count||0
+    }));
+  }catch(e){console.error('[loadOnlineQuizzes]',e);}
+}
+
+// ── カード描画 ────────────────────────────────────────────
+function cardHTML(z){
+  const ci=CATS[z.cat]||{};const isMine=currentUser&&z.userId===currentUser.id;
+  return`<div class="card">
+    <div class="card-actions">
+      <button class="icon-btn ib-play" onclick="event.stopPropagation();startPlay('${z.id}')" title="ソロプレイ"><svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg></button>
+      <button class="icon-btn ib-battle" onclick="event.stopPropagation();quickBattle('${z.id}')" title="対戦部屋作成"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></button>
+      ${isMine?`<button class="icon-btn ib-del" onclick="event.stopPropagation();delQuiz('${z.id}',event)"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>`:''}
+    </div>
+    <div class="card-badge-row"><div class="card-cat ${ci.c}">${ci.e} ${ci.l}</div></div>
+    <div class="card-title">${esc(z.title)}</div>
+    <div class="card-meta">
+      <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${tl(z.timeLimit)}</span>
+      <span><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-5-3z"/></svg>${(z.questions||[]).length}問</span>
+    </div>
+    <div class="card-foot">
+      <div class="card-author"><div class="ava" style="background:${z.authorColor||'#2d5be3'}">${(z.author||'?')[0].toUpperCase()}</div>${esc(z.author||'ゲスト')}</div>
+      <span class="card-date">${ago(z.createdAt)}</span>
+    </div>
+  </div>`;
+}
+function renderCom(){
+  const grid=document.getElementById('com-grid'),empty=document.getElementById('com-empty'),nores=document.getElementById('com-nores');
+  let list=onlineQuizzes.filter(z=>(filterCat==='all'||z.cat===filterCat)&&(!searchQ||z.title.toLowerCase().includes(searchQ)));
+  if(!onlineQuizzes.length){grid.innerHTML='';grid.style.display='none';empty.style.display='';nores.style.display='none';document.getElementById('com-label').textContent='みんなのクイズ';return;}
+  empty.style.display='none';
+  if(!list.length){grid.style.display='none';nores.style.display='';document.getElementById('com-label').textContent='検索結果 (0件)';return;}
+  nores.style.display='none';grid.style.display='';
+  grid.innerHTML=list.map(cardHTML).join('');
+  document.getElementById('com-label').textContent=(filterCat!=='all'||searchQ)?`検索結果 (${list.length}件)`:`みんなのクイズ (${list.length}件)`;
+}
+function renderMine(){
+  const grid=document.getElementById('mine-grid'),empty=document.getElementById('mine-empty');
+  const mine=onlineQuizzes.filter(z=>currentUser&&z.userId===currentUser.id);
+  document.getElementById('mine-cnt').textContent=`(${mine.length})`;
+  if(!mine.length){grid.style.display='none';empty.style.display='';}
+  else{empty.style.display='none';grid.style.display='';grid.innerHTML=mine.map(cardHTML).join('');}
+}
+function render(){renderCom();renderMine();}
+
+function goTab(i){
+  [0,1,2].forEach(n=>{
+    document.getElementById('t'+n).classList.toggle('on',n===i);
+    document.getElementById('p'+n).classList.toggle('on',n===i);
+    document.getElementById('sb'+n).classList.toggle('on',n===i);
+  });
+  document.getElementById('cat-bar').style.display=i===0?'flex':'none';
+}
+function setCat(c){filterCat=c;document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('on',p.dataset.c===c));loadOnlineQuizzes().then(render);}
+function onSearch(v){searchQ=v.trim().toLowerCase();render();}
+function toggleUserMenu(){document.getElementById('user-menu').classList.toggle('open');}
+function closeUserMenu(){document.getElementById('user-menu').classList.remove('open');}
+document.addEventListener('click',e=>{
+  const m=document.getElementById('user-menu');
+  if(m&&m.classList.contains('open')&&!m.contains(e.target)&&e.target.id!=='sb-user-btn')closeUserMenu();
+  const pop=document.getElementById('media-popover');
+  if(pop&&pop.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest('.media-icon-btn'))closeMediaPop();
+  const np=document.getElementById('notif-panel');
+  if(np&&np.classList.contains('open')&&!np.contains(e.target)&&e.target.id!=='notif-btn'&&!e.target.closest('#notif-btn'))np.classList.remove('open');
+});
+
+function ovClick(id,e){if(e.target===document.getElementById(id))closeOv(id);}
+function openOv(id){document.getElementById(id).classList.add('open');}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+
+// ── クイズ作成・編集 ──────────────────────────────────────
+function openCreateScreen(){
+  mCat=null;mInfinite=false;draftQs=[];
+  document.getElementById('m-title').value='';
+  document.getElementById('m-time-sec').value='30';
+  document.getElementById('m-time-sec').disabled=false;
+  document.getElementById('m-time-sec').style.opacity='1';
+  document.getElementById('time-inf-btn').classList.remove('on');
+  document.querySelectorAll('.co').forEach(el=>el.classList.remove('on'));
+  ['title-img','title-aud'].forEach(k=>{delete mediaStore[k];updateMediaBtn(k);});
+  updateQCountBadge();
+  const el=document.getElementById('create-screen');
+  el.style.display='flex';requestAnimationFrame(()=>el.classList.add('open'));
+}
+function closeCreateScreen(){
+  const el=document.getElementById('create-screen');el.classList.remove('open');setTimeout(()=>{el.style.display='none';},350);
+}
+function openQScreen(){
+  currentQIdx=null;resetQEditor();
+  const el=document.getElementById('qscreen');el.style.display='flex';requestAnimationFrame(()=>el.classList.add('open'));renderQList();
+}
+function closeQScreen(){
+  const el=document.getElementById('qscreen');el.classList.remove('open');setTimeout(()=>{el.style.display='none';},350);updateQCountBadge();
+}
+function updateQCountBadge(){document.getElementById('q-count-badge').textContent=draftQs.length+'問';}
+
+// ── メディア ──────────────────────────────────────────────
+function openMediaPop(key,e){
+  e.stopPropagation();currentMediaKey=key;
+  const pop=document.getElementById('media-popover');
+  const btn=e.currentTarget;const rect=btn.getBoundingClientRect();
+  const titles={'title-img':'タイトル画像','title-aud':'タイトル音声','qimg':'問題画像','qaud':'問題音声','cha-img':'選択肢A画像','chb-img':'選択肢B画像','chc-img':'選択肢C画像','chd-img':'選択肢D画像','expimg':'解説画像','expaud':'解説音声'};
+  document.getElementById('mpop-title').textContent=titles[key]||key;
+  const prev=document.getElementById('mpop-preview');
+  if(mediaStore[key]){
+    const isImg=mediaStore[key].type.startsWith('image/');
+    const isAud=mediaStore[key].type.startsWith('audio/');
+    if(isImg)prev.innerHTML=`<img class="media-preview-thumb" src="${mediaStore[key].dataUrl}" alt=""><div class="media-preview-name">${esc(mediaStore[key].name)}</div>`;
+    else if(isAud)prev.innerHTML=`<audio class="media-preview-audio" controls src="${mediaStore[key].dataUrl}"></audio><div class="media-preview-name">${esc(mediaStore[key].name)}</div>`;
+  }else{prev.innerHTML=`<div style="font-size:12px;color:var(--hint);margin-bottom:8px;text-align:center">まだ設定されていません</div>`;}
+  const popH=180;const topPos=rect.bottom+6+popH>window.innerHeight?rect.top-popH-6:rect.bottom+6;
+  pop.style.top=Math.max(6,topPos)+'px';pop.style.left=Math.min(rect.left,window.innerWidth-220)+'px';
+  const hasMedia=!!mediaStore[key];const label=document.getElementById('mpop-change-label');const fi=document.getElementById('mpop-file-input');
+  label.childNodes[0].textContent=hasMedia?'変更':'追加';fi.accept=key.includes('aud')?'audio/*':'image/*';fi.dataset.key=key;fi.value='';
+  document.getElementById('mpop-del').style.display=hasMedia?'':'none';pop.classList.add('open');
+}
+function closeMediaPop(){document.getElementById('media-popover').classList.remove('open');currentMediaKey=null;}
+function deleteMedia(){if(!currentMediaKey)return;delete mediaStore[currentMediaKey];updateMediaBtn(currentMediaKey);closeMediaPop();toast('🗑️ 削除しました');}
+function handleMediaPop(input){
+  const file=input.files[0];if(!file)return;
+  const key=currentMediaKey||input.dataset.key;if(!key)return;
+  const reader=new FileReader();
+  reader.onload=e=>{mediaStore[key]={dataUrl:e.target.result,name:file.name,type:file.type};updateMediaBtn(key);toast('✅ メディアを設定しました');};
+  reader.readAsDataURL(file);currentMediaKey=null;document.getElementById('media-popover').classList.remove('open');
+}
+function handleMedia(input,key){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{mediaStore[key]={dataUrl:e.target.result,name:file.name,type:file.type};updateMediaBtn(key);};
+  reader.readAsDataURL(file);
+}
+function updateMediaBtn(key){const btn=document.getElementById('btn-'+key);if(btn)btn.classList.toggle('has-media',!!mediaStore[key]);}
+
+// ── 問題エディタ ──────────────────────────────────────────
+function setQType(t){qType=t;document.getElementById('type-choice-btn').classList.toggle('on',t==='choice');document.getElementById('type-text-btn').classList.toggle('on',t==='text');document.getElementById('choice-area').style.display=t==='choice'?'':'none';document.getElementById('text-area').style.display=t==='text'?'':'none';}
+function selCorrect(i){correctIdx=i;document.querySelectorAll('.correct-btn').forEach((b,j)=>b.classList.toggle('on',j===i));}
+function selCat(c){mCat=c;document.querySelectorAll('.co').forEach(el=>el.classList.toggle('on',el.dataset.c===c));}
+function toggleInfinite(){mInfinite=!mInfinite;document.getElementById('time-inf-btn').classList.toggle('on',mInfinite);document.getElementById('m-time-sec').disabled=mInfinite;document.getElementById('m-time-sec').style.opacity=mInfinite?'0.4':'1';}
+function setScorePreset(v){document.getElementById('aq-score').value=v;document.querySelectorAll('.score-preset-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)===v));}
+function syncScorePreset(v){document.querySelectorAll('.score-preset-btn').forEach(b=>b.classList.toggle('on',parseInt(b.dataset.v)===parseInt(v)));}
+function setOrderOpt(v){battleOrderMode=v;document.getElementById('order-random').classList.toggle('on',v==='random');document.getElementById('order-fixed').classList.toggle('on',v==='fixed');}
+
+function resetQEditor(){
+  qType='choice';correctIdx=null;
+  document.getElementById('aq-text').value='';document.getElementById('aq-score').value='10';syncScorePreset(10);
+  ['ch-a','ch-b','ch-c','ch-d','aq-exp','text-ans'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.correct-btn').forEach(b=>b.classList.remove('on'));setQType('choice');
+  ['qimg','qaud','cha-img','chb-img','chc-img','chd-img','expimg','expaud'].forEach(k=>{delete mediaStore[k];updateMediaBtn(k);const f=document.getElementById(k+'-file');if(f)f.value='';});
+}
+function loadQToEditor(idx){
+  currentQIdx=idx;const q=draftQs[idx];resetQEditor();setQType(q.type);
+  document.getElementById('aq-text').value=q.text||'';document.getElementById('aq-exp').value=q.explanation||'';
+  document.getElementById('aq-score').value=q.score||10;syncScorePreset(q.score||10);
+  if(q.type==='choice'){
+    ['ch-a','ch-b','ch-c','ch-d'].forEach((id,i)=>document.getElementById(id).value=q.choices[i]||'');
+    correctIdx=q.correct;document.querySelectorAll('.correct-btn').forEach((b,j)=>b.classList.toggle('on',j===correctIdx));
+    if(q.choiceImages){['cha-img','chb-img','chc-img','chd-img'].forEach((k,i)=>{if(q.choiceImages[i]){mediaStore[k]={dataUrl:q.choiceImages[i],name:'image',type:'image/jpeg'};updateMediaBtn(k);}});}
+  }else{document.getElementById('text-ans').value=q.textAnswer||'';}
+  if(q.questionImage){mediaStore['qimg']={dataUrl:q.questionImage,name:'image',type:'image/jpeg'};updateMediaBtn('qimg');}
+  if(q.questionAudio){mediaStore['qaud']={dataUrl:q.questionAudio,name:'audio',type:'audio/mpeg'};updateMediaBtn('qaud');}
+  if(q.explanationImage){mediaStore['expimg']={dataUrl:q.explanationImage,name:'image',type:'image/jpeg'};updateMediaBtn('expimg');}
+  if(q.explanationAudio){mediaStore['expaud']={dataUrl:q.explanationAudio,name:'audio',type:'audio/mpeg'};updateMediaBtn('expaud');}
+  renderQList();
+}
+function addNewQ(){currentQIdx=null;resetQEditor();renderQList();document.getElementById('q-editor-left').scrollTop=0;}
+function saveCurrentQ(){
+  const text=document.getElementById('aq-text').value.trim();
+  if(!text)return toast('❗ 問題文を入力してください');
+  const exp=document.getElementById('aq-exp').value.trim();const score=parseInt(document.getElementById('aq-score').value)||10;
+  const q={type:qType,text,explanation:exp,score,questionImage:mediaStore['qimg']?.dataUrl||null,questionAudio:mediaStore['qaud']?.dataUrl||null,explanationImage:mediaStore['expimg']?.dataUrl||null,explanationAudio:mediaStore['expaud']?.dataUrl||null};
+  if(qType==='choice'){
+    const choices=['ch-a','ch-b','ch-c','ch-d'].map(id=>document.getElementById(id).value.trim());
+    if(choices.some(c=>!c))return toast('❗ 選択肢A〜Dをすべて入力してください');
+    if(correctIdx===null)return toast('❗ 正解を選択してください');
+    q.choices=choices;q.correct=correctIdx;q.choiceImages=['cha-img','chb-img','chc-img','chd-img'].map(k=>mediaStore[k]?.dataUrl||null);
+  }else{const ans=document.getElementById('text-ans').value.trim();if(!ans)return toast('❗ 模範解答を入力してください');q.textAnswer=ans;}
+  if(currentQIdx!==null){draftQs[currentQIdx]=q;toast('✅ 問題を更新しました');}
+  else{draftQs.push(q);currentQIdx=draftQs.length-1;toast(`✅ 問題${draftQs.length}を追加しました`);}
+  renderQList();updateQCountBadge();
+}
+function renderQList(){
+  const scroll=document.getElementById('q-list-scroll');document.getElementById('q-list-cnt').textContent=draftQs.length+'問';
+  if(!draftQs.length){scroll.innerHTML=`<div style="text-align:center;padding:32px 16px;color:var(--hint);font-size:12px">まだ問題がありません<br>左のエディタで作成して保存してください</div>`;return;}
+  scroll.innerHTML=draftQs.map((q,i)=>{
+    const isChoice=q.type==='choice';const ansText=isChoice?q.choices[q.correct]:q.textAnswer;const isActive=currentQIdx===i;
+    return`<div class="q-item${isActive?' active':''}" onclick="loadQToEditor(${i})">
+      <div class="q-num">${i+1}</div>
+      <div class="q-body">
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+          <span class="q-type-badge ${isChoice?'qt-choice':'qt-text'}">${isChoice?'選択式':'記述式'}</span>
+          <span style="font-size:10px;color:var(--gold);font-weight:700">${q.score||10}pt</span>
+        </div>
+        <div class="q-text">${esc(q.text)}</div>
+        <div class="q-ans"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>${esc(ansText)}</div>
+      </div>
+      <button class="q-del-btn" onclick="removeQ(${i},event)"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>`;
+  }).join('');
+}
+function removeQ(i,e){e.stopPropagation();draftQs.splice(i,1);if(currentQIdx===i){currentQIdx=null;resetQEditor();}else if(currentQIdx>i)currentQIdx--;renderQList();updateQCountBadge();toast('🗑️ 削除しました');}
+
+// ── クイズ保存・削除 ──────────────────────────────────────
+function startTrialPlay(){
+  if(!draftQs.length)return toast('❗ 問題を1つ以上追加してください');
+  const title=document.getElementById('m-title').value.trim()||'プレビュークイズ';
+  const cat=mCat||'other';const timeSec=mInfinite?0:parseInt(document.getElementById('m-time-sec').value)||30;
+  startPlayFromObj({id:'trial',title,cat,timeLimit:timeSec,questions:draftQs},false);
+}
+async function submitQuiz(){
+  const title=document.getElementById('m-title').value.trim();
+  if(!title)return toast('❗ タイトルを入力してください');
+  if(!mCat)return toast('❗ カテゴリを選択してください');
+  const timeSec=mInfinite?0:parseInt(document.getElementById('m-time-sec').value)||30;
+  if(!mInfinite&&(timeSec<1||timeSec>3600))return toast('❗ 時間制限は1〜3600秒');
+  if(!draftQs.length)return toast('❗ 問題を1つ以上追加してください');
+  const btn=document.getElementById('submit-quiz-btn');btn.innerHTML='<span class="loading-spinner"></span>';btn.disabled=true;
+  const{error}=await sb.from('quizzes').insert({
+    title,cat:mCat,time_limit:timeSec,questions:draftQs,
+    author:getUserName(),author_color:getUserColor(),user_id:currentUser.id
+  });
+  btn.textContent='保存して投稿';btn.disabled=false;
+  if(error){toast('❌ 保存失敗: '+error.message);return;}
+  await loadOnlineQuizzes();closeCreateScreen();render();toast('✅ 投稿しました！');
+}
+async function delQuiz(id,e){
+  e.stopPropagation();if(!confirm('このクイズを削除しますか？'))return;
+  const{error}=await sb.from('quizzes').delete().eq('id',id).eq('user_id',currentUser.id);
+  if(error){toast('❌ 削除失敗');return;}
+  await loadOnlineQuizzes();render();toast('🗑️ 削除しました');
+}
+
+// ── 通知システム ──────────────────────────────────────────
+function subscribeNotifications(){
+  if(!currentUser)return;
+  if(notifChannel)notifChannel.unsubscribe();
+  notifChannel=sb.channel('notif-'+currentUser.id,{config:{broadcast:{self:false}}});
+  notifChannel.on('broadcast',{event:'invite'},(msg)=>{
+    const p=msg.payload;
+    addNotification({type:'invite',from:p.fromName||'誰か',fromColor:p.fromColor||'#2d5be3',fromAvatar:p.fromAvatar||'🐱',roomCode:p.roomCode||'----',title:p.quizTitle||'クイズ対戦',id:Date.now()+Math.random(),unread:true});
+  });
+  notifChannel.subscribe();
+}
+function addNotification(notif){
+  notifications.unshift(notif);renderNotifList();
+  document.getElementById('notif-dot').style.display='block';
+  toast(`🔔 ${notif.from}さんから招待が届きました！`);
+}
+function toggleNotifPanel(){
+  const p=document.getElementById('notif-panel');p.classList.toggle('open');
+  if(p.classList.contains('open')){notifications.forEach(n=>n.unread=false);document.getElementById('notif-dot').style.display='none';renderNotifList();}
+}
+function clearNotifs(){notifications=[];renderNotifList();document.getElementById('notif-dot').style.display='none';}
+function renderNotifList(){
+  const el=document.getElementById('notif-list');
+  if(!notifications.length){el.innerHTML='<div class="notif-empty">通知はありません</div>';return;}
+  el.innerHTML=notifications.map((n,i)=>`
+    <div class="notif-item${n.unread?' unread':''}">
+      <div class="notif-item-icon" style="background:${n.fromColor};font-size:18px">${n.fromAvatar}</div>
+      <div class="notif-item-body">
+        <div class="notif-item-title">${esc(n.from)}さんから招待</div>
+        <div class="notif-item-sub">${esc(n.title)} · コード: <b>${n.roomCode}</b></div>
+        <div class="notif-item-actions">
+          <button class="notif-accept" onclick="acceptInvite('${n.roomCode}',${i})">参加する</button>
+          <button class="notif-decline" onclick="declineInvite(${i})">断る</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function acceptInvite(code,idx){
+  notifications.splice(idx,1);renderNotifList();
+  document.getElementById('notif-panel').classList.remove('open');
+  document.getElementById('join-code-inp').value=code;
+  joinRoom();
+}
+function declineInvite(idx){notifications.splice(idx,1);renderNotifList();toast('招待を断りました');}
+
+// ── 部屋一覧（Supabase DB + Realtime Postgres Changes）─────
+// rooms テーブルを直接購読→INSERT/UPDATE/DELETE がリアルタイムで全員に届く
+
+function subscribeRoomsList(){
+  if(roomsChannel)roomsChannel.unsubscribe();
+  // まず現在の公開部屋を取得
+  sb.from('rooms').select('*').eq('status','waiting').order('created_at',{ascending:false}).then(({data})=>{
+    renderRoomList(data||[]);
+  });
+  // Realtime Postgres Changesで rooms テーブルを監視
+  roomsChannel=sb.channel('public-rooms-realtime')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'rooms'},(payload)=>{
+      if(payload.new.status==='waiting')appendRoom(payload.new);
+    })
+    .on('postgres_changes',{event:'UPDATE',schema:'public',table:'rooms'},(payload)=>{
+      updateRoom(payload.new);
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'rooms'},(payload)=>{
+      removeRoomFromList(payload.old.id);
+    })
+    .subscribe();
+}
+
+let roomListCache=[];// 現在表示中の部屋リスト
+
+function appendRoom(row){
+  roomListCache=roomListCache.filter(r=>r.id!==row.id);
+  roomListCache.unshift(row);
+  renderRoomList(roomListCache);
+}
+function updateRoom(row){
+  const idx=roomListCache.findIndex(r=>r.id===row.id);
+  if(idx>=0){roomListCache[idx]=row;}else if(row.status==='waiting')roomListCache.unshift(row);
+  // playingやclosedになったら一覧から消す
+  if(row.status!=='waiting')roomListCache=roomListCache.filter(r=>r.id!==row.id);
+  renderRoomList(roomListCache);
+}
+function removeRoomFromList(id){
+  roomListCache=roomListCache.filter(r=>r.id!==id);
+  renderRoomList(roomListCache);
+}
+
+function renderRoomList(rooms){
+  if(rooms)roomListCache=rooms;
+  const el=document.getElementById('room-list-el');if(!el)return;
+  const waiting=roomListCache.filter(r=>r.status==='waiting');
+  if(!waiting.length){
+    el.innerHTML=`<div class="room-empty">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      現在公開中の部屋はありません<br>
+      <span style="font-size:11px;margin-top:4px;display:block">「部屋を作る」で最初の部屋を作りましょう</span>
+    </div>`;
+    return;
+  }
+  el.innerHTML=waiting.map(r=>{
+    const isMine=currentRoom?.id===r.id;
+    const avatars=(r.player_avatars||[]).slice(0,5);
+    const colors=(r.player_colors||[]);
+    const avatarHtml=avatars.map((a,i)=>`<div class="room-card-ava" style="background:${colors[i]||'#2d5be3'}">${a}</div>`).join('');
+    const ci=CATS[r.quiz_cat]||{e:'🎮'};
+    return`<div class="room-card">
+      <div class="room-card-cat">${ci.e}</div>
+      <div class="room-card-body">
+        <div class="room-card-title">${esc(r.quiz_title||'クイズ')}</div>
+        <div class="room-card-meta">
+          <span><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${esc(r.host_name)}</span>
+          <span><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-5-3z"/></svg>${r.total_q||'?'}問</span>
+          <span><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${tl(r.time_limit)}</span>
+        </div>
+      </div>
+      <div class="room-card-players" style="margin-right:8px">${avatarHtml}</div>
+      <span style="font-size:11px;color:var(--hint);margin-right:8px;white-space:nowrap">${r.player_count}人</span>
+      ${isMine
+        ?`<button class="room-join-btn full">自分の部屋</button>`
+        :`<button class="room-join-btn" onclick="joinRoomById('${r.id}','${r.code}')">参加する</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+// ── 部屋作成・参加（DB連携） ─────────────────────────────
+function openCreateRoomModal(){
+  const sel=document.getElementById('room-quiz-select');sel.innerHTML='<option value="">-- クイズを選択 --</option>';
+  onlineQuizzes.forEach(z=>{const op=document.createElement('option');op.value=z.id;op.textContent=`${z.title} (${(z.questions||[]).length}問)`;sel.appendChild(op);});
+  openOv('create-room-ov');
+}
+function openJoinRoomModal(){document.getElementById('join-code-inp').value='';openOv('join-room-ov');}
+function quickBattle(quizId){
+  openOv('create-room-ov');
+  setTimeout(()=>{
+    const sel=document.getElementById('room-quiz-select');sel.innerHTML='<option value="">-- クイズを選択 --</option>';
+    onlineQuizzes.forEach(z=>{const op=document.createElement('option');op.value=z.id;op.textContent=`${z.title} (${(z.questions||[]).length}問)`;sel.appendChild(op);});
+    sel.value=quizId;
+  },50);
+}
+function copyRoomCode(){
+  const code=currentRoom?.code;if(!code)return;
+  navigator.clipboard.writeText(code).then(()=>toast('✅ コードをコピー: '+code)).catch(()=>toast('コード: '+code));
+}
+
+async function createRoom(){
+  const quizId=document.getElementById('room-quiz-select').value;
+  if(!quizId)return toast('❗ クイズを選択してください');
+  const quiz=onlineQuizzes.find(z=>z.id===quizId);
+  if(!quiz)return toast('❗ クイズが見つかりません');
+  battleQCount=parseInt(document.getElementById('room-q-count').value)||10;
+  const code=genCode();
+  isLeader=true;
+  const ci=CATS[quiz.cat]||{};
+
+  // ① DBにroomsレコードを作成
+  const{data:roomRow,error}=await sb.from('rooms').insert({
+    code,
+    host_id:currentUser.id,
+    host_name:getUserName(),
+    host_avatar:myAvatar,
+    host_color:getUserColor(),
+    quiz_id:quizId,
+    quiz_title:quiz.title,
+    quiz_cat:quiz.cat,
+    total_q:(quiz.questions||[]).length,
+    time_limit:quiz.timeLimit,
+    status:'waiting',
+    player_count:1,
+    player_avatars:[myAvatar],
+    player_colors:[getUserColor()],
+  }).select().single();
+
+  if(error){toast('❌ 部屋の作成に失敗しました: '+error.message);console.error(error);return;}
+
+  currentRoom={
+    id:roomRow.id,code,quizId,quizTitle:quiz.title,quizCat:quiz.cat,
+    timeLimit:quiz.timeLimit,allQuestions:quiz.questions,
+    qCount:battleQCount,orderMode:battleOrderMode
+  };
+  multiPlayers={};
+  addPlayer(currentUser.id,getUserName(),getUserColor(),myAvatar,true);
+  closeOv('create-room-ov');
+  openLobbyScreen();
+  subscribeRoom(code,()=>{console.log('[QuizHub] room ready:',code);});
+  toast('✅ 部屋を作成しました！コード: '+code);
+}
+
+async function joinRoomById(roomId,code){
+  if(currentRoom)return toast('❗ すでに部屋にいます。先に退出してください');
+  document.getElementById('join-code-inp').value=code;
+  await joinRoom();
+}
+
+async function joinRoom(){
+  const codeEl=document.getElementById('join-code-inp');
+  const code=(codeEl?.value||'').trim().toUpperCase();
+  if(!code||code.length<4)return toast('❗ ルームコードを入力してください');
+
+  // DBから部屋情報を取得
+  const{data:roomRow,error}=await sb.from('rooms').select('*').eq('code',code).eq('status','waiting').single();
+  if(error||!roomRow){toast('❌ 部屋が見つかりません（コードを確認してください）');return;}
+
+  isLeader=false;
+  currentRoom={
+    id:roomRow.id,code,
+    quizId:roomRow.quiz_id,quizTitle:roomRow.quiz_title,quizCat:roomRow.quiz_cat,
+    timeLimit:roomRow.time_limit,allQuestions:[],qCount:10,orderMode:'random'
+  };
+  multiPlayers={};
+  addPlayer(currentUser.id,getUserName(),getUserColor(),myAvatar,false);
+  closeOv('join-room-ov');
+  openLobbyScreen();
+  subscribeRoom(code,()=>{
+    broadcastToRoom({type:'player_join',userId:currentUser.id,name:getUserName(),color:getUserColor(),avatar:myAvatar});
+  });
+  toast('✅ 部屋に参加しました！');
+}
+
+// ── DBの部屋レコードを更新 ────────────────────────────────
+async function updateRoomInDB(updates){
+  if(!currentRoom?.id||!isLeader)return;
+  await sb.from('rooms').update(updates).eq('id',currentRoom.id);
+}
+async function closeRoomInDB(){
+  if(!currentRoom?.id||!isLeader)return;
+  await sb.from('rooms').delete().eq('id',currentRoom.id);
+}
+
+// ── ゲーム内Broadcast ────────────────────────────────────
+function subscribeRoom(code,onReady){
+  if(realtimeChannel){realtimeChannel.unsubscribe();realtimeChannel=null;}
+  realtimeChannel=sb.channel('room-'+code,{config:{broadcast:{self:true}}});
+  realtimeChannel.on('broadcast',{event:'room_event'},({payload})=>{handleRoomEvent(payload);});
+  realtimeChannel.subscribe(status=>{
+    if(status==='SUBSCRIBED'){if(onReady)onReady();}
+    else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){toast('❌ 接続エラー。再度お試しください');}
+  });
+}
+function broadcastToRoom(data){
+  if(!realtimeChannel||!currentRoom)return;
+  realtimeChannel.send({type:'broadcast',event:'room_event',payload:data});
+}
+
+function handleRoomEvent(payload){
+  if(payload.type==='player_join'){
+    if(payload.userId===currentUser?.id)return;
+    if(!multiPlayers[payload.userId])addPlayer(payload.userId,payload.name,payload.color,payload.avatar||'🐱',false);
+    renderLobbyPlayers();
+    if(isLeader){
+      broadcastToRoom({type:'room_info',quizId:currentRoom.quizId,quizTitle:currentRoom.quizTitle,quizCat:currentRoom.quizCat,timeLimit:currentRoom.timeLimit,qCount:currentRoom.qCount,orderMode:currentRoom.orderMode,players:Object.values(multiPlayers)});
+      // DBの人数・アバターを更新
+      const players=Object.values(multiPlayers);
+      updateRoomInDB({player_count:players.length,player_avatars:players.map(p=>p.avatar),player_colors:players.map(p=>p.color)});
+    }
+  }else if(payload.type==='room_info'){
+    if(!isLeader){
+      currentRoom.quizId=payload.quizId;currentRoom.quizTitle=payload.quizTitle;
+      currentRoom.quizCat=payload.quizCat;currentRoom.timeLimit=payload.timeLimit;
+      currentRoom.qCount=payload.qCount;currentRoom.orderMode=payload.orderMode;
+      payload.players.forEach(p=>{if(!multiPlayers[p.id])addPlayer(p.id,p.name,p.color,p.avatar||'🐱',p.isLeader);});
+      renderLobbyInfo();renderLobbyPlayers();
+    }
+  }else if(payload.type==='game_start'){
+    if(!isLeader){
+      currentRoom.questions=payload.questions;currentRoom.timeLimit=payload.timeLimit;
+      closePlay();
+      startPlayFromObj({id:'battle',title:currentRoom.quizTitle,cat:currentRoom.quizCat,timeLimit:payload.timeLimit,questions:payload.questions},true);
+    }
+  }else if(payload.type==='player_score'){
+    if(payload.userId!==currentUser?.id&&multiPlayers[payload.userId]){
+      multiPlayers[payload.userId].score=payload.score;
+      multiPlayers[payload.userId].correctCount=payload.correctCount;
+    }
+    renderInGameScoreboard();
+  }else if(payload.type==='first_answer'){
+    if(!firstAnswerUserId){
+      firstAnswerUserId=payload.userId;
+      if(payload.userId!==currentUser?.id)showBuzzerOther(payload.name);
+    }
+  }else if(payload.type==='skip_question'){
+    if(!isLeader)forceNextQ();
+  }else if(payload.type==='end_game'){
+    if(!isLeader)endBattleForced();
+  }else if(payload.type==='game_end'){
+    if(!isLeader){
+      payload.scores.forEach(s=>{if(multiPlayers[s.userId]){multiPlayers[s.userId].score=s.score;multiPlayers[s.userId].correctCount=s.correctCount;}});
+      if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
+      updateCumulativeStats(payload.scores);showRanking();
+    }
+  }else if(payload.type==='avatar_change'){
+    if(payload.userId!==currentUser?.id&&multiPlayers[payload.userId]){multiPlayers[payload.userId].avatar=payload.avatar;renderLobbyPlayers();}
+  }
+}
+
+function addPlayer(userId,name,color,avatar,leader){
+  const ex=multiPlayers[userId]||{};
+  multiPlayers[userId]={id:userId,name,color,avatar:avatar||'🐱',isLeader:leader,score:0,correctCount:0,totalCorrect:ex.totalCorrect||0,totalAnswered:ex.totalAnswered||0,lastRank:ex.lastRank||null,games:ex.games||0};
+}
+
+// ── ロビー画面 ────────────────────────────────────────────
+function openLobbyScreen(){
+  renderLobbyInfo();renderLobbyPlayers();initAvatarSelector();
+  document.getElementById('lb-leader-area').style.display=isLeader?'':'none';
+  document.getElementById('lb-member-area').style.display=isLeader?'none':'';
+  document.getElementById('lb-select-wrap').style.display=isLeader?'':'none';
+  const hasRank=Object.values(multiPlayers).some(p=>p.lastRank!=null);
+  document.getElementById('lb-ranking-section').classList.toggle('show',hasRank);
+  if(hasRank)renderLobbyRanking();
+  document.getElementById('lobby-screen').classList.add('open');
+}
+function renderLobbyInfo(){
+  document.getElementById('lb-code-display').textContent=currentRoom?.code||'----';
+  document.getElementById('invite-code-box').textContent=currentRoom?.code||'----';
+  const lbSel=document.getElementById('lb-quiz-select');
+  lbSel.innerHTML='<option value="">-- クイズを選択 --</option>';
+  onlineQuizzes.forEach(z=>{const op=document.createElement('option');op.value=z.id;op.textContent=`${z.title} (${(z.questions||[]).length}問)`;lbSel.appendChild(op);});
+  if(currentRoom?.quizId)lbSel.value=currentRoom.quizId;
+  const qz=currentRoom?.quizId?onlineQuizzes.find(z=>z.id===currentRoom.quizId):null;
+  if(qz){
+    const ci=CATS[qz.cat]||{};
+    document.getElementById('lb-quiz-icon').textContent=ci.e||'🎮';
+    document.getElementById('lb-quiz-name').textContent=qz.title;
+    document.getElementById('lb-quiz-meta').innerHTML=`<span>${(qz.questions||[]).length}問</span><span>${ci.l}</span>`;
+  }else{
+    document.getElementById('lb-quiz-icon').textContent='🎮';
+    document.getElementById('lb-quiz-name').textContent=isLeader?'クイズを選択してください':'リーダーがクイズを選択中...';
+    document.getElementById('lb-quiz-meta').innerHTML='';
+  }
+}
+function onLbQuizChange(v){
+  if(!isLeader||!currentRoom)return;
+  const quiz=onlineQuizzes.find(z=>z.id===v);if(!quiz)return;
+  currentRoom.quizId=v;currentRoom.quizTitle=quiz.title;currentRoom.quizCat=quiz.cat;currentRoom.timeLimit=quiz.timeLimit;currentRoom.allQuestions=quiz.questions;
+  renderLobbyInfo();
+  broadcastToRoom({type:'room_info',quizId:v,quizTitle:quiz.title,quizCat:quiz.cat,timeLimit:quiz.timeLimit,qCount:currentRoom.qCount,orderMode:currentRoom.orderMode,players:Object.values(multiPlayers)});
+  updateRoomInDB({quiz_id:v,quiz_title:quiz.title,quiz_cat:quiz.cat,time_limit:quiz.timeLimit,total_q:(quiz.questions||[]).length});
+}
+function renderLobbyPlayers(){
+  const players=Object.values(multiPlayers);
+  const meId=currentUser?.id;
+  document.getElementById('lb-player-cnt').textContent=players.length+'人';
+  document.getElementById('lb-player-list').innerHTML=players.map(p=>{
+    const isMe=p.id===meId;
+    return`<div class="lb-player-row${isMe?' me':''}">
+      <div class="lb-pr-ava${isMe?' me':''}${p.isLeader?' leader':''}" style="background:${p.color};position:relative">
+        <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px">${p.avatar}</span>
+      </div>
+      <div class="lb-pr-info">
+        <div class="lb-pr-name">
+          ${esc(p.name)}
+          ${isMe?'<span class="lb-pr-tag you">YOU</span>':''}
+          ${p.isLeader?'<span class="lb-pr-tag leader">👑</span>':''}
+        </div>
+        <div class="lb-pr-score">${p.score>0?p.score+'pt':''}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('lb-ready-dots').innerHTML=players.map(()=>'<div class="lb-ready-dot on"></div>').join('');
+  document.getElementById('lb-ready-text').textContent=`${players.length}人が参加中`;
+}
+function renderLobbyRanking(){
+  const players=Object.values(multiPlayers).filter(p=>p.lastRank!=null).sort((a,b)=>a.lastRank-b.lastRank);
+  document.getElementById('lb-rank-list').innerHTML=players.map((p,i)=>`
+    <div class="lb-rank-row">
+      <div class="lb-rank-pos ${i===0?'g1':i===1?'g2':i===2?'g3':''}">${p.lastRank}</div>
+      <div style="width:24px;height:24px;border-radius:50%;background:${p.color};position:relative;overflow:hidden;flex-shrink:0">
+        <span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:14px">${p.avatar}</span>
+      </div>
+      <div class="lb-rank-name">${esc(p.name)}</div>
+      <div class="lb-rank-pts">${p.score}pt</div>
+    </div>`).join('');
+}
+function initAvatarSelector(){
+  document.getElementById('lb-avatar-selector').innerHTML=AVATARS.map(a=>`
+    <div class="avatar-opt${a===myAvatar?' selected':''}" onclick="selectAvatar('${a}')">${a}</div>`).join('');
+}
+function selectAvatar(a){
+  myAvatar=a;
+  saveProfile({avatar:a});// DBに保存
+  document.querySelectorAll('.avatar-opt').forEach(el=>el.classList.toggle('selected',el.textContent===a));
+  if(currentUser&&multiPlayers[currentUser.id])multiPlayers[currentUser.id].avatar=a;
+  renderLobbyPlayers();
+  broadcastToRoom({type:'avatar_change',userId:currentUser?.id,avatar:a});
+}
+
+// ── 招待モーダル ──────────────────────────────────────────
+async function openInviteModal(){
+  document.getElementById('invite-ov').classList.add('open');
+  document.getElementById('invite-search-inp').value='';
+  document.getElementById('invite-list').innerHTML='<div class="invite-empty">読み込み中...</div>';
+  try{
+    const{data,error}=await sb.from('profiles').select('id,display_name,avatar,color').neq('id',currentUser.id).limit(100);
+    if(error)throw error;
+    allUsersCache=(data||[]).filter(u=>!multiPlayers[u.id]).map(u=>({id:u.id,name:u.display_name||'ユーザー',color:u.color||'#2d5be3',avatar:u.avatar||'🐱'}));
+    renderInviteList(allUsersCache);
+  }catch(e){
+    console.error(e);
+    document.getElementById('invite-list').innerHTML='<div class="invite-empty">ユーザーの取得に失敗しました</div>';
+  }
+}
+function closeInviteModal(){document.getElementById('invite-ov').classList.remove('open');}
+function filterInviteList(v){const q=v.trim().toLowerCase();renderInviteList(q?allUsersCache.filter(u=>u.name.toLowerCase().includes(q)):allUsersCache);}
+function renderInviteList(users){
+  const el=document.getElementById('invite-list');
+  if(!users.length){el.innerHTML=`<div class="invite-empty">招待できるユーザーがいません</div>`;return;}
+  el.innerHTML=users.map(u=>`
+    <div class="invite-item">
+      <div class="invite-ava" style="background:${u.color}">${u.avatar}</div>
+      <div class="invite-name">${esc(u.name)}</div>
+      <button class="invite-btn" id="inv-${u.id}" onclick="sendInvite('${u.id}','${esc(u.name)}','${u.color}','${u.avatar}',this)">招待する</button>
+    </div>`).join('');
+}
+function sendInvite(userId,name,color,avatar,btn){
+  btn.textContent='送信中...';btn.disabled=true;
+  const ch=sb.channel('notif-'+userId,{config:{broadcast:{self:true}}});
+  ch.subscribe(status=>{
+    if(status==='SUBSCRIBED'){
+      ch.send({type:'broadcast',event:'invite',payload:{fromId:currentUser.id,fromName:getUserName(),fromColor:getUserColor(),fromAvatar:myAvatar,roomCode:currentRoom?.code||'----',quizTitle:currentRoom?.quizTitle||'クイズ対戦'}})
+        .then(()=>{btn.textContent='✓ 送信済み';btn.className='invite-btn invited';btn.disabled=false;toast(`📨 ${name} に招待を送りました`);setTimeout(()=>ch.unsubscribe(),2000);})
+        .catch(()=>{btn.textContent='招待する';btn.disabled=false;setTimeout(()=>ch.unsubscribe(),1000);});
+    }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){btn.textContent='招待する';btn.disabled=false;ch.unsubscribe();}
+  });
+}
+
+function leaveLobby(){
+  if(!confirm('ロビーを退出しますか？'))return;
+  if(isLeader)closeRoomInDB();
+  if(realtimeChannel)realtimeChannel.unsubscribe();realtimeChannel=null;
+  currentRoom=null;isLeader=false;multiPlayers={};
+  document.getElementById('lobby-screen').classList.remove('open');
+  closePlay();
+}
+
+// ── バトル開始 ────────────────────────────────────────────
+function startBattle(){
+  if(!currentRoom)return;
+  if(!currentRoom.quizId)return toast('❗ クイズを選択してください');
+  let qs=[...currentRoom.allQuestions];
+  if(currentRoom.orderMode==='random')qs=qs.sort(()=>Math.random()-.5);
+  qs=qs.slice(0,currentRoom.qCount);currentRoom.questions=qs;
+  // DBのstatusをplayingに変更→部屋一覧から消える
+  updateRoomInDB({status:'playing'});
+  broadcastToRoom({type:'game_start',questions:qs,timeLimit:currentRoom.timeLimit});
+  startPlayFromObj({id:'battle',title:currentRoom.quizTitle,cat:currentRoom.quizCat,timeLimit:currentRoom.timeLimit,questions:qs},true);
+}
+function restartBattle(){
+  closePlay();
+  Object.values(multiPlayers).forEach(p=>{p.score=0;p.correctCount=0;p.lastRank=null;});
+  // DBをwaitingに戻す
+  if(isLeader)updateRoomInDB({status:'waiting',player_count:Object.keys(multiPlayers).length});
+  openLobbyScreen();
+}
+function returnToLobby(){
+  closePlay();
+  const hasRank=Object.values(multiPlayers).some(p=>p.lastRank!=null);
+  document.getElementById('lb-ranking-section').classList.toggle('show',hasRank);
+  if(hasRank)renderLobbyRanking();
+  renderLobbyPlayers();
+  document.getElementById('lobby-screen').classList.add('open');
+}
+
+// ── リーダーコントロール ──────────────────────────────────
+function leaderSkipQ(){
+  if(!isLeader)return;
+  broadcastToRoom({type:'skip_question',qIdx:playIdx});
+  forceNextQ();
+}
+function leaderEndGame(){
+  if(!isLeader||!confirm('ゲームを途中で終了しますか？'))return;
+  broadcastToRoom({type:'end_game'});
+  endBattleForced();
+}
+function forceNextQ(){
+  clearInterval(timerInterval);playAnswered=true;
+  const q=playQuestions[playIdx];
+  if(q?.type==='choice'){document.querySelectorAll('.play-choice').forEach(b=>b.classList.add('answered'));const btns=document.querySelectorAll('.play-choice');if(btns[q.correct])btns[q.correct].classList.add('show-correct');}
+  setTimeout(()=>{playIdx++;if(playIdx>=playQuestions.length){if(isMultiPlay)endBattle();else showResult();}else showQuestion();},1200);
+}
+function endBattleForced(){
+  clearInterval(timerInterval);
+  if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
+  if(isLeader){
+    const scores=Object.values(multiPlayers).map(p=>({userId:p.id,score:p.score,correctCount:p.correctCount}));
+    broadcastToRoom({type:'game_end',scores});
+    updateCumulativeStats(scores);
+    saveGameScores(scores);
+  }
+  showRanking();
+}
+
+// ── プレイ ────────────────────────────────────────────────
+function startPlay(id){
+  const z=onlineQuizzes.find(z=>z.id===id);
+  if(!z||!z.questions?.length)return toast('❗ 問題がありません');
+  // play_countをインクリメント
+  sb.from('quizzes').update({play_count:(z.playCount||0)+1}).eq('id',id).then(()=>{});
+  startPlayFromObj(z,false);
+}
+function startPlayFromObj(z,isMulti){
+  playQuiz=z;playIdx=0;playScore=0;playAnswered=false;isMultiPlay=!!isMulti;firstAnswerUserId=null;
+  playQuestions=z.questions||[];
+  document.getElementById('play-game').style.display='block';
+  document.getElementById('play-result').classList.remove('show');
+  document.getElementById('play-ranking').classList.remove('show');
+  const ci=CATS[z.cat]||{};
+  document.getElementById('play-cat-label').textContent=ci.e+' '+ci.l;
+  document.getElementById('play-quiz-title').textContent=z.title;
+  document.getElementById('play-scoreboard').style.display=isMulti?'':'none';
+  document.getElementById('buzzer-banner').style.display=isMulti?'':'none';
+  document.getElementById('leader-controls').style.display=(isMulti&&isLeader)?'':'none';
+  if(isMulti)renderInGameScoreboard();
+  showQuestion();openOv('play-ov');
+}
+function showQuestion(){
+  playAnswered=false;firstAnswerUserId=null;questionStartTime=Date.now();
+  const q=playQuestions[playIdx],total=playQuestions.length;
+  document.getElementById('play-q-counter').textContent=`${playIdx+1}/${total}`;
+  document.getElementById('prog-fill').style.width=Math.round(playIdx/total*100)+'%';
+  document.getElementById('prog-text').textContent=`${playIdx}/${total}`;
+  document.getElementById('play-q-num').textContent=`Q${playIdx+1}`;
+  document.getElementById('play-q-text').textContent=q.text;
+  document.getElementById('play-fb').className='play-feedback';document.getElementById('play-fb').textContent='';
+  document.getElementById('play-next').className='play-next';
+  document.getElementById('play-exp-img').style.display='none';document.getElementById('play-exp-audio').style.display='none';
+  const qImg=document.getElementById('play-q-img');
+  if(q.questionImage){qImg.src=q.questionImage;qImg.style.display='';}else qImg.style.display='none';
+  const qAud=document.getElementById('play-q-audio');
+  if(q.questionAudio){qAud.src=q.questionAudio;qAud.style.display='';}else qAud.style.display='none';
+  const labels=['A','B','C','D'],choicesEl=document.getElementById('play-choices');
+  if(q.type==='choice'){
+    choicesEl.innerHTML=q.choices.map((c,i)=>{
+      const imgHtml=q.choiceImages?.[i]?`<img src="${q.choiceImages[i]}" style="width:44px;height:44px;object-fit:cover;border-radius:5px;border:1px solid var(--border);flex-shrink:0" alt="">`:'' ;
+      return`<button class="play-choice" onclick="answer(${i})"><span class="choice-key">${labels[i]}</span>${imgHtml}${esc(c)}</button>`;
+    }).join('');
+  }else{
+    choicesEl.innerHTML=`<textarea class="play-text-input" id="play-text-inp" placeholder="答えを入力..." rows="3"></textarea><button class="play-text-submit" onclick="answerText()">回答する</button>`;
+  }
+  startTimer(playQuiz.timeLimit);
+}
+function showExpMedia(q){
+  if(q.explanationImage){const ei=document.getElementById('play-exp-img');ei.src=q.explanationImage;ei.style.display='';}
+  if(q.explanationAudio){const ea=document.getElementById('play-exp-audio');ea.src=q.explanationAudio;ea.style.display='';}
+}
+function showBuzzerOther(name){
+  if(playAnswered)return;
+  clearInterval(timerInterval);playAnswered=true;
+  const fb=document.getElementById('play-fb');fb.className='play-feedback ng show';fb.textContent=`⚡ ${name} が最速正解！次の問題へ...`;
+  document.querySelectorAll('.play-choice').forEach(b=>b.classList.add('answered'));
+  const q=playQuestions[playIdx];
+  if(q?.type==='choice'){const btns=document.querySelectorAll('.play-choice');if(btns[q.correct])btns[q.correct].classList.add('show-correct');}
+  else if(q?.type==='text'){const inp=document.getElementById('play-text-inp');if(inp)inp.disabled=true;const sub=document.querySelector('.play-text-submit');if(sub)sub.disabled=true;}
+  showExpMedia(q);
+  document.getElementById('play-next').className='play-next';
+  setTimeout(()=>nextQ(),2000);
+}
+function answer(idx){
+  if(playAnswered)return;playAnswered=true;clearInterval(timerInterval);
+  const q=playQuestions[playIdx];
+  document.querySelectorAll('.play-choice').forEach(b=>b.classList.add('answered'));
+  const fb=document.getElementById('play-fb');const qScore=q.score||10;
+  const isCorrect=idx===q.correct;
+  if(isMultiPlay&&isCorrect&&!firstAnswerUserId){
+    firstAnswerUserId=currentUser?.id;
+    broadcastToRoom({type:'first_answer',userId:currentUser?.id,name:getUserName(),score:qScore});
+  }
+  let earned=0;
+  if(isCorrect){
+    const isFirst=!isMultiPlay||(firstAnswerUserId===currentUser?.id);
+    earned=qScore+(isMultiPlay&&isFirst?10:0);
+    playScore+=earned;
+    document.querySelectorAll('.play-choice')[idx].classList.add('correct');
+    fb.className='play-feedback ok show';fb.textContent=`✓ 正解！ +${earned}点${earned>qScore?' ⚡早押し+10':''}${q.explanation?' — '+q.explanation:''}`;
+  }else{
+    if(isMultiPlay){const penalty=Math.floor(qScore/2);playScore=Math.max(0,playScore-penalty);fb.className='play-feedback ng show';fb.textContent=`✗ 不正解。-${penalty}点。正解は「${q.choices[q.correct]}」${q.explanation?' — '+q.explanation:''}`;}
+    else{fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.choices[q.correct]+'」'+(q.explanation?' — '+q.explanation:'');}
+    document.querySelectorAll('.play-choice')[idx].classList.add('wrong');
+    document.querySelectorAll('.play-choice')[q.correct].classList.add('show-correct');
+  }
+  showExpMedia(q);
+  if(isMultiPlay){
+    if(isCorrect&&multiPlayers[currentUser?.id])multiPlayers[currentUser.id].correctCount=(multiPlayers[currentUser.id].correctCount||0)+1;
+    if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
+    broadcastToRoom({type:'player_score',userId:currentUser?.id,score:playScore,correctCount:multiPlayers[currentUser?.id]?.correctCount||0});
+    renderInGameScoreboard();
+  }
+  if(isMultiPlay&&isCorrect&&firstAnswerUserId===currentUser?.id){setTimeout(()=>nextQ(),1800);}
+  else{const nb=document.getElementById('play-next');nb.className='play-next show';nb.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';}
+}
+function answerText(){
+  if(playAnswered)return;const inp=document.getElementById('play-text-inp');if(!inp)return;
+  const userAns=inp.value.trim();if(!userAns)return toast('❗ 答えを入力してください');
+  playAnswered=true;clearInterval(timerInterval);
+  const q=playQuestions[playIdx];const norm=s=>s.toLowerCase().replace(/\s/g,'');
+  const correct=norm(userAns).includes(norm(q.textAnswer))||norm(q.textAnswer).includes(norm(userAns));
+  inp.disabled=true;document.querySelector('.play-text-submit').disabled=true;
+  const fb=document.getElementById('play-fb');const qScore=q.score||10;
+  if(correct){
+    playScore+=qScore;inp.style.borderColor='var(--green)';fb.className='play-feedback ok show';fb.textContent=`✓ 正解！ +${qScore}点`+(q.explanation?' — '+q.explanation:'');
+    if(isMultiPlay&&!firstAnswerUserId){firstAnswerUserId=currentUser?.id;broadcastToRoom({type:'first_answer',userId:currentUser?.id,name:getUserName(),score:qScore});}
+  }else{
+    if(isMultiPlay){const penalty=Math.floor(qScore/2);playScore=Math.max(0,playScore-penalty);inp.style.borderColor='var(--red)';fb.className='play-feedback ng show';fb.textContent=`✗ 不正解。-${penalty}点。正解は「${q.textAnswer}」${q.explanation?' — '+q.explanation:''}`;}
+    else{inp.style.borderColor='var(--red)';fb.className='play-feedback ng show';fb.textContent='✗ 不正解。正解は「'+q.textAnswer+'」'+(q.explanation?' — '+q.explanation:'');}
+  }
+  showExpMedia(q);
+  if(isMultiPlay){
+    if(correct&&multiPlayers[currentUser?.id])multiPlayers[currentUser.id].correctCount=(multiPlayers[currentUser.id].correctCount||0)+1;
+    if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
+    broadcastToRoom({type:'player_score',userId:currentUser?.id,score:playScore,correctCount:multiPlayers[currentUser?.id]?.correctCount||0});
+    renderInGameScoreboard();
+  }
+  if(isMultiPlay&&correct&&firstAnswerUserId===currentUser?.id){setTimeout(()=>nextQ(),1800);}
+  else{const nb=document.getElementById('play-next');nb.className='play-next show';nb.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';}
+}
+function nextQ(){playIdx++;if(playIdx>=playQuestions.length){if(isMultiPlay)endBattle();else showResult();return;}showQuestion();}
+
+// ── 対戦終了・スコア保存 ──────────────────────────────────
+function endBattle(){
+  clearInterval(timerInterval);
+  const total=playQuestions.length;
+  document.getElementById('prog-fill').style.width='100%';document.getElementById('prog-text').textContent=`${total}/${total}`;
+  document.getElementById('play-q-counter').textContent=`${total}/${total}`;
+  if(multiPlayers[currentUser?.id])multiPlayers[currentUser.id].score=playScore;
+  if(isLeader){
+    const scores=Object.values(multiPlayers).map(p=>({userId:p.id,score:p.score,correctCount:p.correctCount}));
+    broadcastToRoom({type:'game_end',scores});
+    updateCumulativeStats(scores);
+    saveGameScores(scores);
+    closeRoomInDB();// ゲーム終了後は部屋を削除
+  }
+  showRanking();
+}
+
+async function saveGameScores(scores){
+  if(!currentRoom?.id)return;
+  const sorted=[...scores].sort((a,b)=>b.score-a.score);
+  // game_scoresテーブルに保存
+  const rows=sorted.map((s,i)=>({
+    room_id:currentRoom.id,
+    user_id:s.userId,
+    user_name:multiPlayers[s.userId]?.name||'不明',
+    score:s.score,
+    correct_count:s.correctCount,
+    rank:i+1
+  }));
+  await sb.from('game_scores').insert(rows);
+  // 各プレイヤーのprofilesを更新
+  for(const s of scores){
+    const p=multiPlayers[s.userId];if(!p)continue;
+    await sb.from('profiles').update({
+      total_score:sb.rpc('increment',{x:s.score}),// ※ increment RPCが無ければ下のraw SQLを使用
+      total_correct:p.totalCorrect,
+      total_played:p.totalAnswered,
+      games_played:p.games,
+    }).eq('id',s.userId);
+  }
+}
+
+function updateCumulativeStats(scores){
+  const sorted=[...scores].sort((a,b)=>b.score-a.score);
+  sorted.forEach((s,rank)=>{
+    if(multiPlayers[s.userId]){
+      multiPlayers[s.userId].totalCorrect=(multiPlayers[s.userId].totalCorrect||0)+s.correctCount;
+      multiPlayers[s.userId].totalAnswered=(multiPlayers[s.userId].totalAnswered||0)+playQuestions.length;
+      multiPlayers[s.userId].lastRank=rank+1;
+      multiPlayers[s.userId].games=(multiPlayers[s.userId].games||0)+1;
+    }
+  });
+}
+
+function showRanking(){
+  document.getElementById('play-game').style.display='none';
+  document.getElementById('play-result').classList.remove('show');
+  document.getElementById('play-ranking').classList.add('show');
+  const players=Object.values(multiPlayers).sort((a,b)=>b.score-a.score);
+  const total=playQuestions.reduce((s,q)=>s+(q.score||10),0);
+  document.getElementById('ranking-subtitle').textContent=`全${playQuestions.length}問 / 最高${total}点`;
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('ranking-list').innerHTML=players.map((p,i)=>`
+    <div class="ranking-item ${i<3?'rank-'+(i+1):''}" id="rank-item-${i}">
+      <div class="ranking-medal">${medals[i]||''}</div>
+      <div class="ranking-rank-num">${i<3?'':i+1}</div>
+      <div class="ranking-ava" style="background:${p.color}"><span class="ranking-ava-emoji">${p.avatar}</span></div>
+      <div class="ranking-name">${esc(p.name)}${p.id===currentUser?.id?' (あなた)':''}</div>
+      <div class="ranking-stats"><div class="ranking-pts">${p.score}pt</div><div class="ranking-correct">${p.correctCount||0}問正解</div></div>
+    </div>`).join('');
+  players.forEach((_,i)=>setTimeout(()=>{document.getElementById('rank-item-'+i)?.classList.add('show');},300+i*200));
+  if(players[0]?.id===currentUser?.id)setTimeout(launchConfetti,800);
+}
+function showResult(){
+  clearInterval(timerInterval);
+  const total=playQuestions.length;const maxScore=playQuestions.reduce((s,q)=>s+(q.score||10),0);
+  document.getElementById('prog-fill').style.width='100%';document.getElementById('prog-text').textContent=`${total}/${total}`;
+  document.getElementById('play-q-counter').textContent=`${total}/${total}`;
+  document.getElementById('play-game').style.display='none';document.getElementById('play-result').classList.add('show');
+  const pct=maxScore>0?Math.round(playScore/maxScore*100):0;
+  document.getElementById('res-score').textContent=playScore;document.getElementById('res-total').textContent=maxScore;
+  document.getElementById('res-correct').textContent=playScore+'pt';document.getElementById('res-wrong').textContent=(maxScore-playScore)+'pt';document.getElementById('res-rate').textContent=pct+'%';
+  let stars='⭐',msg;
+  if(pct>=90){stars='🌟🌟🌟';msg='完璧！天才クイズマスター！';launchConfetti();}
+  else if(pct>=70){stars='⭐⭐⭐';msg='素晴らしい！よく勉強してるね！';}
+  else if(pct>=50){stars='⭐⭐';msg='惜しい！もう一度チャレンジ！';}
+  else{stars='⭐';msg='まだまだ！もう一度頑張ろう！';}
+  document.getElementById('res-stars').textContent=stars;document.getElementById('res-msg').textContent=msg;
+}
+function renderInGameScoreboard(){
+  const players=Object.values(multiPlayers).sort((a,b)=>b.score-a.score);
+  document.getElementById('play-scoreboard-list').innerHTML=players.map(p=>{
+    const isMe=p.id===currentUser?.id;
+    return`<div class="play-score-item${isMe?' me':''}">
+      <div class="play-score-ava" style="background:${p.color}"><span class="play-score-ava-emoji">${p.avatar}</span></div>
+      <div class="play-score-name">${esc(p.name.length>5?p.name.slice(0,5)+'…':p.name)}</div>
+      <div class="play-score-pts">${p.score}pt</div>
+    </div>`;
+  }).join('');
+}
+function closePlay(){clearInterval(timerInterval);closeOv('play-ov');}
+function restartPlay(){if(!playQuiz)return;startPlayFromObj(playQuiz,isMultiPlay);}
+
+// ── タイマー ──────────────────────────────────────────────
+function startTimer(sec){
+  clearInterval(timerInterval);
+  if(sec===0){document.getElementById('timer-wrap').style.display='none';return;}
+  timerSec=sec;timerRemain=sec;document.getElementById('timer-wrap').style.display='flex';
+  updateTimerUI();
+  timerInterval=setInterval(()=>{timerRemain--;updateTimerUI();if(timerRemain<=0){clearInterval(timerInterval);timeUp();}},1000);
+}
+function updateTimerUI(){
+  const pct=timerSec>0?Math.round(timerRemain/timerSec*100):0;
+  const fill=document.getElementById('timer-fill'),num=document.getElementById('timer-num');
+  fill.style.width=pct+'%';fill.style.background=timerRemain<=5?'var(--red)':timerRemain<=10?'var(--gold)':'var(--a)';
+  num.textContent=timerRemain;num.className='play-timer-num'+(timerRemain<=5?' warn':'');
+}
+function timeUp(){
+  if(playAnswered)return;playAnswered=true;
+  document.querySelectorAll('.play-choice').forEach(b=>b.classList.add('answered'));
+  const q=playQuestions[playIdx];
+  document.getElementById('play-fb').className='play-feedback ng show';
+  document.getElementById('play-fb').textContent='⏱ 時間切れ！正解は「'+(q.type==='choice'?q.choices[q.correct]:q.textAnswer)+'」'+(q.explanation?' — '+q.explanation:'');
+  if(q.type==='choice'){const btns=document.querySelectorAll('.play-choice');if(btns[q.correct])btns[q.correct].classList.add('show-correct');}
+  showExpMedia(q);
+  const nb=document.getElementById('play-next');nb.className='play-next show';nb.textContent=playIdx+1<playQuestions.length?'次の問題 →':'結果を見る';
+}
+
+// ── クラッカー・Toast ─────────────────────────────────────
+function launchConfetti(){
+  const container=document.getElementById('confetti-container');
+  const colors=['#2d5be3','#e05b2e','#1a8a50','#fbbf24','#be185d','#7c3aed'];
+  for(let i=0;i<80;i++){
+    const el=document.createElement('div');el.className='confetti-piece';
+    el.style.left=Math.random()*100+'vw';el.style.background=colors[Math.floor(Math.random()*colors.length)];
+    el.style.animationDuration=(Math.random()*2+1.5)+'s';el.style.animationDelay=Math.random()*1.5+'s';
+    el.style.transform=`rotate(${Math.random()*360}deg)`;el.style.width=(Math.random()*10+5)+'px';el.style.height=(Math.random()*10+5)+'px';
+    container.appendChild(el);setTimeout(()=>el.remove(),3500+Math.random()*1000);
+  }
+}
+let tt;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2800);}
+
+// ── 初期化 ────────────────────────────────────────────────
+(async()=>{
+  const{data:{session}}=await sb.auth.getSession();
+  if(session?.user){
+    currentUser=session.user;
+    await loadOnlineQuizzes();
+    await showMainScreen();
+    render();
+  }else{
+    showAuthScreen();
+  }
+  sb.auth.onAuthStateChange(async(_,sess)=>{
+    if(sess?.user){
+      currentUser=sess.user;
+      await loadOnlineQuizzes();
+      await showMainScreen();
+      render();
+    }else{
+      currentUser=null;myProfile=null;
+      showAuthScreen();
+    }
+  });
+})();
+</script>
 
 const CATS={trivia:{l:'雑学',e:'🧠',c:'cc-trivia'},general:{l:'一般常識',e:'📚',c:'cc-general'},sns:{l:'SNS',e:'📱',c:'cc-sns'},music:{l:'音楽',e:'🎵',c:'cc-music'},sports:{l:'スポーツ',e:'⚽',c:'cc-sports'},anime:{l:'アニメ',e:'🎌',c:'cc-anime'},other:{l:'その他',e:'✨',c:'cc-other'}};
 const COLORS=['#2d5be3','#e05b2e','#1a8a50','#be185d','#b45309','#0369a1','#b91c1c','#7c3aed'];
