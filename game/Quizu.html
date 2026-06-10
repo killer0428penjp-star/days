@@ -319,272 +319,137 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .order-opt{padding:3px 9px;border-radius:5px;font:600 11px 'DM Sans',sans-serif;color:var(--hint);cursor:pointer;border:none;background:transparent;transition:all .15s}
 .order-opt.on{background:var(--surface);color:var(--a);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 
-/* ══ シンプル・クリーンロビー ══ */
-#lobby-screen{
-  position:fixed;inset:0;z-index:450;
-  background:var(--lobby-bg);
-  display:none;flex-direction:column;
-}
+/* ══ フォートナイト風ロビー ══ */
+#lobby-screen{position:fixed;inset:0;z-index:450;background:#0a0e1a;display:none;flex-direction:column;}
 #lobby-screen.open{display:flex}
-/* 上部バー */
-.lb-topbar{
-  height:52px;
-  background:rgba(255,255,255,0.04);
-  border-bottom:1px solid var(--lobby-border);
-  display:flex;align-items:center;padding:0 16px;gap:10px;
-  flex-shrink:0;
-}
-.lb-topbar-title{
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;
-  color:var(--lobby-text);letter-spacing:2px;
-}
-.lb-topbar-code{
-  background:rgba(74,158,255,0.12);border:1px solid rgba(74,158,255,0.25);
-  border-radius:6px;padding:4px 12px;
-  font-family:'Orbitron',monospace;font-size:13px;font-weight:700;
-  color:var(--lobby-accent);letter-spacing:4px;
-  cursor:pointer;transition:background .15s;
-}
-.lb-topbar-code:hover{background:rgba(74,158,255,0.2)}
+.lb-topbar{height:50px;flex-shrink:0;background:rgba(0,0,0,0.5);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;padding:0 16px;gap:10px;}
+.lb-topbar-title{font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:#e8eaf0;letter-spacing:2px;}
+.lb-topbar-code{background:rgba(74,158,255,0.12);border:1px solid rgba(74,158,255,0.25);border-radius:6px;padding:4px 12px;font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:#4a9eff;letter-spacing:3px;cursor:pointer;transition:background .15s;}
+.lb-topbar-code:hover{background:rgba(74,158,255,0.22)}
 .lb-topbar-sp{flex:1}
-.lb-topbar-btn{
-  height:32px;padding:0 12px;border-radius:7px;
-  font:600 12px 'DM Sans',sans-serif;cursor:pointer;
-  display:inline-flex;align-items:center;gap:5px;
-  border:1px solid var(--lobby-border);
-  background:transparent;color:var(--lobby-hint);
-  transition:all .15s;white-space:nowrap;
-}
-.lb-topbar-btn:hover{background:rgba(255,255,255,0.08);color:var(--lobby-text)}
-.lb-topbar-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
-.lb-topbar-btn.primary{background:rgba(74,158,255,0.15);border-color:rgba(74,158,255,0.3);color:var(--lobby-accent)}
+.lb-topbar-btn{height:30px;padding:0 12px;border-radius:6px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#6b7280;transition:all .15s;}
+.lb-topbar-btn:hover{background:rgba(255,255,255,0.08);color:#e8eaf0}
+.lb-topbar-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.lb-topbar-btn.primary{background:rgba(74,158,255,0.15);border-color:rgba(74,158,255,0.3);color:#4a9eff}
 .lb-topbar-btn.primary:hover{background:rgba(74,158,255,0.25)}
-.lb-topbar-btn.danger{color:var(--lobby-red);border-color:rgba(239,83,80,0.25)}
+.lb-topbar-btn.danger{color:#ef5350;border-color:rgba(239,83,80,0.2)}
 .lb-topbar-btn.danger:hover{background:rgba(239,83,80,0.1)}
 
-/* メインエリア（左右分割） */
-.lb-body{
-  flex:1;display:flex;overflow:hidden;
-}
+.lb-field{flex:1;position:relative;overflow:hidden;background:linear-gradient(180deg,#0a0e1a 0%,#111827 60%,#1a2332 100%);}
+.lb-field-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 110%,rgba(74,158,255,0.12) 0%,transparent 60%),repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(255,255,255,0.015) 80px,rgba(255,255,255,0.015) 81px),repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(255,255,255,0.015) 80px,rgba(255,255,255,0.015) 81px);}
 
-/* 左側：プレイヤーリスト */
-.lb-players-panel{
-  width:260px;
-  border-right:1px solid var(--lobby-border);
-  display:flex;flex-direction:column;
-  flex-shrink:0;
-}
-.lb-panel-hdr{
-  padding:14px 16px 10px;
-  border-bottom:1px solid var(--lobby-border);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.lb-panel-hdr-title{
-  font-size:11px;font-weight:700;
-  color:var(--lobby-hint);text-transform:uppercase;letter-spacing:.8px;
-}
-.lb-panel-hdr-cnt{
-  font-size:11px;color:var(--lobby-hint);
-  font-variant-numeric:tabular-nums;
-}
-.lb-player-list{flex:1;overflow-y:auto;padding:8px}
-.lb-player-list::-webkit-scrollbar{width:4px}
-.lb-player-list::-webkit-scrollbar-track{background:transparent}
-.lb-player-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
-.lb-player-row{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 10px;border-radius:8px;
-  transition:background .15s;
-  cursor:default;
-}
-.lb-player-row:hover{background:rgba(255,255,255,0.04)}
-.lb-player-row.me{background:rgba(74,158,255,0.08)}
-.lb-pr-ava{
-  width:32px;height:32px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;flex-shrink:0;
-  border:1.5px solid rgba(255,255,255,0.15);
-  overflow:hidden;position:relative;
-}
-.lb-pr-ava.me{border-color:rgba(74,158,255,0.5)}
-.lb-pr-ava.leader{border-color:rgba(255,213,79,0.5)}
-.lb-pr-info{flex:1;min-width:0}
-.lb-pr-name{
-  font-size:12px;font-weight:600;color:var(--lobby-text);
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  display:flex;align-items:center;gap:4px;
-}
-.lb-pr-tag{
-  font-size:9px;font-weight:700;
-  padding:1px 5px;border-radius:3px;
-  flex-shrink:0;
-}
-.lb-pr-tag.you{background:rgba(74,158,255,0.2);color:var(--lobby-accent)}
-.lb-pr-tag.leader{background:rgba(255,213,79,0.2);color:var(--lobby-gold)}
-.lb-pr-score{font:600 11px 'Orbitron',monospace;color:var(--lobby-accent)}
-.lb-invite-btn{
-  width:100%;margin:8px 0;height:32px;
-  border:1.5px dashed rgba(255,255,255,0.12);
-  border-radius:8px;background:transparent;
-  color:var(--lobby-hint);font:600 11px 'DM Sans',sans-serif;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;
-  transition:all .15s;
-}
-.lb-invite-btn:hover{border-color:rgba(74,158,255,0.4);color:var(--lobby-accent)}
-.lb-invite-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.lb-stage-wrap{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:16px;overflow:hidden;}
+.lb-stage{display:flex;align-items:flex-end;justify-content:center;gap:0;transition:transform .4s cubic-bezier(.22,.68,0,1.1);will-change:transform;min-width:100%;}
 
-/* 右側：メインコンテンツ */
-.lb-main{
-  flex:1;display:flex;flex-direction:column;overflow:hidden;
-}
+.lb-pcard{display:flex;flex-direction:column;align-items:center;width:130px;flex-shrink:0;transition:transform .3s cubic-bezier(.22,.68,0,1.1),opacity .3s;position:relative;}
+.lb-pcard.is-me{z-index:10}
+.lb-pcard.is-side{transform:scale(0.82);opacity:0.75}
+.lb-pcard.is-far{transform:scale(0.68);opacity:0.55}
+.lb-pcard.is-hidden{transform:scale(0.55);opacity:0.2;pointer-events:none}
+.lb-pcard-inner{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 10px 10px;display:flex;flex-direction:column;align-items:center;width:100%;position:relative;transition:border-color .2s;}
+.lb-pcard.is-me .lb-pcard-inner{border-color:rgba(74,158,255,0.5);background:rgba(74,158,255,0.08);box-shadow:0 0 24px rgba(74,158,255,0.15);}
+.lb-pcard.is-leader .lb-pcard-inner{border-color:rgba(255,213,79,0.4);background:rgba(255,213,79,0.05);}
+.lb-pava{width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative;border:2px solid rgba(255,255,255,0.15);margin-bottom:8px;overflow:hidden;}
+.lb-pcard.is-me .lb-pava{border-color:rgba(74,158,255,0.6);box-shadow:0 0 16px rgba(74,158,255,0.4);}
+.lb-pcard.is-leader .lb-pava{border-color:rgba(255,213,79,0.6);}
+.lb-pava-crown{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:14px}
+.lb-pava-you{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);background:#4a9eff;color:#fff;font:700 7px 'Orbitron',monospace;letter-spacing:1px;padding:1px 5px;border-radius:3px;white-space:nowrap;}
+.lb-pname{font-size:11px;font-weight:700;color:#e8eaf0;text-align:center;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;}
+.lb-prole{font-size:9px;color:#6b7280;text-align:center;margin-bottom:3px}
+.lb-pscore{font:700 10px 'Orbitron',monospace;color:#4a9eff;text-align:center}
+.lb-pcard-shadow{width:80px;height:8px;border-radius:50%;background:rgba(0,0,0,0.4);filter:blur(4px);margin-top:4px;transition:opacity .3s;}
+.lb-pcard.is-me .lb-pcard-shadow{background:rgba(74,158,255,0.3)}
 
-/* クイズ情報エリア */
-.lb-quiz-area{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:32px 24px;
-}
-.lb-quiz-icon{
-  font-size:48px;margin-bottom:16px;
-}
-.lb-quiz-name{
-  font-family:'DM Serif Display',serif;
-  font-size:1.8rem;color:var(--lobby-text);
-  text-align:center;margin-bottom:6px;
-  line-height:1.3;
-}
-.lb-quiz-meta{
-  font-size:13px;color:var(--lobby-hint);
-  text-align:center;margin-bottom:32px;
-  display:flex;gap:16px;align-items:center;justify-content:center;
-}
-.lb-quiz-meta span{display:flex;align-items:center;gap:4px}
-.lb-quiz-meta svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8}
+.lb-empty-slot{width:130px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;opacity:0.3;transition:opacity .2s;cursor:pointer;}
+.lb-empty-slot:hover{opacity:0.6}
+.lb-empty-circle{width:64px;height:64px;border-radius:50%;border:2px dashed rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;margin-bottom:8px;transition:border-color .2s;}
+.lb-empty-slot:hover .lb-empty-circle{border-color:rgba(74,158,255,0.5)}
+.lb-empty-circle svg{width:20px;height:20px;stroke:rgba(255,255,255,0.4);fill:none;stroke-width:2}
+.lb-empty-label{font-size:9px;color:rgba(255,255,255,0.3);font-weight:600}
 
-/* クイズ選択（リーダー） */
-.lb-select-wrap{
-  width:100%;max-width:420px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--lobby-border);
-  border-radius:12px;padding:20px;
-}
-.lb-select-label{
-  font-size:11px;font-weight:700;color:var(--lobby-hint);
-  text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;
-}
-.lb-quiz-select{
-  width:100%;height:40px;
-  background:rgba(255,255,255,0.06);
-  border:1px solid var(--lobby-border);
-  border-radius:8px;
-  color:var(--lobby-text);
-  font:600 13px 'DM Sans',sans-serif;
-  padding:0 10px;outline:none;
-  transition:border-color .15s;
-  cursor:pointer;
-}
-.lb-quiz-select:focus{border-color:var(--lobby-accent)}
-.lb-quiz-select option{background:#1a1f2e;color:var(--lobby-text)}
-.lb-quiz-select:disabled{opacity:0.5;cursor:default}
+.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.15);color:#e8eaf0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;z-index:20;}
+.lb-arrow:hover{background:rgba(74,158,255,0.3);border-color:rgba(74,158,255,0.5)}
+.lb-arrow svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5}
+.lb-arrow-left{left:12px}
+.lb-arrow-right{right:12px}
+.lb-dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:20;}
+.lb-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.2);transition:all .2s;}
+.lb-dot.active{background:#4a9eff;width:16px;border-radius:3px}
 
-/* アバター選択 */
-.lb-avatar-area{
-  margin-top:16px;
-  background:rgba(255,255,255,0.04);
-  border:1px solid var(--lobby-border);
-  border-radius:12px;padding:16px;
-  width:100%;max-width:420px;
-}
-.lb-avatar-label{
-  font-size:11px;font-weight:700;color:var(--lobby-hint);
-  text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;
-}
-.avatar-selector{
-  display:grid;grid-template-columns:repeat(10,1fr);gap:4px;
-}
-.avatar-opt{
-  height:32px;border-radius:6px;
-  border:1.5px solid transparent;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;cursor:pointer;transition:all .12s;
-  background:rgba(255,255,255,0.04);
-}
-.avatar-opt:hover{border-color:rgba(74,158,255,0.4);background:rgba(74,158,255,0.08)}
-.avatar-opt.selected{border-color:var(--lobby-accent);background:rgba(74,158,255,0.15)}
+.lb-bottom{flex-shrink:0;background:rgba(0,0,0,0.6);border-top:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(12px);padding:10px 16px 8px;display:flex;flex-direction:column;gap:8px;}
+.lb-quiz-info{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;min-height:52px;}
+.lb-qi-icon{font-size:24px;flex-shrink:0}
+.lb-qi-body{flex:1;min-width:0}
+.lb-qi-title{font-size:13px;font-weight:700;color:#e8eaf0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-qi-meta{font-size:11px;color:#6b7280;margin-top:1px}
+.lb-qi-edit-btn,.lb-qi-select-btn{height:28px;padding:0 10px;border-radius:7px;font:600 11px 'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:4px;flex-shrink:0;transition:all .15s;white-space:nowrap;}
+.lb-qi-edit-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#9ca3af}
+.lb-qi-edit-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.lb-qi-edit-btn:hover{background:rgba(255,255,255,0.1);color:#e8eaf0}
+.lb-qi-select-btn{background:rgba(74,158,255,0.15);border:1px solid rgba(74,158,255,0.3);color:#4a9eff}
+.lb-qi-select-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
+.lb-qi-select-btn:hover{background:rgba(74,158,255,0.25)}
 
-/* 下部：コントロールバー */
-.lb-ctrl-bar{
-  height:64px;
-  background:rgba(0,0,0,0.3);
-  border-top:1px solid var(--lobby-border);
-  display:flex;align-items:center;padding:0 20px;gap:12px;
-  flex-shrink:0;
-}
-.lb-player-ready{
-  font-size:12px;color:var(--lobby-hint);
-  display:flex;align-items:center;gap:6px;
-  flex:1;
-}
-.lb-ready-dots{display:flex;gap:4px}
-.lb-ready-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:rgba(255,255,255,0.1);
-  transition:background .3s;
-}
-.lb-ready-dot.on{background:var(--lobby-green)}
-.lb-start-btn{
-  height:42px;padding:0 28px;
-  background:linear-gradient(135deg,var(--lobby-accent),var(--lobby-accent2));
-  border:none;border-radius:9px;
-  font:700 13px 'Orbitron',monospace;
-  color:#fff;cursor:pointer;
-  display:flex;align-items:center;gap:7px;
-  transition:opacity .15s,transform .1s;
-  letter-spacing:1px;
-  flex-shrink:0;
-}
+.lb-settings{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:4px 2px;}
+.lb-setting-item{display:flex;align-items:center;gap:7px}
+.lb-setting-label{font-size:11px;color:#6b7280;font-weight:600;white-space:nowrap}
+.lb-setting-unit{font-size:11px;color:#6b7280}
+.lb-setting-input{width:56px;height:28px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:6px;color:#e8eaf0;font:600 13px 'DM Sans',sans-serif;text-align:center;outline:none;transition:border-color .15s;}
+.lb-setting-input:focus{border-color:rgba(74,158,255,0.5)}
+.lb-order-toggle{display:flex;gap:4px}
+.lb-order-btn{height:26px;padding:0 9px;border-radius:5px;font:600 10px 'DM Sans',sans-serif;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:transparent;color:#6b7280;transition:all .15s;}
+.lb-order-btn.on{background:rgba(74,158,255,0.2);border-color:rgba(74,158,255,0.4);color:#4a9eff}
+
+.lb-avatar-row{display:flex;align-items:center;gap:8px}
+.lb-avatar-row-label{font-size:10px;color:#6b7280;font-weight:600;white-space:nowrap;flex-shrink:0}
+.lb-avatar-mini{display:flex;gap:3px;flex-wrap:wrap;flex:1}
+.lb-ava-opt{width:26px;height:26px;border-radius:6px;border:1.5px solid transparent;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .12s;background:rgba(255,255,255,0.04);}
+.lb-ava-opt:hover{border-color:rgba(74,158,255,0.4);background:rgba(74,158,255,0.08)}
+.lb-ava-opt.selected{border-color:#4a9eff;background:rgba(74,158,255,0.15)}
+
+.lb-ctrl-bar{display:flex;align-items:center;gap:12px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);}
+.lb-player-cnt-display{flex:1;display:flex;align-items:center;gap:7px;font-size:11px;color:#6b7280;}
+.lb-ready-dots{display:flex;gap:3px}
+.lb-ready-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,0.1);transition:background .3s;}
+.lb-ready-dot.on{background:#4caf50}
+.lb-start-btn{height:38px;padding:0 24px;background:linear-gradient(135deg,#4a9eff,#7c4dff);border:none;border-radius:8px;font:700 12px 'Orbitron',monospace;color:#fff;cursor:pointer;display:flex;align-items:center;gap:6px;transition:opacity .15s,transform .1s;letter-spacing:1px;flex-shrink:0;}
 .lb-start-btn:hover{opacity:0.9;transform:scale(1.02)}
-.lb-start-btn:disabled{opacity:0.4;cursor:not-allowed;transform:none}
-.lb-start-btn svg{width:14px;height:14px;stroke:#fff;fill:#fff;stroke-width:0}
-.lb-wait-msg{
-  font-size:12px;color:var(--lobby-hint);
-  display:flex;align-items:center;gap:8px;
-}
-.lb-wait-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--lobby-accent);
-  animation:waitPulse 1.4s ease-in-out infinite;
-}
-@keyframes waitPulse{0%,100%{opacity:0.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+.lb-wait-msg{font-size:11px;color:#6b7280;display:flex;align-items:center;gap:6px}
+.lb-wait-dot{width:6px;height:6px;border-radius:50%;background:#4a9eff;animation:waitPulse 1.4s ease-in-out infinite}
+@keyframes waitPulse{0%,100%{opacity:.3;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
 
-/* ランキング（ゲーム後のみ表示） */
-.lb-ranking-section{
-  margin-top:16px;width:100%;max-width:420px;
-  background:rgba(255,255,255,0.03);
-  border:1px solid var(--lobby-border);
-  border-radius:12px;padding:16px;
-  display:none;
-}
-.lb-ranking-section.show{display:block}
-.lb-ranking-title{
-  font-size:11px;font-weight:700;color:var(--lobby-hint);
-  text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;
-}
-.lb-rank-row{
-  display:flex;align-items:center;gap:8px;
-  padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.05);
-}
-.lb-rank-row:last-child{border-bottom:none}
-.lb-rank-pos{
-  font:700 11px 'Orbitron',monospace;
-  width:20px;text-align:center;color:var(--lobby-hint);
-}
-.lb-rank-pos.g1{color:var(--lobby-gold)}
-.lb-rank-pos.g2{color:#c0c0c0}
-.lb-rank-pos.g3{color:#cd7f32}
-.lb-rank-ava{width:24px;height:24px;border-radius:50%;overflow:hidden;position:relative;flex-shrink:0}
-.lb-rank-name{font-size:12px;color:var(--lobby-text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lb-rank-pts{font:700 11px 'Orbitron',monospace;color:var(--lobby-accent)}
+/* ══ クイズ選択オーバーレイ ══ */
+#quiz-picker-ov{position:fixed;inset:0;z-index:500;background:var(--bg);display:none;flex-direction:column;}
+#quiz-picker-ov.open{display:flex}
+.qp-header{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;}
+.qp-back{width:34px;height:34px;border:none;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sub);transition:background .15s;flex-shrink:0;}
+.qp-back:hover{background:var(--border)}
+.qp-back svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.qp-title{font-size:1rem;font-weight:700;color:var(--text);white-space:nowrap}
+.qp-cats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+.qp-cats::-webkit-scrollbar{display:none}
+.qp-body{flex:1;overflow-y:auto;padding:16px}
+.card-pick-btn{width:100%;height:34px;border-radius:8px;background:var(--a);color:#fff;font:700 12px 'DM Sans',sans-serif;border:none;cursor:pointer;transition:background .15s;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:5px;}
+.card-pick-btn:hover{background:var(--a2)}
+.card-pick-btn svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.5}
+
+@keyframes roomPulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+.room-card{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);transition:background .15s}
+.room-card:last-child{border-bottom:none}
+.room-card:hover{background:var(--surface2)}
+.room-card-cat{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.room-card-body{flex:1;min-width:0}
+.room-card-title{font-size:13px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:3px}
+.room-card-meta{display:flex;gap:10px;font-size:11px;color:var(--hint);flex-wrap:wrap}
+.room-card-meta span{display:flex;align-items:center;gap:3px}
+.room-card-meta svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:1.8}
+.room-card-ava{width:22px;height:22px;border-radius:50%;border:2px solid var(--surface);margin-left:-4px;font-size:12px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.room-card-ava:first-child{margin-left:0}
+.room-join-btn{height:30px;padding:0 12px;border-radius:7px;background:var(--a);color:#fff;font:700 11px 'DM Sans',sans-serif;border:none;cursor:pointer;transition:background .15s;white-space:nowrap;flex-shrink:0}
+.room-join-btn:hover{background:var(--a2)}
+.room-join-btn.full{background:var(--surface2);color:var(--hint);cursor:default}
+.room-empty{text-align:center;padding:32px 16px;color:var(--hint);font-size:13px}
+.room-empty svg{width:28px;height:28px;stroke:var(--hint);fill:none;stroke-width:1.5;margin:0 auto 8px;display:block}
 
 /* ══ 招待モーダル ══ */
 #invite-ov{
@@ -1182,31 +1047,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- ════ 部屋作成モーダル ════ -->
-<div class="ov" id="create-room-ov" onclick="ovClick('create-room-ov',event)">
-  <div class="modal" style="max-width:500px">
-    <div class="mh"><div class="mt">🎮 部屋を作る</div><button class="mc" onclick="closeOv('create-room-ov')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div style="margin-bottom:14px">
-      <label class="lbl">クイズを選ぶ *</label>
-      <select id="room-quiz-select" style="width:100%;height:38px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font:500 14px 'DM Sans',sans-serif;background:var(--surface);outline:none;color:var(--text)"><option value="">-- クイズを選択 --</option></select>
-    </div>
-    <div style="margin-bottom:14px">
-      <label class="lbl">問題数</label>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" class="slider" id="room-q-count" min="1" max="20" value="10" oninput="document.getElementById('room-q-count-val').textContent=this.value+'問'">
-        <span id="room-q-count-val" style="font:700 14px 'DM Sans',sans-serif;color:var(--text);width:40px">10問</span>
-      </div>
-    </div>
-    <div style="margin-bottom:18px">
-      <label class="lbl">出題順</label>
-      <div class="order-toggle">
-        <button class="order-opt on" id="order-random" onclick="setOrderOpt('random')">🔀 ランダム</button>
-        <button class="order-opt" id="order-fixed" onclick="setOrderOpt('fixed')">📋 作成順</button>
-      </div>
-    </div>
-    <button class="btn bp" style="width:100%;height:42px;justify-content:center;font-size:14px" onclick="createRoom()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>部屋を作成してロビーへ</button>
-  </div>
-</div>
+<!-- ════ 部屋作成モーダル（即ロビーへ、モーダルなし） ════ -->
+<!-- createRoom()を直接呼ぶためモーダル不要 -->
 
 <!-- ════ 部屋参加モーダル ════ -->
 <div class="ov" id="join-room-ov" onclick="ovClick('join-room-ov',event)">
@@ -1220,81 +1062,129 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   </div>
 </div>
 
-<!-- ════ クリーン・シンプルロビー画面 ════ -->
+<!-- ════ フォートナイト風ロビー画面 ════ -->
 <div id="lobby-screen">
+
+  <!-- 上部バー -->
   <div class="lb-topbar">
-    <div class="lb-topbar-title">QUIZHUB</div>
+    <div class="lb-topbar-title">QUIZHUB LOBBY</div>
     <div class="lb-topbar-code" id="lb-code-display" onclick="copyRoomCode()" title="クリックでコピー">----</div>
     <div class="lb-topbar-sp"></div>
     <button class="lb-topbar-btn primary" onclick="openInviteModal()">
-      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-      招待
+      <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>招待
     </button>
     <button class="lb-topbar-btn danger" onclick="leaveLobby()">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      退出
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>退出
     </button>
   </div>
 
-  <div class="lb-body">
-    <!-- 左：プレイヤー一覧 -->
-    <div class="lb-players-panel">
-      <div class="lb-panel-hdr">
-        <div class="lb-panel-hdr-title">プレイヤー</div>
-        <div class="lb-panel-hdr-cnt" id="lb-player-cnt">0人</div>
+  <!-- フォートナイト風プレイヤーフィールド -->
+  <div class="lb-field" id="lb-field">
+    <div class="lb-field-bg"></div>
+    <div class="lb-stage-wrap">
+      <div class="lb-stage" id="lb-stage"></div>
+    </div>
+    <button class="lb-arrow lb-arrow-left" id="lb-arrow-left" onclick="slideStage(-1)" style="display:none">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <button class="lb-arrow lb-arrow-right" id="lb-arrow-right" onclick="slideStage(1)" style="display:none">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <div class="lb-dots" id="lb-dots"></div>
+  </div>
+
+  <!-- 下部：クイズ情報＋設定＋コントロール -->
+  <div class="lb-bottom">
+
+    <!-- クイズ選択エリア（クリックでピッカー）-->
+    <div class="lb-quiz-info" id="lb-quiz-info">
+      <div class="lb-qi-icon" id="lb-qi-icon">🎮</div>
+      <div class="lb-qi-body">
+        <div class="lb-qi-title" id="lb-qi-title">クイズを選択してください</div>
+        <div class="lb-qi-meta" id="lb-qi-meta"></div>
       </div>
-      <div class="lb-player-list" id="lb-player-list"></div>
+      <button class="lb-qi-edit-btn" id="lb-qi-edit-btn" onclick="openQuizPicker()" style="display:none">
+        <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        クイズを変更
+      </button>
+      <button class="lb-qi-select-btn" id="lb-qi-select-btn" onclick="openQuizPicker()" style="display:none">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        クイズを選ぶ
+      </button>
     </div>
 
-    <!-- 右：メインコンテンツ -->
-    <div class="lb-main">
-      <div class="lb-quiz-area">
-        <div class="lb-quiz-icon" id="lb-quiz-icon">🎮</div>
-        <div class="lb-quiz-name" id="lb-quiz-name">クイズを選択してください</div>
-        <div class="lb-quiz-meta" id="lb-quiz-meta">
-          <span><svg viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 01-7 7 7 7 0 01-5-3z"/></svg>— 問</span>
-        </div>
-
-        <!-- クイズ選択（リーダーのみ） -->
-        <div class="lb-select-wrap" id="lb-select-wrap">
-          <div class="lb-select-label">クイズを選ぶ</div>
-          <select class="lb-quiz-select" id="lb-quiz-select" onchange="onLbQuizChange(this.value)">
-            <option value="">-- クイズを選択 --</option>
-          </select>
-        </div>
-
-        <!-- アバター選択 -->
-        <div class="lb-avatar-area">
-          <div class="lb-avatar-label">アバター</div>
-          <div class="avatar-selector" id="lb-avatar-selector"></div>
-        </div>
-
-        <!-- ランキング（前回あれば表示） -->
-        <div class="lb-ranking-section" id="lb-ranking-section">
-          <div class="lb-ranking-title">🏆 前回の結果</div>
-          <div id="lb-rank-list"></div>
+    <!-- 問題数・順序設定（リーダーのみ） -->
+    <div class="lb-settings" id="lb-settings" style="display:none">
+      <div class="lb-setting-item">
+        <span class="lb-setting-label">問題数</span>
+        <input type="number" class="lb-setting-input" id="lb-q-count" min="1" max="20" value="10" onchange="onLbSettingChange()">
+        <span class="lb-setting-unit">問</span>
+      </div>
+      <div class="lb-setting-item">
+        <span class="lb-setting-label">順序</span>
+        <div class="lb-order-toggle">
+          <button class="lb-order-btn on" id="lb-order-random" onclick="setLbOrder('random')">🔀 ランダム</button>
+          <button class="lb-order-btn" id="lb-order-fixed" onclick="setLbOrder('fixed')">📋 作成順</button>
         </div>
       </div>
+    </div>
 
-      <!-- 下部コントロールバー -->
-      <div class="lb-ctrl-bar">
-        <div class="lb-player-ready" id="lb-ready-area">
-          <div class="lb-ready-dots" id="lb-ready-dots"></div>
-          <span id="lb-ready-text">参加者が集まるのを待っています...</span>
-        </div>
-        <div id="lb-leader-area">
-          <button class="lb-start-btn" id="lb-start-btn" onclick="startBattle()">
-            <svg viewBox="0 0 24 24" style="fill:white;stroke:none"><polygon points="5 3 19 12 5 21"/></svg>
-            START
-          </button>
-        </div>
-        <div id="lb-member-area" style="display:none">
-          <div class="lb-wait-msg">
-            <div class="lb-wait-dot"></div>
-            リーダーがゲームを開始するまでお待ちください
-          </div>
+    <!-- アバター選択（横並び小サイズ） -->
+    <div class="lb-avatar-row">
+      <span class="lb-avatar-row-label">アバター</span>
+      <div class="lb-avatar-mini" id="lb-avatar-mini"></div>
+    </div>
+
+    <!-- コントロールバー -->
+    <div class="lb-ctrl-bar">
+      <div class="lb-player-cnt-display">
+        <div class="lb-ready-dots" id="lb-ready-dots"></div>
+        <span id="lb-ready-text">0人が参加中</span>
+      </div>
+      <div id="lb-leader-area">
+        <button class="lb-start-btn" onclick="startBattle()">
+          <svg viewBox="0 0 24 24" style="fill:white;stroke:none"><polygon points="5 3 19 12 5 21"/></svg>
+          START
+        </button>
+      </div>
+      <div id="lb-member-area" style="display:none">
+        <div class="lb-wait-msg">
+          <div class="lb-wait-dot"></div>
+          リーダーがゲームを開始するまでお待ちください
         </div>
       </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════ クイズ選択オーバーレイ ════ -->
+<div id="quiz-picker-ov">
+  <div class="qp-header">
+    <button class="qp-back" onclick="closeQuizPicker()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="qp-title">クイズを選ぶ</div>
+    <div class="search" style="max-width:240px;flex:1">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="クイズを検索..." id="qp-search" oninput="renderQuizPicker(this.value)">
+    </div>
+  </div>
+  <div class="qp-cats" id="qp-cats">
+    <button class="pill p-all on" data-qpc="all" onclick="setQpCat('all')">すべて</button>
+    <button class="pill p-trivia" data-qpc="trivia" onclick="setQpCat('trivia')">🧠 雑学</button>
+    <button class="pill p-general" data-qpc="general" onclick="setQpCat('general')">📚 一般常識</button>
+    <button class="pill p-sns" data-qpc="sns" onclick="setQpCat('sns')">📱 SNS</button>
+    <button class="pill p-music" data-qpc="music" onclick="setQpCat('music')">🎵 音楽</button>
+    <button class="pill p-sports" data-qpc="sports" onclick="setQpCat('sports')">⚽ スポーツ</button>
+    <button class="pill p-anime" data-qpc="anime" onclick="setQpCat('anime')">🎌 アニメ</button>
+    <button class="pill p-other" data-qpc="other" onclick="setQpCat('other')">✨ その他</button>
+  </div>
+  <div class="qp-body">
+    <div class="grid" id="qp-grid"></div>
+    <div class="nores" id="qp-nores" style="display:none">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      該当するクイズが見つかりませんでした
     </div>
   </div>
 </div>
