@@ -1,0 +1,3978 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RECORD // TRACKER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0c12;
+    --panel: #14161f;
+    --panel-2: #1b1e2a;
+    --line: #2a2e3d;
+    --accent: #9b6bff;
+    --accent-2: #35e8d2;
+    --danger: #ff5c7a;
+    --text: #e9e9f2;
+    --text-dim: #8b8fa3;
+    --topbar-h: 60px;
+    --header-ctrl-h: 20px;
+    --font-display: 'Outfit', 'Noto Sans JP', sans-serif;
+    --font-body: 'Noto Sans JP', 'Outfit', sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    transition: background-color 0.3s, color 0.3s;
+    overflow: hidden;
+  }
+
+  #bgLayer { position: fixed; inset: 0; z-index: -1; display: none; overflow: hidden; background: #000; }
+  #bgLayer img, #bgLayer video { width: 100%; height: 100%; object-fit: cover; display: none; }
+  #bgLayer .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,7,12,0.75), rgba(6,7,12,0.6)); }
+  body.custom-bg .panel, body.custom-bg .topbar, body.custom-bg .overlay, body.custom-bg .help-popover {
+    background: rgba(16,17,26,0.72) !important; backdrop-filter: blur(10px);
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+    background: linear-gradient(90deg, var(--panel) 0%, var(--panel-2) 100%);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; padding: 0 16px; gap: 14px; z-index: 300;
+    transition: background-color 0.3s;
+  }
+  .help-wrap { position: relative; flex-shrink: 0; }
+  .help-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text-dim);
+    padding: 8px 12px; cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 600;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .help-btn:hover { color: var(--accent-2); border-color: var(--accent-2); }
+  .help-btn .q {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--accent);
+    color: #fff; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .help-popover {
+    display: none; position: absolute; top: calc(100% + 8px); left: 0; width: 300px;
+    background: var(--panel); border: 1px solid var(--line); padding: 16px;
+    z-index: 400; box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  }
+  .help-popover.open { display: block; }
+  .help-popover h4 { margin: 0 0 10px; font-family: var(--font-display); font-size: 12px; letter-spacing: 1px; color: var(--accent-2); }
+  .help-popover dl { margin: 0; }
+  .help-popover dt { font-family: var(--font-display); font-weight: 700; font-size: 12.5px; color: var(--text); margin-top: 10px; }
+  .help-popover dt:first-child { margin-top: 0; }
+  .help-popover dd { margin: 3px 0 0; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+  .topbar-nav { display: flex; gap: 6px; flex: 1; overflow-x: auto; }
+  .nav-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px; padding: 9px 15px;
+    background: transparent; border: 1px solid transparent; color: var(--text-dim); cursor: pointer;
+    font-family: var(--font-display); font-size: 12.5px; font-weight: 600; letter-spacing: 0.5px;
+    white-space: nowrap; min-width: 96px;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+  .nav-btn .ic { width: 17px; height: 17px; flex-shrink: 0; display:flex; }
+  .nav-btn .ic svg { width: 100%; height: 100%; }
+  .nav-btn:hover { color: var(--text); background: rgba(155,107,255,0.08); }
+  .nav-btn.active { color: var(--accent-2); background: rgba(53,232,210,0.08); border-color: rgba(53,232,210,0.25); }
+
+  /* ---------- Main (fills screen) ---------- */
+  .main { margin-top: var(--topbar-h); height: calc(100vh - var(--topbar-h)); padding: 18px 22px; display: flex; flex-direction: column; min-height: 0; }
+  .wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; max-width: 1200px; margin: 0 auto; width: 100%; }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line);
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    padding: 18px; transition: background-color 0.3s;
+  }
+  .main-panel { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+  .panel-title-row { display: flex; align-items: flex-start; flex-shrink: 0; }
+  .panel-title {
+    font-family: var(--font-display); font-size: 13px; letter-spacing: 2px; color: var(--text-dim);
+    font-weight: 600; margin: 0 0 14px 0; display: flex; align-items: center; gap: 8px;
+    height: var(--header-ctrl-h); line-height: var(--header-ctrl-h); box-sizing: border-box;
+  }
+  .panel-title::before { content: ""; width: 8px; height: 8px; background: var(--accent); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+  .count-badge { font-family: var(--font-display); font-size: 11px; color: var(--text-dim); margin-left: auto; }
+
+  input[type="text"], input[type="number"], select {
+    background: var(--bg); border: 1px solid var(--line); color: var(--text);
+    padding: 10px 12px; font-size: 14px; font-family: var(--font-body); outline: none;
+    transition: border-color 0.15s, background-color 0.3s, color 0.3s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--accent); }
+  input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
+
+  .btn {
+    font-family: var(--font-display); font-weight: 600; font-size: 13px; letter-spacing: 0.5px;
+    border: none; padding: 10px 18px; cursor: pointer;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    transition: transform 0.1s, filter 0.15s;
+  }
+  .btn:hover { filter: brightness(1.15); }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), #7c4fe0); color: #fff; }
+  .btn-ghost { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); }
+  .btn-danger { background: rgba(255,92,122,0.15); color: var(--danger); border: 1px solid rgba(255,92,122,0.35); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-icon { padding: 8px 10px; }
+
+  /* Type / unit pill groups (used for column type, and for check/time/distance field inputs) */
+  .type-dropdown { position: relative; display: inline-block; }
+  .type-dropdown-btn {
+    display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+    background: var(--panel-2); border: 1px solid var(--line); color: var(--text); cursor: pointer;
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 600; min-width: 92px;
+  }
+  .type-dropdown-btn .tp-ic { font-size: 12px; line-height: 1; }
+  .type-dropdown-btn .type-dropdown-label { flex: 1; text-align: left; }
+  .type-dropdown-arrow { font-size: 9px; color: var(--text-dim); transition: transform 0.15s; }
+  .type-dropdown.open .type-dropdown-arrow { transform: rotate(180deg); }
+  .sort-dropdown { margin-left: 10px; }
+  .sort-dropdown-btn {
+    color: var(--text-dim);
+    min-width: 0;
+    width: fit-content;
+    height: var(--header-ctrl-h);
+    line-height: var(--header-ctrl-h);
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+  .sort-dropdown-btn .type-dropdown-label { white-space: nowrap; }
+  .sort-dropdown-btn:hover, .sort-dropdown.open .sort-dropdown-btn { color: var(--accent-2); border-color: var(--accent-2); }
+  #globalDropdownPortal, #sortDropdownPortal, #lapsSortDropdownPortal, #filesSortDropdownPortal {
+    display: none; position: fixed; min-width: 130px;
+    background: var(--panel); border: 1px solid var(--line); z-index: 9999;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.45); flex-direction: column; overflow: hidden;
+  }
+  #globalDropdownPortal.open, #sortDropdownPortal.open, #lapsSortDropdownPortal.open, #filesSortDropdownPortal.open { display: flex; }
+  .type-option {
+    display: flex; align-items: center; gap: 7px; padding: 8px 10px; width: 100%;
+    background: transparent; border: none; border-bottom: 1px solid var(--line); color: var(--text-dim); cursor: pointer;
+    font-family: var(--font-display); font-size: 11.5px; font-weight: 600; text-align: left;
+  }
+  .type-option:last-child { border-bottom: none; }
+  .type-option .tp-ic { font-size: 12px; line-height: 1; }
+  .type-option:hover { background: rgba(155,107,255,0.1); color: var(--text); }
+  .type-option.active { color: var(--accent-2); background: rgba(53,232,210,0.08); }
+  .sort-option.sort-back { color: var(--accent-2); }
+
+  .time-detail-wrap { display: none; }
+  .time-unit-toggles { display: inline-flex; gap: 0; border: 1px solid var(--line); overflow: hidden; vertical-align: middle; }
+  .tu-chip {
+    padding: 5px 8px; background: var(--panel-2); border: none; border-right: 1px solid var(--line);
+    color: var(--text-dim); cursor: pointer; font-family: var(--font-display); font-size: 10.5px; font-weight: 600;
+  }
+  .tu-chip:last-child { border-right: none; }
+  .tu-chip.active { color: #fff; background: linear-gradient(135deg, var(--accent), #7c4fe0); }
+  .time-detail-note { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+
+  .time-input-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .time-unit-item { display: flex; align-items: center; gap: 5px; }
+  .time-input-group input { width: 58px; text-align: center; }
+  .time-unit-label { font-family: var(--font-display); font-size: 12px; color: var(--text-dim); }
+  .time-colon-sep { font-family: var(--font-display); font-weight: 700; color: var(--text-dim); font-size: 15px; }
+
+  .count-input-group { display: flex; align-items: center; gap: 8px; }
+  .count-input-group input { flex: 1; min-width: 0; }
+  .count-unit-label { font-family: var(--font-display); font-size: 12px; color: var(--text-dim); }
+  .time-unit-note { font-size: 10.5px; color: var(--text-dim); margin-top: 4px; }
+
+  .distance-input-group { display: flex; align-items: center; gap: 6px; }
+  .distance-input-group input { flex: 1; min-width: 0; }
+  .unit-pill-group { display: flex; gap: 4px; flex-shrink: 0; }
+  .unit-pill {
+    padding: 8px 12px; background: var(--panel-2); border: 1px solid var(--line); color: var(--text-dim);
+    cursor: pointer; font-family: var(--font-display); font-size: 12px; font-weight: 700;
+  }
+  .unit-pill:first-child { clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%, 0 6px); }
+  .unit-pill:last-child { clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%); }
+  .unit-pill.active { color: #fff; background: linear-gradient(135deg, var(--accent), #7c4fe0); border-color: transparent; }
+
+  .empty-line { position: absolute; inset: 0; display: block; pointer-events: none; }
+  .empty-line svg { width: 100%; height: 100%; display: block; }
+
+  .check-box-display {
+    width: 20px; height: 20px; border: 2px solid var(--line); background: var(--bg);
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .check-box-display.on,
+  .check-toggle-field input:checked + .check-box-display {
+    background: linear-gradient(135deg, var(--accent), #7c4fe0); border-color: transparent;
+  }
+  .check-box-display.on::after,
+  .check-toggle-field input:checked + .check-box-display::after {
+    content: ''; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+    transform: rotate(-45deg) translate(1px, -1px);
+  }
+  .check-toggle-field {
+    display: flex; align-items: center; width: 100%; box-sizing: border-box; cursor: pointer;
+    background: var(--bg); border: 1px solid var(--line); padding: 10px 12px; min-height: 40px;
+  }
+  .check-toggle-field input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; }
+
+  table.bordered thead th, table.bordered tbody td { border-right: 1px solid var(--line); }
+  table.bordered thead th:last-child, table.bordered tbody td:last-child { border-right: none; }
+
+  table.wrap-columns { table-layout: fixed; width: 100%; }
+  table.wrap-columns thead th, table.wrap-columns tbody td { white-space: normal; word-break: break-word; }
+
+  /* ---------- 記録入力（改行／スライド切替可能なフィールドレイアウト） ---------- */
+  .entry-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .entry-toolbar .panel-title { margin: 0; }
+  .entry-mode-toggle { display: inline-flex; border: 1px solid var(--line); overflow: hidden; flex-shrink: 0; }
+  .entry-mode-btn {
+    padding: 6px 12px; background: var(--panel-2); border: none; border-right: 1px solid var(--line);
+    color: var(--text-dim); cursor: pointer; font-family: var(--font-display); font-size: 11px; font-weight: 600; white-space: nowrap;
+  }
+  .entry-mode-btn:last-child { border-right: none; }
+  .entry-mode-btn.active { color: #fff; background: linear-gradient(135deg, var(--accent), #7c4fe0); }
+  .entry-fields-viewport { overflow: hidden; }
+  .entry-fields { display: flex; gap: 10px; }
+  .entry-fields.mode-wrap { flex-wrap: wrap; }
+  .entry-fields.mode-slide { flex-wrap: nowrap; overflow-x: auto; scroll-behavior: smooth; padding-bottom: 6px; }
+  .entry-field {
+    display: flex; flex-direction: column; gap: 6px; background: var(--bg); border: 1px solid var(--line);
+    padding: 8px 10px; flex: 0 0 auto; min-width: 0;
+  }
+  .entry-field-label {
+    font-family: var(--font-display); font-size: 10px; letter-spacing: 0.5px; color: var(--text-dim);
+    font-weight: 700; white-space: nowrap;
+  }
+  .entry-field-date .entry-field-value { font-size: 12.5px; color: var(--text-dim); white-space: nowrap; }
+  .entry-slide-controls { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+  .entry-field .time-input-group { flex-wrap: nowrap; gap: 6px; }
+  .entry-field .time-input-group input { width: 48px; }
+
+  /* ---------- タイマー ---------- */
+  .timer-digital-display {
+    font-family: var(--font-display); font-size: 38px; font-weight: 800; text-align: center;
+    letter-spacing: 1px; margin: 22px 0; color: var(--text); font-variant-numeric: tabular-nums;
+  }
+  .timer-clock-wrap { display: flex; justify-content: center; margin: 22px 0; }
+  .timer-clock-wrap svg { width: 220px; height: 220px; }
+  .timer-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 6px; }
+
+  .timer-lap-row {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--panel-2);
+    border: 1px solid var(--line); margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .timer-lap-number { font-family: var(--font-display); font-size: 11px; color: var(--text-dim); font-weight: 700; flex-shrink: 0; }
+  .timer-lap-time { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--accent-2); min-width: 100px; flex-shrink: 0; }
+  .timer-lap-date { font-size: 12px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
+  .timer-lap-memo { flex: 1; min-width: 140px; }
+  .timer-lap-memo input[type="text"] { width: 100%; }
+
+  .laps-footer-controls {
+    display: none; align-items: center; justify-content: space-between; gap: 10px;
+    margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); flex-wrap: wrap;
+  }
+  .laps-expand-btn { display: inline-flex; align-items: center; gap: 6px; }
+  .laps-all-list-wrap { flex: 1; min-height: 0; overflow: hidden; }
+  .laps-picker-row {
+    font: inherit; color: inherit; cursor: pointer; width: 100%; text-align: left;
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--panel-2);
+    border: 1px solid var(--line); margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .laps-picker-row:hover { border-color: var(--accent-2); background: rgba(53,232,210,0.06); }
+  .laps-picker-memo { flex: 1; min-width: 100px; color: var(--text-dim); font-size: 12.5px; }
+
+  /* ---------- ファイル ---------- */
+  .file-create-row { margin-bottom: 16px; flex-shrink: 0; }
+  .file-create-row input[type="text"] { width: 100%; max-width: 340px; }
+  .files-list-wrap { flex: 1; min-height: 0; overflow-y: auto; }
+  .file-item {
+    display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--panel-2);
+    border: 1px solid var(--line); margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .file-item .file-icon { font-size: 18px; flex-shrink: 0; }
+  .file-item .file-name { flex: 1; min-width: 120px; font-weight: 600; font-family: var(--font-display); font-size: 13.5px; }
+  .file-item .file-name input[type="text"] { width: 100%; }
+  .file-item .file-date { color: var(--text-dim); font-size: 12px; white-space: nowrap; }
+  .file-item.file-clickable { cursor: pointer; transition: border-color 0.15s, background-color 0.15s; }
+  .file-item.file-clickable:hover { border-color: var(--accent-2); background: rgba(53,232,210,0.06); }
+  .file-item.file-active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .file-item.file-trash-item { border-style: dashed; }
+  .file-active-badge {
+    font-family: var(--font-display); font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    color: #fff; background: linear-gradient(135deg, var(--accent), #7c4fe0); padding: 3px 8px; flex-shrink: 0;
+    clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%, 0 6px);
+  }
+
+  /* Table */
+  .table-scroll { position: relative; overflow-x: auto; overflow-y: auto; flex: 1; min-height: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; transform-origin: left top; }
+  thead th {
+    position: sticky; top: 0;
+    text-align: left; font-family: var(--font-display); font-weight: 700; font-size: 11.5px;
+    letter-spacing: 1px; color: var(--accent-2); padding: 10px 12px; border-bottom: 2px solid var(--line);
+    white-space: nowrap; background: var(--panel);
+  }
+  thead th.th-center { text-align: center; }
+  tbody td { position: relative; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; white-space: nowrap; }
+  tbody tr:hover { background: rgba(155,107,255,0.05); }
+  tbody td input[type="text"], tbody td input[type="number"] { width: 100%; padding: 6px 8px; font-size: 13px; }
+  .actions-cell { display: flex; gap: 6px; white-space: nowrap; }
+  .datetime-cell { color: var(--text-dim); font-size: 12.5px; }
+  .point-cell { white-space: normal; }
+  .point-cell-total { font-family: var(--font-display); font-weight: 700; color: var(--accent-2); font-size: 13.5px; }
+  .point-inline-value {
+    font-family: var(--font-display); font-weight: 700; color: var(--accent-2); background: rgba(53,232,210,0.08);
+  }
+  .point-toggle-btn { display: inline-flex; align-items: center; gap: 6px; }
+  .check-cell { text-align: center; }
+  .check-cell .check-box-display { margin: 0 auto; }
+
+  .list-mode-btns { display: flex; align-items: center; gap: 8px; margin-left: 12px; flex-wrap: wrap; }
+  .list-mode-hint { font-size: 11.5px; color: var(--text-dim); font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+  tbody tr.row-clickable-edit { cursor: pointer; transition: background-color 0.12s, box-shadow 0.12s; }
+  tbody tr.row-clickable-edit:hover { background: rgba(155,107,255,0.14); box-shadow: inset 3px 0 0 var(--accent); }
+  tbody tr.row-editing { background: rgba(53,232,210,0.06); box-shadow: inset 3px 0 0 var(--accent-2); }
+  .check-toggle-field.inline-select {
+    width: auto; min-height: 0; padding: 0; background: transparent; border: none; display: inline-flex;
+  }
+  .check-toggle-field.inline-select .check-box-display { width: 18px; height: 18px; }
+
+  .col-add-row td { background: rgba(155,107,255,0.04); vertical-align: top; }
+  .col-add-row input[type="text"] { min-width: 200px; }
+
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--text-dim); margin: auto; }
+  .empty-state .glyph { font-family: var(--font-display); font-size: 40px; font-weight: 800; color: var(--line); margin-bottom: 8px; }
+  .empty-state a.inline-link { color: var(--accent-2); cursor: pointer; text-decoration: underline; }
+
+  /* column horizontal overflow buttons (buttonSlide mode) */
+  .col-nav-btn {
+    position: sticky; top: 50%; transform: translateY(-50%);
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); color: #fff; border: none; cursor: pointer;
+    display: none; align-items: center; justify-content: center; font-size: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35); z-index: 20; flex-shrink: 0;
+  }
+  .col-nav-btn.show { display: flex; }
+  .col-nav-btn.left { float: left; margin: 0 8px 0 -6px; }
+  .col-nav-btn.right { float: right; margin: 0 -6px 0 8px; }
+
+  /* Pagination / slide controls */
+  .page-controls { display: flex; align-items: center; justify-content: center; gap: 8px; padding-top: 14px; flex-shrink: 0; }
+  .page-num-btn {
+    min-width: 32px; height: 32px; padding: 0 8px; background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--text-dim); cursor: pointer; font-family: var(--font-display); font-size: 12.5px; font-weight: 700;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  }
+  .page-num-btn.active { color: #fff; background: linear-gradient(135deg, var(--accent), #7c4fe0); border-color: transparent; }
+  .slide-arrow {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line);
+    color: var(--text); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+  }
+  .slide-arrow:disabled { opacity: 0.3; cursor: default; }
+  .slide-dots { display: flex; gap: 6px; align-items: center; }
+  .slide-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); cursor: pointer; }
+  .slide-dot.active { background: var(--accent-2); width: 18px; border-radius: 4px; }
+  .slide-hint { text-align: center; font-size: 11px; color: var(--text-dim); margin-top: 6px; flex-shrink: 0; }
+
+  .table-slide-wrap { flex: 1; min-height: 0; overflow: hidden; position: relative; touch-action: pan-x pan-y; }
+  .table-slide-track { height: 100%; }
+
+  /* ---------- Fullscreen overlay panels ---------- */
+  .overlay {
+    position: fixed; inset: 0; background: var(--bg); z-index: 500; display: none;
+    overflow-y: auto; animation: overlayIn 0.22s ease; transition: background-color 0.3s;
+  }
+  .overlay.open { display: block; }
+  .overlay.overlay-flex { display: none; flex-direction: column; overflow: hidden; }
+  .overlay.overlay-flex.open { display: flex; }
+  .overlay.overlay-flex .overlay-inner {
+    flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+    padding-bottom: 24px; width: 100%;
+  }
+  .overlay.overlay-flex .overlay-topbar { flex-shrink: 0; }
+  .overlay.overlay-flex .panel { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  @keyframes overlayIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .overlay-inner { max-width: 780px; margin: 0 auto; padding: 32px 24px 80px; }
+  .overlay-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .overlay-eyebrow { font-family: var(--font-display); font-size: 11px; letter-spacing: 3px; color: var(--accent-2); font-weight: 600; margin: 0 0 6px 0; }
+  .overlay-title { font-family: var(--font-display); font-size: 24px; font-weight: 800; margin: 0; }
+  .close-btn {
+    width: 38px; height: 38px; background: var(--panel-2); border: 1px solid var(--line); color: var(--text);
+    cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    flex-shrink: 0;
+  }
+  .close-btn:hover { color: var(--danger); border-color: var(--danger); }
+
+  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .field label { display: block; font-size: 11px; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 6px; font-family: var(--font-display); font-weight: 600; }
+  .field input[type="text"] { width: 100%; }
+  .field .check-field { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); padding: 9px 12px; }
+
+  .auto-date-note {
+    display: flex; align-items: center; gap: 10px; background: var(--panel-2); border: 1px solid var(--line);
+    padding: 12px 14px; margin-bottom: 20px; font-size: 13px; color: var(--text-dim);
+  }
+  .auto-date-note strong { color: var(--accent-2); font-family: var(--font-display); }
+
+  /* usage example */
+  .example-note { font-size: 12px; color: var(--text-dim); margin: -6px 0 12px; }
+
+  /* ---------- Design overlay ---------- */
+  .theme-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .theme-card {
+    position: relative; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; padding: 0; overflow: hidden;
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    transition: border-color 0.15s, transform 0.1s; text-align: left;
+  }
+  .theme-card:hover { transform: translateY(-2px); }
+  .theme-card.active { border-color: var(--accent-2); box-shadow: 0 0 0 1px var(--accent-2); }
+  .theme-swatch { height: 64px; width: 100%; }
+  .theme-label { display: block; padding: 10px 12px; font-family: var(--font-display); font-size: 12.5px; font-weight: 600; letter-spacing: 0.5px; }
+  .theme-check {
+    position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; background: var(--accent-2); color: #06251f;
+    border-radius: 50%; display: none; align-items: center; justify-content: center; font-size: 11px; font-weight: 800;
+  }
+  .theme-card.active .theme-check { display: flex; }
+  .upload-zone {
+    border: 1.5px dashed var(--line); padding: 24px; text-align: center; color: var(--text-dim); font-size: 13px;
+    cursor: pointer; margin-bottom: 12px; transition: border-color 0.15s, color 0.15s;
+  }
+  .upload-zone:hover { border-color: var(--accent); color: var(--text); }
+  .upload-zone strong { color: var(--accent-2); font-family: var(--font-display); }
+  #customBgInput { display: none; }
+  .bg-preview { display: none; margin-bottom: 12px; border: 1px solid var(--line); max-height: 160px; overflow: hidden; }
+  .bg-preview img, .bg-preview video { width: 100%; max-height: 160px; object-fit: cover; display: block; }
+  .theme-note { font-size: 12px; color: var(--text-dim); margin: 4px 0 16px; }
+
+  /* ---------- Settings overlay (extensible) ---------- */
+  .setting-block { margin-bottom: 22px; }
+  .setting-block:last-child { margin-bottom: 0; }
+  .setting-block-title { font-family: var(--font-display); font-weight: 700; font-size: 13.5px; margin: 0 0 4px; }
+  .setting-block-desc { font-size: 12px; color: var(--text-dim); margin: 0 0 12px; }
+  .option-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .option-pill {
+    padding: 10px 14px; background: var(--panel-2); border: 1px solid var(--line); color: var(--text-dim);
+    cursor: pointer; font-size: 12.5px; font-family: var(--font-display); font-weight: 600; text-align: left;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    max-width: 260px;
+  }
+  .option-pill .pill-desc { display: block; font-family: var(--font-body); font-weight: 400; font-size: 11px; margin-top: 3px; color: var(--text-dim); }
+  .option-pill.active { color: var(--accent-2); background: rgba(53,232,210,0.08); border-color: var(--accent-2); }
+  .settings-more-note { font-size: 12px; color: var(--text-dim); border-top: 1px dashed var(--line); padding-top: 16px; margin-top: 4px; }
+
+  /* ---------- ゴミ箱 ---------- */
+  .trash-item {
+    background: var(--panel-2); border: 1px solid var(--line); border-style: dashed;
+    padding: 14px; margin-bottom: 10px;
+  }
+  .trash-item-meta { display: flex; flex-wrap: wrap; gap: 10px 16px; margin-bottom: 10px; }
+  .trash-item-date, .trash-item-source, .trash-item-deleted { font-size: 11.5px; color: var(--text-dim); font-family: var(--font-display); }
+  .trash-item-source { color: var(--accent-2); font-weight: 700; }
+  .trash-item-fields { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-bottom: 12px; }
+  .trash-field { display: flex; flex-direction: column; gap: 2px; }
+  .trash-field-label { font-size: 10px; letter-spacing: 0.5px; color: var(--text-dim); font-family: var(--font-display); font-weight: 700; }
+  .trash-field-value { font-size: 13px; position: relative; min-width: 30px; min-height: 16px; }
+  .trash-item-actions { display: flex; gap: 8px; }
+  .trash-header-actions { display: flex; justify-content: flex-end; margin-bottom: 14px; flex-shrink: 0; }
+
+  /* ---------- ポイント：計算式エディタと合計ポイント表示 ---------- */
+  .col-type-badge { font-size: 10px; font-weight: 500; color: var(--text-dim); margin-left: 5px; letter-spacing: 0; text-transform: none; }
+  .point-formula-block {
+    background: var(--panel-2); border: 1px solid var(--line);
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+    padding: 16px 18px; margin-bottom: 14px;
+  }
+  .point-formula-block:last-child { margin-bottom: 0; }
+  .point-formula-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+  .point-formula-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; }
+
+  /* 基準値ボックス：計算式の起点として視覚的に強調する */
+  .point-base-box {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    background: var(--bg); border: 1.5px solid var(--accent); padding: 10px 14px; margin-bottom: 10px;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  }
+  .point-base-label {
+    font-family: var(--font-display); font-weight: 800; font-size: 11px; letter-spacing: 1px;
+    color: #fff; background: linear-gradient(135deg, var(--accent), #7c4fe0); padding: 5px 10px; flex-shrink: 0;
+    clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%, 0 6px);
+  }
+  .point-base-box .time-input-group,
+  .point-base-box .count-input-group { gap: 8px; }
+  .point-base-box input[type="number"],
+  .point-base-box input[type="text"] { width: 66px; }
+
+  .point-chain-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .point-chain-arrow { color: var(--accent-2); font-family: var(--font-display); font-size: 18px; font-weight: 700; flex-shrink: 0; }
+  .point-step-chip {
+    display: flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--line); padding: 8px 10px;
+  }
+  .point-step-value { width: 80px; }
+  .calc-op-group { display: flex; gap: 4px; }
+  .calc-op-btn {
+    width: 28px; height: 28px; background: var(--panel-2); border: 1px solid var(--line); color: var(--text-dim);
+    cursor: pointer; font-family: var(--font-display); font-weight: 700; font-size: 13px;
+  }
+  .calc-op-btn.active { color: #fff; background: linear-gradient(135deg, var(--accent), #7c4fe0); border-color: transparent; }
+  .calc-value-input { text-align: center; }
+  .point-add-step-btn { margin-top: 10px; }
+  .point-result-box {
+    margin-top: 12px; padding: 10px 14px; background: rgba(53,232,210,0.07); border-left: 3px solid var(--accent-2);
+    font-family: var(--font-display); font-size: 13px; color: var(--text);
+  }
+  .point-result-box strong { color: var(--accent-2); font-size: 15px; }
+  .point-check-inputs { display: flex; gap: 14px; flex-wrap: wrap; }
+  .point-check-field {
+    display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line); padding: 8px 12px;
+  }
+  .point-check-field.plus { border-left: 3px solid var(--accent-2); }
+  .point-check-field.minus { border-left: 3px solid var(--danger); }
+  .point-check-label { font-family: var(--font-display); font-size: 12.5px; font-weight: 700; color: var(--text-dim); }
+  .point-check-field .calc-value-input { width: 90px; }
+
+  /* ---------- 計算（formula）項目 ---------- */
+  .formula-readonly-field {
+    background: var(--bg); border: 1.5px dashed var(--accent-2); padding: 10px 12px;
+    font-family: var(--font-display); font-weight: 700; color: var(--accent-2); font-size: 14px;
+    min-height: 40px; display: flex; align-items: center; box-sizing: border-box;
+  }
+  .formula-chain-editor { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .formula-chain-editor select { min-width: 130px; }
+
+  /* 合計ポイント：でかでかとした表デザイン */
+  table.point-summary-table { font-size: 17px; }
+  table.point-summary-table thead th {
+    font-size: 13px; padding: 14px 18px; background: var(--panel-2);
+    border-bottom: 3px solid var(--accent); text-align: center;
+  }
+  table.point-summary-table tbody td {
+    padding: 18px; font-size: 19px; font-weight: 700; text-align: center;
+  }
+  th.point-total-col { color: var(--accent-2); }
+  td.point-total-cell {
+    color: var(--accent-2); font-size: 22px; font-weight: 800;
+    background: rgba(53,232,210,0.06); border-left: 2px solid var(--line);
+  }
+
+  /* ---------- 中央表示の確認モーダル ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(4,5,10,0.62); z-index: 900;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--panel); border: 1px solid var(--line); padding: 26px; max-width: 360px; width: 100%;
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5); text-align: center;
+  }
+  .modal-icon { font-size: 30px; margin-bottom: 12px; }
+  .modal-message { font-size: 14px; line-height: 1.6; color: var(--text); margin: 0 0 22px; white-space: pre-line; }
+  .modal-actions { display: flex; gap: 10px; justify-content: center; }
+
+  ::-webkit-scrollbar { height: 8px; width: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--line); }
+  ::-webkit-scrollbar-track { background: var(--panel); }
+
+  @media (max-width: 680px) {
+    .topbar { padding: 0 10px; gap: 8px; }
+    .nav-btn { padding: 9px 10px; font-size: 11px; min-width: 0; }
+    .nav-btn span:not(.ic) { display: none; }
+    .help-btn span:not(.q) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="bgLayer">
+  <div class="scrim"></div>
+  <img id="bgImage" alt="">
+  <video id="bgVideo" autoplay muted loop playsinline></video>
+</div>
+
+<div class="topbar">
+  <div class="help-wrap">
+    <button class="help-btn" id="helpBtn"><span class="q">?</span><span>使い方</span></button>
+    <div class="help-popover" id="helpPopover">
+      <h4>使い方ガイド</h4>
+      <dl>
+        <dt>＋ 追加</dt><dd>新しい記録を入力します。日時は自動で記録されます。</dd>
+        <dt>▦ 項目</dt><dd>記録する項目（列）を追加・編集・削除します。テキスト・チェック・時間・距離の4種類が選べます。</dd>
+        <dt>◐ デザイン</dt><dd>配色テーマや背景の画像・動画を変更します。</dd>
+        <dt>🗀 タイマー</dt><dd>ストップウォッチです。デジタル表示とアナログ（時計の針が動く）表示を切り替えられます。保存したタイムは日付・メモ付きの一覧で確認できます。</dd>
+        <dt>⚙ 設定</dt><dd>記録一覧の表示方法（ページ送り・スライド）などを変更します。</dd>
+      </dl>
+    </div>
+  </div>
+  <nav class="topbar-nav">
+    <button class="nav-btn" id="navAdd" title="記録を追加">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      <span>追加</span>
+    </button>
+    <button class="nav-btn" id="navCols" title="項目設定">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="10" x2="9" y2="20"/></svg></span>
+      <span>項目</span>
+    </button>
+    <button class="nav-btn" id="navDesign" title="デザイン">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="0.5"/><circle cx="17.5" cy="10.5" r="0.5"/><circle cx="8.5" cy="7.5" r="0.5"/><circle cx="6.5" cy="12.5" r="0.5"/><path d="M12 2a10 10 0 1 0 10 10c0-1-1-2-2-2h-2.5a2.5 2.5 0 0 1 0-5H19a10 10 0 0 0-7-5z"/></svg></span>
+      <span>デザイン</span>
+    </button>
+    <button class="nav-btn" id="navFiles" title="ファイル">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>
+      <span>ファイル</span>
+    </button>
+    <button class="nav-btn" id="navTimer" title="タイマー">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/><path d="M18.5 4.5l1.5 1.5"/></svg></span>
+      <span>タイマー</span>
+    </button>
+    <button class="nav-btn" id="navSettings" title="設定">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+      <span>設定</span>
+    </button>
+  </nav>
+</div>
+
+<div class="main">
+  <div class="wrap">
+    <div class="panel main-panel">
+      <div class="panel-title-row">
+        <p class="panel-title">記録一覧</p>
+        <div class="type-dropdown sort-dropdown" id="sortDropdown">
+          <button type="button" class="type-dropdown-btn sort-dropdown-btn" id="sortDropdownBtn">
+            <span class="tp-ic">⇅</span><span class="type-dropdown-label" id="sortDropdownLabel">新規順</span><span class="type-dropdown-arrow">▾</span>
+          </button>
+        </div>
+        <span class="count-badge" id="countBadge"></span>
+        <div class="list-mode-btns" id="listModeBtns"></div>
+      </div>
+
+      <div class="table-slide-wrap" id="tableSlideWrap">
+        <div class="table-slide-track" id="tableSlideTrack">
+          <div class="table-scroll" id="tableScroll">
+            <table id="recordTable">
+              <thead><tr id="tableHead"></tr></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" id="emptyState" style="display:none;">
+        <div class="glyph">NO DATA</div>
+        <p id="emptyStateMsg">まだ記録がありません。</p>
+      </div>
+
+      <div class="page-controls" id="pageControls"></div>
+      <div class="slide-hint" id="slideHint" style="display:none;">マウスホイールまたは指のスワイプ（横・縦どちらも）でページを切り替えられます</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 記録を追加オーバーレイ ===== -->
+<div class="overlay" id="overlayAdd">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">NEW ENTRY</p><h2 class="overlay-title">記録を追加</h2></div>
+      <button class="close-btn" id="closeAdd">×</button>
+    </div>
+    <div class="auto-date-note"><span>🕒</span><div>日時は自動で記録されます：<strong id="autoDatePreview"></strong></div></div>
+
+    <div id="addNoColsMsg" style="display:none; color:var(--text-dim); font-size:14px; margin-bottom:16px;">
+      まだ項目がありません。先に <a class="inline-link" id="jumpToCols">項目設定</a> から項目を追加してください。
+    </div>
+
+    <div class="panel" id="addEntryPanel">
+      <div class="entry-toolbar">
+        <p class="panel-title">記録入力</p>
+        <div class="entry-mode-toggle" id="entryModeToggle">
+          <button type="button" class="entry-mode-btn" data-entry-mode="wrap">改行</button>
+          <button type="button" class="entry-mode-btn" data-entry-mode="slide">スライド</button>
+        </div>
+      </div>
+      <div class="entry-fields-viewport">
+        <div class="entry-fields" id="entryFields"></div>
+      </div>
+      <div class="entry-slide-controls" id="entrySlideControls" style="display:none;">
+        <button type="button" class="slide-arrow" id="entrySlideLeft">‹</button>
+        <button type="button" class="slide-arrow" id="entrySlideRight">›</button>
+      </div>
+    </div>
+
+    <div class="panel" id="addPreviewPanel" style="margin-top:16px;">
+      <p class="panel-title">使用例プレビュー</p>
+      <p class="example-note">入力した内容は記録一覧でこのように表示されます。</p>
+      <div class="table-scroll" id="addPreviewScroll" style="max-height:none; overflow-y:visible;">
+        <table id="addPreviewTable">
+          <thead><tr id="addPreviewHead"></tr></thead>
+          <tbody><tr id="addPreviewRow"></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="addRowBtn" style="margin-top:20px;">＋ この内容で記録を追加</button>
+  </div>
+</div>
+
+<!-- ===== 項目設定オーバーレイ ===== -->
+<div class="overlay" id="overlayCols">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">FIELD SETUP</p><h2 class="overlay-title">項目設定</h2></div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button type="button" class="btn btn-ghost btn-sm" id="openSimulatorBtn">🧮 追加機能</button>
+        <button class="close-btn" id="closeCols">×</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title-row">
+        <p class="panel-title">項目一覧</p>
+        <span class="count-badge" id="colCountBadge"></span>
+      </div>
+      <div class="table-scroll" style="max-height:none; overflow-x:auto; overflow-y:visible;">
+        <table id="colTable">
+          <thead><tr><th>項目名</th><th>種類</th><th>詳細</th><th>操作</th></tr></thead>
+          <tbody id="colTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="panel-title">使用例プレビュー</p>
+      <p class="example-note">現在の項目を使うと、記録一覧はこのように表示されます。</p>
+      <div class="table-scroll" id="exampleScroll" style="max-height:none; overflow-y:visible;">
+        <table id="exampleTable">
+          <thead><tr id="exampleHead"></tr></thead>
+          <tbody><tr id="exampleRow"></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ポイント（距離・時間・回数・チェックの記録を計算式で点数化する） ===== -->
+<div class="overlay overlay-flex" id="overlaySimulator">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">POINT</p><h2 class="overlay-title">ポイント</h2></div>
+      <button class="close-btn" id="closeSimulator">×</button>
+    </div>
+    <div id="simulatorContent" style="flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden;">
+      <div class="panel" style="flex:0 0 auto; margin-bottom:16px;">
+        <div class="panel-title-row">
+          <p class="panel-title">合計ポイント</p>
+          <button type="button" class="btn btn-ghost btn-sm point-toggle-btn" id="togglePointsInListBtn">記録一覧にポイント列を表示</button>
+        </div>
+        <p class="example-note">現在のファイルの全記録に、計算式をあてはめた合計です。ページを切り替えても、ここは常に表示されます。</p>
+        <div id="pointSummary"></div>
+      </div>
+      <div class="panel" style="flex:1; min-height:0; display:flex; flex-direction:column;">
+        <div class="panel-title-row">
+          <p class="panel-title">ポイント計算式</p>
+        </div>
+        <p class="example-note">項目ごとに、記録した値をポイントに変換する計算式を作れます。演算子（＋－×÷）と数値のステップを好きなだけ追加・削除できます。チェック項目は「チェック時は＋、未チェック時は－」で自動計算されます。</p>
+        <div class="table-slide-wrap" id="pointFormulaSlideWrap" style="flex:1; min-height:0; overflow:hidden; position:relative;">
+          <div class="table-slide-track" id="pointFormulaSlideTrack" style="height:100%; overflow-y:auto;">
+            <div id="pointFormulaList"></div>
+          </div>
+        </div>
+        <div class="page-controls" id="pointFormulaPageControls"></div>
+        <div class="slide-hint" id="pointFormulaSlideHint" style="display:none;">マウスホイールまたは指のスワイプ（横・縦どちらも）でページを切り替えられます</div>
+      </div>
+    </div>
+    <div class="empty-state" id="simulatorEmpty" style="display:none;">
+      <div class="glyph">NO ITEMS</div>
+      <p style="color:var(--text-dim);">距離・時間・回数・チェックの項目がまだありません。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== デザインオーバーレイ ===== -->
+<div class="overlay" id="overlayDesign">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">APPEARANCE</p><h2 class="overlay-title">デザイン</h2></div>
+      <button class="close-btn" id="closeDesign">×</button>
+    </div>
+    <div class="panel">
+      <p class="panel-title">テーマを選ぶ</p>
+      <div class="theme-grid" id="themeGrid"></div>
+    </div>
+    <div class="panel">
+      <p class="panel-title">背景に画像・動画を設定</p>
+      <div class="bg-preview" id="bgPreview"></div>
+      <div class="upload-zone" id="uploadZone">
+        <strong>クリックして画像または動画を選択</strong><br>（対応形式：jpg / png / gif / mp4 / webm など）
+      </div>
+      <input type="file" id="customBgInput" accept="image/*,video/*">
+      <p class="theme-note">大きすぎるファイルは端末への保存に失敗する場合があります。数MB以内のファイルを推奨します。</p>
+      <button class="btn btn-ghost btn-sm" id="clearBgBtn">背景画像・動画を削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 設定オーバーレイ（拡張可能） ===== -->
+<div class="overlay" id="overlaySettings">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">PREFERENCES</p><h2 class="overlay-title">設定</h2></div>
+      <button class="close-btn" id="closeSettings">×</button>
+    </div>
+    <div class="panel">
+      <div class="setting-block">
+        <p class="setting-block-title">記録一覧の表示方法</p>
+        <p class="setting-block-desc">画面に入りきらない記録をどう切り替えるか選べます。</p>
+        <div class="option-pills" id="rowModePills"></div>
+      </div>
+      <div class="setting-block">
+        <p class="setting-block-title">項目（列）が画面に収まらないときの挙動</p>
+        <p class="setting-block-desc">表の横幅が画面より広くなった場合の動きを選べます。</p>
+        <div class="option-pills" id="colOverflowPills"></div>
+      </div>
+      <div class="setting-block">
+        <p class="setting-block-title">表に枠をつける</p>
+        <p class="setting-block-desc">項目ごとの境目に線を引いて見やすくします。</p>
+        <div class="option-pills" id="tableBorderPills"></div>
+      </div>
+      <div class="setting-block">
+        <p class="setting-block-title">時間の表示形式</p>
+        <p class="setting-block-desc">「時間」項目の表示・入力のしかたを選べます。</p>
+        <div class="option-pills" id="timeFormatPills"></div>
+      </div>
+      <div class="setting-block">
+        <p class="setting-block-title">日時の表示</p>
+        <p class="setting-block-desc">記録一覧に「日時」列を表示するかどうかを選べます。</p>
+        <div class="option-pills" id="dateColumnPills"></div>
+      </div>
+      <p class="settings-more-note">設定は今後もここに追加していけます。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== タイマーオーバーレイ ===== -->
+<div class="overlay" id="overlayTimer">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">TIMER</p><h2 class="overlay-title">タイマー</h2></div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button type="button" class="btn btn-ghost btn-sm" id="lapsShowAllBtn">☰ すべて表示</button>
+        <button class="close-btn" id="closeTimer">×</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="entry-toolbar">
+        <p class="panel-title">経過時間</p>
+        <div class="entry-mode-toggle" id="timerModeToggle">
+          <button type="button" class="entry-mode-btn" data-timer-view="digital">デジタル</button>
+          <button type="button" class="entry-mode-btn" data-timer-view="clock">アナログ</button>
+        </div>
+      </div>
+
+      <div class="timer-clock-wrap" id="timerClockWrap" style="display:none;">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="94" fill="var(--panel-2)" stroke="var(--line)" stroke-width="3"/>
+          <g stroke="var(--text-dim)" stroke-width="2">
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(0 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(30 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(60 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(90 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(120 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(150 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(180 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(210 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(240 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(270 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(300 100 100)"/>
+            <line x1="100" y1="8" x2="100" y2="18" transform="rotate(330 100 100)"/>
+          </g>
+          <line id="timerHandHour" x1="100" y1="100" x2="100" y2="60" stroke="var(--text)" stroke-width="5" stroke-linecap="round"/>
+          <line id="timerHandMinute" x1="100" y1="100" x2="100" y2="35" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/>
+          <line id="timerHandSecond" x1="100" y1="100" x2="100" y2="25" stroke="var(--accent-2)" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="100" cy="100" r="5" fill="var(--accent-2)"/>
+        </svg>
+      </div>
+
+      <div class="timer-digital-display" id="timerDigitalDisplay">00:00.00</div>
+
+      <div class="timer-controls">
+        <button class="btn btn-primary" id="timerStartBtn">開始</button>
+        <button class="btn btn-ghost" id="timerResetBtn">リセット</button>
+        <button class="btn btn-ghost" id="timerSaveBtn">＋ タイムを保存</button>
+      </div>
+    </div>
+
+    <div class="panel" id="timerLapsPanel" style="margin-top:16px;">
+      <div class="panel-title-row">
+        <p class="panel-title">保存したタイム</p>
+        <div class="type-dropdown sort-dropdown" id="lapsSortDropdownTop">
+          <button type="button" class="type-dropdown-btn sort-dropdown-btn">
+            <span class="tp-ic">⇅</span><span class="type-dropdown-label" data-laps-sort-label>新規順</span><span class="type-dropdown-arrow">▾</span>
+          </button>
+        </div>
+        <span class="count-badge" id="timerLapsCount"></span>
+      </div>
+      <div id="timerLapsList"></div>
+      <div class="empty-state" id="timerLapsEmpty" style="display:none; padding:24px;">
+        <p style="color:var(--text-dim); font-size:13px;">まだ保存されたタイムはありません。</p>
+      </div>
+      <div class="laps-footer-controls" id="lapsFooterControls">
+        <span style="font-size:11px; color:var(--text-dim); font-family:var(--font-display); font-weight:600; letter-spacing:0.5px;">並び替え</span>
+        <div class="type-dropdown sort-dropdown" id="lapsSortDropdownBottom">
+          <button type="button" class="type-dropdown-btn sort-dropdown-btn">
+            <span class="tp-ic">⇅</span><span class="type-dropdown-label" data-laps-sort-label>新規順</span><span class="type-dropdown-arrow">▾</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 保存したタイム（全件表示）オーバーレイ ===== -->
+<div class="overlay overlay-flex" id="overlayLapsAll">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">ALL SAVED TIMES</p><h2 class="overlay-title">保存したタイム（全件）</h2></div>
+      <button class="close-btn" id="closeLapsAll">×</button>
+    </div>
+    <div class="panel">
+      <div class="panel-title-row">
+        <p class="panel-title">並び替え</p>
+        <div class="type-dropdown sort-dropdown" id="lapsSortDropdownAll">
+          <button type="button" class="type-dropdown-btn sort-dropdown-btn">
+            <span class="tp-ic">⇅</span><span class="type-dropdown-label" data-laps-sort-label>新規順</span><span class="type-dropdown-arrow">▾</span>
+          </button>
+        </div>
+        <span class="count-badge" id="timerLapsAllCount"></span>
+      </div>
+      <div class="laps-all-list-wrap" id="lapsAllListWrap">
+        <div id="timerLapsAllList"></div>
+      </div>
+      <div class="page-controls" id="lapsAllPageControls"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== タイマーからコピー（選択専用）オーバーレイ ===== -->
+<div class="overlay" id="overlayLapsPicker">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">COPY FROM TIMER</p><h2 class="overlay-title">保存したタイムから選択</h2></div>
+      <button class="close-btn" id="closeLapsPicker">×</button>
+    </div>
+    <div class="panel">
+      <p class="example-note">タップすると、そのタイムが時間の項目に自動で入力されます。</p>
+      <div id="lapsPickerList"></div>
+      <div class="empty-state" id="lapsPickerEmpty" style="display:none; padding:24px;">
+        <p style="color:var(--text-dim); font-size:13px;">まだ保存されたタイムはありません。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="globalDropdownPortal"></div>
+<div id="sortDropdownPortal"></div>
+
+<!-- ===== ファイルオーバーレイ ===== -->
+<div class="overlay overlay-flex" id="overlayFiles">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">FILES</p><h2 class="overlay-title">ファイル</h2></div>
+      <button class="close-btn" id="closeFiles">×</button>
+    </div>
+    <div class="panel">
+      <div class="panel-title-row">
+        <p class="panel-title">ファイル一覧</p>
+        <div class="type-dropdown sort-dropdown" id="filesSortDropdown">
+          <button type="button" class="type-dropdown-btn sort-dropdown-btn" id="filesSortDropdownBtn">
+            <span class="tp-ic">⇅</span><span class="type-dropdown-label" id="filesSortDropdownLabel">新規順</span><span class="type-dropdown-arrow">▾</span>
+          </button>
+        </div>
+        <span class="count-badge" id="filesCountBadge"></span>
+      </div>
+      <p class="example-note">ファイルをクリックすると、そのファイルの記録一覧に切り替わります。それぞれのファイルは独立した記録データ（項目・記録）を持っています。</p>
+      <div class="file-create-row" id="fileCreateRow">
+        <button type="button" class="btn btn-primary btn-sm" id="createFileBtn">＋ ファイルを作成</button>
+      </div>
+      <div class="files-list-wrap"><div id="filesList"></div></div>
+      <div class="empty-state" id="filesEmpty" style="display:none; padding:40px 20px;">
+        <div class="glyph">NO FILES</div>
+        <p style="color:var(--text-dim);">まだファイルがありません。「＋ ファイルを作成」から追加してください。</p>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="lapsSortDropdownPortal"></div>
+<div id="filesSortDropdownPortal"></div>
+
+<!-- ===== ゴミ箱オーバーレイ ===== -->
+<div class="overlay overlay-flex" id="overlayTrash">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">TRASH</p><h2 class="overlay-title">ゴミ箱</h2></div>
+      <button class="close-btn" id="closeTrash">×</button>
+    </div>
+    <div class="panel">
+      <div class="panel-title-row">
+        <p class="panel-title">削除した記録</p>
+        <span class="count-badge" id="trashCountBadge"></span>
+      </div>
+      <p class="example-note">記録一覧で削除した記録がここに移動します。完全に削除するまでは元のデータが保持されます。</p>
+      <div class="trash-header-actions">
+        <button type="button" class="btn btn-danger btn-sm" id="emptyTrashBtn">🗑 ゴミ箱を空にする</button>
+      </div>
+      <div class="files-list-wrap"><div id="trashList"></div></div>
+      <div class="empty-state" id="trashEmpty" style="display:none; padding:40px 20px;">
+        <div class="glyph">EMPTY</div>
+        <p style="color:var(--text-dim);">ゴミ箱には何もありません。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 中央表示の確認モーダル ===== -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon">🗑</div>
+    <p class="modal-message" id="modalMessage"></p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="modalCancelBtn">キャンセル</button>
+      <button type="button" class="btn btn-danger" id="modalConfirmBtn">完全に削除</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORAGE_KEY = 'recordTracker_v4';
+  const ROW_HEIGHT = 44;
+
+  let state = load() || defaultState();
+  function defaultState() {
+    return {
+      columns: [],
+      rows: [],
+      files: [],
+      trash: [],
+      theme: { mode: 'light', customBgType: null, customBgData: null },
+      settings: { rowDisplayMode: 'pagination', columnOverflowMode: 'buttonSlide', tableBorders: 'on', timeFormat: 'kanji', sort: { key: 'newest', columnId: null }, entryFieldsMode: 'wrap', filesSort: 'newest', showDateColumn: 'on', showPointsInList: false }
+    };
+  }
+  if (!state.theme) state.theme = defaultState().theme;
+  if (!state.settings) state.settings = defaultState().settings;
+  if (!state.settings.tableBorders) state.settings.tableBorders = 'on';
+  if (!state.settings.timeFormat) state.settings.timeFormat = 'kanji';
+  if (!state.settings.sort) state.settings.sort = { key: 'newest', columnId: null };
+  if (!state.settings.entryFieldsMode) state.settings.entryFieldsMode = 'wrap';
+  if (!state.settings.filesSort) state.settings.filesSort = 'newest';
+  if (!state.settings.showDateColumn) state.settings.showDateColumn = 'on';
+  if (typeof state.settings.showPointsInList !== 'boolean') state.settings.showPointsInList = false;
+  if (!Array.isArray(state.files)) state.files = [];
+  if (!Array.isArray(state.trash)) state.trash = [];
+  state.files.forEach(f => {
+    if (!Array.isArray(f.columns)) f.columns = [];
+    if (!Array.isArray(f.rows)) f.rows = [];
+  });
+  if (!state.filesDataMigrated) {
+    // 「最初のファイル」に、これまで使っていた記録一覧のデータ（項目・記録）を引き継ぐ
+    const firstFile = {
+      id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      name: '最初のファイル',
+      createdAt: Date.now(),
+      columns: Array.isArray(state.columns) ? state.columns : [],
+      rows: Array.isArray(state.rows) ? state.rows : []
+    };
+    state.files.unshift(firstFile);
+    state.activeFileId = firstFile.id;
+    state.filesDataMigrated = true;
+  }
+  if (!state.activeFileId || !state.files.some(f => f.id === state.activeFileId)) {
+    state.activeFileId = state.files[0].id;
+  }
+  // state.columns / state.rows は常に「現在開いているファイル」のデータを指す
+  {
+    const activeFileInit = state.files.find(f => f.id === state.activeFileId);
+    state.columns = activeFileInit.columns;
+    state.rows = activeFileInit.rows;
+  }
+  if (!state.timer) state.timer = { laps: [], viewMode: 'digital', lapsSort: 'newest' };
+  if (!Array.isArray(state.timer.laps)) state.timer.laps = [];
+  if (!state.timer.viewMode) state.timer.viewMode = 'digital';
+  if (!state.timer.lapsSort) state.timer.lapsSort = 'newest';
+
+  let editingRowId = null;
+  let editingColId = null;
+  let editingFormulaSteps = null; // 計算（formula）項目を編集中の、未保存のステップ配列
+  let editingFileId = null;
+  let currentPage = 0;
+  let slideLock = false;
+  let listActionMode = 'none'; // 'none' | 'edit' | 'delete'
+  let rowsMarkedForDelete = new Set();
+  let pointBreakdownExpandedRows = new Set(); // ポイント列をクリックして内訳を開いている記録のID
+  let cachedRowsPerPage = 3; // 直近に測定した「1ページに入る件数」（スライド移動などで使い回す）
+
+  function load() {
+    try { const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : null; }
+    catch (e) { console.error('load error', e); return null; }
+  }
+  function getActiveFile() {
+    return state.files.find(f => f.id === state.activeFileId) || null;
+  }
+  function syncActiveFileData() {
+    const af = getActiveFile();
+    if (af) { af.columns = state.columns; af.rows = state.rows; }
+  }
+  function save() {
+    syncActiveFileData();
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) {
+      console.error('save error', e);
+      alert('保存容量の上限を超えたため保存できませんでした。背景ファイルのサイズを小さくしてください。');
+    }
+  }
+  function uid() { return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str == null ? '' : String(str); return div.innerHTML; }
+  function formatAutoDate(ts) {
+    const d = new Date(ts);
+    const ampm = d.getHours() < 12 ? '午前' : '午後';
+    return `${d.getMonth() + 1}月${d.getDate()}日 ${ampm}`;
+  }
+
+  // ---------- 中央表示の確認モーダル（共通） ----------
+  let modalConfirmCallback = null;
+  function showConfirmModal(message, onConfirm, options) {
+    const opts = options || {};
+    document.getElementById('modalMessage').textContent = message;
+    document.getElementById('modalIcon').textContent = opts.icon || '🗑';
+    const confirmBtn = document.getElementById('modalConfirmBtn');
+    confirmBtn.textContent = opts.confirmLabel || '完全に削除';
+    confirmBtn.className = 'btn ' + (opts.confirmClass || 'btn-danger');
+    modalConfirmCallback = onConfirm;
+    document.getElementById('modalBackdrop').classList.add('open');
+  }
+  function hideConfirmModal() {
+    document.getElementById('modalBackdrop').classList.remove('open');
+    modalConfirmCallback = null;
+  }
+  document.getElementById('modalCancelBtn').onclick = hideConfirmModal;
+  document.getElementById('modalConfirmBtn').onclick = () => {
+    const cb = modalConfirmCallback;
+    hideConfirmModal();
+    if (cb) cb();
+  };
+  document.getElementById('modalBackdrop').addEventListener('click', (e) => {
+    if (e.target.id === 'modalBackdrop') hideConfirmModal();
+  });
+
+  // ---------- Help popover ----------
+  const helpBtn = document.getElementById('helpBtn');
+  const helpPopover = document.getElementById('helpPopover');
+  helpBtn.onclick = (e) => { e.stopPropagation(); helpPopover.classList.toggle('open'); };
+  document.addEventListener('click', (e) => {
+    if (!helpPopover.contains(e.target) && e.target !== helpBtn) helpPopover.classList.remove('open');
+  });
+
+  // ---------- Themes ----------
+  const THEMES = {
+    dark:   { label: 'ダークモード', vars: { '--bg':'#0b0c12', '--panel':'#14161f', '--panel-2':'#1b1e2a', '--line':'#2a2e3d', '--accent':'#9b6bff', '--accent-2':'#35e8d2', '--text':'#e9e9f2', '--text-dim':'#8b8fa3' }, swatch: 'linear-gradient(135deg,#0b0c12,#1b1e2a 60%,#9b6bff)' },
+    light:  { label: 'ホワイトモード', vars: { '--bg':'#f4f3fa', '--panel':'#ffffff', '--panel-2':'#f0eef9', '--line':'#ddd8ee', '--accent':'#7c4fe0', '--accent-2':'#0891b2', '--text':'#1a1a2e', '--text-dim':'#68687f' }, swatch: 'linear-gradient(135deg,#ffffff,#f0eef9 60%,#7c4fe0)' },
+    sea:    { label: '海', vars: { '--bg':'#03151f', '--panel':'#0a2438', '--panel-2':'#0f3049', '--line':'#1c4a63', '--accent':'#2dd4bf', '--accent-2':'#38bdf8', '--text':'#e6f6fb', '--text-dim':'#7fa8ba' }, swatch: 'linear-gradient(135deg,#03151f,#0f3049 60%,#2dd4bf)' },
+    forest: { label: '森', vars: { '--bg':'#0c1710', '--panel':'#15271a', '--panel-2':'#1b3322', '--line':'#2d4a34', '--accent':'#4ade80', '--accent-2':'#a3e635', '--text':'#e8f5ea', '--text-dim':'#84a08c' }, swatch: 'linear-gradient(135deg,#0c1710,#1b3322 60%,#4ade80)' },
+    tech:   { label: 'テクノロジー', vars: { '--bg':'#050810', '--panel':'#0d1424', '--panel-2':'#121b30', '--line':'#1f2d4a', '--accent':'#00d9ff', '--accent-2':'#7c3aed', '--text':'#e3ecfb', '--text-dim':'#7488ad' }, swatch: 'linear-gradient(135deg,#050810,#121b30 60%,#00d9ff)' }
+  };
+
+  function applyTheme() {
+    const mode = state.theme.mode;
+    const bgLayer = document.getElementById('bgLayer');
+    const bgImage = document.getElementById('bgImage');
+    const bgVideo = document.getElementById('bgVideo');
+    const isCustom = mode === 'custom' && state.theme.customBgData;
+    const baseVars = (THEMES[mode] || THEMES.dark).vars;
+    Object.entries(baseVars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+
+    if (isCustom) {
+      Object.entries(THEMES.dark.vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+      bgLayer.style.display = 'block';
+      document.body.classList.add('custom-bg');
+      if (state.theme.customBgType === 'video') {
+        bgVideo.src = state.theme.customBgData; bgVideo.style.display = 'block'; bgImage.style.display = 'none';
+        bgVideo.play().catch(() => {});
+      } else {
+        bgImage.src = state.theme.customBgData; bgImage.style.display = 'block'; bgVideo.style.display = 'none';
+      }
+    } else {
+      bgLayer.style.display = 'none'; bgVideo.removeAttribute('src'); bgImage.removeAttribute('src');
+      document.body.classList.remove('custom-bg');
+    }
+  }
+
+  function renderThemeGrid() {
+    const grid = document.getElementById('themeGrid');
+    grid.innerHTML = '';
+    Object.entries(THEMES).forEach(([key, t]) => {
+      const isActive = state.theme.mode === key;
+      const card = document.createElement('button');
+      card.className = 'theme-card' + (isActive ? ' active' : '');
+      card.innerHTML = `<div class="theme-check">✓</div><div class="theme-swatch" style="background:${t.swatch}"></div><span class="theme-label">${t.label}</span>`;
+      card.onclick = () => { state.theme.mode = key; save(); applyTheme(); renderThemeGrid(); };
+      grid.appendChild(card);
+    });
+  }
+  function renderBgPreview() {
+    const preview = document.getElementById('bgPreview');
+    preview.innerHTML = '';
+    if (state.theme.customBgData) {
+      preview.style.display = 'block';
+      preview.innerHTML = state.theme.customBgType === 'video'
+        ? `<video src="${state.theme.customBgData}" autoplay muted loop playsinline></video>`
+        : `<img src="${state.theme.customBgData}" alt="背景プレビュー">`;
+    } else { preview.style.display = 'none'; }
+  }
+  document.getElementById('uploadZone').onclick = () => document.getElementById('customBgInput').click();
+  document.getElementById('customBgInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const isVideo = file.type.startsWith('video/');
+    const reader = new FileReader();
+    reader.onload = () => {
+      state.theme.customBgData = reader.result;
+      state.theme.customBgType = isVideo ? 'video' : 'image';
+      state.theme.mode = 'custom';
+      save(); applyTheme(); renderThemeGrid(); renderBgPreview();
+    };
+    reader.onerror = () => alert('ファイルの読み込みに失敗しました。');
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('clearBgBtn').onclick = () => {
+    state.theme.customBgData = null; state.theme.customBgType = null;
+    if (state.theme.mode === 'custom') state.theme.mode = 'dark';
+    document.getElementById('customBgInput').value = '';
+    save(); applyTheme(); renderThemeGrid(); renderBgPreview();
+  };
+
+  // ---------- Overlay control ----------
+  function openOverlay(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
+  function closeOverlay(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow = ''; }
+
+  document.getElementById('navAdd').onclick = () => {
+    document.getElementById('autoDatePreview').textContent = formatAutoDate(Date.now());
+    renderAddForm(); openOverlay('overlayAdd');
+  };
+  document.getElementById('closeAdd').onclick = () => closeOverlay('overlayAdd');
+
+  document.getElementById('navCols').onclick = () => { editingColId = null; renderColumnsTable(); renderExamplePreview(); openOverlay('overlayCols'); };
+  document.getElementById('closeCols').onclick = () => { closeOverlay('overlayCols'); currentPage = 0; renderAll(); };
+
+  document.getElementById('openSimulatorBtn').onclick = () => {
+    openOverlay('overlaySimulator');
+    renderSimulator();
+    requestAnimationFrame(() => { requestAnimationFrame(() => { renderPointFormulaList(); }); });
+  };
+  document.getElementById('closeSimulator').onclick = () => closeOverlay('overlaySimulator');
+
+  document.getElementById('navDesign').onclick = () => { renderThemeGrid(); renderBgPreview(); openOverlay('overlayDesign'); };
+  document.getElementById('closeDesign').onclick = () => closeOverlay('overlayDesign');
+
+  document.getElementById('navSettings').onclick = () => { renderSettingsPanel(); openOverlay('overlaySettings'); };
+  document.getElementById('closeSettings').onclick = () => { closeOverlay('overlaySettings'); currentPage = 0; renderAll(); };
+
+  document.getElementById('navFiles').onclick = () => { editingFileId = null; renderFilesList(); openOverlay('overlayFiles'); };
+  document.getElementById('closeFiles').onclick = () => closeOverlay('overlayFiles');
+
+  document.getElementById('closeTrash').onclick = () => closeOverlay('overlayTrash');
+
+  // ---------- ファイル ----------
+  function fuid() { return 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+  let creatingFileDraft = false;
+
+  function startFileCreateDraft() {
+    creatingFileDraft = true;
+    renderFilesList();
+    const input = document.getElementById('newFileNameInlineInput');
+    if (input) { input.focus(); }
+  }
+  function cancelFileCreateDraft() {
+    if (!creatingFileDraft) return;
+    creatingFileDraft = false;
+    renderFilesList();
+  }
+  function commitFileCreateDraft(inputEl) {
+    const name = inputEl.value.trim();
+    if (!name) { cancelFileCreateDraft(); return; }
+    state.files.push({ id: fuid(), name, createdAt: Date.now(), columns: [], rows: [] });
+    save();
+    creatingFileDraft = false;
+    renderFilesList();
+  }
+  document.getElementById('createFileBtn').onclick = startFileCreateDraft;
+
+  // ---------- ファイル一覧の並び替え（新規順／古い順／あいうえお順） ----------
+  const FILES_SORT_OPTIONS = [
+    { key: 'newest', label: '新規順' },
+    { key: 'oldest', label: '古い順' },
+    { key: 'kana', label: 'あいうえお順' }
+  ];
+  function filesSortLabel(key) {
+    const found = FILES_SORT_OPTIONS.find(o => o.key === key);
+    return found ? found.label : '新規順';
+  }
+  function getSortedFiles() {
+    const files = state.files.slice();
+    switch (state.settings.filesSort) {
+      case 'oldest': files.sort((a, b) => a.createdAt - b.createdAt); break;
+      case 'kana': files.sort((a, b) => a.name.localeCompare(b.name, 'ja')); break;
+      case 'newest':
+      default: files.sort((a, b) => b.createdAt - a.createdAt);
+    }
+    return files;
+  }
+  function updateFilesSortLabel() {
+    const labelEl = document.getElementById('filesSortDropdownLabel');
+    if (labelEl) labelEl.textContent = filesSortLabel(state.settings.filesSort);
+  }
+  function openFilesSortMenu() {
+    closeTypeDropdownPortal();
+    closeSortMenu();
+    closeLapsSortMenu();
+    renderFilesSortPortal();
+    document.getElementById('filesSortDropdown').classList.add('open');
+  }
+  function renderFilesSortPortal() {
+    const portal = document.getElementById('filesSortDropdownPortal');
+    const btn = document.getElementById('filesSortDropdownBtn');
+    if (!portal || !btn) return;
+    const rect = btn.getBoundingClientRect();
+    portal.innerHTML = FILES_SORT_OPTIONS.map(o =>
+      `<button type="button" class="type-option ${state.settings.filesSort === o.key ? 'active' : ''}" data-files-sort-value="${o.key}">${o.label}</button>`
+    ).join('');
+    portal.style.left = Math.round(rect.left) + 'px';
+    portal.style.top = Math.round(rect.bottom + 4) + 'px';
+    portal.style.minWidth = Math.max(rect.width, 150) + 'px';
+    portal.classList.add('open');
+  }
+  function closeFilesSortMenu() {
+    const portal = document.getElementById('filesSortDropdownPortal');
+    if (portal) { portal.classList.remove('open'); portal.innerHTML = ''; }
+    const dd = document.getElementById('filesSortDropdown');
+    if (dd) dd.classList.remove('open');
+  }
+  document.addEventListener('click', (e) => {
+    const sortBtn = e.target.closest('#filesSortDropdownBtn');
+    if (sortBtn) {
+      const isOpen = document.getElementById('filesSortDropdownPortal').classList.contains('open');
+      if (isOpen) { closeFilesSortMenu(); } else { openFilesSortMenu(); }
+      return;
+    }
+    const option = e.target.closest('#filesSortDropdownPortal [data-files-sort-value]');
+    if (option) {
+      state.settings.filesSort = option.dataset.filesSortValue;
+      save(); closeFilesSortMenu(); renderFilesList();
+      return;
+    }
+    if (!e.target.closest('#filesSortDropdown') && !e.target.closest('#filesSortDropdownPortal')) {
+      closeFilesSortMenu();
+    }
+  });
+  window.addEventListener('resize', closeFilesSortMenu);
+  document.addEventListener('scroll', closeFilesSortMenu, true);
+
+  // ファイルを切り替える（そのファイルの項目・記録を記録一覧に読み込み、記録一覧の画面に戻る）
+  function switchToFile(fileId) {
+    if (fileId === state.activeFileId) { closeOverlay('overlayFiles'); return; }
+    const file = state.files.find(f => f.id === fileId);
+    if (!file) return;
+    state.activeFileId = file.id;
+    state.columns = file.columns;
+    state.rows = file.rows;
+    state.settings.sort = { key: 'newest', columnId: null };
+    editingRowId = null;
+    editingColId = null;
+    listActionMode = 'none';
+    rowsMarkedForDelete.clear();
+    currentPage = 0;
+    save();
+    closeOverlay('overlayFiles');
+    renderTable();
+  }
+
+  function renderFilesList() {
+    const list = document.getElementById('filesList');
+    const empty = document.getElementById('filesEmpty');
+    const countBadge = document.getElementById('filesCountBadge');
+    const createBtn = document.getElementById('createFileBtn');
+    const totalCount = state.files.length + (creatingFileDraft ? 1 : 0);
+    countBadge.textContent = totalCount ? `${totalCount} 件` : '';
+    createBtn.style.display = creatingFileDraft ? 'none' : '';
+    updateFilesSortLabel();
+    list.innerHTML = '';
+
+    // ゴミ箱は並び替えの影響を受けず、常に一覧の一番上に固定表示される特別な項目（削除不可）
+    const trashRow = document.createElement('div');
+    trashRow.className = 'file-item file-clickable file-trash-item';
+    trashRow.innerHTML = `
+      <span class="file-icon">🗑</span>
+      <div class="file-name">ゴミ箱</div>
+      <span class="file-date">${state.trash.length ? state.trash.length + ' 件' : '空'}</span>
+    `;
+    trashRow.onclick = () => { closeOverlay('overlayFiles'); renderTrashList(); openOverlay('overlayTrash'); };
+    list.appendChild(trashRow);
+
+    if (creatingFileDraft) {
+      const draftRow = document.createElement('div');
+      draftRow.className = 'file-item';
+      draftRow.innerHTML = `
+        <span class="file-icon">📄</span>
+        <div class="file-name"><input type="text" id="newFileNameInlineInput" placeholder="ファイル名を入力してEnter"></div>
+        <span class="file-date">${escapeHtml(formatAutoDate(Date.now()))}</span>
+      `;
+      list.appendChild(draftRow);
+      const inlineInput = draftRow.querySelector('#newFileNameInlineInput');
+      let committed = false;
+      inlineInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          committed = true;
+          commitFileCreateDraft(inlineInput);
+        } else if (e.key === 'Escape') {
+          committed = true;
+          cancelFileCreateDraft();
+        }
+      });
+      inlineInput.addEventListener('blur', () => {
+        if (committed) return;
+        // Enterが押されずにフォーカスが外れた場合は追加をキャンセルする
+        cancelFileCreateDraft();
+      });
+    }
+
+    if (state.files.length > 0 || creatingFileDraft) {
+      empty.style.display = 'none';
+      getSortedFiles().forEach(file => {
+        const row = document.createElement('div');
+        row.className = 'file-item';
+        const isEditing = editingFileId === file.id;
+
+        const nameEl = document.createElement('div');
+        nameEl.className = 'file-name';
+        if (isEditing) {
+          nameEl.innerHTML = `<input type="text" value="${escapeHtml(file.name)}" data-edit-file-name>`;
+        } else {
+          nameEl.textContent = file.name;
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'actions-cell';
+        if (isEditing) {
+          const saveBtn = document.createElement('button');
+          saveBtn.className = 'btn btn-primary btn-sm'; saveBtn.textContent = '保存';
+          saveBtn.onclick = () => {
+            const input = nameEl.querySelector('[data-edit-file-name]');
+            const newName = input.value.trim();
+            if (!newName) { alert('ファイル名を入力してください。'); return; }
+            file.name = newName;
+            editingFileId = null; save(); renderFilesList();
+          };
+          const cancelBtn = document.createElement('button');
+          cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.textContent = 'キャンセル';
+          cancelBtn.onclick = () => { editingFileId = null; renderFilesList(); };
+          actions.appendChild(saveBtn); actions.appendChild(cancelBtn);
+        } else {
+          const editBtn = document.createElement('button');
+          editBtn.className = 'btn btn-ghost btn-sm'; editBtn.textContent = '編集';
+          editBtn.onclick = (e) => { e.stopPropagation(); editingFileId = file.id; renderFilesList(); };
+          const delBtn = document.createElement('button');
+          delBtn.className = 'btn btn-danger btn-sm'; delBtn.textContent = '削除';
+          delBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (state.files.length <= 1) { alert('最後の1つのファイルは削除できません。'); return; }
+            if (!confirm(`ファイル「${file.name}」を削除しますか？中の記録データも削除されます。`)) return;
+            const wasActive = state.activeFileId === file.id;
+            state.files = state.files.filter(f => f.id !== file.id);
+            if (wasActive) {
+              const nextFile = state.files[0];
+              state.activeFileId = nextFile.id;
+              state.columns = nextFile.columns;
+              state.rows = nextFile.rows;
+              currentPage = 0;
+            }
+            save(); renderFilesList();
+            if (wasActive) renderTable();
+          };
+          actions.appendChild(editBtn); actions.appendChild(delBtn);
+        }
+
+        const isActive = file.id === state.activeFileId;
+        row.classList.toggle('file-active', isActive);
+        if (!isEditing) {
+          row.classList.add('file-clickable');
+          row.onclick = () => switchToFile(file.id);
+        }
+
+        row.innerHTML = `<span class="file-icon">📄</span>`;
+        row.appendChild(nameEl);
+        if (isActive) {
+          const badge = document.createElement('span');
+          badge.className = 'file-active-badge';
+          badge.textContent = '表示中';
+          row.appendChild(badge);
+        }
+        const dateEl = document.createElement('span');
+        dateEl.className = 'file-date';
+        dateEl.textContent = formatAutoDate(file.createdAt);
+        row.appendChild(dateEl);
+        row.appendChild(actions);
+
+        list.appendChild(row);
+      });
+    } else {
+      empty.style.display = 'block';
+    }
+  }
+
+  // ---------- ゴミ箱 ----------
+  function renderTrashList() {
+    const list = document.getElementById('trashList');
+    const empty = document.getElementById('trashEmpty');
+    const countBadge = document.getElementById('trashCountBadge');
+    const emptyBtn = document.getElementById('emptyTrashBtn');
+    countBadge.textContent = state.trash.length ? `${state.trash.length} 件` : '';
+    emptyBtn.style.display = state.trash.length ? '' : 'none';
+    list.innerHTML = '';
+
+    if (state.trash.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+
+    const sorted = state.trash.slice().sort((a, b) => b.deletedAt - a.deletedAt);
+    sorted.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'trash-item';
+
+      let fieldsHtml = '';
+      (item.columnsSnapshot || []).forEach(col => {
+        let valHtml;
+        if (col.type === 'check') {
+          valHtml = item.data[col.id] ? '<span class="check-box-display on"></span>' : '<span class="check-box-display"></span>';
+        } else {
+          valHtml = displayValueHTML(col, item.data[col.id]);
+        }
+        fieldsHtml += `<div class="trash-field"><span class="trash-field-label">${escapeHtml(col.name)}</span><span class="trash-field-value">${valHtml}</span></div>`;
+      });
+
+      card.innerHTML = `
+        <div class="trash-item-meta">
+          <span class="trash-item-source">元ファイル：${escapeHtml(item.sourceFileName || '不明')}</span>
+          <span class="trash-item-date">記録日時：${escapeHtml(formatAutoDate(item.createdAt))}</span>
+          <span class="trash-item-deleted">削除日時：${escapeHtml(formatAutoDate(item.deletedAt))}</span>
+        </div>
+        <div class="trash-item-fields">${fieldsHtml || '<span style="color:var(--text-dim); font-size:12.5px;">（項目なし）</span>'}</div>
+        <div class="trash-item-actions">
+          <button type="button" class="btn btn-ghost btn-sm" data-restore-trash="${item.id}">↩ 元に戻す</button>
+          <button type="button" class="btn btn-danger btn-sm" data-perma-delete="${item.id}">🗑 完全に削除</button>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+  function restoreTrashItem(id) {
+    const item = state.trash.find(t => t.id === id);
+    if (!item) return;
+    let targetFile = item.sourceFileId ? state.files.find(f => f.id === item.sourceFileId) : null;
+    let restoredToActive = false;
+    if (!targetFile) {
+      targetFile = getActiveFile();
+      restoredToActive = true;
+    }
+    if (!targetFile) { alert('復元先のファイルが見つかりませんでした。'); return; }
+    targetFile.rows.push({ id: uid(), createdAt: item.createdAt, data: item.data });
+    state.trash = state.trash.filter(t => t.id !== id);
+    save();
+    renderTrashList();
+    if (targetFile.id === state.activeFileId) renderTable();
+    if (restoredToActive && item.sourceFileId) {
+      alert(`元のファイル「${escapeHtml(item.sourceFileName || '')}」が見つからなかったため、現在開いているファイル「${targetFile.name}」に復元しました。`);
+    }
+  }
+  document.getElementById('trashList').addEventListener('click', (e) => {
+    const restoreBtn = e.target.closest('[data-restore-trash]');
+    if (restoreBtn) { restoreTrashItem(restoreBtn.dataset.restoreTrash); return; }
+    const delBtn = e.target.closest('[data-perma-delete]');
+    if (!delBtn) return;
+    const id = delBtn.dataset.permaDelete;
+    showConfirmModal('この記録を完全に削除しますか？\nこの操作は元に戻せません。', () => {
+      state.trash = state.trash.filter(t => t.id !== id);
+      save(); renderTrashList();
+    });
+  });
+  document.getElementById('emptyTrashBtn').onclick = () => {
+    if (state.trash.length === 0) return;
+    showConfirmModal(`ゴミ箱の${state.trash.length}件をすべて完全に削除しますか？\nこの操作は元に戻せません。`, () => {
+      state.trash = [];
+      save(); renderTrashList();
+    });
+  };
+
+  // ---------- Settings (extensible) ----------
+  const ROW_MODE_OPTIONS = [
+    { key: 'pagination', label: 'ページ送り（番号ボタン）', desc: '画面いっぱいに表を表示し、1・2・3のボタンでページを切り替えます。' },
+    { key: 'slide', label: 'スライド式', desc: '矢印ボタン・マウスホイール・指のスワイプ（横でも縦でもOK）でページ全体をスライドさせて切り替えます。' }
+  ];
+  const COL_OVERFLOW_OPTIONS = [
+    { key: 'buttonSlide', label: 'ボタンでスライド（推奨）', desc: '表が画面に収まらない時、右へ進むボタンが表示され少しずつ滑らかに移動します。' },
+    { key: 'normalSlide', label: '普通にスライド', desc: '表を左右にスワイプ・スクロールして見る、通常の動きです。' },
+    { key: 'fitScale', label: '全部入るように縮小', desc: '文字や表全体の大きさを自動で調整し、すべての項目が画面内に収まるようにします。' },
+    { key: 'wrap', label: '改行して表示', desc: '表の横幅を画面内に収め、はみ出す文字は折り返して複数行で表示します。' }
+  ];
+  const TABLE_BORDER_OPTIONS = [
+    { key: 'off', label: '枠なし', desc: '線を引かず、すっきりと表示します。' },
+    { key: 'on', label: '枠あり', desc: '項目ごとに縦の境界線を引き、区切りを分かりやすくします。' }
+  ];
+  const TIME_FORMAT_OPTIONS = [
+    { key: 'kanji', label: '「12分34秒」表記', desc: '時・分・秒に日本語の単位をつけて表示します。' },
+    { key: 'colon', label: '「12：34」表記', desc: 'コロンで区切った時刻表示にします。' }
+  ];
+  const DATE_COLUMN_OPTIONS = [
+    { key: 'on', label: '表示する', desc: '記録一覧に「日時」列を表示します。' },
+    { key: 'off', label: '表示しない', desc: '記録一覧から「日時」列を隠します。' }
+  ];
+
+  function renderPillGroup(containerId, options, currentValue, onSelect) {
+    const wrap = document.getElementById(containerId);
+    wrap.innerHTML = '';
+    options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.className = 'option-pill' + (currentValue === opt.key ? ' active' : '');
+      btn.innerHTML = `${escapeHtml(opt.label)}<span class="pill-desc">${escapeHtml(opt.desc)}</span>`;
+      btn.onclick = () => onSelect(opt.key);
+      wrap.appendChild(btn);
+    });
+  }
+  function renderSettingsPanel() {
+    renderPillGroup('rowModePills', ROW_MODE_OPTIONS, state.settings.rowDisplayMode, (key) => {
+      state.settings.rowDisplayMode = key; save(); currentPage = 0; renderSettingsPanel(); renderTable();
+      pointFormulaPage = 0;
+      if (document.getElementById('overlaySimulator').classList.contains('open')) renderPointFormulaList();
+    });
+    renderPillGroup('colOverflowPills', COL_OVERFLOW_OPTIONS, state.settings.columnOverflowMode, (key) => {
+      state.settings.columnOverflowMode = key; save(); renderSettingsPanel(); renderTable();
+    });
+    renderPillGroup('tableBorderPills', TABLE_BORDER_OPTIONS, state.settings.tableBorders, (key) => {
+      state.settings.tableBorders = key; save(); renderSettingsPanel(); renderTable();
+    });
+    renderPillGroup('timeFormatPills', TIME_FORMAT_OPTIONS, state.settings.timeFormat, (key) => {
+      state.settings.timeFormat = key; save(); renderSettingsPanel(); renderTable();
+    });
+    renderPillGroup('dateColumnPills', DATE_COLUMN_OPTIONS, state.settings.showDateColumn, (key) => {
+      state.settings.showDateColumn = key; save(); renderSettingsPanel(); renderTable();
+    });
+  }
+
+  // ---------- 項目タイプ（テキスト／チェック／時間／距離／回数／計算） ----------
+  const COL_TYPES = [
+    { key: 'text', label: 'テキスト', icon: '✎' },
+    { key: 'check', label: 'チェック', icon: '✓' },
+    { key: 'time', label: '時間', icon: '⏱' },
+    { key: 'distance', label: '距離', icon: '📍' },
+    { key: 'count', label: '回数', icon: '#' },
+    { key: 'formula', label: '計算', icon: '＝' }
+  ];
+  const COL_TYPE_LABEL = { text: 'テキスト', check: 'チェック', time: '時間', distance: '距離', count: '回数', formula: '計算' };
+  // 計算（formula）項目が変数として参照できる項目の種類（距離・時間・回数・チェックの記録値を数値化して使う）
+  const FORMULA_REF_TYPES = ['distance', 'time', 'count', 'check'];
+
+  function typeDropdownHTML(groupId, selected) {
+    const current = COL_TYPES.find(t => t.key === selected) || COL_TYPES[0];
+    return `<div class="type-dropdown" id="${groupId}" data-selected="${selected}">
+      <button type="button" class="type-dropdown-btn">
+        <span class="tp-ic">${current.icon}</span><span class="type-dropdown-label">${current.label}</span><span class="type-dropdown-arrow">▾</span>
+      </button>
+    </div>`;
+  }
+  function getSelectedType(groupId, fallback) {
+    const group = document.getElementById(groupId);
+    return group ? (group.dataset.selected || fallback) : fallback;
+  }
+
+  // ---------- 種類ドロップダウン：パネルのclip-pathに隠れないよう body 直下のポータルに描画 ----------
+  let openDropdownGroupId = null;
+  function openTypeDropdownPortal(groupId) {
+    const group = document.getElementById(groupId);
+    const portal = document.getElementById('globalDropdownPortal');
+    if (!group || !portal) return;
+    const btn = group.querySelector('.type-dropdown-btn');
+    const rect = btn.getBoundingClientRect();
+    const selected = group.dataset.selected;
+    portal.innerHTML = COL_TYPES.map(t => `<button type="button" class="type-option ${t.key === selected ? 'active' : ''}" data-type-value="${t.key}"><span class="tp-ic">${t.icon}</span>${t.label}</button>`).join('');
+    portal.style.left = Math.round(rect.left) + 'px';
+    portal.style.top = Math.round(rect.bottom + 4) + 'px';
+    portal.style.minWidth = Math.max(rect.width, 130) + 'px';
+    portal.classList.add('open');
+    openDropdownGroupId = groupId;
+    group.classList.add('open');
+  }
+  function closeTypeDropdownPortal() {
+    const portal = document.getElementById('globalDropdownPortal');
+    if (portal) { portal.classList.remove('open'); portal.innerHTML = ''; }
+    if (openDropdownGroupId) {
+      const g = document.getElementById(openDropdownGroupId);
+      if (g) g.classList.remove('open');
+    }
+    openDropdownGroupId = null;
+  }
+  window.addEventListener('resize', closeTypeDropdownPortal);
+  document.addEventListener('scroll', closeTypeDropdownPortal, true);
+
+  // ---------- 時間の単位（時／分／秒）の選択チップ ----------
+  function timeUnitTogglesHTML(id, units) {
+    const u = units || { hour: false, minute: true, second: true };
+    return `<div class="time-unit-toggles" id="${id}" data-hour="${!!u.hour}" data-minute="${!!u.minute}" data-second="${!!u.second}">
+      <button type="button" class="tu-chip ${u.hour ? 'active' : ''}" data-unit="hour">時</button>
+      <button type="button" class="tu-chip ${u.minute ? 'active' : ''}" data-unit="minute">分</button>
+      <button type="button" class="tu-chip ${u.second ? 'active' : ''}" data-unit="second">秒</button>
+    </div>`;
+  }
+  function getTimeUnits(id, fallback) {
+    const el = document.getElementById(id);
+    if (!el) return fallback || { hour: false, minute: true, second: true };
+    return { hour: el.dataset.hour === 'true', minute: el.dataset.minute === 'true', second: el.dataset.second === 'true' };
+  }
+  function timeUnitsSummary(units) {
+    const u = units || { hour: false, minute: true, second: true };
+    const parts = [];
+    if (u.hour) parts.push('時');
+    if (u.minute) parts.push('分');
+    if (u.second) parts.push('秒');
+    return parts.length ? parts.join('・') : '—';
+  }
+  function distanceUnitTogglesHTML(id, units) {
+    const u = units || { km: true, m: true };
+    return `<div class="time-unit-toggles" id="${id}" data-km="${!!u.km}" data-m="${!!u.m}">
+      <button type="button" class="tu-chip ${u.km ? 'active' : ''}" data-unit="km">km</button>
+      <button type="button" class="tu-chip ${u.m ? 'active' : ''}" data-unit="m">m</button>
+    </div>`;
+  }
+  function getDistanceUnits(id, fallback) {
+    const el = document.getElementById(id);
+    if (!el) return fallback || { km: true, m: true };
+    return { km: el.dataset.km === 'true', m: el.dataset.m === 'true' };
+  }
+  function distanceUnitsSummary(units) {
+    const u = units || { km: true, m: true };
+    const parts = [];
+    if (u.km) parts.push('km');
+    if (u.m) parts.push('m');
+    return parts.length ? parts.join('・') : '—';
+  }
+  // 旧形式（{value, unit}）で保存された距離データを新形式（{km, m}）に変換する（後方互換のため）
+  function normalizeDistanceValue(raw) {
+    if (!raw || typeof raw !== 'object') return {};
+    if ('value' in raw && !('km' in raw) && !('m' in raw)) {
+      const result = {};
+      if (raw.value) result[raw.unit === 'm' ? 'm' : 'km'] = raw.value;
+      return result;
+    }
+    return raw;
+  }
+
+  // Delegated click handling for the type dropdown (種類の選択リスト), time-unit chips, and unit-pills
+  document.addEventListener('click', (e) => {
+    const ddBtn = e.target.closest('.type-dropdown-btn');
+    if (ddBtn) {
+      const group = ddBtn.closest('.type-dropdown');
+      if (group && group.classList.contains('sort-dropdown')) {
+        // sort-dropdown系（記録一覧・タイマー保存タイム）は専用のハンドラで処理する
+        return;
+      }
+      if (group) {
+        if (openDropdownGroupId === group.id) { closeTypeDropdownPortal(); }
+        else { closeTypeDropdownPortal(); openTypeDropdownPortal(group.id); }
+      }
+      return;
+    }
+    const option = e.target.closest('#globalDropdownPortal .type-option');
+    if (option) {
+      const group = document.getElementById(openDropdownGroupId);
+      if (group) {
+        const key = option.dataset.typeValue;
+        group.dataset.selected = key;
+        const chosen = COL_TYPES.find(t => t.key === key) || COL_TYPES[0];
+        const btn = group.querySelector('.type-dropdown-btn');
+        btn.querySelector('.tp-ic').textContent = chosen.icon;
+        btn.querySelector('.type-dropdown-label').textContent = chosen.label;
+        const tr = group.closest('tr');
+        if (tr) {
+          tr.querySelectorAll('.time-detail-wrap[data-detail-for]').forEach(w => {
+            w.style.display = (w.dataset.detailFor === key) ? 'block' : 'none';
+          });
+        }
+      }
+      closeTypeDropdownPortal();
+      return;
+    }
+    if (!e.target.closest('.type-dropdown') && !e.target.closest('#globalDropdownPortal')) {
+      closeTypeDropdownPortal();
+    }
+
+    const tuChip = e.target.closest('.tu-chip');
+    if (tuChip) {
+      const wrap = tuChip.closest('.time-unit-toggles');
+      if (wrap) {
+        const unit = tuChip.dataset.unit;
+        const isActive = tuChip.classList.contains('active');
+        const activeCount = wrap.querySelectorAll('.tu-chip.active').length;
+        if (isActive && activeCount <= 1) return; // 最低ひとつは残す
+        tuChip.classList.toggle('active');
+        wrap.dataset[unit] = tuChip.classList.contains('active') ? 'true' : 'false';
+      }
+      return;
+    }
+
+    const unitBtn = e.target.closest('.unit-pill');
+    if (unitBtn) {
+      const group = unitBtn.closest('.unit-pill-group');
+      if (group) {
+        group.querySelectorAll('.unit-pill').forEach(p => p.classList.remove('active'));
+        unitBtn.classList.add('active');
+        group.dataset.selectedUnit = unitBtn.dataset.unit;
+      }
+      return;
+    }
+
+    const formulaOpBtn = e.target.closest('[data-formula-op]');
+    if (formulaOpBtn) {
+      const idx = parseInt(formulaOpBtn.dataset.formulaStep, 10);
+      if (editingFormulaSteps && editingFormulaSteps[idx]) editingFormulaSteps[idx].operator = formulaOpBtn.dataset.formulaOp;
+      refreshFormulaEditorCell();
+      return;
+    }
+    const formulaAddBtn = e.target.closest('[data-formula-add-step]');
+    if (formulaAddBtn) {
+      const col = state.columns.find(c => c.id === editingColId);
+      const eligible = col ? state.columns.filter(c => c.id !== col.id && FORMULA_REF_TYPES.includes(c.type)) : [];
+      if (editingFormulaSteps && eligible.length) {
+        editingFormulaSteps.push({ columnId: eligible[0].id, operator: '+' });
+      }
+      refreshFormulaEditorCell();
+      return;
+    }
+    const formulaDelBtn = e.target.closest('[data-formula-delete-step]');
+    if (formulaDelBtn) {
+      const idx = parseInt(formulaDelBtn.dataset.formulaDeleteStep, 10);
+      if (editingFormulaSteps) editingFormulaSteps.splice(idx, 1);
+      refreshFormulaEditorCell();
+      return;
+    }
+  });
+
+  document.addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-formula-select-step]');
+    if (sel) {
+      const idx = parseInt(sel.dataset.formulaSelectStep, 10);
+      if (editingFormulaSteps && editingFormulaSteps[idx]) editingFormulaSteps[idx].columnId = sel.value;
+    }
+  });
+
+  // ---------- 共通フィールド入力パーツ（追加フォーム／表内編集の両方で使用） ----------
+  function fieldInputHTML(col, value, attr) {
+    if (col.type === 'check') {
+      const checked = value ? 'checked' : '';
+      return `<label class="check-toggle-field"><input type="checkbox" ${attr}="${col.id}" data-type="check" ${checked}><span class="check-box-display"></span></label>`;
+    }
+    if (col.type === 'time') {
+      const units = col.timeUnits || { hour: false, minute: true, second: true };
+      const format = state.settings.timeFormat || 'kanji';
+      const v = (value && typeof value === 'object') ? value : {};
+      const labelMap = { hour: '時', minute: '分', second: '秒' };
+      const order = ['hour', 'minute', 'second'].filter(k => units[k]);
+      let html = '<div class="time-input-group">';
+      order.forEach((key, idx) => {
+        html += `<span class="time-unit-item"><input type="number" min="0" ${key === 'hour' ? '' : 'max="59"'} inputmode="numeric" placeholder="${labelMap[key]}" value="${escapeHtml(v[key] || '')}" ${attr}="${col.id}" data-type="time" data-part="${key}">`;
+        if (format === 'kanji') html += `<span class="time-unit-label">${labelMap[key]}</span>`;
+        html += `</span>`;
+        if (format === 'colon' && idx < order.length - 1) html += `<span class="time-colon-sep">：</span>`;
+      });
+      html += '</div>';
+      if (attr === 'data-col') {
+        html += `<button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px; align-self:flex-start;" data-time-copy-col="${col.id}">🕒 タイマーからコピー</button>`;
+      }
+      return html;
+    }
+    if (col.type === 'distance') {
+      const units = col.distanceUnits || { km: true, m: true };
+      const v = normalizeDistanceValue(value);
+      const labelMap = { km: 'km', m: 'm' };
+      const order = ['km', 'm'].filter(k => units[k]);
+      let html = '<div class="time-input-group">';
+      order.forEach(key => {
+        html += `<span class="time-unit-item"><input type="text" inputmode="decimal" placeholder="${labelMap[key]}" value="${escapeHtml(v[key] || '')}" ${attr}="${col.id}" data-type="distance" data-part="${key}"><span class="time-unit-label">${labelMap[key]}</span></span>`;
+      });
+      html += '</div>';
+      return html;
+    }
+    if (col.type === 'count') {
+      return `<div class="count-input-group">
+        <input type="number" min="0" inputmode="numeric" placeholder="例：10" value="${escapeHtml(value || '')}" ${attr}="${col.id}" data-type="count">
+        <span class="count-unit-label">回</span>
+      </div>`;
+    }
+    if (col.type === 'formula') {
+      // 計算項目は他の項目の値から自動計算される読み取り専用の表示（直接入力はできない）
+      const displayVal = (typeof value === 'number') ? value : (value ? parseFloat(value) : 0);
+      return `<div class="formula-readonly-field" data-formula-col="${col.id}" data-type="formula">${escapeHtml(formatPointNumber(isNaN(displayVal) ? 0 : displayVal))}</div>`;
+    }
+    // text
+    return `<input type="text" value="${escapeHtml(value || '')}" ${attr}="${col.id}" data-type="text" placeholder="${escapeHtml(col.name)}を入力">`;
+  }
+
+  function collectFieldValue(root, col, attr) {
+    if (col.type === 'check') {
+      const el = root.querySelector(`[${attr}="${col.id}"][data-type="check"]`);
+      const checked = el ? el.checked : false;
+      return { value: checked, hasValue: checked };
+    }
+    if (col.type === 'time') {
+      const units = col.timeUnits || { hour: false, minute: true, second: true };
+      const result = {}; let hasValue = false;
+      ['hour', 'minute', 'second'].forEach(key => {
+        if (!units[key]) return;
+        const el = root.querySelector(`[${attr}="${col.id}"][data-part="${key}"]`);
+        const val = el ? el.value.trim() : '';
+        if (val) { result[key] = val; hasValue = true; }
+      });
+      return { value: hasValue ? result : '', hasValue };
+    }
+    if (col.type === 'distance') {
+      const units = col.distanceUnits || { km: true, m: true };
+      const result = {}; let hasValue = false;
+      ['km', 'm'].forEach(key => {
+        if (!units[key]) return;
+        const el = root.querySelector(`[${attr}="${col.id}"][data-part="${key}"]`);
+        const val = el ? el.value.trim() : '';
+        if (val) { result[key] = val; hasValue = true; }
+      });
+      return { value: hasValue ? result : '', hasValue };
+    }
+    if (col.type === 'count') {
+      const el = root.querySelector(`[${attr}="${col.id}"][data-type="count"]`);
+      const val = el ? el.value.trim() : '';
+      return { value: val, hasValue: !!val };
+    }
+    if (col.type === 'formula') {
+      const val = computeFormulaValueFromRoot(root, col, attr);
+      return { value: val, hasValue: true };
+    }
+    const el = root.querySelector(`[${attr}="${col.id}"][data-type="text"]`);
+    const val = el ? el.value.trim() : '';
+    return { value: val, hasValue: !!val };
+  }
+
+  // 計算（formula）項目の値を、同じ入力エリア（root）内にある他の項目の現在値から計算する。
+  // 1つ目のステップの項目の値がスタート地点となり、2つ目以降は演算子で順番に計算していく（例：項目A ＋ 項目B）。
+  function computeFormulaValueFromRoot(root, col, attr) {
+    const steps = (col.formula && col.formula.steps) || [];
+    let running = null;
+    steps.forEach((step, idx) => {
+      const refCol = state.columns.find(c => c.id === step.columnId);
+      if (!refCol) return;
+      const result = collectFieldValue(root, refCol, attr);
+      const val = columnValueToNumber(refCol, result.value);
+      if (idx === 0 || running === null) { running = val; }
+      else { running = performCalcOp(running, step.operator || '+', val); }
+    });
+    return running === null ? 0 : running;
+  }
+  // 現在表示中の計算（formula）項目の読み取り専用表示を、他の項目の入力に合わせて更新する
+  function refreshFormulaDisplays(root, attr) {
+    if (!root) return;
+    root.querySelectorAll('[data-formula-col]').forEach(el => {
+      const col = state.columns.find(c => c.id === el.dataset.formulaCol);
+      if (!col) return;
+      const val = computeFormulaValueFromRoot(root, col, attr);
+      el.textContent = formatPointNumber(val);
+    });
+  }
+
+  // ある項目（列）に、既に何らかのデータが入力されているかを調べる（種類変更時の警告判定に使用）
+  function columnHasAnyData(colId) {
+    return state.rows.some(row => {
+      const v = row.data[colId];
+      if (v === undefined || v === null || v === '') return false;
+      if (typeof v === 'object') return Object.values(v).some(x => x !== undefined && x !== null && x !== '');
+      return true;
+    });
+  }
+
+  // ---------- 項目設定：テーブル形式（編集可） ----------
+  // 計算（formula）項目のステップ一覧を、一覧表示用の短い文字列にまとめる（例：「距離 ＋ 時間」）
+  function formulaSummary(col) {
+    const steps = (col.formula && col.formula.steps) || [];
+    if (steps.length === 0) return '未設定';
+    return steps.map((step, idx) => {
+      const refCol = state.columns.find(c => c.id === step.columnId);
+      const name = refCol ? refCol.name : '？';
+      return idx === 0 ? name : `${step.operator || '+'} ${name}`;
+    }).join(' ');
+  }
+  // 計算項目の編集フォーム内で使う、ステップ（項目＋演算子）を組み立てるチェーンエディタ
+  function renderFormulaEditorHTML(col, steps) {
+    const eligibleCols = state.columns.filter(c => c.id !== col.id && FORMULA_REF_TYPES.includes(c.type));
+    if (eligibleCols.length === 0) {
+      return `<p style="font-size:11.5px; color:var(--text-dim); margin:0;">計算に使える項目（距離・時間・回数・チェック）がまだありません。先に他の項目を作成してください。</p>`;
+    }
+    let html = '<div class="formula-chain-editor">';
+    steps.forEach((step, idx) => {
+      html += `<div class="point-step-chip">`;
+      if (idx > 0) {
+        html += `<div class="calc-op-group">` +
+          CALC_OPERATORS.map(op => `<button type="button" class="calc-op-btn ${step.operator === op ? 'active' : ''}" data-formula-op="${op}" data-formula-step="${idx}">${op}</button>`).join('') +
+          `</div>`;
+      }
+      html += `<select data-formula-select-step="${idx}">` +
+        eligibleCols.map(c => `<option value="${c.id}" ${c.id === step.columnId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('') +
+        `</select>`;
+      html += `<button type="button" class="btn btn-danger btn-sm" data-formula-delete-step="${idx}">削除</button>`;
+      html += `</div>`;
+    });
+    html += `<button type="button" class="btn btn-ghost btn-sm" data-formula-add-step="1">＋ 項目を追加</button>`;
+    html += '</div>';
+    return html;
+  }
+  // 計算項目の編集エリアだけを部分的に再描画する（行全体を再描画すると、他の入力中の値が失われるため）
+  function refreshFormulaEditorCell() {
+    const col = state.columns.find(c => c.id === editingColId);
+    if (!col) return;
+    const wrap = document.querySelector('.time-detail-wrap[data-detail-for="formula"]');
+    if (wrap) wrap.innerHTML = renderFormulaEditorHTML(col, editingFormulaSteps || []);
+  }
+
+  function renderColumnsTable() {
+    const body = document.getElementById('colTableBody');
+    const badge = document.getElementById('colCountBadge');
+    badge.textContent = state.columns.length ? `${state.columns.length} 項目` : '';
+    body.innerHTML = '';
+
+    state.columns.forEach((col) => {
+      const tr = document.createElement('tr');
+      const isEditing = editingColId === col.id;
+
+      if (isEditing) {
+        const tdName = document.createElement('td');
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text'; nameInput.value = col.name; nameInput.id = 'editColName';
+        tdName.appendChild(nameInput);
+
+        const tdType = document.createElement('td');
+        tdType.innerHTML = typeDropdownHTML('editColTypePills', col.type);
+
+        const tdDetail = document.createElement('td');
+        tdDetail.innerHTML = `<div class="time-detail-wrap" data-detail-for="time" style="display:${col.type === 'time' ? 'block' : 'none'}">${timeUnitTogglesHTML('editColTimeUnits', col.timeUnits)}</div>` +
+          `<div class="time-detail-wrap" data-detail-for="distance" style="display:${col.type === 'distance' ? 'block' : 'none'}">${distanceUnitTogglesHTML('editColDistanceUnits', col.distanceUnits)}</div>` +
+          `<div class="time-detail-wrap" data-detail-for="formula" style="display:${col.type === 'formula' ? 'block' : 'none'}">${renderFormulaEditorHTML(col, editingFormulaSteps || [])}</div>`;
+
+        const tdActions = document.createElement('td');
+        tdActions.className = 'actions-cell';
+        const saveBtn = document.createElement('button');
+        saveBtn.className = 'btn btn-primary btn-sm'; saveBtn.textContent = '保存';
+        saveBtn.onclick = () => {
+          const newName = nameInput.value.trim();
+          if (!newName) { alert('項目名を入力してください。'); return; }
+          const dup = state.columns.some(c => c.id !== col.id && c.name === newName);
+          if (dup) { alert('同じ名前の項目が既にあります。'); return; }
+          const newType = getSelectedType('editColTypePills', col.type);
+          const typeChanged = newType !== col.type;
+
+          const applyColumnEdit = () => {
+            col.name = newName; col.type = newType;
+            if (newType === 'time') col.timeUnits = getTimeUnits('editColTimeUnits', col.timeUnits);
+            if (newType === 'distance') col.distanceUnits = getDistanceUnits('editColDistanceUnits', col.distanceUnits);
+            if (newType === 'formula') { col.formula = { steps: (editingFormulaSteps || []).filter(s => s.columnId) }; }
+            else { col.formula = null; }
+            if (typeChanged) { state.rows.forEach(row => { delete row.data[col.id]; }); col.pointFormula = null; }
+            editingColId = null; editingFormulaSteps = null; save(); renderColumnsTable(); renderExamplePreview();
+          };
+
+          if (typeChanged && columnHasAnyData(col.id)) {
+            showConfirmModal(
+              '項目の種類を変更すると、この項目にすでに入力されている記録データは失われます。\n変更してもよろしいですか？',
+              applyColumnEdit,
+              { icon: '⚠️', confirmLabel: '変更する', confirmClass: 'btn-danger' }
+            );
+          } else {
+            applyColumnEdit();
+          }
+        };
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.textContent = 'キャンセル';
+        cancelBtn.onclick = () => { editingColId = null; editingFormulaSteps = null; renderColumnsTable(); };
+        tdActions.appendChild(saveBtn); tdActions.appendChild(cancelBtn);
+
+        tr.appendChild(tdName); tr.appendChild(tdType); tr.appendChild(tdDetail); tr.appendChild(tdActions);
+      } else {
+        const tdName = document.createElement('td');
+        tdName.textContent = col.name;
+        const tdType = document.createElement('td');
+        tdType.textContent = COL_TYPE_LABEL[col.type] || 'テキスト';
+        const tdDetail = document.createElement('td');
+        tdDetail.textContent = col.type === 'time' ? timeUnitsSummary(col.timeUnits)
+          : col.type === 'distance' ? distanceUnitsSummary(col.distanceUnits)
+          : col.type === 'formula' ? formulaSummary(col)
+          : '—';
+        const tdActions = document.createElement('td');
+        tdActions.className = 'actions-cell';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-ghost btn-sm'; editBtn.textContent = '編集';
+        editBtn.onclick = () => {
+          editingColId = col.id;
+          editingFormulaSteps = col.type === 'formula' ? JSON.parse(JSON.stringify((col.formula && col.formula.steps) || [])) : [];
+          renderColumnsTable();
+        };
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn btn-danger btn-sm'; delBtn.textContent = '削除';
+        delBtn.onclick = () => removeColumn(col.id);
+        tdActions.appendChild(editBtn); tdActions.appendChild(delBtn);
+        tr.appendChild(tdName); tr.appendChild(tdType); tr.appendChild(tdDetail); tr.appendChild(tdActions);
+      }
+      body.appendChild(tr);
+    });
+
+    // 項目の表の中に追加できる行
+    const addTr = document.createElement('tr');
+    addTr.className = 'col-add-row';
+    const tdInput = document.createElement('td');
+    const input = document.createElement('input');
+    input.type = 'text'; input.id = 'newColName'; input.placeholder = '新しい項目名（例：金額、内容、場所）';
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') addColumn(); });
+    tdInput.appendChild(input);
+
+    const tdType = document.createElement('td');
+    tdType.innerHTML = typeDropdownHTML('newColTypePills', 'text');
+
+    const tdDetail = document.createElement('td');
+    tdDetail.innerHTML = `<div class="time-detail-wrap" data-detail-for="time" style="display:none">${timeUnitTogglesHTML('newColTimeUnits', null)}</div>` +
+      `<div class="time-detail-wrap" data-detail-for="distance" style="display:none">${distanceUnitTogglesHTML('newColDistanceUnits', null)}</div>`;
+
+    const tdBtn = document.createElement('td');
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn btn-primary btn-sm'; addBtn.textContent = '＋ 追加'; addBtn.onclick = addColumn;
+    tdBtn.appendChild(addBtn);
+
+    addTr.appendChild(tdInput); addTr.appendChild(tdType); addTr.appendChild(tdDetail); addTr.appendChild(tdBtn);
+    body.appendChild(addTr);
+  }
+
+  function addColumn() {
+    const nameInput = document.getElementById('newColName');
+    const name = nameInput.value.trim();
+    const type = getSelectedType('newColTypePills', 'text');
+    if (!name) return;
+    if (state.columns.some(c => c.name === name)) { alert('同じ名前の項目が既にあります。'); return; }
+    const newCol = { id: uid(), name, type };
+    if (type === 'time') newCol.timeUnits = getTimeUnits('newColTimeUnits', { hour: false, minute: true, second: true });
+    if (type === 'distance') newCol.distanceUnits = getDistanceUnits('newColDistanceUnits', { km: true, m: true });
+    if (type === 'formula') newCol.formula = { steps: [] };
+    state.columns.push(newCol);
+    save(); renderColumnsTable(); renderExamplePreview();
+    if (type === 'formula') {
+      alert('「計算」項目を追加しました。一覧の「編集」から、計算に使う項目（例：項目A＋項目B）を設定してください。');
+    }
+  }
+  function removeColumn(colId) {
+    const col = state.columns.find(c => c.id === colId);
+    if (!col) return;
+    if (!confirm(`項目「${col.name}」を削除しますか？既存の記録からもこの項目のデータが削除されます。`)) return;
+    state.columns = state.columns.filter(c => c.id !== colId);
+    state.rows.forEach(row => { delete row.data[colId]; });
+    if (state.settings.sort && state.settings.sort.columnId === colId) {
+      state.settings.sort = { key: 'newest', columnId: null };
+    }
+    save(); renderColumnsTable(); renderExamplePreview();
+  }
+
+  // 使用例プレビュー
+  function renderExamplePreview() {
+    const head = document.getElementById('exampleHead');
+    const row = document.getElementById('exampleRow');
+    head.innerHTML = ''; row.innerHTML = '';
+    document.getElementById('exampleTable').classList.toggle('bordered', state.settings.tableBorders === 'on');
+    const thDate = document.createElement('th'); thDate.textContent = '日時'; head.appendChild(thDate);
+    const tdDate = document.createElement('td'); tdDate.className = 'datetime-cell'; tdDate.textContent = formatAutoDate(Date.now()); row.appendChild(tdDate);
+
+    if (state.columns.length === 0) {
+      const th = document.createElement('th'); th.textContent = '（項目を追加すると表示されます）'; head.appendChild(th);
+      const td = document.createElement('td'); td.textContent = '—'; td.style.color = 'var(--text-dim)'; row.appendChild(td);
+      return;
+    }
+    state.columns.forEach((col, i) => {
+      const th = document.createElement('th'); th.textContent = col.name;
+      if (col.type === 'check') th.classList.add('th-center');
+      head.appendChild(th);
+      const td = document.createElement('td');
+      if (col.type === 'check') {
+        td.className = 'check-cell';
+        td.innerHTML = i % 2 === 0 ? '<span class="check-box-display on"></span>' : '<span class="check-box-display"></span>';
+      } else if (col.type === 'time') {
+        const units = col.timeUnits || { hour: false, minute: true, second: true };
+        const format = state.settings.timeFormat || 'kanji';
+        const sampleVals = i % 2 === 0 ? { hour: '1', minute: '12', second: '34' } : { hour: '2', minute: '45', second: '08' };
+        const labelMap = { hour: '時', minute: '分', second: '秒' };
+        const order = ['hour', 'minute', 'second'].filter(k => units[k]);
+        td.textContent = format === 'colon'
+          ? order.map(k => sampleVals[k]).join('：')
+          : order.map(k => `${sampleVals[k]}${labelMap[k]}`).join('');
+      } else if (col.type === 'distance') {
+        const units = col.distanceUnits || { km: true, m: true };
+        const sampleVals = i % 2 === 0 ? { km: '5.2', m: '300' } : { km: '1.8', m: '600' };
+        const order = ['km', 'm'].filter(k => units[k]);
+        td.textContent = order.map(k => `${sampleVals[k]}${k}`).join('');
+      } else if (col.type === 'count') {
+        td.textContent = i % 2 === 0 ? '10回' : '3回';
+      } else if (col.type === 'formula') {
+        td.textContent = '（他の項目から自動計算）';
+        td.style.color = 'var(--text-dim)';
+      } else {
+        td.textContent = `例：サンプル${col.name}`;
+      }
+      row.appendChild(td);
+    });
+    applyColumnOverflowMode(document.getElementById('exampleScroll'), document.getElementById('exampleTable'));
+  }
+
+  // ---------- ポイント（記録した値を計算式でポイント化し、合計ポイントで達成度を確認する） ----------
+  const POINT_TYPES = ['distance', 'time', 'count', 'check'];
+  const CALC_OPERATORS = ['+', '-', '\u00d7', '\u00f7'];
+  function getPointColumns() {
+    return state.columns.filter(c => POINT_TYPES.includes(c.type));
+  }
+  // 項目の時間／距離の設定の中で、最も小さい単位を返す（例：分・秒が有効なら「秒」）
+  function smallestActiveTimeUnit(col) {
+    const units = col.timeUnits || { hour: false, minute: true, second: true };
+    const order = ['hour', 'minute', 'second'].filter(k => units[k]);
+    return order[order.length - 1] || 'second';
+  }
+  function smallestActiveDistanceUnit(col) {
+    const units = col.distanceUnits || { km: true, m: true };
+    const order = ['km', 'm'].filter(k => units[k]);
+    return order[order.length - 1] || 'm';
+  }
+  // 基準値の初期値：最も小さい単位の欄に「1」を入れ、他は空にする
+  function defaultPreviewBase(col) {
+    if (col.type === 'time') {
+      const result = {};
+      result[smallestActiveTimeUnit(col)] = '1';
+      return result;
+    }
+    if (col.type === 'distance') {
+      const result = {};
+      result[smallestActiveDistanceUnit(col)] = '1';
+      return result;
+    }
+    return '1'; // count
+  }
+  // チェック項目は「＋の場合」「－の場合」の2つの固定値のみ。それ以外は演算子＋数値のステップを何段でも追加でき、
+  // 計算のスタート地点となる「基準値」をユーザーが自由に設定できる。
+  function ensurePointFormula(col) {
+    if (col.type === 'check') {
+      if (!col.pointFormula || typeof col.pointFormula.plusValue === 'undefined') {
+        col.pointFormula = { plusValue: '', minusValue: '' };
+      }
+      return col.pointFormula;
+    }
+    if (!col.pointFormula || !Array.isArray(col.pointFormula.steps)) {
+      col.pointFormula = { steps: [], previewBase: defaultPreviewBase(col) };
+    }
+    if (col.pointFormula.previewBase === undefined || col.pointFormula.previewBase === null) {
+      col.pointFormula.previewBase = defaultPreviewBase(col);
+    }
+    return col.pointFormula;
+  }
+  function performCalcOp(a, operator, b) {
+    switch (operator) {
+      case '+': return a + b;
+      case '-': return a - b;
+      case '\u00d7': return a * b;
+      case '\u00f7': return b === 0 ? NaN : a / b;
+      default: return NaN;
+    }
+  }
+  // 種類ごとの値を計算用の数値に変換する。時間・距離は「その項目で設定されている、最も小さい単位」を基準に数値化する
+  // （例：分・秒が有効なら秒数、kmだけが有効ならkm数）。これにより基準値やステップの数値が実際の単位と食い違わない。
+  function columnValueToNumber(col, raw) {
+    if (col.type === 'check') return raw ? 1 : 0;
+    if (col.type === 'count') { const n = parseFloat(raw); return isNaN(n) ? 0 : n; }
+    if (col.type === 'distance') {
+      const totalMeters = distanceToMeters(raw);
+      return smallestActiveDistanceUnit(col) === 'km' ? totalMeters / 1000 : totalMeters;
+    }
+    if (col.type === 'time') {
+      const totalSeconds = timeToSeconds(raw);
+      const sizes = { hour: 3600, minute: 60, second: 1 };
+      return totalSeconds / sizes[smallestActiveTimeUnit(col)];
+    }
+    return 0;
+  }
+  // 演算子ステップの列を、指定した基準値から順番に適用して計算する
+  function runStepsFrom(base, steps) {
+    let running = base;
+    steps.forEach(step => {
+      const val = parseFloat(step.value);
+      if (isNaN(val)) return;
+      running = performCalcOp(running, step.operator || '+', val);
+    });
+    return running;
+  }
+  // ある項目の記録値に、その項目のポイント計算式をあてはめて点数を求める（実際の記録データの集計に使用）
+  function computeColumnPoints(col, rawValue) {
+    const formula = ensurePointFormula(col);
+    if (col.type === 'check') {
+      const checked = !!rawValue;
+      const raw = checked ? formula.plusValue : formula.minusValue;
+      const val = parseFloat(raw);
+      return isNaN(val) ? 0 : val;
+    }
+    const base = columnValueToNumber(col, rawValue);
+    return runStepsFrom(base, formula.steps);
+  }
+  function formatPointNumber(n) {
+    if (typeof n !== 'number' || isNaN(n)) return '0';
+    return String(Math.round(n * 100) / 100);
+  }
+
+  function updatePointsInListToggleBtn() {
+    const btn = document.getElementById('togglePointsInListBtn');
+    if (!btn) return;
+    const on = !!state.settings.showPointsInList;
+    btn.textContent = on ? '✓ 記録一覧に表示中' : '記録一覧にポイント列を表示';
+    btn.className = 'btn btn-sm point-toggle-btn ' + (on ? 'btn-primary' : 'btn-ghost');
+  }
+  document.getElementById('togglePointsInListBtn').onclick = () => {
+    state.settings.showPointsInList = !state.settings.showPointsInList;
+    save();
+    updatePointsInListToggleBtn();
+    renderTable();
+  };
+
+  function renderSimulator() {
+    const content = document.getElementById('simulatorContent');
+    const empty = document.getElementById('simulatorEmpty');
+    const cols = getPointColumns();
+
+    if (cols.length === 0) {
+      content.style.display = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+    content.style.display = 'flex';
+    empty.style.display = 'none';
+    cols.forEach(col => ensurePointFormula(col));
+
+    pointFormulaPage = 0;
+    updatePointsInListToggleBtn();
+    renderPointFormulaList();
+    renderPointSummary();
+  }
+
+  // ポイント計算式の一覧は、記録一覧と同じ表示方法（ページ送り／スライド）で画面に収まりきらない分を切り替える。
+  // 合計ポイントは切り替えの影響を受けない上の部分に固定表示される。
+  let pointFormulaPage = 0;
+  let pointFormulaSlideLock = false;
+
+  // 実際にブロックをレンダリングして高さを測り、表示エリアに収まる件数を求める
+  function computePointBlocksPerPage(cols) {
+    const wrap = document.getElementById('pointFormulaSlideWrap');
+    const list = document.getElementById('pointFormulaList');
+    if (!wrap || !list || cols.length === 0) return Math.max(1, cols.length);
+    const avail = wrap.clientHeight || 400;
+    list.innerHTML = cols.map(col => pointFormulaBlockHTML(col)).join('');
+    let heightSum = 0;
+    let count = 0;
+    for (const el of Array.from(list.children)) {
+      heightSum += el.offsetHeight;
+      if (heightSum > avail && count > 0) break;
+      count++;
+    }
+    return Math.max(1, count);
+  }
+
+  function renderPointFormulaList() {
+    const cols = getPointColumns();
+    const list = document.getElementById('pointFormulaList');
+    const slideHint = document.getElementById('pointFormulaSlideHint');
+    if (cols.length === 0) {
+      list.innerHTML = '';
+      document.getElementById('pointFormulaPageControls').innerHTML = '';
+      slideHint.style.display = 'none';
+      return;
+    }
+
+    const perPage = computePointBlocksPerPage(cols);
+    const totalPages = Math.max(1, Math.ceil(cols.length / perPage));
+    if (pointFormulaPage >= totalPages) pointFormulaPage = totalPages - 1;
+    if (pointFormulaPage < 0) pointFormulaPage = 0;
+    const start = pointFormulaPage * perPage;
+    const pageCols = cols.slice(start, start + perPage);
+    list.innerHTML = pageCols.map(col => pointFormulaBlockHTML(col)).join('');
+
+    renderPointPageControls(totalPages);
+    slideHint.style.display = (state.settings.rowDisplayMode === 'slide' && totalPages > 1) ? 'block' : 'none';
+  }
+
+  function renderPointPageControls(totalPages) {
+    const controls = document.getElementById('pointFormulaPageControls');
+    controls.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    if (state.settings.rowDisplayMode === 'slide') {
+      const prev = document.createElement('button');
+      prev.className = 'slide-arrow'; prev.textContent = '‹'; prev.disabled = pointFormulaPage === 0;
+      prev.onclick = () => goPointSlidePage(-1);
+      const next = document.createElement('button');
+      next.className = 'slide-arrow'; next.textContent = '›'; next.disabled = pointFormulaPage === totalPages - 1;
+      next.onclick = () => goPointSlidePage(1);
+      const dots = document.createElement('div'); dots.className = 'slide-dots';
+      for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'slide-dot' + (i === pointFormulaPage ? ' active' : '');
+        dot.onclick = () => { if (i === pointFormulaPage) return; goPointSlidePage(i > pointFormulaPage ? 1 : -1, i); };
+        dots.appendChild(dot);
+      }
+      controls.appendChild(prev); controls.appendChild(dots); controls.appendChild(next);
+    } else {
+      for (let i = 0; i < totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'page-num-btn' + (i === pointFormulaPage ? ' active' : '');
+        btn.textContent = (i + 1).toString();
+        btn.onclick = () => { pointFormulaPage = i; renderPointFormulaList(); };
+        controls.appendChild(btn);
+      }
+    }
+  }
+
+  function goPointSlidePage(dir, forcedIndex) {
+    if (pointFormulaSlideLock) return;
+    const cols = getPointColumns();
+    const perPage = computePointBlocksPerPage(cols);
+    const totalPages = Math.max(1, Math.ceil(cols.length / perPage));
+    const next = (typeof forcedIndex === 'number') ? forcedIndex : pointFormulaPage + dir;
+    if (next < 0 || next >= totalPages || next === pointFormulaPage) return;
+    pointFormulaSlideLock = true;
+    const track = document.getElementById('pointFormulaSlideTrack');
+    track.style.transition = 'transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s';
+    track.style.transform = dir > 0 ? 'translate(-18px,-10px)' : 'translate(18px,10px)';
+    track.style.opacity = '0.25';
+    setTimeout(() => {
+      pointFormulaPage = next;
+      renderPointFormulaList();
+      const freshTrack = document.getElementById('pointFormulaSlideTrack');
+      freshTrack.style.transition = 'none';
+      freshTrack.style.transform = dir > 0 ? 'translate(18px,10px)' : 'translate(-18px,-10px)';
+      requestAnimationFrame(() => {
+        freshTrack.style.transition = 'transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s';
+        freshTrack.style.transform = 'translate(0,0)';
+        freshTrack.style.opacity = '1';
+        setTimeout(() => { pointFormulaSlideLock = false; }, 230);
+      });
+    }, 160);
+  }
+
+  function setupPointSlideGestures() {
+    const wrap = document.getElementById('pointFormulaSlideWrap');
+    if (!wrap) return;
+    let wheelCooldown = false;
+    wrap.addEventListener('wheel', (e) => {
+      if (state.settings.rowDisplayMode !== 'slide') return;
+      const dx = e.deltaX, dy = e.deltaY;
+      const primary = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (Math.abs(primary) < 10) return;
+      e.preventDefault();
+      if (wheelCooldown || pointFormulaSlideLock) return;
+      wheelCooldown = true;
+      goPointSlidePage(primary > 0 ? 1 : -1);
+      setTimeout(() => { wheelCooldown = false; }, 260);
+    }, { passive: false });
+
+    let touchStartX = 0, touchStartY = 0, touchActive = false;
+    wrap.addEventListener('touchstart', (e) => {
+      if (state.settings.rowDisplayMode !== 'slide') return;
+      touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; touchActive = true;
+    }, { passive: true });
+    wrap.addEventListener('touchend', (e) => {
+      if (!touchActive || state.settings.rowDisplayMode !== 'slide') return;
+      touchActive = false;
+      const endX = e.changedTouches[0].clientX, endY = e.changedTouches[0].clientY;
+      const dx = touchStartX - endX, dy = touchStartY - endY;
+      const primary = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (Math.abs(primary) < 40) return;
+      goPointSlidePage(primary > 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
+  function pointFormulaBlockHTML(col) {
+    const formula = ensurePointFormula(col);
+
+    if (col.type === 'check') {
+      const plusResult = computeColumnPoints(col, true);
+      const minusResult = computeColumnPoints(col, false);
+      return `<div class="point-formula-block">
+        <div class="point-formula-header"><span class="point-formula-name">${escapeHtml(col.name)}</span><span class="col-type-badge">（${escapeHtml(COL_TYPE_LABEL[col.type] || '')}）</span></div>
+        <div class="point-check-inputs">
+          <div class="point-check-field plus">
+            <span class="point-check-label">✓ チェックあり</span>
+            <input type="text" inputmode="decimal" class="calc-value-input" placeholder="値" value="${escapeHtml(formula.plusValue)}" data-point-check-plus="${col.id}">
+          </div>
+          <div class="point-check-field minus">
+            <span class="point-check-label">✕ チェックなし</span>
+            <input type="text" inputmode="decimal" class="calc-value-input" placeholder="値" value="${escapeHtml(formula.minusValue)}" data-point-check-minus="${col.id}">
+          </div>
+        </div>
+        <div class="point-result-box">チェック時 → <strong>${escapeHtml(formatPointNumber(plusResult))}pt</strong>　／　未チェック時 → <strong>${escapeHtml(formatPointNumber(minusResult))}pt</strong></div>
+      </div>`;
+    }
+
+    const steps = formula.steps;
+    let chain = '';
+    steps.forEach((step, idx) => {
+      chain += `<span class="point-chain-arrow">→</span>`;
+      chain += `<div class="point-step-chip">`;
+      chain += `<div class="calc-op-group">` +
+        CALC_OPERATORS.map(op => `<button type="button" class="calc-op-btn ${step.operator === op ? 'active' : ''}" data-point-op="${op}" data-point-col="${col.id}" data-point-step="${idx}">${op}</button>`).join('') +
+        `</div>`;
+      chain += `<input type="text" inputmode="decimal" class="calc-value-input point-step-value" placeholder="値" value="${escapeHtml(step.value)}" data-point-input-col="${col.id}" data-point-step="${idx}">`;
+      chain += `<button type="button" class="btn btn-danger btn-sm point-step-delete" data-point-delete-col="${col.id}" data-point-delete-step="${idx}">削除</button>`;
+      chain += `</div>`;
+    });
+
+    const baseNumber = columnValueToNumber(col, formula.previewBase);
+    const exampleResult = runStepsFrom(baseNumber, steps);
+    const baseDisplay = displayValueHTML(col, formula.previewBase);
+
+    return `<div class="point-formula-block">
+      <div class="point-formula-header"><span class="point-formula-name">${escapeHtml(col.name)}</span><span class="col-type-badge">（${escapeHtml(COL_TYPE_LABEL[col.type] || '')}）</span></div>
+      <div class="point-base-box">
+        <span class="point-base-label">基準値</span>
+        <div data-point-base-inputs="${col.id}">${fieldInputHTML(col, formula.previewBase, 'data-point-base')}</div>
+      </div>
+      <div class="point-chain-flow">
+        ${chain}
+        <button type="button" class="btn btn-ghost btn-sm point-add-step-btn" data-point-add-step="${col.id}">＋ ステップを追加</button>
+      </div>
+      <div class="point-result-box">基準値 <strong>${baseDisplay}</strong> → <strong>${escapeHtml(formatPointNumber(exampleResult))}pt</strong></div>
+    </div>`;
+  }
+
+  function renderPointSummary() {
+    const wrap = document.getElementById('pointSummary');
+    const cols = getPointColumns();
+    if (state.rows.length === 0) {
+      wrap.innerHTML = '<p style="color:var(--text-dim); font-size:13px;">まだ記録がありません。記録を追加すると、ここに合計ポイントが表示されます。</p>';
+      return;
+    }
+    let grandTotal = 0;
+    const subtotals = cols.map(col => {
+      let subtotal = 0;
+      state.rows.forEach(row => { subtotal += computeColumnPoints(col, row.data[col.id]); });
+      grandTotal += subtotal;
+      return subtotal;
+    });
+
+    let html = '<div class="table-scroll" style="max-height:none; overflow-x:auto; overflow-y:visible;">';
+    html += '<table class="point-summary-table"><thead><tr>';
+    cols.forEach(col => { html += `<th>${escapeHtml(col.name)}</th>`; });
+    html += '<th class="point-total-col">合計</th></tr></thead><tbody><tr>';
+    subtotals.forEach(subtotal => { html += `<td>${escapeHtml(formatPointNumber(subtotal))}pt</td>`; });
+    html += `<td class="point-total-col point-total-cell">${escapeHtml(formatPointNumber(grandTotal))}pt</td>`;
+    html += '</tr></tbody></table></div>';
+    wrap.innerHTML = html;
+  }
+
+  document.getElementById('pointFormulaList').addEventListener('click', (e) => {
+    const opBtn = e.target.closest('[data-point-op]');
+    if (opBtn) {
+      const col = state.columns.find(c => c.id === opBtn.dataset.pointCol);
+      if (col) {
+        const idx = parseInt(opBtn.dataset.pointStep, 10);
+        const formula = ensurePointFormula(col);
+        if (formula.steps && formula.steps[idx]) formula.steps[idx].operator = opBtn.dataset.pointOp;
+        save();
+        renderPointFormulaList();
+        renderPointSummary();
+      }
+      return;
+    }
+    const addBtn = e.target.closest('[data-point-add-step]');
+    if (addBtn) {
+      const col = state.columns.find(c => c.id === addBtn.dataset.pointAddStep);
+      if (col) {
+        const formula = ensurePointFormula(col);
+        if (formula.steps) formula.steps.push({ operator: '+', value: '' });
+        save();
+        renderPointFormulaList();
+        renderPointSummary();
+      }
+      return;
+    }
+    const delBtn = e.target.closest('[data-point-delete-col]');
+    if (delBtn) {
+      const col = state.columns.find(c => c.id === delBtn.dataset.pointDeleteCol);
+      if (col) {
+        const idx = parseInt(delBtn.dataset.pointDeleteStep, 10);
+        const formula = ensurePointFormula(col);
+        if (formula.steps) formula.steps.splice(idx, 1);
+        save();
+        renderPointFormulaList();
+        renderPointSummary();
+      }
+      return;
+    }
+  });
+  document.getElementById('pointFormulaList').addEventListener('input', (e) => {
+    const baseInput = e.target.closest('[data-point-base]');
+    if (baseInput) {
+      const col = state.columns.find(c => c.id === baseInput.dataset.pointBase);
+      if (col) {
+        const formula = ensurePointFormula(col);
+        const container = document.querySelector(`[data-point-base-inputs="${col.id}"]`);
+        const result = collectFieldValue(container, col, 'data-point-base');
+        formula.previewBase = result.value;
+        save();
+        renderPointSummary();
+        // 入力欄自体は再描画せず、基準値の結果表示だけをその場で更新する（フォーカスを維持するため）
+        const block = baseInput.closest('.point-formula-block');
+        const resultBox = block && block.querySelector('.point-result-box');
+        if (resultBox && formula.steps) {
+          const baseNumber = columnValueToNumber(col, formula.previewBase);
+          const exampleResult = runStepsFrom(baseNumber, formula.steps);
+          const baseDisplay = displayValueHTML(col, formula.previewBase);
+          resultBox.innerHTML = `基準値 <strong>${baseDisplay}</strong> → <strong>${formatPointNumber(exampleResult)}pt</strong>`;
+        }
+      }
+      return;
+    }
+    const stepInput = e.target.closest('[data-point-input-col]');
+    if (stepInput) {
+      const col = state.columns.find(c => c.id === stepInput.dataset.pointInputCol);
+      if (col) {
+        const idx = parseInt(stepInput.dataset.pointStep, 10);
+        const formula = ensurePointFormula(col);
+        if (formula.steps && formula.steps[idx]) formula.steps[idx].value = stepInput.value;
+        save();
+        renderPointSummary();
+        // 結果表示だけを更新し、入力欄自体は再描画しない
+        const block = stepInput.closest('.point-formula-block');
+        const resultBox = block && block.querySelector('.point-result-box');
+        if (resultBox && formula.steps) {
+          const baseNumber = columnValueToNumber(col, formula.previewBase);
+          const exampleResult = runStepsFrom(baseNumber, formula.steps);
+          const baseDisplay = displayValueHTML(col, formula.previewBase);
+          resultBox.innerHTML = `基準値 <strong>${baseDisplay}</strong> → <strong>${formatPointNumber(exampleResult)}pt</strong>`;
+        }
+      }
+      return;
+    }
+    const plusInput = e.target.closest('[data-point-check-plus]');
+    if (plusInput) {
+      const col = state.columns.find(c => c.id === plusInput.dataset.pointCheckPlus);
+      if (col) {
+        ensurePointFormula(col).plusValue = plusInput.value;
+        save();
+        renderPointSummary();
+        updateCheckResultBox(col, plusInput);
+      }
+      return;
+    }
+    const minusInput = e.target.closest('[data-point-check-minus]');
+    if (minusInput) {
+      const col = state.columns.find(c => c.id === minusInput.dataset.pointCheckMinus);
+      if (col) {
+        ensurePointFormula(col).minusValue = minusInput.value;
+        save();
+        renderPointSummary();
+        updateCheckResultBox(col, minusInput);
+      }
+      return;
+    }
+  });
+  function updateCheckResultBox(col, fromEl) {
+    const block = fromEl.closest('.point-formula-block');
+    const resultBox = block && block.querySelector('.point-result-box');
+    if (!resultBox) return;
+    const plusResult = computeColumnPoints(col, true);
+    const minusResult = computeColumnPoints(col, false);
+    resultBox.innerHTML = `チェック時 → <strong>${formatPointNumber(plusResult)}pt</strong>　／　未チェック時 → <strong>${formatPointNumber(minusResult)}pt</strong>`;
+  }
+
+  // ---------- 記録を追加フォーム（改行／スライド切替可能なフィールドカード） ----------
+  function renderAddForm() {
+    const noColsMsg = document.getElementById('addNoColsMsg');
+    const entryPanel = document.getElementById('addEntryPanel');
+    const previewPanel = document.getElementById('addPreviewPanel');
+    const btn = document.getElementById('addRowBtn');
+
+    if (state.columns.length === 0) {
+      noColsMsg.style.display = 'block';
+      entryPanel.style.display = 'none';
+      previewPanel.style.display = 'none';
+      btn.style.display = 'none';
+      document.getElementById('jumpToCols').onclick = () => { closeOverlay('overlayAdd'); document.getElementById('navCols').click(); };
+      return;
+    }
+    noColsMsg.style.display = 'none';
+    entryPanel.style.display = '';
+    previewPanel.style.display = '';
+    btn.style.display = '';
+
+    const fields = document.getElementById('entryFields');
+    fields.innerHTML = '';
+    fields.classList.remove('mode-wrap', 'mode-slide');
+    fields.classList.add(state.settings.entryFieldsMode === 'slide' ? 'mode-slide' : 'mode-wrap');
+
+    const dateField = document.createElement('div');
+    dateField.className = 'entry-field entry-field-date';
+    dateField.innerHTML = `<span class="entry-field-label">日時</span><span class="entry-field-value">${escapeHtml(formatAutoDate(Date.now()))}</span>`;
+    fields.appendChild(dateField);
+
+    state.columns.forEach(col => {
+      const field = document.createElement('div');
+      field.className = 'entry-field';
+      field.innerHTML = `<span class="entry-field-label">${escapeHtml(col.name)}</span>` + fieldInputHTML(col, undefined, 'data-col');
+      fields.appendChild(field);
+    });
+
+    updateEntryModeToggleUI();
+    updateEntrySlideControlsVisibility();
+    refreshFormulaDisplays(fields, 'data-col');
+    updateAddPreview();
+  }
+
+  function updateAddPreview() {
+    if (state.columns.length === 0) return;
+    const entryFields = document.getElementById('entryFields');
+    const headRow = document.getElementById('addPreviewHead');
+    const bodyRow = document.getElementById('addPreviewRow');
+    if (!entryFields || !headRow || !bodyRow) return;
+    headRow.innerHTML = ''; bodyRow.innerHTML = '';
+    document.getElementById('addPreviewTable').classList.toggle('bordered', state.settings.tableBorders === 'on');
+
+    const thDate = document.createElement('th'); thDate.textContent = '日時'; headRow.appendChild(thDate);
+    const tdDate = document.createElement('td'); tdDate.className = 'datetime-cell'; tdDate.textContent = formatAutoDate(Date.now()); bodyRow.appendChild(tdDate);
+
+    state.columns.forEach(col => {
+      const th = document.createElement('th'); th.textContent = col.name;
+      if (col.type === 'check') th.classList.add('th-center');
+      headRow.appendChild(th);
+      const td = document.createElement('td');
+      const result = collectFieldValue(entryFields, col, 'data-col');
+      if (col.type === 'check') {
+        td.className = 'check-cell';
+        td.innerHTML = result.value ? '<span class="check-box-display on"></span>' : '<span class="check-box-display"></span>';
+      } else {
+        td.innerHTML = displayValueHTML(col, result.value);
+      }
+      bodyRow.appendChild(td);
+    });
+    applyColumnOverflowMode(document.getElementById('addPreviewScroll'), document.getElementById('addPreviewTable'));
+  }
+
+  // ---------- 記録入力欄の表示方法（改行／スライド）切替 ----------
+  function updateEntryModeToggleUI() {
+    document.querySelectorAll('#entryModeToggle .entry-mode-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.entryMode === state.settings.entryFieldsMode);
+    });
+  }
+  function updateEntrySlideControlsVisibility() {
+    const controls = document.getElementById('entrySlideControls');
+    if (controls) controls.style.display = state.settings.entryFieldsMode === 'slide' ? 'flex' : 'none';
+  }
+  document.querySelectorAll('#entryModeToggle .entry-mode-btn').forEach(b => {
+    b.onclick = () => {
+      state.settings.entryFieldsMode = b.dataset.entryMode;
+      save();
+      const fields = document.getElementById('entryFields');
+      fields.classList.remove('mode-wrap', 'mode-slide');
+      fields.classList.add(state.settings.entryFieldsMode === 'slide' ? 'mode-slide' : 'mode-wrap');
+      updateEntryModeToggleUI();
+      updateEntrySlideControlsVisibility();
+    };
+  });
+  document.getElementById('entrySlideLeft').onclick = () => {
+    document.getElementById('entryFields').scrollBy({ left: -220, behavior: 'smooth' });
+  };
+  document.getElementById('entrySlideRight').onclick = () => {
+    document.getElementById('entryFields').scrollBy({ left: 220, behavior: 'smooth' });
+  };
+
+  // 入力中の変化（テキスト入力・チェック・単位ボタンなど）に合わせてプレビューをリアルタイム更新
+  const overlayAddEl = document.getElementById('overlayAdd');
+  overlayAddEl.addEventListener('input', (e) => { if (e.target.closest('#entryFields')) requestAnimationFrame(() => { refreshFormulaDisplays(document.getElementById('entryFields'), 'data-col'); updateAddPreview(); }); });
+  overlayAddEl.addEventListener('change', (e) => { if (e.target.closest('#entryFields')) requestAnimationFrame(() => { refreshFormulaDisplays(document.getElementById('entryFields'), 'data-col'); updateAddPreview(); }); });
+  overlayAddEl.addEventListener('click', (e) => { if (e.target.closest('#entryFields')) requestAnimationFrame(() => { refreshFormulaDisplays(document.getElementById('entryFields'), 'data-col'); updateAddPreview(); }); });
+
+  document.getElementById('addRowBtn').onclick = () => {
+    const root = document.getElementById('entryFields');
+    const data = {}; let hasValue = false;
+    state.columns.forEach(col => {
+      const result = collectFieldValue(root, col, 'data-col');
+      data[col.id] = result.value;
+      if (result.hasValue) hasValue = true;
+    });
+    if (!hasValue) { alert('少なくとも1つの項目に値を入力してください。'); return; }
+    state.rows.push({ id: uid(), createdAt: Date.now(), data });
+    save(); closeOverlay('overlayAdd'); currentPage = 0; renderAll();
+  };
+
+  // ---------- 記録一覧の並び替え ----------
+  function buildSortMenuItems() {
+    const items = [
+      { type: 'direct', key: 'newest', columnId: null, label: '新規順' },
+      { type: 'direct', key: 'oldest', columnId: null, label: '古い順' }
+    ];
+    const distanceCols = state.columns.filter(c => c.type === 'distance');
+    const countCols = state.columns.filter(c => c.type === 'count');
+    const timeCols = state.columns.filter(c => c.type === 'time');
+
+    function pushGroup(cols, descKey, ascKey, descLabel, ascLabel) {
+      if (cols.length === 1) {
+        items.push({ type: 'direct', key: descKey, columnId: cols[0].id, label: `${cols[0].name}の${descLabel}` });
+        items.push({ type: 'direct', key: ascKey, columnId: cols[0].id, label: `${cols[0].name}の${ascLabel}` });
+      } else if (cols.length > 1) {
+        items.push({ type: 'submenu', key: descKey, label: `${descLabel}（項目を選択）`, options: cols });
+        items.push({ type: 'submenu', key: ascKey, label: `${ascLabel}（項目を選択）`, options: cols });
+      }
+    }
+    pushGroup(distanceCols, 'distance_desc', 'distance_asc', '多い順', '低い順');
+    pushGroup(countCols, 'count_desc', 'count_asc', '多い順', '少ない順');
+    pushGroup(timeCols, 'time_desc', 'time_asc', '秒数の多い順', '秒数の少ない順');
+    return items;
+  }
+
+  function findSortItemLabel(sort) {
+    const items = buildSortMenuItems();
+    if (!sort || !sort.key) return '新規順';
+    if (sort.key === 'newest' || sort.key === 'oldest') {
+      const found = items.find(i => i.key === sort.key);
+      return found ? found.label : '新規順';
+    }
+    // 列を選ぶタイプのソート：現在選択されている列名で組み立てる
+    const col = state.columns.find(c => c.id === sort.columnId);
+    if (!col) return '新規順';
+    const labelMap = {
+      distance_desc: '多い順', distance_asc: '低い順',
+      count_desc: '多い順', count_asc: '少ない順',
+      time_desc: '秒数の多い順', time_asc: '秒数の少ない順'
+    };
+    const suffix = labelMap[sort.key];
+    return suffix ? `${col.name}の${suffix}` : '新規順';
+  }
+  function updateSortButtonLabel() {
+    const labelEl = document.getElementById('sortDropdownLabel');
+    if (!labelEl) return;
+    labelEl.textContent = findSortItemLabel(state.settings.sort);
+  }
+
+  let sortMenuLevel = 'root';
+  let sortMenuPendingCategory = null;
+  function openSortMenu() {
+    sortMenuLevel = 'root';
+    sortMenuPendingCategory = null;
+    renderSortMenuPortal();
+    document.getElementById('sortDropdown').classList.add('open');
+  }
+  function renderSortMenuPortal() {
+    const portal = document.getElementById('sortDropdownPortal');
+    const btn = document.getElementById('sortDropdownBtn');
+    if (!portal || !btn) return;
+    const rect = btn.getBoundingClientRect();
+    let html = '';
+    if (sortMenuLevel === 'root') {
+      const items = buildSortMenuItems();
+      html = items.map(item => {
+        if (item.type === 'submenu') {
+          return `<button type="button" class="type-option sort-option" data-sort-submenu="${item.key}" data-sort-label="${escapeHtml(item.label.replace('（項目を選択）',''))}">${escapeHtml(item.label)} ›</button>`;
+        }
+        const isActive = state.settings.sort.key === item.key && (item.columnId ? state.settings.sort.columnId === item.columnId : true);
+        return `<button type="button" class="type-option sort-option ${isActive ? 'active' : ''}" data-sort-key="${item.key}" data-sort-col="${item.columnId || ''}">${escapeHtml(item.label)}</button>`;
+      }).join('');
+    } else if (sortMenuLevel === 'submenu' && sortMenuPendingCategory) {
+      const cat = sortMenuPendingCategory;
+      html = `<button type="button" class="type-option sort-option sort-back" data-sort-back="1">‹ 戻る</button>` +
+        cat.options.map(col => {
+          const isActive = state.settings.sort.key === cat.key && state.settings.sort.columnId === col.id;
+          return `<button type="button" class="type-option sort-option ${isActive ? 'active' : ''}" data-sort-key="${cat.key}" data-sort-col="${col.id}">${escapeHtml(col.name)}（${escapeHtml(cat.label)}）</button>`;
+        }).join('');
+    }
+    portal.innerHTML = html;
+    portal.style.left = Math.round(rect.left) + 'px';
+    portal.style.top = Math.round(rect.bottom + 4) + 'px';
+    portal.style.minWidth = Math.max(rect.width, 190) + 'px';
+    portal.classList.add('open');
+  }
+  function closeSortMenu() {
+    const portal = document.getElementById('sortDropdownPortal');
+    if (portal) { portal.classList.remove('open'); portal.innerHTML = ''; }
+    const dd = document.getElementById('sortDropdown');
+    if (dd) dd.classList.remove('open');
+    sortMenuLevel = 'root';
+    sortMenuPendingCategory = null;
+  }
+
+  document.addEventListener('click', (e) => {
+    const sortBtn = e.target.closest('#sortDropdownBtn');
+    if (sortBtn) {
+      const isOpen = document.getElementById('sortDropdownPortal').classList.contains('open');
+      closeTypeDropdownPortal();
+      closeLapsSortMenu();
+      if (isOpen) { closeSortMenu(); } else { openSortMenu(); }
+      return;
+    }
+    const submenuBtn = e.target.closest('#sortDropdownPortal [data-sort-submenu]');
+    if (submenuBtn) {
+      const key = submenuBtn.dataset.sortSubmenu;
+      const items = buildSortMenuItems();
+      const found = items.find(i => i.key === key && i.type === 'submenu');
+      if (found) {
+        sortMenuLevel = 'submenu';
+        sortMenuPendingCategory = { key: found.key, label: submenuBtn.dataset.sortLabel, options: found.options };
+        renderSortMenuPortal();
+      }
+      return;
+    }
+    const backBtn = e.target.closest('#sortDropdownPortal [data-sort-back]');
+    if (backBtn) {
+      sortMenuLevel = 'root';
+      sortMenuPendingCategory = null;
+      renderSortMenuPortal();
+      return;
+    }
+    const sortOption = e.target.closest('#sortDropdownPortal [data-sort-key]');
+    if (sortOption) {
+      const key = sortOption.dataset.sortKey;
+      const colId = sortOption.dataset.sortCol || null;
+      state.settings.sort = { key, columnId: colId };
+      save(); closeSortMenu(); currentPage = 0; renderTable();
+      return;
+    }
+    if (!e.target.closest('#sortDropdown') && !e.target.closest('#sortDropdownPortal')) {
+      closeSortMenu();
+    }
+  });
+  window.addEventListener('resize', closeSortMenu);
+  document.addEventListener('scroll', closeSortMenu, true);
+
+  // ---------- 保存したタイムの並び替え・表示件数 ----------
+  const LAPS_SORT_OPTIONS = [
+    { key: 'newest', label: '新規順' },
+    { key: 'oldest', label: '古い順' },
+    { key: 'longest', label: '多い順' },
+    { key: 'shortest', label: '少ない順' }
+  ];
+  function lapsSortLabel(key) {
+    const found = LAPS_SORT_OPTIONS.find(o => o.key === key);
+    return found ? found.label : '新規順';
+  }
+  function updateLapsSortLabels() {
+    const label = lapsSortLabel(state.timer.lapsSort);
+    document.querySelectorAll('[data-laps-sort-label]').forEach(el => { el.textContent = label; });
+  }
+  function getSortedLaps() {
+    const laps = state.timer.laps.slice();
+    switch (state.timer.lapsSort) {
+      case 'oldest': laps.sort((a, b) => a.createdAt - b.createdAt); break;
+      case 'longest': laps.sort((a, b) => b.elapsedMs - a.elapsedMs); break;
+      case 'shortest': laps.sort((a, b) => a.elapsedMs - b.elapsedMs); break;
+      case 'newest':
+      default: laps.sort((a, b) => b.createdAt - a.createdAt);
+    }
+    return laps;
+  }
+
+  const LAPS_SORT_DROPDOWN_IDS = { top: 'lapsSortDropdownTop', bottom: 'lapsSortDropdownBottom', all: 'lapsSortDropdownAll' };
+  let lapsSortOpenFor = null; // 'top' | 'bottom' | 'all' | null
+  function openLapsSortMenu(which) {
+    closeTypeDropdownPortal();
+    closeSortMenu();
+    closeLapsSortMenu();
+    lapsSortOpenFor = which;
+    renderLapsSortPortal();
+    const wrap = document.getElementById(LAPS_SORT_DROPDOWN_IDS[which]);
+    if (wrap) wrap.classList.add('open');
+  }
+  function renderLapsSortPortal() {
+    const portal = document.getElementById('lapsSortDropdownPortal');
+    if (!portal || !lapsSortOpenFor) return;
+    const wrap = document.getElementById(LAPS_SORT_DROPDOWN_IDS[lapsSortOpenFor]);
+    const btn = wrap.querySelector('.type-dropdown-btn');
+    const rect = btn.getBoundingClientRect();
+    portal.innerHTML = LAPS_SORT_OPTIONS.map(o =>
+      `<button type="button" class="type-option ${state.timer.lapsSort === o.key ? 'active' : ''}" data-laps-sort-value="${o.key}">${o.label}</button>`
+    ).join('');
+    portal.style.left = Math.round(rect.left) + 'px';
+    portal.style.top = Math.round(rect.bottom + 4) + 'px';
+    portal.style.minWidth = Math.max(rect.width, 130) + 'px';
+    portal.classList.add('open');
+  }
+  function closeLapsSortMenu() {
+    const portal = document.getElementById('lapsSortDropdownPortal');
+    if (portal) { portal.classList.remove('open'); portal.innerHTML = ''; }
+    Object.values(LAPS_SORT_DROPDOWN_IDS).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('open');
+    });
+    lapsSortOpenFor = null;
+  }
+  document.addEventListener('click', (e) => {
+    const sortBtn = e.target.closest('#lapsSortDropdownTop .type-dropdown-btn, #lapsSortDropdownBottom .type-dropdown-btn, #lapsSortDropdownAll .type-dropdown-btn');
+    if (sortBtn) {
+      let which = 'top';
+      if (sortBtn.closest('#lapsSortDropdownBottom')) which = 'bottom';
+      else if (sortBtn.closest('#lapsSortDropdownAll')) which = 'all';
+      if (lapsSortOpenFor === which) { closeLapsSortMenu(); } else { openLapsSortMenu(which); }
+      return;
+    }
+    const option = e.target.closest('#lapsSortDropdownPortal [data-laps-sort-value]');
+    if (option) {
+      state.timer.lapsSort = option.dataset.lapsSortValue;
+      save(); closeLapsSortMenu();
+      lapsAllPage = 0;
+      renderTimerLaps();
+      if (document.getElementById('overlayLapsAll').classList.contains('open')) renderTimerLapsAll();
+      return;
+    }
+    if (!e.target.closest('#lapsSortDropdownTop') && !e.target.closest('#lapsSortDropdownBottom') && !e.target.closest('#lapsSortDropdownAll') && !e.target.closest('#lapsSortDropdownPortal')) {
+      closeLapsSortMenu();
+    }
+  });
+  window.addEventListener('resize', closeLapsSortMenu);
+  document.addEventListener('scroll', closeLapsSortMenu, true);
+
+  function distanceToMeters(raw) {
+    const data = normalizeDistanceValue(raw);
+    const km = parseFloat(data.km) || 0;
+    const m = parseFloat(data.m) || 0;
+    return km * 1000 + m;
+  }
+  function timeToSeconds(raw) {
+    if (!raw || typeof raw !== 'object') return 0;
+    const h = parseFloat(raw.hour) || 0, m = parseFloat(raw.minute) || 0, s = parseFloat(raw.second) || 0;
+    return h * 3600 + m * 60 + s;
+  }
+  function countValue(raw) {
+    const num = parseFloat(raw);
+    return isNaN(num) ? 0 : num;
+  }
+  function getSortedRows() {
+    const sort = state.settings.sort || { key: 'newest', columnId: null };
+    const rows = state.rows.slice();
+    switch (sort.key) {
+      case 'oldest':
+        rows.sort((a, b) => a.createdAt - b.createdAt);
+        break;
+      case 'distance_desc':
+        rows.sort((a, b) => distanceToMeters(b.data[sort.columnId]) - distanceToMeters(a.data[sort.columnId]));
+        break;
+      case 'distance_asc':
+        rows.sort((a, b) => distanceToMeters(a.data[sort.columnId]) - distanceToMeters(b.data[sort.columnId]));
+        break;
+      case 'count_desc':
+        rows.sort((a, b) => countValue(b.data[sort.columnId]) - countValue(a.data[sort.columnId]));
+        break;
+      case 'count_asc':
+        rows.sort((a, b) => countValue(a.data[sort.columnId]) - countValue(b.data[sort.columnId]));
+        break;
+      case 'time_desc':
+        rows.sort((a, b) => timeToSeconds(b.data[sort.columnId]) - timeToSeconds(a.data[sort.columnId]));
+        break;
+      case 'time_asc':
+        rows.sort((a, b) => timeToSeconds(a.data[sort.columnId]) - timeToSeconds(b.data[sort.columnId]));
+        break;
+      case 'newest':
+      default:
+        rows.sort((a, b) => b.createdAt - a.createdAt);
+    }
+    return rows;
+  }
+
+  // ---------- 記録一覧テーブル（ページ送り／スライド対応） ----------
+  // 実際に行を描画してみて、その高さをもとに1ページに入る件数を求める（見出しの高さも差し引く）
+  function computeRowsPerPageByMeasure(sortedRows, showDate, showPoints) {
+    const wrap = document.getElementById('tableSlideWrap');
+    const table = document.getElementById('recordTable');
+    const body = document.getElementById('tableBody');
+    const theadEl = table ? table.querySelector('thead') : null;
+    const avail = wrap ? wrap.clientHeight : 400;
+    const headerHeight = theadEl ? theadEl.offsetHeight : ROW_HEIGHT;
+    const usable = avail - headerHeight;
+
+    if (sortedRows.length === 0) return Math.max(1, Math.floor(usable / ROW_HEIGHT) || 3);
+
+    // 一時的に全記録を描画して、実際の行の高さを1行ずつ積み上げて測る
+    body.innerHTML = '';
+    sortedRows.forEach(row => { body.appendChild(buildRecordRowElement(row, showDate, showPoints)); });
+    let heightSum = 0;
+    let count = 0;
+    for (const tr of Array.from(body.children)) {
+      heightSum += tr.offsetHeight;
+      if (heightSum > usable && count > 0) break;
+      count++;
+    }
+    return Math.max(1, count);
+  }
+
+  function emptyLineHTML() {
+    return '<span class="empty-line"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="100" x2="100" y2="0" vector-effect="non-scaling-stroke" stroke-width="2" stroke-linecap="round" style="stroke:var(--line)"/></svg></span>';
+  }
+
+  function displayValueHTML(col, raw) {
+    if (col.type === 'check') return null; // handled separately (check-cell)
+    if (col.type === 'time') {
+      if (!raw || typeof raw !== 'object') return emptyLineHTML();
+      const units = col.timeUnits || { hour: false, minute: true, second: true };
+      const format = state.settings.timeFormat || 'kanji';
+      const labelMap = { hour: '時', minute: '分', second: '秒' };
+      const order = ['hour', 'minute', 'second'].filter(k => units[k]);
+      const anyFilled = order.some(k => raw[k]);
+      if (!anyFilled) return emptyLineHTML();
+      if (format === 'colon') {
+        return escapeHtml(order.map(k => raw[k] || '0').join('：'));
+      }
+      return order.filter(k => raw[k]).map(k => `${escapeHtml(raw[k])}${labelMap[k]}`).join('');
+    }
+    if (col.type === 'distance') {
+      if (!raw || typeof raw !== 'object') return emptyLineHTML();
+      const data = normalizeDistanceValue(raw);
+      const units = col.distanceUnits || { km: true, m: true };
+      const order = ['km', 'm'].filter(k => units[k]);
+      const anyFilled = order.some(k => data[k]);
+      if (!anyFilled) return emptyLineHTML();
+      return order.filter(k => data[k]).map(k => `${escapeHtml(data[k])}${k}`).join('');
+    }
+    if (col.type === 'count') {
+      return raw ? `${escapeHtml(raw)}回` : emptyLineHTML();
+    }
+    if (col.type === 'formula') {
+      const num = typeof raw === 'number' ? raw : parseFloat(raw);
+      return (raw === undefined || raw === null || raw === '' || isNaN(num)) ? emptyLineHTML() : escapeHtml(formatPointNumber(num));
+    }
+    return raw ? escapeHtml(raw) : emptyLineHTML();
+  }
+
+  // 記録一覧に表示する列数（削除チェック・日時・ポイントの有無を含む）
+  function getVisibleColumnCount() {
+    let n = state.columns.length;
+    if (listActionMode === 'delete') n++;
+    if (state.settings.showDateColumn !== 'off') n++;
+    if (state.settings.showPointsInList && getPointColumns().length > 0) n++;
+    return n;
+  }
+  // ある記録（行）に、ポイント計算式をあてはめた合計点を求める
+  function computeRowPointTotal(row) {
+    let total = 0;
+    getPointColumns().forEach(col => { total += computeColumnPoints(col, row.data[col.id]); });
+    return total;
+  }
+
+  // 記録一覧の1行分の <tr> 要素を組み立てる（測定用の一時描画と、実際の表示の両方で使う共通処理）
+  function buildRecordRowElement(row, showDate, showPoints) {
+    const tr = document.createElement('tr');
+    tr.dataset.rowId = row.id;
+    const isEditing = listActionMode === 'edit' && editingRowId === row.id;
+
+    if (listActionMode === 'delete') {
+      const tdCheck = document.createElement('td');
+      tdCheck.className = 'check-cell';
+      const isChecked = rowsMarkedForDelete.has(row.id);
+      tdCheck.innerHTML = `<span class="check-box-display row-del-toggle ${isChecked ? 'on' : ''}" data-del-row="${row.id}"></span>`;
+      tr.appendChild(tdCheck);
+    }
+
+    if (showDate) {
+      const tdDate = document.createElement('td');
+      tdDate.className = 'datetime-cell'; tdDate.textContent = formatAutoDate(row.createdAt);
+      tr.appendChild(tdDate);
+    }
+
+    if (showPoints) {
+      const tdPoint = document.createElement('td');
+      tdPoint.className = 'point-cell';
+      tdPoint.innerHTML = `<span class="point-cell-total">${escapeHtml(formatPointNumber(computeRowPointTotal(row)))}pt</span>`;
+      tr.appendChild(tdPoint);
+    }
+
+    const pointConfirmActive = listActionMode === 'points' && pointBreakdownExpandedRows.has(row.id);
+    state.columns.forEach(col => {
+      const td = document.createElement('td');
+      if (pointConfirmActive && POINT_TYPES.includes(col.type)) {
+        td.className = 'point-inline-value';
+        td.innerHTML = `${escapeHtml(formatPointNumber(computeColumnPoints(col, row.data[col.id])))}pt`;
+      } else if (isEditing) {
+        td.innerHTML = fieldInputHTML(col, row.data[col.id], 'data-edit-col');
+      } else if (col.type === 'check') {
+        td.className = 'check-cell';
+        td.innerHTML = row.data[col.id] ? '<span class="check-box-display on"></span>' : '<span class="check-box-display"></span>';
+      } else {
+        td.innerHTML = displayValueHTML(col, row.data[col.id]);
+      }
+      tr.appendChild(td);
+    });
+
+    if (listActionMode === 'edit') {
+      if (isEditing) {
+        tr.classList.add('row-editing');
+      } else {
+        tr.classList.add('row-clickable-edit');
+        tr.onclick = () => { editingRowId = row.id; renderTable(); };
+      }
+    }
+    if (listActionMode === 'points') {
+      tr.classList.add('row-clickable-edit');
+      if (pointBreakdownExpandedRows.has(row.id)) tr.classList.add('row-editing');
+      tr.onclick = () => {
+        if (pointBreakdownExpandedRows.has(row.id)) pointBreakdownExpandedRows.delete(row.id);
+        else pointBreakdownExpandedRows.add(row.id);
+        renderTable();
+      };
+    }
+
+    return tr;
+  }
+
+  function renderTable() {
+    const head = document.getElementById('tableHead');
+    const body = document.getElementById('tableBody');
+    const empty = document.getElementById('emptyState');
+    const emptyMsg = document.getElementById('emptyStateMsg');
+    const table = document.getElementById('recordTable');
+    const countBadge = document.getElementById('countBadge');
+    const tableScroll = document.getElementById('tableScroll');
+    const slideHint = document.getElementById('slideHint');
+
+    countBadge.textContent = state.rows.length ? `${state.rows.length} 件` : '';
+    updateSortButtonLabel();
+
+    if (state.rows.length === 0) {
+      listActionMode = 'none';
+      rowsMarkedForDelete.clear();
+      editingRowId = null;
+    }
+    renderListModeControls();
+
+    const showDate = state.settings.showDateColumn !== 'off';
+    const showPoints = state.settings.showPointsInList && getPointColumns().length > 0;
+
+    head.innerHTML = '';
+    if (listActionMode === 'delete') {
+      const thCheck = document.createElement('th');
+      thCheck.className = 'th-center';
+      const pageIdsForHeader = getCurrentPageRowIds();
+      const allChecked = pageIdsForHeader.length > 0 && pageIdsForHeader.every(id => rowsMarkedForDelete.has(id));
+      thCheck.innerHTML = `<span class="check-box-display select-all-toggle ${allChecked ? 'on' : ''}" id="selectAllRowsToggle" title="このページの記録を全て選択／解除"></span>`;
+      head.appendChild(thCheck);
+    }
+    if (showDate) {
+      const thDate = document.createElement('th'); thDate.textContent = '日時'; head.appendChild(thDate);
+    }
+    if (showPoints) {
+      const thPoint = document.createElement('th'); thPoint.textContent = 'ポイント'; head.appendChild(thPoint);
+    }
+    state.columns.forEach(col => {
+      const th = document.createElement('th'); th.textContent = col.name;
+      if (col.type === 'check') th.classList.add('th-center');
+      head.appendChild(th);
+    });
+
+    body.innerHTML = '';
+
+    // 項目が1つもない場合のみ、表そのものを隠す。項目さえあれば、記録が0件でも表（見出し）は表示し、
+    // 列のはみ出し挙動（ボタンでスライドなど）を記録を追加する前から確認できるようにする。
+    if (state.columns.length === 0) {
+      table.style.display = 'none';
+      empty.style.display = 'block';
+      emptyMsg.textContent = 'まだ項目がありません。上のメニューの「項目」から始めてください。';
+      document.getElementById('pageControls').innerHTML = '';
+      slideHint.style.display = 'none';
+      return;
+    }
+    table.style.display = '';
+    empty.style.display = 'none';
+    table.classList.toggle('bordered', state.settings.tableBorders === 'on');
+
+    if (state.rows.length === 0) {
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = getVisibleColumnCount();
+      td.style.textAlign = 'center'; td.style.color = 'var(--text-dim)'; td.style.padding = '32px 12px';
+      td.textContent = 'まだ記録がありません。上のメニューの「追加」から記録してください。';
+      tr.appendChild(td);
+      body.appendChild(tr);
+      document.getElementById('pageControls').innerHTML = '';
+      slideHint.style.display = 'none';
+      applyColumnOverflowMode(tableScroll, table);
+      return;
+    }
+
+    const sortedRows = getSortedRows();
+    // 実際に描画した高さをもとに、1ページに入る件数を正確に求める（画面からあふれた分がページ送りされず
+    // 単にスクロールで隠れてしまう問題を防ぐ）
+    const rowsPerPage = computeRowsPerPageByMeasure(sortedRows, showDate, showPoints);
+    cachedRowsPerPage = rowsPerPage;
+    const totalPages = Math.max(1, Math.ceil(sortedRows.length / rowsPerPage));
+    if (currentPage >= totalPages) currentPage = totalPages - 1;
+    if (currentPage < 0) currentPage = 0;
+    const start = currentPage * rowsPerPage;
+    const pageRows = sortedRows.slice(start, start + rowsPerPage);
+
+    body.innerHTML = '';
+    pageRows.forEach(row => { body.appendChild(buildRecordRowElement(row, showDate, showPoints)); });
+
+    renderPageControls(totalPages);
+    applyColumnOverflowMode(tableScroll, table);
+    slideHint.style.display = (state.settings.rowDisplayMode === 'slide' && totalPages > 1) ? 'block' : 'none';
+  }
+
+  function renderPageControls(totalPages) {
+    const controls = document.getElementById('pageControls');
+    controls.innerHTML = '';
+    if (totalPages <= 1) return;
+
+    if (state.settings.rowDisplayMode === 'slide') {
+      const prev = document.createElement('button');
+      prev.className = 'slide-arrow'; prev.textContent = '‹'; prev.disabled = currentPage === 0;
+      prev.onclick = () => goSlidePage(-1);
+      const next = document.createElement('button');
+      next.className = 'slide-arrow'; next.textContent = '›'; next.disabled = currentPage === totalPages - 1;
+      next.onclick = () => goSlidePage(1);
+      const dots = document.createElement('div'); dots.className = 'slide-dots';
+      for (let i = 0; i < totalPages; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'slide-dot' + (i === currentPage ? ' active' : '');
+        dot.onclick = () => { if (i === currentPage) return; goSlidePage(i > currentPage ? 1 : -1, i); };
+        dots.appendChild(dot);
+      }
+      controls.appendChild(prev); controls.appendChild(dots); controls.appendChild(next);
+    } else {
+      for (let i = 0; i < totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'page-num-btn' + (i === currentPage ? ' active' : '');
+        btn.textContent = (i + 1).toString();
+        btn.onclick = () => { currentPage = i; renderTable(); };
+        controls.appendChild(btn);
+      }
+    }
+  }
+
+  // ---------- スライド式：矢印／マウスホイール／タッチスワイプ（横・縦とも対応） ----------
+  function goSlidePage(dir, forcedIndex) {
+    if (slideLock) return;
+    const rowsPerPage = cachedRowsPerPage;
+    const totalPages = Math.max(1, Math.ceil(state.rows.length / rowsPerPage));
+    const next = (typeof forcedIndex === 'number') ? forcedIndex : currentPage + dir;
+    if (next < 0 || next >= totalPages || next === currentPage) return;
+    slideLock = true;
+    const track = document.getElementById('tableSlideTrack');
+    track.style.transition = 'transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s';
+    track.style.transform = dir > 0 ? 'translate(-18px,-10px)' : 'translate(18px,10px)';
+    track.style.opacity = '0.25';
+    setTimeout(() => {
+      currentPage = next;
+      renderTable();
+      const freshTrack = document.getElementById('tableSlideTrack');
+      freshTrack.style.transition = 'none';
+      freshTrack.style.transform = dir > 0 ? 'translate(18px,10px)' : 'translate(-18px,-10px)';
+      requestAnimationFrame(() => {
+        freshTrack.style.transition = 'transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s';
+        freshTrack.style.transform = 'translate(0,0)';
+        freshTrack.style.opacity = '1';
+        setTimeout(() => { slideLock = false; }, 230);
+      });
+    }, 160);
+  }
+
+  function setupSlideGestures() {
+    const wrap = document.getElementById('tableSlideWrap');
+    let wheelCooldown = false;
+
+    wrap.addEventListener('wheel', (e) => {
+      if (state.settings.rowDisplayMode !== 'slide') return;
+      const dx = e.deltaX, dy = e.deltaY;
+      const primary = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (Math.abs(primary) < 10) return;
+      e.preventDefault();
+      if (wheelCooldown || slideLock) return;
+      wheelCooldown = true;
+      goSlidePage(primary > 0 ? 1 : -1);
+      setTimeout(() => { wheelCooldown = false; }, 260);
+    }, { passive: false });
+
+    let touchStartX = 0, touchStartY = 0, touchActive = false;
+    wrap.addEventListener('touchstart', (e) => {
+      if (state.settings.rowDisplayMode !== 'slide') return;
+      touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY; touchActive = true;
+    }, { passive: true });
+    wrap.addEventListener('touchend', (e) => {
+      if (!touchActive || state.settings.rowDisplayMode !== 'slide') return;
+      touchActive = false;
+      const endX = e.changedTouches[0].clientX, endY = e.changedTouches[0].clientY;
+      const dx = touchStartX - endX, dy = touchStartY - endY;
+      const primary = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+      if (Math.abs(primary) < 40) return;
+      goSlidePage(primary > 0 ? 1 : -1);
+    }, { passive: true });
+  }
+
+  // 列（横）のはみ出し挙動
+  function applyColumnOverflowMode(tableScroll, table) {
+    table.style.transform = ''; table.style.width = '';
+    table.classList.remove('wrap-columns');
+    const oldBtns = tableScroll.parentElement.querySelectorAll('.col-nav-btn');
+    oldBtns.forEach(b => b.remove());
+
+    const mode = state.settings.columnOverflowMode;
+
+    if (mode === 'wrap') {
+      tableScroll.style.overflowX = 'hidden';
+      table.classList.add('wrap-columns');
+    } else if (mode === 'fitScale') {
+      tableScroll.style.overflowX = 'hidden';
+      requestAnimationFrame(() => {
+        table.style.transform = ''; table.style.width = '';
+        const natural = table.scrollWidth;
+        const avail = tableScroll.clientWidth;
+        if (natural > avail && natural > 0) {
+          const scale = Math.max(0.5, avail / natural);
+          table.style.transform = `scale(${scale})`;
+          table.style.width = `${(1 / scale) * 100}%`;
+        }
+      });
+    } else if (mode === 'normalSlide') {
+      tableScroll.style.overflowX = 'auto';
+    } else {
+      // buttonSlide (default)
+      tableScroll.style.overflowX = 'hidden';
+      requestAnimationFrame(() => {
+        const needsScroll = table.scrollWidth > tableScroll.clientWidth + 2;
+        if (!needsScroll) return;
+        const rightBtn = document.createElement('button');
+        rightBtn.className = 'col-nav-btn right show';
+        rightBtn.textContent = '›';
+        rightBtn.style.position = 'absolute'; rightBtn.style.right = '10px'; rightBtn.style.top = '50%';
+        rightBtn.onclick = () => tableScroll.scrollBy({ left: 220, behavior: 'smooth' });
+
+        const leftBtn = document.createElement('button');
+        leftBtn.className = 'col-nav-btn left';
+        leftBtn.textContent = '‹';
+        leftBtn.style.position = 'absolute'; leftBtn.style.left = '10px'; leftBtn.style.top = '50%';
+        leftBtn.onclick = () => tableScroll.scrollBy({ left: -220, behavior: 'smooth' });
+
+        tableScroll.parentElement.style.position = 'relative';
+        tableScroll.parentElement.appendChild(leftBtn);
+        tableScroll.parentElement.appendChild(rightBtn);
+
+        function updateBtns() {
+          leftBtn.classList.toggle('show', tableScroll.scrollLeft > 4);
+          rightBtn.classList.toggle('show', tableScroll.scrollLeft < tableScroll.scrollWidth - tableScroll.clientWidth - 4);
+        }
+        tableScroll.addEventListener('scroll', updateBtns);
+        updateBtns();
+      });
+    }
+  }
+
+  function saveEdit(rowId, tr) {
+    const row = state.rows.find(r => r.id === rowId);
+    if (!row) return;
+    state.columns.forEach(col => {
+      const result = collectFieldValue(tr, col, 'data-edit-col');
+      row.data[col.id] = result.value;
+    });
+    editingRowId = null; save(); renderTable();
+  }
+  function saveCurrentRowEdit() {
+    if (!editingRowId) return;
+    const tr = document.querySelector(`#tableBody tr[data-row-id="${editingRowId}"]`);
+    if (!tr) { editingRowId = null; renderTable(); return; }
+    saveEdit(editingRowId, tr);
+  }
+  function cancelCurrentRowEdit() {
+    editingRowId = null;
+    renderTable();
+  }
+  function getCurrentPageRowIds() {
+    if (state.rows.length === 0) return [];
+    const rowsPerPage = cachedRowsPerPage;
+    const totalPages = Math.max(1, Math.ceil(state.rows.length / rowsPerPage));
+    let page = currentPage;
+    if (page >= totalPages) page = totalPages - 1;
+    if (page < 0) page = 0;
+    const start = page * rowsPerPage;
+    return getSortedRows().slice(start, start + rowsPerPage).map(r => r.id);
+  }
+  function deleteMarkedRows() {
+    if (rowsMarkedForDelete.size === 0) { alert('削除する記録にチェックを入れてください。'); return; }
+    const activeFile = getActiveFile();
+    const columnsSnapshot = JSON.parse(JSON.stringify(state.columns));
+    const movedRows = state.rows.filter(r => rowsMarkedForDelete.has(r.id));
+    movedRows.forEach(row => {
+      state.trash.push({
+        id: uid(),
+        sourceFileId: activeFile ? activeFile.id : null,
+        sourceFileName: activeFile ? activeFile.name : '',
+        createdAt: row.createdAt,
+        deletedAt: Date.now(),
+        columnsSnapshot,
+        data: row.data
+      });
+    });
+    state.rows = state.rows.filter(r => !rowsMarkedForDelete.has(r.id));
+    rowsMarkedForDelete.clear();
+    listActionMode = 'none';
+    save(); renderTable();
+  }
+
+  // ---------- 記録一覧：右上の編集／削除モード切り替えボタン ----------
+  function renderListModeControls() {
+    const wrap = document.getElementById('listModeBtns');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    if (state.rows.length === 0) return;
+
+    if (listActionMode === 'edit' && editingRowId) {
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'btn btn-primary btn-sm'; saveBtn.textContent = '💾 保存';
+      saveBtn.onclick = () => saveCurrentRowEdit();
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.textContent = 'キャンセル';
+      cancelBtn.onclick = () => cancelCurrentRowEdit();
+      wrap.appendChild(saveBtn); wrap.appendChild(cancelBtn);
+      return;
+    }
+    if (listActionMode === 'edit') {
+      const hint = document.createElement('span');
+      hint.className = 'list-mode-hint'; hint.textContent = '編集する記録をクリック';
+      const doneBtn = document.createElement('button');
+      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.textContent = '完了';
+      doneBtn.onclick = () => { listActionMode = 'none'; renderTable(); };
+      wrap.appendChild(hint); wrap.appendChild(doneBtn);
+      return;
+    }
+    if (listActionMode === 'delete') {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-danger btn-sm';
+      delBtn.textContent = `🗑 削除する（${rowsMarkedForDelete.size}件）`;
+      delBtn.onclick = () => deleteMarkedRows();
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.textContent = 'キャンセル';
+      cancelBtn.onclick = () => { listActionMode = 'none'; rowsMarkedForDelete.clear(); renderTable(); };
+      wrap.appendChild(delBtn); wrap.appendChild(cancelBtn);
+      return;
+    }
+    if (listActionMode === 'points') {
+      const hint = document.createElement('span');
+      hint.className = 'list-mode-hint'; hint.textContent = 'ポイントを確認したい記録をクリック';
+      const doneBtn = document.createElement('button');
+      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.textContent = '完了';
+      doneBtn.onclick = () => { listActionMode = 'none'; renderTable(); };
+      wrap.appendChild(hint); wrap.appendChild(doneBtn);
+      return;
+    }
+    const editBtn = document.createElement('button');
+    editBtn.className = 'btn btn-ghost btn-sm'; editBtn.textContent = '✎ 編集';
+    editBtn.onclick = () => { listActionMode = 'edit'; editingRowId = null; renderTable(); };
+    const pointBtn = document.createElement('button');
+    pointBtn.className = 'btn btn-ghost btn-sm'; pointBtn.textContent = '📊 ポイント確認';
+    pointBtn.onclick = () => {
+      if (getPointColumns().length === 0) { alert('ポイントの対象になる項目（距離・時間・回数・チェック）がまだありません。'); return; }
+      state.settings.showPointsInList = true; save();
+      listActionMode = 'points';
+      renderTable();
+    };
+    const delModeBtn = document.createElement('button');
+    delModeBtn.className = 'btn btn-danger btn-sm'; delModeBtn.textContent = '🗑 削除';
+    delModeBtn.onclick = () => { listActionMode = 'delete'; rowsMarkedForDelete.clear(); renderTable(); };
+    wrap.appendChild(editBtn); wrap.appendChild(pointBtn); wrap.appendChild(delModeBtn);
+  }
+
+  // 削除モードのチェックマーク（行のチェック・全選択チェック）のクリックを処理する
+  document.getElementById('tableHead').addEventListener('click', (e) => {
+    const toggle = e.target.closest('#selectAllRowsToggle');
+    if (!toggle) return;
+    const pageIds = getCurrentPageRowIds();
+    const allChecked = pageIds.length > 0 && pageIds.every(id => rowsMarkedForDelete.has(id));
+    if (allChecked) { pageIds.forEach(id => rowsMarkedForDelete.delete(id)); }
+    else { pageIds.forEach(id => rowsMarkedForDelete.add(id)); }
+    renderTable();
+  });
+  document.getElementById('tableBody').addEventListener('click', (e) => {
+    const toggle = e.target.closest('[data-del-row]');
+    if (!toggle) return;
+    e.stopPropagation();
+    const rowId = toggle.dataset.delRow;
+    if (rowsMarkedForDelete.has(rowId)) { rowsMarkedForDelete.delete(rowId); }
+    else { rowsMarkedForDelete.add(rowId); }
+    renderTable();
+  });
+  // 行を編集中は、入力に合わせて計算（formula）項目の表示もその場で更新する
+  document.getElementById('tableBody').addEventListener('input', (e) => {
+    const tr = e.target.closest('tr[data-row-id]');
+    if (tr) refreshFormulaDisplays(tr, 'data-edit-col');
+  });
+  document.getElementById('tableBody').addEventListener('change', (e) => {
+    const tr = e.target.closest('tr[data-row-id]');
+    if (tr) refreshFormulaDisplays(tr, 'data-edit-col');
+  });
+
+  function renderAll() { renderTable(); }
+
+  // ---------- タイマー ---------- 
+  let timerRunning = false;
+  let timerStartTs = 0;
+  let timerAccumulatedMs = 0;
+  let timerRafId = null;
+
+  function getTimerElapsedMs() {
+    return timerAccumulatedMs + (timerRunning ? (Date.now() - timerStartTs) : 0);
+  }
+  function formatElapsed(ms) {
+    const pad2 = n => String(n).padStart(2, '0');
+    const totalCs = Math.floor(ms / 10);
+    const cs = totalCs % 100;
+    const totalSec = Math.floor(ms / 1000);
+    const s = totalSec % 60;
+    const totalMin = Math.floor(totalSec / 60);
+    const m = totalMin % 60;
+    const h = Math.floor(totalMin / 60);
+    return `${h}:${pad2(m)}:${pad2(s)}.${pad2(cs)}`;
+  }
+  function updateClockHands(ms) {
+    const totalSec = ms / 1000;
+    const secDeg = (totalSec % 60) / 60 * 360;
+    const minDeg = ((totalSec / 60) % 60) / 60 * 360;
+    const hourDeg = ((totalSec / 3600) % 12) / 12 * 360;
+    const secHand = document.getElementById('timerHandSecond');
+    const minHand = document.getElementById('timerHandMinute');
+    const hourHand = document.getElementById('timerHandHour');
+    if (secHand) secHand.setAttribute('transform', `rotate(${secDeg} 100 100)`);
+    if (minHand) minHand.setAttribute('transform', `rotate(${minDeg} 100 100)`);
+    if (hourHand) hourHand.setAttribute('transform', `rotate(${hourDeg} 100 100)`);
+  }
+  function updateTimerDisplay() {
+    const ms = getTimerElapsedMs();
+    const digitalEl = document.getElementById('timerDigitalDisplay');
+    if (digitalEl) digitalEl.textContent = formatElapsed(ms);
+    updateClockHands(ms);
+  }
+  function timerLoop() {
+    updateTimerDisplay();
+    if (timerRunning) {
+      timerRafId = requestAnimationFrame(timerLoop);
+    } else {
+      timerRafId = null;
+    }
+  }
+  function ensureTimerLoop() {
+    if (timerRunning && !timerRafId) { timerRafId = requestAnimationFrame(timerLoop); }
+  }
+  function stopTimerLoop() {
+    if (timerRafId) { cancelAnimationFrame(timerRafId); timerRafId = null; }
+  }
+
+  function updateTimerStartBtnLabel() {
+    const btn = document.getElementById('timerStartBtn');
+    if (!btn) return;
+    btn.textContent = timerRunning ? '一時停止' : (timerAccumulatedMs > 0 ? '再開' : '開始');
+    btn.className = timerRunning ? 'btn btn-ghost' : 'btn btn-primary';
+  }
+
+  function syncTimerViewUI() {
+    document.querySelectorAll('#timerModeToggle .entry-mode-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.timerView === state.timer.viewMode);
+    });
+    const digital = document.getElementById('timerDigitalDisplay');
+    const clockWrap = document.getElementById('timerClockWrap');
+    const isClock = state.timer.viewMode === 'clock';
+    clockWrap.style.display = isClock ? 'flex' : 'none';
+    digital.style.display = 'block';
+    digital.classList.toggle('timer-digital-display-sub', isClock);
+  }
+
+  document.querySelectorAll('#timerModeToggle .entry-mode-btn').forEach(b => {
+    b.onclick = () => {
+      state.timer.viewMode = b.dataset.timerView;
+      save();
+      syncTimerViewUI();
+      updateTimerDisplay();
+    };
+  });
+
+  document.getElementById('timerStartBtn').onclick = () => {
+    if (timerRunning) {
+      timerAccumulatedMs += Date.now() - timerStartTs;
+      timerRunning = false;
+    } else {
+      timerStartTs = Date.now();
+      timerRunning = true;
+      ensureTimerLoop();
+    }
+    updateTimerStartBtnLabel();
+    updateTimerDisplay();
+  };
+  document.getElementById('timerResetBtn').onclick = () => {
+    timerRunning = false;
+    timerAccumulatedMs = 0;
+    timerStartTs = 0;
+    stopTimerLoop();
+    updateTimerStartBtnLabel();
+    updateTimerDisplay();
+  };
+  document.getElementById('timerSaveBtn').onclick = () => {
+    const ms = getTimerElapsedMs();
+    state.timer.laps.push({ id: uid(), elapsedMs: ms, createdAt: Date.now(), memo: '' });
+    save();
+    renderTimerLaps();
+    if (document.getElementById('overlayLapsAll').classList.contains('open')) renderTimerLapsAll();
+  };
+
+  const LAPS_PREVIEW_COUNT = 3;
+
+  function lapRowHTML(lap) {
+    const originalIndex = state.timer.laps.indexOf(lap);
+    return `
+      <span class="timer-lap-number">#${originalIndex + 1}</span>
+      <span class="timer-lap-time">${escapeHtml(formatElapsed(lap.elapsedMs))}</span>
+      <span class="timer-lap-date">${escapeHtml(formatAutoDate(lap.createdAt))}</span>
+      <div class="timer-lap-memo"><input type="text" placeholder="メモ（任意）" value="${escapeHtml(lap.memo || '')}" data-lap-id="${lap.id}"></div>
+      <button type="button" class="btn btn-danger btn-sm" data-del-lap="${lap.id}">削除</button>
+    `;
+  }
+  function renderLapRowsInto(container, laps) {
+    container.innerHTML = '';
+    laps.forEach(lap => {
+      const row = document.createElement('div');
+      row.className = 'timer-lap-row';
+      row.innerHTML = lapRowHTML(lap);
+      container.appendChild(row);
+    });
+  }
+
+  function renderTimerLaps() {
+    const list = document.getElementById('timerLapsList');
+    const empty = document.getElementById('timerLapsEmpty');
+    const countBadge = document.getElementById('timerLapsCount');
+    const footer = document.getElementById('lapsFooterControls');
+    const laps = state.timer.laps;
+
+    countBadge.textContent = laps.length ? `${laps.length} 件` : '';
+    updateLapsSortLabels();
+
+    if (laps.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      footer.style.display = 'none';
+      return;
+    }
+    empty.style.display = 'none';
+    footer.style.display = 'flex';
+
+    const sorted = getSortedLaps();
+    renderLapRowsInto(list, sorted.slice(0, LAPS_PREVIEW_COUNT));
+  }
+
+  const LAPS_ALL_ROW_HEIGHT = 68;
+  let lapsAllPage = 0;
+
+  function computeLapsAllPerPage() {
+    const wrap = document.getElementById('lapsAllListWrap');
+    const avail = wrap ? wrap.clientHeight : 300;
+    return Math.max(3, Math.floor(avail / LAPS_ALL_ROW_HEIGHT));
+  }
+
+  function renderTimerLapsAll() {
+    const list = document.getElementById('timerLapsAllList');
+    const countBadge = document.getElementById('timerLapsAllCount');
+    const pageControls = document.getElementById('lapsAllPageControls');
+    const laps = state.timer.laps;
+
+    countBadge.textContent = laps.length ? `${laps.length} 件` : '';
+    updateLapsSortLabels();
+
+    if (laps.length === 0) {
+      list.innerHTML = '<div class="empty-state" style="padding:24px;"><p style="color:var(--text-dim); font-size:13px;">まだ保存されたタイムはありません。</p></div>';
+      pageControls.innerHTML = '';
+      return;
+    }
+    const sorted = getSortedLaps();
+    const perPage = computeLapsAllPerPage();
+    const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
+    if (lapsAllPage >= totalPages) lapsAllPage = totalPages - 1;
+    if (lapsAllPage < 0) lapsAllPage = 0;
+    const start = lapsAllPage * perPage;
+    renderLapRowsInto(list, sorted.slice(start, start + perPage));
+
+    pageControls.innerHTML = '';
+    if (totalPages > 1) {
+      for (let i = 0; i < totalPages; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'page-num-btn' + (i === lapsAllPage ? ' active' : '');
+        btn.textContent = (i + 1).toString();
+        btn.onclick = () => { lapsAllPage = i; renderTimerLapsAll(); };
+        pageControls.appendChild(btn);
+      }
+    }
+  }
+
+  function handleLapMemoInput(e) {
+    const input = e.target.closest('[data-lap-id]');
+    if (!input) return;
+    const lap = state.timer.laps.find(l => l.id === input.dataset.lapId);
+    if (lap) { lap.memo = input.value; save(); }
+  }
+  function handleLapDeleteClick(e) {
+    const delBtn = e.target.closest('[data-del-lap]');
+    if (!delBtn) return;
+    if (!confirm('この記録を削除しますか？')) return;
+    const id = delBtn.dataset.delLap;
+    state.timer.laps = state.timer.laps.filter(l => l.id !== id);
+    save();
+    renderTimerLaps();
+    if (document.getElementById('overlayLapsAll').classList.contains('open')) renderTimerLapsAll();
+  }
+  document.getElementById('timerLapsPanel').addEventListener('input', handleLapMemoInput);
+  document.getElementById('timerLapsPanel').addEventListener('click', handleLapDeleteClick);
+  document.getElementById('overlayLapsAll').addEventListener('input', handleLapMemoInput);
+  document.getElementById('overlayLapsAll').addEventListener('click', handleLapDeleteClick);
+
+  // ---------- 記録追加フォームの時間項目：「タイマーからコピー」 ----------
+  let timeCopyTargetColId = null;
+
+  function convertMsToUnits(ms, units) {
+    const totalSec = Math.max(0, Math.round(ms / 1000));
+    const u = units || { hour: false, minute: true, second: true };
+    const result = {};
+    let remaining = totalSec;
+    if (u.hour) { result.hour = Math.floor(remaining / 3600); remaining = remaining % 3600; }
+    if (u.minute) { result.minute = Math.floor(remaining / 60); remaining = remaining % 60; }
+    if (u.second) { result.second = remaining; }
+    return result;
+  }
+
+  function applyTimeCopyToField(colId, ms) {
+    const col = state.columns.find(c => c.id === colId);
+    if (!col || col.type !== 'time') return;
+    const units = col.timeUnits || { hour: false, minute: true, second: true };
+    const parts = convertMsToUnits(ms, units);
+    const root = document.getElementById('entryFields');
+    ['hour', 'minute', 'second'].forEach(key => {
+      if (!units[key]) return;
+      const el = root.querySelector(`[data-col="${colId}"][data-part="${key}"]`);
+      if (el) el.value = (parts[key] != null) ? String(parts[key]) : '';
+    });
+    updateAddPreview();
+  }
+
+  function renderLapsPickerList() {
+    const list = document.getElementById('lapsPickerList');
+    const empty = document.getElementById('lapsPickerEmpty');
+    const laps = getSortedLaps();
+    list.innerHTML = '';
+    if (laps.length === 0) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    laps.forEach(lap => {
+      const originalIndex = state.timer.laps.indexOf(lap);
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'laps-picker-row';
+      row.dataset.lapId = lap.id;
+      row.innerHTML = `
+        <span class="timer-lap-number">#${originalIndex + 1}</span>
+        <span class="timer-lap-time">${escapeHtml(formatElapsed(lap.elapsedMs))}</span>
+        <span class="timer-lap-date">${escapeHtml(formatAutoDate(lap.createdAt))}</span>
+        ${lap.memo ? `<span class="laps-picker-memo">${escapeHtml(lap.memo)}</span>` : ''}
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById('entryFields').addEventListener('click', (e) => {
+    const copyBtn = e.target.closest('[data-time-copy-col]');
+    if (!copyBtn) return;
+    timeCopyTargetColId = copyBtn.dataset.timeCopyCol;
+    renderLapsPickerList();
+    openOverlay('overlayLapsPicker');
+  });
+  document.getElementById('lapsPickerList').addEventListener('click', (e) => {
+    const row = e.target.closest('[data-lap-id]');
+    if (!row || !timeCopyTargetColId) return;
+    const lap = state.timer.laps.find(l => l.id === row.dataset.lapId);
+    if (!lap) return;
+    applyTimeCopyToField(timeCopyTargetColId, lap.elapsedMs);
+    closeOverlay('overlayLapsPicker');
+  });
+  document.getElementById('closeLapsPicker').onclick = () => closeOverlay('overlayLapsPicker');
+
+  document.getElementById('lapsShowAllBtn').onclick = () => {
+    lapsAllPage = 0;
+    openOverlay('overlayLapsAll');
+    renderTimerLapsAll();
+  };
+  document.getElementById('closeLapsAll').onclick = () => closeOverlay('overlayLapsAll');
+
+  document.getElementById('navTimer').onclick = () => {
+    syncTimerViewUI();
+    updateTimerStartBtnLabel();
+    updateTimerDisplay();
+    renderTimerLaps();
+    ensureTimerLoop();
+    openOverlay('overlayTimer');
+  };
+  document.getElementById('closeTimer').onclick = () => {
+    stopTimerLoop();
+    closeOverlay('overlayTimer');
+  };
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      renderTable();
+      if (document.getElementById('overlayLapsAll').classList.contains('open')) renderTimerLapsAll();
+      if (document.getElementById('overlaySimulator').classList.contains('open')) renderPointFormulaList();
+    }, 150);
+  });
+
+  applyTheme();
+  renderAll();
+  setupSlideGestures();
+  setupPointSlideGestures();
+
+  // 初回表示の直後は、コンテナの高さやフォントの読み込みがまだ確定していないことがあり、
+  // その状態で「1ページに入る件数」を測ると実際よりも多く見積もってしまい、はみ出した記録が
+  // ページ番号／スライドに切り替わらず、ただの縦スクロールに見えてしまうことがある。
+  // レイアウトが落ち着いたタイミングで記録一覧を測定し直す（複数のタイミングで念のため繰り返す）。
+  requestAnimationFrame(() => { requestAnimationFrame(() => { renderTable(); }); });
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { renderTable(); }).catch(() => {});
+  }
+  window.addEventListener('load', () => { renderTable(); });
+  setTimeout(() => { renderTable(); }, 300);
+  setTimeout(() => { renderTable(); }, 1000);
+
+  // 「一度何か記録を追加してから削除すると表示が直る」という現象への対策として、
+  // 起動時に一時的な記録をこっそり追加してすぐ削除し、実際の追加・削除と同じ流れで
+  // 再描画を強制する（保存はされないので記録データには残らない）。
+  setTimeout(() => {
+    if (state.columns.length === 0) return;
+    const tempRow = { id: uid(), createdAt: Date.now(), data: {} };
+    state.rows.push(tempRow);
+    renderTable();
+    state.rows = state.rows.filter(r => r.id !== tempRow.id);
+    renderTable();
+  }, 500);
+</script>
+</body>
+</html>
