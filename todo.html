@@ -108,12 +108,13 @@
   .panel-title::before { content: ""; width: 8px; height: 8px; background: var(--accent); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
   .count-badge { font-family: var(--font-display); font-size: 11px; color: var(--text-dim); margin-left: auto; }
 
-  input[type="text"], input[type="number"], select {
+  input[type="text"], input[type="number"], select, textarea {
     background: var(--bg); border: 1px solid var(--line); color: var(--text);
     padding: 10px 12px; font-size: 14px; font-family: var(--font-body); outline: none;
     transition: border-color 0.15s, background-color 0.3s, color 0.3s;
   }
-  input[type="text"]:focus, input[type="number"]:focus, select:focus { border-color: var(--accent); }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; line-height: 1.5; }
   input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; }
 
   .btn {
@@ -293,6 +294,17 @@
 
   /* ---------- ファイル ---------- */
   .file-create-row { margin-bottom: 16px; flex-shrink: 0; }
+  .memo-add-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; flex-shrink: 0; align-items: flex-end; }
+  .memo-add-row textarea { width: 100%; }
+  .memo-item {
+    display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px; background: var(--panel-2);
+    border: 1px solid var(--line); margin-bottom: 8px;
+  }
+  .memo-item.memo-item-pinned { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .memo-item-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .memo-item-body { flex: 1; min-width: 0; }
+  .memo-item-text { font-size: 13.5px; line-height: 1.5; word-break: break-word; white-space: pre-wrap; }
+  .memo-item-date { font-size: 11px; color: var(--text-dim); margin-top: 4px; font-family: var(--font-display); }
   .file-create-row input[type="text"] { width: 100%; max-width: 340px; }
   .files-list-wrap { flex: 1; min-height: 0; overflow-y: auto; }
   .file-item {
@@ -512,6 +524,11 @@
   .point-base-box .count-input-group { gap: 8px; }
   .point-base-box input[type="number"],
   .point-base-box input[type="text"] { width: 66px; }
+  .point-zero-toggle {
+    display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim);
+    margin-bottom: 10px; cursor: pointer;
+  }
+  .point-zero-toggle input[type="checkbox"] { width: 16px; height: 16px; flex-shrink: 0; }
 
   .point-chain-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .point-chain-arrow { color: var(--accent-2); font-family: var(--font-display); font-size: 18px; font-weight: 700; flex-shrink: 0; }
@@ -634,6 +651,10 @@
     <button class="nav-btn" id="navTimer" title="タイマー">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2"/><path d="M9 2h6"/><path d="M18.5 4.5l1.5 1.5"/></svg></span>
       <span>タイマー</span>
+    </button>
+    <button class="nav-btn" id="navMemo" title="メモ">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h13l3 3v13a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"/><path d="M8 9h8"/><path d="M8 13h8"/><path d="M8 17h5"/></svg></span>
+      <span>メモ</span>
     </button>
     <button class="nav-btn" id="navSettings" title="設定">
       <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
@@ -936,6 +957,31 @@
   </div>
 </div>
 
+<!-- ===== メモオーバーレイ ===== -->
+<div class="overlay overlay-flex" id="overlayMemo">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">MEMO</p><h2 class="overlay-title">メモ</h2></div>
+      <button class="close-btn" id="closeMemo">×</button>
+    </div>
+    <div class="panel">
+      <div class="memo-add-row">
+        <textarea id="newMemoInput" placeholder="メモを入力（Enterで改行できます）。追加ボタンで保存します。" rows="3"></textarea>
+        <button type="button" class="btn btn-primary btn-sm" id="addMemoBtn">＋ 追加</button>
+      </div>
+      <div class="panel-title-row">
+        <p class="panel-title">メモ一覧</p>
+        <span class="count-badge" id="memoCountBadge"></span>
+      </div>
+      <div class="files-list-wrap"><div id="memoList"></div></div>
+      <div class="empty-state" id="memoEmpty" style="display:none; padding:40px 20px;">
+        <div class="glyph">NO MEMO</div>
+        <p style="color:var(--text-dim);">まだメモがありません。上の入力欄から追加してください。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 保存したタイム（全件表示）オーバーレイ ===== -->
 <div class="overlay overlay-flex" id="overlayLapsAll">
   <div class="overlay-inner">
@@ -973,6 +1019,23 @@
       <div id="lapsPickerList"></div>
       <div class="empty-state" id="lapsPickerEmpty" style="display:none; padding:24px;">
         <p style="color:var(--text-dim); font-size:13px;">まだ保存されたタイムはありません。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== メモから貼り付け（選択専用）オーバーレイ ===== -->
+<div class="overlay" id="overlayMemoPicker">
+  <div class="overlay-inner">
+    <div class="overlay-topbar">
+      <div><p class="overlay-eyebrow">PASTE FROM MEMO</p><h2 class="overlay-title">メモから選択</h2></div>
+      <button class="close-btn" id="closeMemoPicker">×</button>
+    </div>
+    <div class="panel">
+      <p class="example-note">タップすると、そのメモの内容がテキストの項目に貼り付けられます。</p>
+      <div id="memoPickerList"></div>
+      <div class="empty-state" id="memoPickerEmpty" style="display:none; padding:24px;">
+        <p style="color:var(--text-dim); font-size:13px;">まだメモがありません。</p>
       </div>
     </div>
   </div>
@@ -1055,39 +1118,57 @@
   const ROW_HEIGHT = 44;
 
   let state = load() || defaultState();
+  function defaultFileSettings() {
+    return { rowDisplayMode: 'pagination', columnOverflowMode: 'buttonSlide', tableBorders: 'on', timeFormat: 'kanji', sort: { key: 'newest', columnId: null }, entryFieldsMode: 'wrap', showDateColumn: 'on', showPointsInList: false };
+  }
   function defaultState() {
     return {
       columns: [],
       rows: [],
       files: [],
       trash: [],
+      memos: [],
+      filesSort: 'newest',
       theme: { mode: 'light', customBgType: null, customBgData: null },
-      settings: { rowDisplayMode: 'pagination', columnOverflowMode: 'buttonSlide', tableBorders: 'on', timeFormat: 'kanji', sort: { key: 'newest', columnId: null }, entryFieldsMode: 'wrap', filesSort: 'newest', showDateColumn: 'on', showPointsInList: false }
+      settings: defaultFileSettings()
     };
   }
+  if (!Array.isArray(state.memos)) state.memos = [];
   if (!state.theme) state.theme = defaultState().theme;
-  if (!state.settings) state.settings = defaultState().settings;
+  if (!state.settings) state.settings = defaultFileSettings();
   if (!state.settings.tableBorders) state.settings.tableBorders = 'on';
   if (!state.settings.timeFormat) state.settings.timeFormat = 'kanji';
   if (!state.settings.sort) state.settings.sort = { key: 'newest', columnId: null };
   if (!state.settings.entryFieldsMode) state.settings.entryFieldsMode = 'wrap';
-  if (!state.settings.filesSort) state.settings.filesSort = 'newest';
   if (!state.settings.showDateColumn) state.settings.showDateColumn = 'on';
   if (typeof state.settings.showPointsInList !== 'boolean') state.settings.showPointsInList = false;
+  if (!state.filesSort) state.filesSort = 'newest';
   if (!Array.isArray(state.files)) state.files = [];
   if (!Array.isArray(state.trash)) state.trash = [];
   state.files.forEach(f => {
     if (!Array.isArray(f.columns)) f.columns = [];
     if (!Array.isArray(f.rows)) f.rows = [];
+    if (!f.settings) {
+      // 設定をファイルごとに持つように変更：既存ファイルには現在の設定をコピーして引き継ぐ
+      f.settings = JSON.parse(JSON.stringify(state.settings));
+    } else {
+      if (!f.settings.tableBorders) f.settings.tableBorders = 'on';
+      if (!f.settings.timeFormat) f.settings.timeFormat = 'kanji';
+      if (!f.settings.sort) f.settings.sort = { key: 'newest', columnId: null };
+      if (!f.settings.entryFieldsMode) f.settings.entryFieldsMode = 'wrap';
+      if (!f.settings.showDateColumn) f.settings.showDateColumn = 'on';
+      if (typeof f.settings.showPointsInList !== 'boolean') f.settings.showPointsInList = false;
+    }
   });
   if (!state.filesDataMigrated) {
-    // 「最初のファイル」に、これまで使っていた記録一覧のデータ（項目・記録）を引き継ぐ
+    // 「最初のファイル」に、これまで使っていた記録一覧のデータ（項目・記録・設定）を引き継ぐ
     const firstFile = {
       id: 'f' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       name: '最初のファイル',
       createdAt: Date.now(),
       columns: Array.isArray(state.columns) ? state.columns : [],
-      rows: Array.isArray(state.rows) ? state.rows : []
+      rows: Array.isArray(state.rows) ? state.rows : [],
+      settings: state.settings
     };
     state.files.unshift(firstFile);
     state.activeFileId = firstFile.id;
@@ -1096,11 +1177,12 @@
   if (!state.activeFileId || !state.files.some(f => f.id === state.activeFileId)) {
     state.activeFileId = state.files[0].id;
   }
-  // state.columns / state.rows は常に「現在開いているファイル」のデータを指す
+  // state.columns / state.rows / state.settings は常に「現在開いているファイル」のデータを指す
   {
     const activeFileInit = state.files.find(f => f.id === state.activeFileId);
     state.columns = activeFileInit.columns;
     state.rows = activeFileInit.rows;
+    state.settings = activeFileInit.settings;
   }
   if (!state.timer) state.timer = { laps: [], viewMode: 'digital', lapsSort: 'newest' };
   if (!Array.isArray(state.timer.laps)) state.timer.laps = [];
@@ -1108,6 +1190,7 @@
   if (!state.timer.lapsSort) state.timer.lapsSort = 'newest';
 
   let editingRowId = null;
+  let copyingRowId = null; // コピーモードで選択中の記録のID
   let editingColId = null;
   let editingFormulaSteps = null; // 計算（formula）項目を編集中の、未保存のステップ配列
   let editingFileId = null;
@@ -1127,7 +1210,7 @@
   }
   function syncActiveFileData() {
     const af = getActiveFile();
-    if (af) { af.columns = state.columns; af.rows = state.rows; }
+    if (af) { af.columns = state.columns; af.rows = state.rows; af.settings = state.settings; }
   }
   function save() {
     syncActiveFileData();
@@ -1307,7 +1390,7 @@
   function commitFileCreateDraft(inputEl) {
     const name = inputEl.value.trim();
     if (!name) { cancelFileCreateDraft(); return; }
-    state.files.push({ id: fuid(), name, createdAt: Date.now(), columns: [], rows: [] });
+    state.files.push({ id: fuid(), name, createdAt: Date.now(), columns: [], rows: [], settings: defaultFileSettings() });
     save();
     creatingFileDraft = false;
     renderFilesList();
@@ -1326,7 +1409,7 @@
   }
   function getSortedFiles() {
     const files = state.files.slice();
-    switch (state.settings.filesSort) {
+    switch (state.filesSort) {
       case 'oldest': files.sort((a, b) => a.createdAt - b.createdAt); break;
       case 'kana': files.sort((a, b) => a.name.localeCompare(b.name, 'ja')); break;
       case 'newest':
@@ -1336,7 +1419,7 @@
   }
   function updateFilesSortLabel() {
     const labelEl = document.getElementById('filesSortDropdownLabel');
-    if (labelEl) labelEl.textContent = filesSortLabel(state.settings.filesSort);
+    if (labelEl) labelEl.textContent = filesSortLabel(state.filesSort);
   }
   function openFilesSortMenu() {
     closeTypeDropdownPortal();
@@ -1351,7 +1434,7 @@
     if (!portal || !btn) return;
     const rect = btn.getBoundingClientRect();
     portal.innerHTML = FILES_SORT_OPTIONS.map(o =>
-      `<button type="button" class="type-option ${state.settings.filesSort === o.key ? 'active' : ''}" data-files-sort-value="${o.key}">${o.label}</button>`
+      `<button type="button" class="type-option ${state.filesSort === o.key ? 'active' : ''}" data-files-sort-value="${o.key}">${o.label}</button>`
     ).join('');
     portal.style.left = Math.round(rect.left) + 'px';
     portal.style.top = Math.round(rect.bottom + 4) + 'px';
@@ -1373,7 +1456,7 @@
     }
     const option = e.target.closest('#filesSortDropdownPortal [data-files-sort-value]');
     if (option) {
-      state.settings.filesSort = option.dataset.filesSortValue;
+      state.filesSort = option.dataset.filesSortValue;
       save(); closeFilesSortMenu(); renderFilesList();
       return;
     }
@@ -1392,7 +1475,7 @@
     state.activeFileId = file.id;
     state.columns = file.columns;
     state.rows = file.rows;
-    state.settings.sort = { key: 'newest', columnId: null };
+    state.settings = file.settings;
     editingRowId = null;
     editingColId = null;
     listActionMode = 'none';
@@ -1500,6 +1583,7 @@
               state.activeFileId = nextFile.id;
               state.columns = nextFile.columns;
               state.rows = nextFile.rows;
+              state.settings = nextFile.settings;
               currentPage = 0;
             }
             save(); renderFilesList();
@@ -1858,8 +1942,12 @@
     if (formulaAddBtn) {
       const col = state.columns.find(c => c.id === editingColId);
       const eligible = col ? state.columns.filter(c => c.id !== col.id && FORMULA_REF_TYPES.includes(c.type)) : [];
-      if (editingFormulaSteps && eligible.length) {
-        editingFormulaSteps.push({ columnId: eligible[0].id, operator: '+' });
+      if (editingFormulaSteps) {
+        if (eligible.length) {
+          editingFormulaSteps.push({ mode: 'column', columnId: eligible[0].id, operator: '+' });
+        } else {
+          editingFormulaSteps.push({ mode: 'number', value: '', operator: '+' });
+        }
       }
       refreshFormulaEditorCell();
       return;
@@ -1871,6 +1959,20 @@
       refreshFormulaEditorCell();
       return;
     }
+    const formulaModeBtn = e.target.closest('[data-formula-step-mode]');
+    if (formulaModeBtn) {
+      const idx = parseInt(formulaModeBtn.dataset.formulaModeStep, 10);
+      if (editingFormulaSteps && editingFormulaSteps[idx]) {
+        editingFormulaSteps[idx].mode = formulaModeBtn.dataset.formulaStepMode;
+        if (editingFormulaSteps[idx].mode === 'column' && !editingFormulaSteps[idx].columnId) {
+          const col = state.columns.find(c => c.id === editingColId);
+          const eligible = col ? state.columns.filter(c => c.id !== col.id && FORMULA_REF_TYPES.includes(c.type)) : [];
+          if (eligible.length) editingFormulaSteps[idx].columnId = eligible[0].id;
+        }
+      }
+      refreshFormulaEditorCell();
+      return;
+    }
   });
 
   document.addEventListener('change', (e) => {
@@ -1878,6 +1980,13 @@
     if (sel) {
       const idx = parseInt(sel.dataset.formulaSelectStep, 10);
       if (editingFormulaSteps && editingFormulaSteps[idx]) editingFormulaSteps[idx].columnId = sel.value;
+    }
+  });
+  document.addEventListener('input', (e) => {
+    const numInput = e.target.closest('[data-formula-num-step]');
+    if (numInput) {
+      const idx = parseInt(numInput.dataset.formulaNumStep, 10);
+      if (editingFormulaSteps && editingFormulaSteps[idx]) editingFormulaSteps[idx].value = numInput.value;
     }
   });
 
@@ -1930,7 +2039,11 @@
       return `<div class="formula-readonly-field" data-formula-col="${col.id}" data-type="formula">${escapeHtml(formatPointNumber(isNaN(displayVal) ? 0 : displayVal))}</div>`;
     }
     // text
-    return `<input type="text" value="${escapeHtml(value || '')}" ${attr}="${col.id}" data-type="text" placeholder="${escapeHtml(col.name)}を入力">`;
+    let html = `<textarea ${attr}="${col.id}" data-type="text" placeholder="${escapeHtml(col.name)}を入力（Enterで改行できます）" rows="2">${escapeHtml(value || '')}</textarea>`;
+    if (attr === 'data-col') {
+      html += `<button type="button" class="btn btn-ghost btn-sm" style="margin-top:6px; align-self:flex-start;" data-memo-paste-col="${col.id}">📝 メモから貼り付け</button>`;
+    }
+    return html;
   }
 
   function collectFieldValue(root, col, attr) {
@@ -1976,15 +2089,21 @@
   }
 
   // 計算（formula）項目の値を、同じ入力エリア（root）内にある他の項目の現在値から計算する。
-  // 1つ目のステップの項目の値がスタート地点となり、2つ目以降は演算子で順番に計算していく（例：項目A ＋ 項目B）。
+  // 1つ目のステップの値（項目または数値）がスタート地点となり、2つ目以降は演算子で順番に計算していく（例：項目A ＋ 項目B、項目A ＋ 5）。
   function computeFormulaValueFromRoot(root, col, attr) {
     const steps = (col.formula && col.formula.steps) || [];
     let running = null;
     steps.forEach((step, idx) => {
-      const refCol = state.columns.find(c => c.id === step.columnId);
-      if (!refCol) return;
-      const result = collectFieldValue(root, refCol, attr);
-      const val = columnValueToNumber(refCol, result.value);
+      let val;
+      if (step.mode === 'number') {
+        val = parseFloat(step.value);
+        if (isNaN(val)) val = 0;
+      } else {
+        const refCol = state.columns.find(c => c.id === step.columnId);
+        if (!refCol) return;
+        const result = collectFieldValue(root, refCol, attr);
+        val = columnValueToNumber(refCol, result.value);
+      }
       if (idx === 0 || running === null) { running = val; }
       else { running = performCalcOp(running, step.operator || '+', val); }
     });
@@ -2017,32 +2136,47 @@
     const steps = (col.formula && col.formula.steps) || [];
     if (steps.length === 0) return '未設定';
     return steps.map((step, idx) => {
-      const refCol = state.columns.find(c => c.id === step.columnId);
-      const name = refCol ? refCol.name : '？';
-      return idx === 0 ? name : `${step.operator || '+'} ${name}`;
+      let label;
+      if (step.mode === 'number') {
+        label = step.value || '0';
+      } else {
+        const refCol = state.columns.find(c => c.id === step.columnId);
+        label = refCol ? refCol.name : '？';
+      }
+      return idx === 0 ? label : `${step.operator || '+'} ${label}`;
     }).join(' ');
   }
-  // 計算項目の編集フォーム内で使う、ステップ（項目＋演算子）を組み立てるチェーンエディタ
+  // 計算項目の編集フォーム内で使う、ステップ（項目または数値＋演算子）を組み立てるチェーンエディタ
   function renderFormulaEditorHTML(col, steps) {
     const eligibleCols = state.columns.filter(c => c.id !== col.id && FORMULA_REF_TYPES.includes(c.type));
-    if (eligibleCols.length === 0) {
-      return `<p style="font-size:11.5px; color:var(--text-dim); margin:0;">計算に使える項目（距離・時間・回数・チェック）がまだありません。先に他の項目を作成してください。</p>`;
-    }
     let html = '<div class="formula-chain-editor">';
     steps.forEach((step, idx) => {
+      const mode = step.mode === 'number' ? 'number' : 'column';
       html += `<div class="point-step-chip">`;
       if (idx > 0) {
         html += `<div class="calc-op-group">` +
           CALC_OPERATORS.map(op => `<button type="button" class="calc-op-btn ${step.operator === op ? 'active' : ''}" data-formula-op="${op}" data-formula-step="${idx}">${op}</button>`).join('') +
           `</div>`;
       }
-      html += `<select data-formula-select-step="${idx}">` +
-        eligibleCols.map(c => `<option value="${c.id}" ${c.id === step.columnId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('') +
-        `</select>`;
+      html += `<div class="entry-mode-toggle">
+        <button type="button" class="entry-mode-btn ${mode === 'column' ? 'active' : ''}" data-formula-step-mode="column" data-formula-mode-step="${idx}">項目</button>
+        <button type="button" class="entry-mode-btn ${mode === 'number' ? 'active' : ''}" data-formula-step-mode="number" data-formula-mode-step="${idx}">数値</button>
+      </div>`;
+      if (mode === 'column') {
+        if (eligibleCols.length === 0) {
+          html += `<span style="font-size:11px; color:var(--text-dim);">参照できる項目がありません</span>`;
+        } else {
+          html += `<select data-formula-select-step="${idx}">` +
+            eligibleCols.map(c => `<option value="${c.id}" ${c.id === step.columnId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('') +
+            `</select>`;
+        }
+      } else {
+        html += `<input type="text" inputmode="decimal" class="calc-value-input" placeholder="数値" value="${escapeHtml(step.value || '')}" data-formula-num-step="${idx}">`;
+      }
       html += `<button type="button" class="btn btn-danger btn-sm" data-formula-delete-step="${idx}">削除</button>`;
       html += `</div>`;
     });
-    html += `<button type="button" class="btn btn-ghost btn-sm" data-formula-add-step="1">＋ 項目を追加</button>`;
+    html += `<button type="button" class="btn btn-ghost btn-sm" data-formula-add-step="1">＋ ステップを追加</button>`;
     html += '</div>';
     return html;
   }
@@ -2060,7 +2194,7 @@
     badge.textContent = state.columns.length ? `${state.columns.length} 項目` : '';
     body.innerHTML = '';
 
-    state.columns.forEach((col) => {
+    state.columns.forEach((col, idx) => {
       const tr = document.createElement('tr');
       const isEditing = editingColId === col.id;
 
@@ -2094,7 +2228,10 @@
             col.name = newName; col.type = newType;
             if (newType === 'time') col.timeUnits = getTimeUnits('editColTimeUnits', col.timeUnits);
             if (newType === 'distance') col.distanceUnits = getDistanceUnits('editColDistanceUnits', col.distanceUnits);
-            if (newType === 'formula') { col.formula = { steps: (editingFormulaSteps || []).filter(s => s.columnId) }; }
+            if (newType === 'formula') {
+              const validSteps = (editingFormulaSteps || []).filter(s => s.mode === 'number' ? (s.value !== undefined && s.value !== '') : !!s.columnId);
+              col.formula = { steps: validSteps };
+            }
             else { col.formula = null; }
             if (typeChanged) { state.rows.forEach(row => { delete row.data[col.id]; }); col.pointFormula = null; }
             editingColId = null; editingFormulaSteps = null; save(); renderColumnsTable(); renderExamplePreview();
@@ -2128,6 +2265,16 @@
           : '—';
         const tdActions = document.createElement('td');
         tdActions.className = 'actions-cell';
+        const upBtn = document.createElement('button');
+        upBtn.className = 'btn btn-ghost btn-sm'; upBtn.textContent = '↑';
+        upBtn.title = '上に移動';
+        upBtn.disabled = idx === 0;
+        upBtn.onclick = () => moveColumn(col.id, -1);
+        const downBtn = document.createElement('button');
+        downBtn.className = 'btn btn-ghost btn-sm'; downBtn.textContent = '↓';
+        downBtn.title = '下に移動';
+        downBtn.disabled = idx === state.columns.length - 1;
+        downBtn.onclick = () => moveColumn(col.id, 1);
         const editBtn = document.createElement('button');
         editBtn.className = 'btn btn-ghost btn-sm'; editBtn.textContent = '編集';
         editBtn.onclick = () => {
@@ -2138,7 +2285,7 @@
         const delBtn = document.createElement('button');
         delBtn.className = 'btn btn-danger btn-sm'; delBtn.textContent = '削除';
         delBtn.onclick = () => removeColumn(col.id);
-        tdActions.appendChild(editBtn); tdActions.appendChild(delBtn);
+        tdActions.appendChild(upBtn); tdActions.appendChild(downBtn); tdActions.appendChild(editBtn); tdActions.appendChild(delBtn);
         tr.appendChild(tdName); tr.appendChild(tdType); tr.appendChild(tdDetail); tr.appendChild(tdActions);
       }
       body.appendChild(tr);
@@ -2185,16 +2332,30 @@
       alert('「計算」項目を追加しました。一覧の「編集」から、計算に使う項目（例：項目A＋項目B）を設定してください。');
     }
   }
+  // 項目の並び順を1つ上／下に入れ替える
+  function moveColumn(colId, direction) {
+    const idx = state.columns.findIndex(c => c.id === colId);
+    if (idx === -1) return;
+    const newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= state.columns.length) return;
+    const [item] = state.columns.splice(idx, 1);
+    state.columns.splice(newIdx, 0, item);
+    save(); renderColumnsTable(); renderExamplePreview();
+  }
   function removeColumn(colId) {
     const col = state.columns.find(c => c.id === colId);
     if (!col) return;
-    if (!confirm(`項目「${col.name}」を削除しますか？既存の記録からもこの項目のデータが削除されます。`)) return;
-    state.columns = state.columns.filter(c => c.id !== colId);
-    state.rows.forEach(row => { delete row.data[colId]; });
-    if (state.settings.sort && state.settings.sort.columnId === colId) {
-      state.settings.sort = { key: 'newest', columnId: null };
-    }
-    save(); renderColumnsTable(); renderExamplePreview();
+    showConfirmModal(
+      `項目「${col.name}」を削除しますか？\nこの操作は元に戻せません。既存の記録からもこの項目のデータが削除されます。`,
+      () => {
+        state.columns = state.columns.filter(c => c.id !== colId);
+        state.rows.forEach(row => { delete row.data[colId]; });
+        if (state.settings.sort && state.settings.sort.columnId === colId) {
+          state.settings.sort = { key: 'newest', columnId: null };
+        }
+        save(); renderColumnsTable(); renderExamplePreview();
+      }
+    );
   }
 
   // 使用例プレビュー
@@ -2287,11 +2448,12 @@
       return col.pointFormula;
     }
     if (!col.pointFormula || !Array.isArray(col.pointFormula.steps)) {
-      col.pointFormula = { steps: [], previewBase: defaultPreviewBase(col) };
+      col.pointFormula = { steps: [], previewBase: defaultPreviewBase(col), zeroIsZero: false };
     }
     if (col.pointFormula.previewBase === undefined || col.pointFormula.previewBase === null) {
       col.pointFormula.previewBase = defaultPreviewBase(col);
     }
+    if (typeof col.pointFormula.zeroIsZero !== 'boolean') col.pointFormula.zeroIsZero = false;
     return col.pointFormula;
   }
   function performCalcOp(a, operator, b) {
@@ -2319,27 +2481,43 @@
     }
     return 0;
   }
-  // 演算子ステップの列を、指定した基準値から順番に適用して計算する
-  function runStepsFrom(base, steps) {
+  // 演算子ステップの列を、指定した基準値から順番に適用して計算する。
+  // ステップが他の項目を参照するモードの場合、記録データ（rowData）があればその実際の値を、
+  // なければ（計算式エディタのプレビュー用）仮の値として1を使う。
+  function runStepsFrom(base, steps, rowData) {
     let running = base;
     steps.forEach(step => {
-      const val = parseFloat(step.value);
+      let val;
+      if (step.mode === 'column') {
+        const refCol = state.columns.find(c => c.id === step.columnId);
+        if (!refCol) return;
+        if (rowData && typeof rowData === 'object') {
+          val = columnValueToNumber(refCol, rowData[step.columnId]);
+        } else {
+          val = 1; // プレビュー時の仮の値
+        }
+      } else {
+        val = parseFloat(step.value);
+      }
       if (isNaN(val)) return;
       running = performCalcOp(running, step.operator || '+', val);
     });
     return running;
   }
   // ある項目の記録値に、その項目のポイント計算式をあてはめて点数を求める（実際の記録データの集計に使用）
-  function computeColumnPoints(col, rawValue) {
+  // rowData には記録全体（row.data）を渡す。他の項目を参照するステップがある場合にそこから値を取り出す。
+  function computeColumnPoints(col, rowData) {
     const formula = ensurePointFormula(col);
     if (col.type === 'check') {
-      const checked = !!rawValue;
+      const checked = typeof rowData === 'boolean' ? rowData : !!(rowData && rowData[col.id]);
       const raw = checked ? formula.plusValue : formula.minusValue;
       const val = parseFloat(raw);
       return isNaN(val) ? 0 : val;
     }
+    const rawValue = (rowData && typeof rowData === 'object') ? rowData[col.id] : rowData;
     const base = columnValueToNumber(col, rawValue);
-    return runStepsFrom(base, formula.steps);
+    if (formula.zeroIsZero && base === 0) return 0;
+    return runStepsFrom(base, formula.steps, rowData);
   }
   function formatPointNumber(n) {
     if (typeof n !== 'number' || isNaN(n)) return '0';
@@ -2538,20 +2716,37 @@
     }
 
     const steps = formula.steps;
+    const eligibleCols = state.columns.filter(c => c.id !== col.id && FORMULA_REF_TYPES.includes(c.type));
     let chain = '';
     steps.forEach((step, idx) => {
+      const mode = step.mode === 'column' ? 'column' : 'number';
       chain += `<span class="point-chain-arrow">→</span>`;
       chain += `<div class="point-step-chip">`;
       chain += `<div class="calc-op-group">` +
         CALC_OPERATORS.map(op => `<button type="button" class="calc-op-btn ${step.operator === op ? 'active' : ''}" data-point-op="${op}" data-point-col="${col.id}" data-point-step="${idx}">${op}</button>`).join('') +
         `</div>`;
-      chain += `<input type="text" inputmode="decimal" class="calc-value-input point-step-value" placeholder="値" value="${escapeHtml(step.value)}" data-point-input-col="${col.id}" data-point-step="${idx}">`;
+      chain += `<div class="entry-mode-toggle">
+        <button type="button" class="entry-mode-btn ${mode === 'number' ? 'active' : ''}" data-point-step-mode="number" data-point-mode-col="${col.id}" data-point-mode-step="${idx}">数値</button>
+        <button type="button" class="entry-mode-btn ${mode === 'column' ? 'active' : ''}" data-point-step-mode="column" data-point-mode-col="${col.id}" data-point-mode-step="${idx}">項目</button>
+      </div>`;
+      if (mode === 'column') {
+        if (eligibleCols.length === 0) {
+          chain += `<span style="font-size:11px; color:var(--text-dim);">参照できる項目がありません</span>`;
+        } else {
+          chain += `<select data-point-select-col="${col.id}" data-point-select-step="${idx}">` +
+            eligibleCols.map(c => `<option value="${c.id}" ${c.id === step.columnId ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('') +
+            `</select>`;
+        }
+      } else {
+        chain += `<input type="text" inputmode="decimal" class="calc-value-input point-step-value" placeholder="値" value="${escapeHtml(step.value || '')}" data-point-input-col="${col.id}" data-point-step="${idx}">`;
+      }
       chain += `<button type="button" class="btn btn-danger btn-sm point-step-delete" data-point-delete-col="${col.id}" data-point-delete-step="${idx}">削除</button>`;
       chain += `</div>`;
     });
 
     const baseNumber = columnValueToNumber(col, formula.previewBase);
-    const exampleResult = runStepsFrom(baseNumber, steps);
+    let exampleResult = runStepsFrom(baseNumber, steps);
+    if (formula.zeroIsZero && baseNumber === 0) exampleResult = 0;
     const baseDisplay = displayValueHTML(col, formula.previewBase);
 
     return `<div class="point-formula-block">
@@ -2560,12 +2755,35 @@
         <span class="point-base-label">基準値</span>
         <div data-point-base-inputs="${col.id}">${fieldInputHTML(col, formula.previewBase, 'data-point-base')}</div>
       </div>
+      <label class="point-zero-toggle">
+        <input type="checkbox" data-point-zero-is-zero="${col.id}" ${formula.zeroIsZero ? 'checked' : ''}>
+        <span>基準値が0のときは、＋いくつでも0ptにする</span>
+      </label>
       <div class="point-chain-flow">
         ${chain}
         <button type="button" class="btn btn-ghost btn-sm point-add-step-btn" data-point-add-step="${col.id}">＋ ステップを追加</button>
       </div>
       <div class="point-result-box">基準値 <strong>${baseDisplay}</strong> → <strong>${escapeHtml(formatPointNumber(exampleResult))}pt</strong></div>
     </div>`;
+  }
+
+  // 表が横に収まりきらない場合、崩れないよう比率を保ったまま縮小してぴったり収める
+  function autoFitScaleTable(wrapId, tableId) {
+    const wrap = document.getElementById(wrapId);
+    const table = document.getElementById(tableId);
+    if (!wrap || !table) return;
+    table.style.transform = ''; table.style.width = ''; table.style.transformOrigin = 'left top';
+    requestAnimationFrame(() => {
+      const natural = table.scrollWidth;
+      const avail = wrap.clientWidth;
+      if (natural > avail && natural > 0) {
+        const scale = Math.max(0.4, avail / natural);
+        table.style.transform = `scale(${scale})`;
+        table.style.width = `${(1 / scale) * 100}%`;
+      } else {
+        table.style.transform = ''; table.style.width = '';
+      }
+    });
   }
 
   function renderPointSummary() {
@@ -2578,19 +2796,20 @@
     let grandTotal = 0;
     const subtotals = cols.map(col => {
       let subtotal = 0;
-      state.rows.forEach(row => { subtotal += computeColumnPoints(col, row.data[col.id]); });
+      state.rows.forEach(row => { subtotal += computeColumnPoints(col, row.data); });
       grandTotal += subtotal;
       return subtotal;
     });
 
-    let html = '<div class="table-scroll" style="max-height:none; overflow-x:auto; overflow-y:visible;">';
-    html += '<table class="point-summary-table"><thead><tr>';
+    let html = '<div class="table-scroll" id="pointSummaryScroll" style="max-height:none; overflow-x:hidden; overflow-y:visible;">';
+    html += '<table class="point-summary-table" id="pointSummaryTable"><thead><tr>';
     cols.forEach(col => { html += `<th>${escapeHtml(col.name)}</th>`; });
     html += '<th class="point-total-col">合計</th></tr></thead><tbody><tr>';
     subtotals.forEach(subtotal => { html += `<td>${escapeHtml(formatPointNumber(subtotal))}pt</td>`; });
     html += `<td class="point-total-col point-total-cell">${escapeHtml(formatPointNumber(grandTotal))}pt</td>`;
     html += '</tr></tbody></table></div>';
     wrap.innerHTML = html;
+    autoFitScaleTable('pointSummaryScroll', 'pointSummaryTable');
   }
 
   document.getElementById('pointFormulaList').addEventListener('click', (e) => {
@@ -2632,6 +2851,68 @@
       }
       return;
     }
+    const stepModeBtn = e.target.closest('[data-point-step-mode]');
+    if (stepModeBtn) {
+      const col = state.columns.find(c => c.id === stepModeBtn.dataset.pointModeCol);
+      if (col) {
+        const idx = parseInt(stepModeBtn.dataset.pointModeStep, 10);
+        const formula = ensurePointFormula(col);
+        if (formula.steps && formula.steps[idx]) {
+          formula.steps[idx].mode = stepModeBtn.dataset.pointStepMode;
+          if (formula.steps[idx].mode === 'column' && !formula.steps[idx].columnId) {
+            const eligible = state.columns.filter(c => c.id !== col.id && FORMULA_REF_TYPES.includes(c.type));
+            if (eligible.length) formula.steps[idx].columnId = eligible[0].id;
+          }
+        }
+        save();
+        renderPointFormulaList();
+        renderPointSummary();
+      }
+      return;
+    }
+  });
+  document.getElementById('pointFormulaList').addEventListener('change', (e) => {
+    const sel = e.target.closest('[data-point-select-col]');
+    if (sel) {
+      const col = state.columns.find(c => c.id === sel.dataset.pointSelectCol);
+      if (col) {
+        const idx = parseInt(sel.dataset.pointSelectStep, 10);
+        const formula = ensurePointFormula(col);
+        if (formula.steps && formula.steps[idx]) formula.steps[idx].columnId = sel.value;
+        save();
+        renderPointSummary();
+        const block = sel.closest('.point-formula-block');
+        const resultBox = block && block.querySelector('.point-result-box');
+        if (resultBox && formula.steps) {
+          const baseNumber = columnValueToNumber(col, formula.previewBase);
+          let exampleResult = runStepsFrom(baseNumber, formula.steps);
+          if (formula.zeroIsZero && baseNumber === 0) exampleResult = 0;
+          const baseDisplay = displayValueHTML(col, formula.previewBase);
+          resultBox.innerHTML = `基準値 <strong>${baseDisplay}</strong> → <strong>${formatPointNumber(exampleResult)}pt</strong>`;
+        }
+      }
+      return;
+    }
+    const zeroToggle = e.target.closest('[data-point-zero-is-zero]');
+    if (zeroToggle) {
+      const col = state.columns.find(c => c.id === zeroToggle.dataset.pointZeroIsZero);
+      if (col) {
+        const formula = ensurePointFormula(col);
+        formula.zeroIsZero = zeroToggle.checked;
+        save();
+        renderPointSummary();
+        const block = zeroToggle.closest('.point-formula-block');
+        const resultBox = block && block.querySelector('.point-result-box');
+        if (resultBox) {
+          const baseNumber = columnValueToNumber(col, formula.previewBase);
+          let exampleResult = runStepsFrom(baseNumber, formula.steps);
+          if (formula.zeroIsZero && baseNumber === 0) exampleResult = 0;
+          const baseDisplay = displayValueHTML(col, formula.previewBase);
+          resultBox.innerHTML = `基準値 <strong>${baseDisplay}</strong> → <strong>${formatPointNumber(exampleResult)}pt</strong>`;
+        }
+      }
+      return;
+    }
   });
   document.getElementById('pointFormulaList').addEventListener('input', (e) => {
     const baseInput = e.target.closest('[data-point-base]');
@@ -2649,7 +2930,8 @@
         const resultBox = block && block.querySelector('.point-result-box');
         if (resultBox && formula.steps) {
           const baseNumber = columnValueToNumber(col, formula.previewBase);
-          const exampleResult = runStepsFrom(baseNumber, formula.steps);
+          let exampleResult = runStepsFrom(baseNumber, formula.steps);
+          if (formula.zeroIsZero && baseNumber === 0) exampleResult = 0;
           const baseDisplay = displayValueHTML(col, formula.previewBase);
           resultBox.innerHTML = `基準値 <strong>${baseDisplay}</strong> → <strong>${formatPointNumber(exampleResult)}pt</strong>`;
         }
@@ -2670,7 +2952,8 @@
         const resultBox = block && block.querySelector('.point-result-box');
         if (resultBox && formula.steps) {
           const baseNumber = columnValueToNumber(col, formula.previewBase);
-          const exampleResult = runStepsFrom(baseNumber, formula.steps);
+          let exampleResult = runStepsFrom(baseNumber, formula.steps);
+          if (formula.zeroIsZero && baseNumber === 0) exampleResult = 0;
           const baseDisplay = displayValueHTML(col, formula.previewBase);
           resultBox.innerHTML = `基準値 <strong>${baseDisplay}</strong> → <strong>${formatPointNumber(exampleResult)}pt</strong>`;
         }
@@ -2837,6 +3120,7 @@
     const distanceCols = state.columns.filter(c => c.type === 'distance');
     const countCols = state.columns.filter(c => c.type === 'count');
     const timeCols = state.columns.filter(c => c.type === 'time');
+    const formulaCols = state.columns.filter(c => c.type === 'formula');
 
     function pushGroup(cols, descKey, ascKey, descLabel, ascLabel) {
       if (cols.length === 1) {
@@ -2850,13 +3134,18 @@
     pushGroup(distanceCols, 'distance_desc', 'distance_asc', '多い順', '低い順');
     pushGroup(countCols, 'count_desc', 'count_asc', '多い順', '少ない順');
     pushGroup(timeCols, 'time_desc', 'time_asc', '秒数の多い順', '秒数の少ない順');
+    pushGroup(formulaCols, 'formula_desc', 'formula_asc', '多い順', '少ない順');
+    if (getPointColumns().length > 0) {
+      items.push({ type: 'direct', key: 'points_desc', columnId: null, label: 'ポイントの多い順' });
+      items.push({ type: 'direct', key: 'points_asc', columnId: null, label: 'ポイントの少ない順' });
+    }
     return items;
   }
 
   function findSortItemLabel(sort) {
     const items = buildSortMenuItems();
     if (!sort || !sort.key) return '新規順';
-    if (sort.key === 'newest' || sort.key === 'oldest') {
+    if (sort.key === 'newest' || sort.key === 'oldest' || sort.key === 'points_desc' || sort.key === 'points_asc') {
       const found = items.find(i => i.key === sort.key);
       return found ? found.label : '新規順';
     }
@@ -2866,7 +3155,8 @@
     const labelMap = {
       distance_desc: '多い順', distance_asc: '低い順',
       count_desc: '多い順', count_asc: '少ない順',
-      time_desc: '秒数の多い順', time_asc: '秒数の少ない順'
+      time_desc: '秒数の多い順', time_asc: '秒数の少ない順',
+      formula_desc: '多い順', formula_asc: '少ない順'
     };
     const suffix = labelMap[sort.key];
     return suffix ? `${col.name}の${suffix}` : '新規順';
@@ -3092,6 +3382,18 @@
       case 'time_asc':
         rows.sort((a, b) => timeToSeconds(a.data[sort.columnId]) - timeToSeconds(b.data[sort.columnId]));
         break;
+      case 'points_desc':
+        rows.sort((a, b) => computeRowPointTotal(b) - computeRowPointTotal(a));
+        break;
+      case 'points_asc':
+        rows.sort((a, b) => computeRowPointTotal(a) - computeRowPointTotal(b));
+        break;
+      case 'formula_desc':
+        rows.sort((a, b) => countValue(b.data[sort.columnId]) - countValue(a.data[sort.columnId]));
+        break;
+      case 'formula_asc':
+        rows.sort((a, b) => countValue(a.data[sort.columnId]) - countValue(b.data[sort.columnId]));
+        break;
       case 'newest':
       default:
         rows.sort((a, b) => b.createdAt - a.createdAt);
@@ -3160,7 +3462,7 @@
       const num = typeof raw === 'number' ? raw : parseFloat(raw);
       return (raw === undefined || raw === null || raw === '' || isNaN(num)) ? emptyLineHTML() : escapeHtml(formatPointNumber(num));
     }
-    return raw ? escapeHtml(raw) : emptyLineHTML();
+    return raw ? escapeHtml(raw).replace(/\n/g, '<br>') : emptyLineHTML();
   }
 
   // 記録一覧に表示する列数（削除チェック・日時・ポイントの有無を含む）
@@ -3174,7 +3476,7 @@
   // ある記録（行）に、ポイント計算式をあてはめた合計点を求める
   function computeRowPointTotal(row) {
     let total = 0;
-    getPointColumns().forEach(col => { total += computeColumnPoints(col, row.data[col.id]); });
+    getPointColumns().forEach(col => { total += computeColumnPoints(col, row.data); });
     return total;
   }
 
@@ -3210,7 +3512,7 @@
       const td = document.createElement('td');
       if (pointConfirmActive && POINT_TYPES.includes(col.type)) {
         td.className = 'point-inline-value';
-        td.innerHTML = `${escapeHtml(formatPointNumber(computeColumnPoints(col, row.data[col.id])))}pt`;
+        td.innerHTML = `${escapeHtml(formatPointNumber(computeColumnPoints(col, row.data)))}pt`;
       } else if (isEditing) {
         td.innerHTML = fieldInputHTML(col, row.data[col.id], 'data-edit-col');
       } else if (col.type === 'check') {
@@ -3239,6 +3541,11 @@
         renderTable();
       };
     }
+    if (listActionMode === 'copy') {
+      tr.classList.add('row-clickable-edit');
+      if (copyingRowId === row.id) tr.classList.add('row-editing');
+      tr.onclick = () => { copyingRowId = row.id; renderTable(); };
+    }
 
     return tr;
   }
@@ -3260,6 +3567,7 @@
       listActionMode = 'none';
       rowsMarkedForDelete.clear();
       editingRowId = null;
+      copyingRowId = null;
     }
     renderListModeControls();
 
@@ -3581,6 +3889,25 @@
       wrap.appendChild(hint); wrap.appendChild(doneBtn);
       return;
     }
+    if (listActionMode === 'copy' && copyingRowId) {
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'btn btn-primary btn-sm'; copyBtn.textContent = '📋 コピーする';
+      copyBtn.onclick = () => copySelectedRow();
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.textContent = 'キャンセル';
+      cancelBtn.onclick = () => { copyingRowId = null; listActionMode = 'none'; renderTable(); };
+      wrap.appendChild(copyBtn); wrap.appendChild(cancelBtn);
+      return;
+    }
+    if (listActionMode === 'copy') {
+      const hint = document.createElement('span');
+      hint.className = 'list-mode-hint'; hint.textContent = 'コピーしたい記録をクリック';
+      const doneBtn = document.createElement('button');
+      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.textContent = '完了';
+      doneBtn.onclick = () => { listActionMode = 'none'; renderTable(); };
+      wrap.appendChild(hint); wrap.appendChild(doneBtn);
+      return;
+    }
     const editBtn = document.createElement('button');
     editBtn.className = 'btn btn-ghost btn-sm'; editBtn.textContent = '✎ 編集';
     editBtn.onclick = () => { listActionMode = 'edit'; editingRowId = null; renderTable(); };
@@ -3592,10 +3919,26 @@
       listActionMode = 'points';
       renderTable();
     };
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'btn btn-ghost btn-sm'; copyBtn.textContent = '📋 コピー';
+    copyBtn.onclick = () => { listActionMode = 'copy'; copyingRowId = null; renderTable(); };
     const delModeBtn = document.createElement('button');
     delModeBtn.className = 'btn btn-danger btn-sm'; delModeBtn.textContent = '🗑 削除';
     delModeBtn.onclick = () => { listActionMode = 'delete'; rowsMarkedForDelete.clear(); renderTable(); };
-    wrap.appendChild(editBtn); wrap.appendChild(pointBtn); wrap.appendChild(delModeBtn);
+    wrap.appendChild(editBtn); wrap.appendChild(pointBtn); wrap.appendChild(copyBtn); wrap.appendChild(delModeBtn);
+  }
+
+  // 選択中の記録を複製する。データはそのままコピーし、日時だけ「今日（コピーした瞬間）」に変わる。
+  function copySelectedRow() {
+    if (!copyingRowId) return;
+    const original = state.rows.find(r => r.id === copyingRowId);
+    if (!original) { copyingRowId = null; listActionMode = 'none'; renderTable(); return; }
+    const newRow = { id: uid(), createdAt: Date.now(), data: JSON.parse(JSON.stringify(original.data)) };
+    state.rows.push(newRow);
+    copyingRowId = null;
+    listActionMode = 'none';
+    save();
+    renderTable();
   }
 
   // 削除モードのチェックマーク（行のチェック・全選択チェック）のクリックを処理する
@@ -3915,6 +4258,60 @@
   });
   document.getElementById('closeLapsPicker').onclick = () => closeOverlay('overlayLapsPicker');
 
+  // ---------- 記録追加フォームのテキスト項目：「メモから貼り付け」 ----------
+  let textPasteTargetColId = null;
+
+  function applyMemoPasteToField(colId, text) {
+    const col = state.columns.find(c => c.id === colId);
+    if (!col || col.type !== 'text') return;
+    const root = document.getElementById('entryFields');
+    const el = root.querySelector(`[data-col="${colId}"][data-type="text"]`);
+    if (el) el.value = text;
+    refreshFormulaDisplays(root, 'data-col');
+    updateAddPreview();
+  }
+
+  function renderMemoPickerList() {
+    const list = document.getElementById('memoPickerList');
+    const empty = document.getElementById('memoPickerEmpty');
+    const memos = state.memos.slice().sort((a, b) => {
+      const pa = a.pinned ? 1 : 0, pb = b.pinned ? 1 : 0;
+      if (pa !== pb) return pb - pa;
+      return b.createdAt - a.createdAt;
+    });
+    list.innerHTML = '';
+    if (memos.length === 0) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    memos.forEach(memo => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'laps-picker-row';
+      row.dataset.memoId = memo.id;
+      row.innerHTML = `
+        <span class="timer-lap-date">${escapeHtml(formatAutoDate(memo.createdAt))}</span>
+        <span class="laps-picker-memo">${escapeHtml(memo.text)}</span>
+      `;
+      list.appendChild(row);
+    });
+  }
+
+  document.getElementById('entryFields').addEventListener('click', (e) => {
+    const pasteBtn = e.target.closest('[data-memo-paste-col]');
+    if (!pasteBtn) return;
+    textPasteTargetColId = pasteBtn.dataset.memoPasteCol;
+    renderMemoPickerList();
+    openOverlay('overlayMemoPicker');
+  });
+  document.getElementById('memoPickerList').addEventListener('click', (e) => {
+    const row = e.target.closest('[data-memo-id]');
+    if (!row || !textPasteTargetColId) return;
+    const memo = state.memos.find(m => m.id === row.dataset.memoId);
+    if (!memo) return;
+    applyMemoPasteToField(textPasteTargetColId, memo.text);
+    closeOverlay('overlayMemoPicker');
+  });
+  document.getElementById('closeMemoPicker').onclick = () => closeOverlay('overlayMemoPicker');
+
   document.getElementById('lapsShowAllBtn').onclick = () => {
     lapsAllPage = 0;
     openOverlay('overlayLapsAll');
@@ -3934,6 +4331,77 @@
     stopTimerLoop();
     closeOverlay('overlayTimer');
   };
+
+  // ---------- メモ：1つずつ追加していく簡単なメモ一覧 ----------
+  function muid() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function renderMemoList() {
+    const list = document.getElementById('memoList');
+    const empty = document.getElementById('memoEmpty');
+    const countBadge = document.getElementById('memoCountBadge');
+    countBadge.textContent = state.memos.length ? `${state.memos.length} 件` : '';
+    list.innerHTML = '';
+    if (state.memos.length === 0) {
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    const sorted = state.memos.slice().sort((a, b) => {
+      const pa = a.pinned ? 1 : 0, pb = b.pinned ? 1 : 0;
+      if (pa !== pb) return pb - pa;
+      return b.createdAt - a.createdAt;
+    });
+    sorted.forEach(memo => {
+      const item = document.createElement('div');
+      item.className = 'memo-item' + (memo.pinned ? ' memo-item-pinned' : '');
+      item.innerHTML = `
+        <span class="memo-item-icon">📝</span>
+        <div class="memo-item-body">
+          <div class="memo-item-text">${escapeHtml(memo.text)}</div>
+          <div class="memo-item-date">${escapeHtml(formatAutoDate(memo.createdAt))}</div>
+        </div>
+        <button type="button" class="btn btn-sm ${memo.pinned ? 'btn-primary' : 'btn-ghost'}" data-pin-memo="${memo.id}" title="ピン止め">📌</button>
+        <button type="button" class="btn btn-danger btn-sm" data-del-memo="${memo.id}">削除</button>
+      `;
+      list.appendChild(item);
+    });
+  }
+  function addMemo() {
+    const input = document.getElementById('newMemoInput');
+    const text = input.value.trim();
+    if (!text) return;
+    state.memos.push({ id: muid(), text, createdAt: Date.now() });
+    input.value = '';
+    save();
+    renderMemoList();
+    input.focus();
+  }
+  document.getElementById('addMemoBtn').onclick = addMemo;
+  document.getElementById('newMemoInput').addEventListener('keydown', (e) => {
+    // Enterは改行として使うので、Ctrl（Mac ではCmd）＋Enterで素早く追加できるようにする
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); addMemo(); }
+  });
+  document.getElementById('memoList').addEventListener('click', (e) => {
+    const pinBtn = e.target.closest('[data-pin-memo]');
+    if (pinBtn) {
+      const memo = state.memos.find(m => m.id === pinBtn.dataset.pinMemo);
+      if (memo) { memo.pinned = !memo.pinned; save(); renderMemoList(); }
+      return;
+    }
+    const delBtn = e.target.closest('[data-del-memo]');
+    if (!delBtn) return;
+    const id = delBtn.dataset.delMemo;
+    showConfirmModal('このメモを削除しますか？\nこの操作は元に戻せません。', () => {
+      state.memos = state.memos.filter(m => m.id !== id);
+      save();
+      renderMemoList();
+    });
+  });
+  document.getElementById('navMemo').onclick = () => {
+    renderMemoList();
+    openOverlay('overlayMemo');
+  };
+  document.getElementById('closeMemo').onclick = () => closeOverlay('overlayMemo');
+
 
   let resizeTimer = null;
   window.addEventListener('resize', () => {
