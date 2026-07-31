@@ -6,6 +6,7 @@
 <title>RECORD // TRACKER</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" href="icon-512.png">
 <style>
   :root {
     --bg: #0b0c12;
@@ -873,6 +874,11 @@
         <p class="setting-block-desc">記録一覧に「日時」列を表示するかどうかを選べます。</p>
         <div class="option-pills" id="dateColumnPills"></div>
       </div>
+      <div class="setting-block">
+        <p class="setting-block-title">ポイント合計の表示</p>
+        <p class="setting-block-desc">記録一覧の日時の隣に、記録ごとの合計ポイントを表示するかどうかを選べます。</p>
+        <div class="option-pills" id="pointsColumnPills"></div>
+      </div>
       <p class="settings-more-note">設定は今後もここに追加していけます。</p>
     </div>
   </div>
@@ -1728,6 +1734,10 @@
     { key: 'on', label: '表示する', desc: '記録一覧に「日時」列を表示します。' },
     { key: 'off', label: '表示しない', desc: '記録一覧から「日時」列を隠します。' }
   ];
+  const POINTS_COLUMN_OPTIONS = [
+    { key: 'on', label: '表示する', desc: '記録一覧の日時の隣に「ポイント」列（合計点）を表示します。' },
+    { key: 'off', label: '表示しない', desc: '記録一覧から「ポイント」列を隠します。' }
+  ];
 
   function renderPillGroup(containerId, options, currentValue, onSelect) {
     const wrap = document.getElementById(containerId);
@@ -1757,6 +1767,10 @@
     });
     renderPillGroup('dateColumnPills', DATE_COLUMN_OPTIONS, state.settings.showDateColumn, (key) => {
       state.settings.showDateColumn = key; save(); renderSettingsPanel(); renderTable();
+    });
+    renderPillGroup('pointsColumnPills', POINTS_COLUMN_OPTIONS, state.settings.showPointsInList ? 'on' : 'off', (key) => {
+      state.settings.showPointsInList = (key === 'on'); save(); renderSettingsPanel(); renderTable();
+      if (document.getElementById('overlaySimulator').classList.contains('open')) updatePointsInListToggleBtn();
     });
   }
 
@@ -3915,7 +3929,6 @@
     pointBtn.className = 'btn btn-ghost btn-sm'; pointBtn.textContent = '📊 ポイント確認';
     pointBtn.onclick = () => {
       if (getPointColumns().length === 0) { alert('ポイントの対象になる項目（距離・時間・回数・チェック）がまだありません。'); return; }
-      state.settings.showPointsInList = true; save();
       listActionMode = 'points';
       renderTable();
     };
