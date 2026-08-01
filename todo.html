@@ -350,13 +350,15 @@
   .point-inline-value {
     font-family: var(--font-display); font-weight: 700; color: var(--accent-2); background: rgba(53,232,210,0.08);
   }
-  .point-toggle-btn { display: inline-flex; align-items: center; gap: 0.375rem; }
   .check-cell { text-align: center; }
   .check-cell .check-box-display { margin: 0 auto; }
 
   .list-mode-btns { display: flex; align-items: center; gap: 0.375rem; margin-left: 0.75rem; flex-wrap: nowrap; overflow-x: auto; }
   .list-mode-btns .btn { padding: 0.3rem 0.5rem; font-size: 0.6875rem; white-space: nowrap; flex-shrink: 0; }
-  .list-mode-hint { font-size: 0.7188rem; color: var(--text-dim); font-family: var(--font-display); font-weight: 600; white-space: nowrap; }
+  .list-mode-hint {
+    font-size: 0.6875rem; color: var(--text-dim); font-family: var(--font-display); font-weight: 600;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1;
+  }
   tbody tr.row-clickable-edit { cursor: pointer; transition: background-color 0.12s, box-shadow 0.12s; }
   tbody tr.row-clickable-edit:hover { background: rgba(155,107,255,0.14); box-shadow: inset 0.1875rem 0 0 var(--accent); }
   tbody tr.row-editing { background: rgba(53,232,210,0.06); box-shadow: inset 0.1875rem 0 0 var(--accent-2); }
@@ -777,7 +779,7 @@
         <p class="panel-title">項目一覧</p>
         <span class="count-badge" id="colCountBadge"></span>
       </div>
-      <div class="table-scroll" style="max-height:none; overflow-x:auto; overflow-y:visible;">
+      <div class="table-scroll" id="colTableScroll" style="max-height:none; overflow-y:visible;">
         <table id="colTable">
           <thead><tr><th>項目名</th><th>種類</th><th>詳細</th><th>操作</th></tr></thead>
           <tbody id="colTableBody"></tbody>
@@ -808,9 +810,8 @@
       <div class="panel" style="flex:0 0 auto; margin-bottom:16px;">
         <div class="panel-title-row">
           <p class="panel-title">合計ポイント</p>
-          <button type="button" class="btn btn-ghost btn-sm point-toggle-btn" id="togglePointsInListBtn">記録一覧にポイント列を表示</button>
         </div>
-        <p class="example-note">現在のファイルの全記録に、計算式をあてはめた合計です。ページを切り替えても、ここは常に表示されます。</p>
+        <p class="example-note">現在のファイルの全記録に、計算式をあてはめた合計です。ページを切り替えても、ここは常に表示されます。記録一覧への表示・非表示は「設定」で切り替えられます。</p>
         <div id="pointSummary"></div>
       </div>
       <div class="panel" style="flex:1; min-height:0; display:flex; flex-direction:column;">
@@ -1787,7 +1788,6 @@
     });
     renderPillGroup('pointsColumnPills', POINTS_COLUMN_OPTIONS, state.settings.showPointsInList ? 'on' : 'off', (key) => {
       state.settings.showPointsInList = (key === 'on'); save(); renderSettingsPanel(); renderTable();
-      if (document.getElementById('overlaySimulator').classList.contains('open')) updatePointsInListToggleBtn();
     });
   }
 
@@ -2345,6 +2345,7 @@
 
     addTr.appendChild(tdInput); addTr.appendChild(tdType); addTr.appendChild(tdDetail); addTr.appendChild(tdBtn);
     body.appendChild(addTr);
+    applyColumnOverflowMode(document.getElementById('colTableScroll'), document.getElementById('colTable'));
   }
 
   function addColumn() {
@@ -2555,20 +2556,6 @@
     return String(Math.round(n * 100) / 100);
   }
 
-  function updatePointsInListToggleBtn() {
-    const btn = document.getElementById('togglePointsInListBtn');
-    if (!btn) return;
-    const on = !!state.settings.showPointsInList;
-    btn.textContent = on ? '✓ 記録一覧に表示中' : '記録一覧にポイント列を表示';
-    btn.className = 'btn btn-sm point-toggle-btn ' + (on ? 'btn-primary' : 'btn-ghost');
-  }
-  document.getElementById('togglePointsInListBtn').onclick = () => {
-    state.settings.showPointsInList = !state.settings.showPointsInList;
-    save();
-    updatePointsInListToggleBtn();
-    renderTable();
-  };
-
   function renderSimulator() {
     const content = document.getElementById('simulatorContent');
     const empty = document.getElementById('simulatorEmpty');
@@ -2584,7 +2571,6 @@
     cols.forEach(col => ensurePointFormula(col));
 
     pointFormulaPage = 0;
-    updatePointsInListToggleBtn();
     renderPointFormulaList();
     renderPointSummary();
   }
@@ -3883,10 +3869,10 @@
 
     if (listActionMode === 'edit' && editingRowId) {
       const saveBtn = document.createElement('button');
-      saveBtn.className = 'btn btn-primary btn-sm'; saveBtn.textContent = '💾 保存';
+      saveBtn.className = 'btn btn-primary btn-sm'; saveBtn.innerHTML = '💾<span class="btn-label"> 保存</span>';
       saveBtn.onclick = () => saveCurrentRowEdit();
       const cancelBtn = document.createElement('button');
-      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.textContent = 'キャンセル';
+      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.innerHTML = '✕<span class="btn-label"> キャンセル</span>';
       cancelBtn.onclick = () => cancelCurrentRowEdit();
       wrap.appendChild(saveBtn); wrap.appendChild(cancelBtn);
       return;
@@ -3895,7 +3881,7 @@
       const hint = document.createElement('span');
       hint.className = 'list-mode-hint'; hint.textContent = '編集する記録をクリック';
       const doneBtn = document.createElement('button');
-      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.textContent = '完了';
+      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.innerHTML = '✓<span class="btn-label"> 完了</span>';
       doneBtn.onclick = () => { listActionMode = 'none'; renderTable(); };
       wrap.appendChild(hint); wrap.appendChild(doneBtn);
       return;
@@ -3903,10 +3889,10 @@
     if (listActionMode === 'delete') {
       const delBtn = document.createElement('button');
       delBtn.className = 'btn btn-danger btn-sm';
-      delBtn.textContent = `🗑 削除する（${rowsMarkedForDelete.size}件）`;
+      delBtn.innerHTML = `🗑 ${rowsMarkedForDelete.size}件<span class="btn-label"> を削除</span>`;
       delBtn.onclick = () => deleteMarkedRows();
       const cancelBtn = document.createElement('button');
-      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.textContent = 'キャンセル';
+      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.innerHTML = '✕<span class="btn-label"> キャンセル</span>';
       cancelBtn.onclick = () => { listActionMode = 'none'; rowsMarkedForDelete.clear(); renderTable(); };
       wrap.appendChild(delBtn); wrap.appendChild(cancelBtn);
       return;
@@ -3915,17 +3901,17 @@
       const hint = document.createElement('span');
       hint.className = 'list-mode-hint'; hint.textContent = 'ポイントを確認したい記録をクリック';
       const doneBtn = document.createElement('button');
-      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.textContent = '完了';
+      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.innerHTML = '✓<span class="btn-label"> 完了</span>';
       doneBtn.onclick = () => { listActionMode = 'none'; renderTable(); };
       wrap.appendChild(hint); wrap.appendChild(doneBtn);
       return;
     }
     if (listActionMode === 'copy' && copyingRowId) {
       const copyBtn = document.createElement('button');
-      copyBtn.className = 'btn btn-primary btn-sm'; copyBtn.textContent = '📋 コピーする';
+      copyBtn.className = 'btn btn-primary btn-sm'; copyBtn.innerHTML = '📋<span class="btn-label"> コピーする</span>';
       copyBtn.onclick = () => copySelectedRow();
       const cancelBtn = document.createElement('button');
-      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.textContent = 'キャンセル';
+      cancelBtn.className = 'btn btn-ghost btn-sm'; cancelBtn.innerHTML = '✕<span class="btn-label"> キャンセル</span>';
       cancelBtn.onclick = () => { copyingRowId = null; listActionMode = 'none'; renderTable(); };
       wrap.appendChild(copyBtn); wrap.appendChild(cancelBtn);
       return;
@@ -3934,7 +3920,7 @@
       const hint = document.createElement('span');
       hint.className = 'list-mode-hint'; hint.textContent = 'コピーしたい記録をクリック';
       const doneBtn = document.createElement('button');
-      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.textContent = '完了';
+      doneBtn.className = 'btn btn-ghost btn-sm'; doneBtn.innerHTML = '✓<span class="btn-label"> 完了</span>';
       doneBtn.onclick = () => { listActionMode = 'none'; renderTable(); };
       wrap.appendChild(hint); wrap.appendChild(doneBtn);
       return;
