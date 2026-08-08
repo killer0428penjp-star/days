@@ -48,7 +48,7 @@
 
   /* ---------- Top bar ---------- */
   .topbar {
-    position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+    position: sticky; top: 0; height: var(--topbar-h);
     background: linear-gradient(90deg, var(--panel) 0%, var(--panel-2) 100%);
     border-bottom: 0.0625rem solid var(--line);
     display: flex; align-items: center; padding: 0 1rem; gap: 0.875rem; z-index: 300;
@@ -95,7 +95,7 @@
   .nav-btn.active { color: var(--accent-2); background: rgba(53,232,210,0.08); border-color: rgba(53,232,210,0.25); }
 
   /* ---------- Main (fills screen) ---------- */
-  .main { margin-top: var(--topbar-h); height: calc(100vh - var(--topbar-h)); padding: 1.125rem 1.375rem; display: flex; flex-direction: column; min-height: 0; }
+  .main { height: calc(100vh - var(--topbar-h)); padding: 1.125rem 1.375rem; display: flex; flex-direction: column; min-height: 0; }
   .wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; max-width: 75rem; margin: 0 auto; width: 100%; }
 
   .panel {
