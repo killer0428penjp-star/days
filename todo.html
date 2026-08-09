@@ -41,9 +41,16 @@
 
   #bgLayer { position: fixed; inset: 0; z-index: -1; display: none; overflow: hidden; background: #000; }
   #bgLayer img, #bgLayer video { width: 100%; height: 100%; object-fit: cover; display: none; }
-  #bgLayer .scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,7,12,0.75), rgba(6,7,12,0.6)); }
+  #bgLayer .scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 32%, transparent); }
   body.custom-bg .panel, body.custom-bg .topbar, body.custom-bg .overlay, body.custom-bg .help-popover {
-    background: rgba(16,17,26,0.72) !important; backdrop-filter: blur(0.625rem);
+    background: color-mix(in srgb, var(--panel) 58%, transparent) !important; backdrop-filter: blur(0.625rem);
+  }
+  /* 記録一覧（main-panel）は背景画像がしっかり見えるよう、ほぼ透明にする */
+  body.custom-bg .main-panel {
+    background: color-mix(in srgb, var(--panel) 12%, transparent) !important; backdrop-filter: blur(0.25rem);
+  }
+  body.custom-bg .main-panel thead th {
+    background: color-mix(in srgb, var(--panel) 40%, transparent) !important;
   }
 
   /* ---------- Top bar ---------- */
@@ -314,6 +321,31 @@
   .memo-item-body { flex: 1; min-width: 0; }
   .memo-item-text { font-size: 0.8438rem; line-height: 1.5; word-break: break-word; white-space: pre-wrap; }
   .memo-item-date { font-size: 0.6875rem; color: var(--text-dim); margin-top: 0.25rem; font-family: var(--font-display); }
+  .memo-item-media { display: block; width: 100%; max-height: 13.75rem; object-fit: cover; border: 0.0625rem solid var(--line); margin: 0.5rem 0; }
+
+  .memo-links-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+  .memo-link-btn {
+    padding: 0.5rem 0.875rem; background: var(--panel-2); border: 0.125rem solid transparent; color: #fff;
+    cursor: pointer; font-family: var(--font-display); font-size: 0.75rem; font-weight: 700; max-width: 9.375rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    box-shadow: 0 0.1875rem 0.5rem rgba(0,0,0,0.3);
+    clip-path: polygon(0.375rem 0, 100% 0, 100% calc(100% - 0.375rem), calc(100% - 0.375rem) 100%, 0 100%, 0 0.375rem);
+  }
+  .memo-link-btn:nth-of-type(1) { --link-color: #ff6b81; --link-color-2: #ee5253; }
+  .memo-link-btn:nth-of-type(2) { --link-color: #4dabf7; --link-color-2: #1971c2; }
+  .memo-link-btn:nth-of-type(3) { --link-color: #51e0a0; --link-color-2: #2f9e44; }
+  .memo-link-btn:nth-of-type(4) { --link-color: #ffb84d; --link-color-2: #e8590c; }
+  .memo-link-btn { background: linear-gradient(135deg, var(--link-color), var(--link-color-2)); }
+  .memo-link-btn.memo-link-btn-empty {
+    background: transparent; color: var(--link-color); border: 0.125rem dashed var(--link-color); box-shadow: none;
+  }
+  .memo-link-edit-field { display: flex; flex-direction: column; gap: 0.25rem; background: var(--bg); border: 0.0625rem solid var(--line); padding: 0.5rem; flex: 1 1 9.375rem; min-width: 8.75rem; }
+  .memo-link-edit-field input[type="text"] { width: 100%; }
+  .memo-links-edit-toggle { margin-left: auto; flex-shrink: 0; }
+  .memo-media-picker-row { display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; width: 100%; }
+  .memo-media-note { font-size: 0.6875rem; color: var(--text-dim); margin: -0.25rem 0 0; width: 100%; box-sizing: border-box; }
+  .memo-media-preview { position: relative; display: flex; flex-direction: column; gap: 0.375rem; align-items: flex-start; width: 100%; max-width: 15.625rem; }
+  .memo-media-preview img, .memo-media-preview video { width: 100%; max-height: 11.25rem; object-fit: cover; border: 0.0625rem solid var(--line); display: block; }
   .file-create-row input[type="text"] { width: 100%; max-width: 21.25rem; }
   .files-list-wrap { flex: 1; min-height: 0; overflow-y: auto; }
   .file-item {
@@ -360,7 +392,7 @@
   .list-mode-btns { display: flex; align-items: center; gap: 0.3125rem; margin: 0 0 0 auto; flex-wrap: nowrap; flex-shrink: 0; }
   .list-mode-btns .btn { padding: 0.5rem; font-size: 0.9375rem; line-height: 1; white-space: nowrap; flex-shrink: 0; min-width: 2.25rem; display: flex; align-items: center; justify-content: center; }
   .list-mode-hint {
-    font-size: 0.6875rem; color: var(--text-dim); font-family: var(--font-display); font-weight: 600;
+    font-size: 0.5625rem; color: var(--text-dim); font-family: var(--font-display); font-weight: 600;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1;
   }
   tbody tr.row-clickable-edit { cursor: pointer; transition: background-color 0.12s, box-shadow 0.12s; }
@@ -993,8 +1025,15 @@
       <button class="close-btn" id="closeMemo">×</button>
     </div>
     <div class="panel">
+      <div class="memo-links-row" id="memoLinksRow"></div>
       <div class="memo-add-row">
         <textarea id="newMemoInput" placeholder="メモを入力（Enterで改行できます）。追加ボタンで保存します。" rows="3"></textarea>
+        <div class="memo-media-picker-row">
+          <input type="file" id="memoMediaInput" accept="image/*,video/*" style="display:none;">
+          <button type="button" class="btn btn-ghost btn-sm" id="memoMediaBtn">📎 画像・動画を追加</button>
+          <div class="memo-media-preview" id="memoMediaPreview" style="display:none;"></div>
+        </div>
+        <p class="memo-media-note">大きすぎるファイルは保存に失敗する場合があります。数MB以内のファイルを推奨します。</p>
         <button type="button" class="btn btn-primary btn-sm" id="addMemoBtn">＋ 追加</button>
       </div>
       <div class="panel-title-row">
@@ -1162,6 +1201,10 @@
     };
   }
   if (!Array.isArray(state.memos)) state.memos = [];
+  if (!Array.isArray(state.memoLinks) || state.memoLinks.length !== 4) {
+    const existingLinks = Array.isArray(state.memoLinks) ? state.memoLinks : [];
+    state.memoLinks = [0, 1, 2, 3].map(i => existingLinks[i] || { label: '', url: '' });
+  }
   if (!state.theme) state.theme = defaultState().theme;
   if (!state.settings) state.settings = defaultFileSettings();
   if (!state.settings.tableBorders) state.settings.tableBorders = 'on';
@@ -1222,6 +1265,8 @@
   let editingColId = null;
   let editingFormulaSteps = null; // 計算（formula）項目を編集中の、未保存のステップ配列
   let editingFileId = null;
+  let memoLinksEditMode = false; // メモのリンクボタン（4つ）を編集中かどうか
+  let pendingMemoMedia = null; // メモに追加しようとしている画像・動画（未保存）
   let currentPage = 0;
   let slideLock = false;
   let listActionMode = 'none'; // 'none' | 'edit' | 'delete'
@@ -1240,14 +1285,46 @@
     const af = getActiveFile();
     if (af) { af.columns = state.columns; af.rows = state.rows; af.settings = state.settings; }
   }
-  function save() {
+  function save(silent) {
     syncActiveFileData();
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    catch (e) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      return true;
+    } catch (e) {
       console.error('save error', e);
-      alert('保存容量の上限を超えたため保存できませんでした。背景ファイルのサイズを小さくしてください。');
+      if (!silent) {
+        alert('保存容量の上限を超えたため保存できませんでした。添付した画像・動画や背景ファイルのサイズを小さくするか、削除してください。');
+      }
+      return false;
     }
   }
+  // 画像ファイルを指定の最大辺サイズ・画質でJPEGに圧縮し、保存容量を大きく節約する
+  function compressImageFile(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.naturalWidth, height = img.naturalHeight;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+            else { width = Math.round(width * maxDim / height); height = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          try { resolve(canvas.toDataURL('image/jpeg', quality)); }
+          catch (err) { reject(err); }
+        };
+        img.onerror = () => reject(new Error('image load failed'));
+        img.src = reader.result;
+      };
+      reader.onerror = () => reject(new Error('file read failed'));
+      reader.readAsDataURL(file);
+    });
+  }
+  const MEDIA_VIDEO_MAX_BYTES = 4 * 1024 * 1024; // 動画は圧縮できないため、あらかじめサイズの上限を設けて弾く
   function uid() { return 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
   function escapeHtml(str) { const div = document.createElement('div'); div.textContent = str == null ? '' : String(str); return div.innerHTML; }
   function formatAutoDate(ts) {
@@ -1304,12 +1381,11 @@
     const bgLayer = document.getElementById('bgLayer');
     const bgImage = document.getElementById('bgImage');
     const bgVideo = document.getElementById('bgVideo');
-    const isCustom = mode === 'custom' && state.theme.customBgData;
+    const hasCustomBg = !!state.theme.customBgData;
     const baseVars = (THEMES[mode] || THEMES.dark).vars;
     Object.entries(baseVars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
 
-    if (isCustom) {
-      Object.entries(THEMES.dark.vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+    if (hasCustomBg) {
       bgLayer.style.display = 'block';
       document.body.classList.add('custom-bg');
       if (state.theme.customBgType === 'video') {
@@ -1347,23 +1423,46 @@
     } else { preview.style.display = 'none'; }
   }
   document.getElementById('uploadZone').onclick = () => document.getElementById('customBgInput').click();
-  document.getElementById('customBgInput').addEventListener('change', (e) => {
+  document.getElementById('customBgInput').addEventListener('change', async (e) => {
     const file = e.target.files[0];
+    e.target.value = '';
     if (!file) return;
     const isVideo = file.type.startsWith('video/');
-    const reader = new FileReader();
-    reader.onload = () => {
-      state.theme.customBgData = reader.result;
-      state.theme.customBgType = isVideo ? 'video' : 'image';
-      state.theme.mode = 'custom';
-      save(); applyTheme(); renderThemeGrid(); renderBgPreview();
+    const prevData = state.theme.customBgData;
+    const prevType = state.theme.customBgType;
+
+    const applyBg = (data, type) => {
+      state.theme.customBgData = data;
+      state.theme.customBgType = type;
+      const ok = save(true);
+      if (!ok) {
+        state.theme.customBgData = prevData;
+        state.theme.customBgType = prevType;
+        alert('保存容量の上限を超えたため、背景に設定できませんでした。もっと小さいファイルを選ぶか、他の添付データ（メモの画像・動画など）を削除してから再度お試しください。');
+      }
+      applyTheme(); renderThemeGrid(); renderBgPreview();
     };
-    reader.onerror = () => alert('ファイルの読み込みに失敗しました。');
-    reader.readAsDataURL(file);
+
+    if (isVideo) {
+      if (file.size > MEDIA_VIDEO_MAX_BYTES) {
+        alert(`動画のサイズが大きすぎます（${(file.size / 1024 / 1024).toFixed(1)}MB）。${MEDIA_VIDEO_MAX_BYTES / 1024 / 1024}MB以内の動画を選んでください。`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => applyBg(reader.result, 'video');
+      reader.onerror = () => alert('ファイルの読み込みに失敗しました。');
+      reader.readAsDataURL(file);
+    } else {
+      try {
+        const compressed = await compressImageFile(file, 1600, 0.82);
+        applyBg(compressed, 'image');
+      } catch (err) {
+        alert('画像の読み込みに失敗しました。');
+      }
+    }
   });
   document.getElementById('clearBgBtn').onclick = () => {
     state.theme.customBgData = null; state.theme.customBgType = null;
-    if (state.theme.mode === 'custom') state.theme.mode = 'dark';
     document.getElementById('customBgInput').value = '';
     save(); applyTheme(); renderThemeGrid(); renderBgPreview();
   };
@@ -4374,10 +4473,16 @@
     sorted.forEach(memo => {
       const item = document.createElement('div');
       item.className = 'memo-item' + (memo.pinned ? ' memo-item-pinned' : '');
+      const mediaHtml = memo.mediaType === 'video'
+        ? `<video class="memo-item-media" src="${memo.mediaData}" controls playsinline></video>`
+        : memo.mediaType === 'image'
+        ? `<img class="memo-item-media" src="${memo.mediaData}" alt="添付画像">`
+        : '';
       item.innerHTML = `
         <span class="memo-item-icon">📝</span>
         <div class="memo-item-body">
-          <div class="memo-item-text">${escapeHtml(memo.text)}</div>
+          ${memo.text ? `<div class="memo-item-text">${escapeHtml(memo.text)}</div>` : ''}
+          ${mediaHtml}
           <div class="memo-item-date">${escapeHtml(formatAutoDate(memo.createdAt))}</div>
         </div>
         <button type="button" class="btn btn-sm ${memo.pinned ? 'btn-primary' : 'btn-ghost'}" data-pin-memo="${memo.id}" title="ピン止め">📌</button>
@@ -4389,10 +4494,23 @@
   function addMemo() {
     const input = document.getElementById('newMemoInput');
     const text = input.value.trim();
-    if (!text) return;
-    state.memos.push({ id: muid(), text, createdAt: Date.now() });
+    if (!text && !pendingMemoMedia) return;
+    const memo = { id: muid(), text, createdAt: Date.now() };
+    if (pendingMemoMedia) { memo.mediaType = pendingMemoMedia.type; memo.mediaData = pendingMemoMedia.data; }
+    state.memos.push(memo);
+    const ok = save(true);
+    if (!ok) {
+      state.memos.pop();
+      if (memo.mediaType) {
+        alert('保存容量の上限を超えたため、画像・動画付きのメモを保存できませんでした。添付ファイルを小さくするか、他の添付データ（メモの画像・動画、背景ファイルなど）を削除してから再度お試しください。');
+      } else {
+        alert('保存容量の上限を超えたため保存できませんでした。添付した画像・動画や背景ファイルのサイズを小さくするか、削除してください。');
+      }
+      return;
+    }
     input.value = '';
-    save();
+    pendingMemoMedia = null;
+    renderMemoMediaPreview();
     renderMemoList();
     input.focus();
   }
@@ -4417,7 +4535,107 @@
       renderMemoList();
     });
   });
+
+  // ---------- メモの画像・動画添付 ----------
+  function renderMemoMediaPreview() {
+    const preview = document.getElementById('memoMediaPreview');
+    if (!preview) return;
+    if (!pendingMemoMedia) { preview.style.display = 'none'; preview.innerHTML = ''; return; }
+    preview.style.display = 'flex';
+    preview.innerHTML = (pendingMemoMedia.type === 'video'
+      ? `<video src="${pendingMemoMedia.data}" controls playsinline></video>`
+      : `<img src="${pendingMemoMedia.data}" alt="添付プレビュー">`) +
+      `<button type="button" class="btn btn-ghost btn-sm" id="memoMediaRemoveBtn">✕ 添付を削除</button>`;
+    document.getElementById('memoMediaRemoveBtn').onclick = () => { pendingMemoMedia = null; renderMemoMediaPreview(); };
+  }
+  document.getElementById('memoMediaBtn').onclick = () => document.getElementById('memoMediaInput').click();
+  document.getElementById('memoMediaInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    const isVideo = file.type.startsWith('video/');
+    if (isVideo) {
+      if (file.size > MEDIA_VIDEO_MAX_BYTES) {
+        alert(`動画のサイズが大きすぎます（${(file.size / 1024 / 1024).toFixed(1)}MB）。${MEDIA_VIDEO_MAX_BYTES / 1024 / 1024}MB以内の動画を選んでください。`);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => { pendingMemoMedia = { type: 'video', data: reader.result }; renderMemoMediaPreview(); };
+      reader.onerror = () => alert('ファイルの読み込みに失敗しました。');
+      reader.readAsDataURL(file);
+    } else {
+      try {
+        const compressed = await compressImageFile(file, 1280, 0.8);
+        pendingMemoMedia = { type: 'image', data: compressed };
+        renderMemoMediaPreview();
+      } catch (err) {
+        alert('画像の読み込みに失敗しました。');
+      }
+    }
+  });
+
+  // ---------- メモ入力欄の上のリンクボタン（4つ）：編集でURLを登録すると、押した時にそのリンクへ飛ぶ ----------
+  function renderMemoLinks() {
+    const wrap = document.getElementById('memoLinksRow');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    state.memoLinks.forEach((link, idx) => {
+      if (memoLinksEditMode) {
+        const field = document.createElement('div');
+        field.className = 'memo-link-edit-field';
+        field.innerHTML = `
+          <input type="text" placeholder="ボタン名（例：リンク${idx + 1}）" value="${escapeHtml(link.label)}" data-memo-link-label="${idx}">
+          <input type="text" placeholder="https://..." value="${escapeHtml(link.url)}" data-memo-link-url="${idx}">
+        `;
+        wrap.appendChild(field);
+      } else {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'memo-link-btn' + (link.url ? '' : ' memo-link-btn-empty');
+        btn.textContent = link.label || `リンク${idx + 1}`;
+        btn.title = link.url || '編集してリンク先を設定できます';
+        btn.onclick = () => {
+          if (link.url) {
+            let url = link.url.trim();
+            if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+            window.open(url, '_blank', 'noopener');
+          } else {
+            memoLinksEditMode = true;
+            renderMemoLinks();
+          }
+        };
+        wrap.appendChild(btn);
+      }
+    });
+    const editToggle = document.createElement('button');
+    editToggle.type = 'button';
+    editToggle.className = 'btn btn-ghost btn-sm memo-links-edit-toggle';
+    editToggle.innerHTML = memoLinksEditMode ? '✓ 完了' : '✎ 編集';
+    editToggle.onclick = () => { memoLinksEditMode = !memoLinksEditMode; renderMemoLinks(); };
+    wrap.appendChild(editToggle);
+  }
+  document.getElementById('memoLinksRow').addEventListener('input', (e) => {
+    const labelInput = e.target.closest('[data-memo-link-label]');
+    if (labelInput) {
+      const idx = parseInt(labelInput.dataset.memoLinkLabel, 10);
+      state.memoLinks[idx].label = labelInput.value;
+      save();
+      return;
+    }
+    const urlInput = e.target.closest('[data-memo-link-url]');
+    if (urlInput) {
+      const idx = parseInt(urlInput.dataset.memoLinkUrl, 10);
+      state.memoLinks[idx].url = urlInput.value;
+      save();
+      return;
+    }
+  });
+
   document.getElementById('navMemo').onclick = () => {
+    memoLinksEditMode = false;
+    pendingMemoMedia = null;
+    renderMemoMediaPreview();
+    renderMemoLinks();
     renderMemoList();
     openOverlay('overlayMemo');
   };
