@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>1日の予定</title>
+<style>
+  :root{
+    --root-fs: clamp(14px, 1.6vw, 18px);
+    --accent: #b8894c;
+    --accent-dark: #93692f;
+    --accent-pale: #f6efe4;
+    --titlebar-from: #24262b;
+    --titlebar-to: #3a3d45;
+    --ribbon-bg: #fbfaf8;
+    --border: #e3ded4;
+    --text-main: #2c2c2c;
+    --text-sub: #8a8478;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ font-size:var(--root-fs); }
+  body{
+    font-family:"Calibri","Noto Sans JP",sans-serif;
+    background:#f2f2f2;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  /* Safariでのズーム防止 */
+  input, select{ font-size:16px; }
+
+  /* ===================== サイドバー（Excelリボン風） ===================== */
+  .sidebar{
+    background:var(--ribbon-bg);
+    border-bottom:1px solid var(--border);
+    box-shadow:0 3px 12px rgba(0,0,0,0.06);
+  }
+  .titlebar{
+    background:linear-gradient(120deg, var(--titlebar-from), var(--titlebar-to));
+    color:#f2ede4;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:0.5rem;
+    padding:0.5rem 1rem;
+  }
+  .titlebar .tb-left{ display:flex; align-items:center; gap:0.5rem; }
+  .titlebar .tb-icon{
+    width:1.15rem; height:1.15rem;
+    border:1.5px solid var(--accent);
+    border-radius:0.2rem;
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.65rem; color:var(--accent);
+  }
+  .titlebar .tb-title{
+    font-size:0.82rem;
+    font-weight:600;
+    letter-spacing:0.04em;
+    color:#f2ede4;
+  }
+  .titlebar .tb-sub{
+    font-size:0.68rem;
+    color:#a9a397;
+    margin-left:0.2rem;
+  }
+  .titlebar input[type="date"]{
+    background:rgba(255,255,255,0.08);
+    color:#f2ede4;
+    border:1px solid rgba(255,255,255,0.28);
+    border-radius:0.3rem;
+    padding:0.25rem 0.5rem;
+    font-family:inherit;
+    font-size:16px;
+    outline:none;
+    color-scheme:dark;
+  }
+  .titlebar input[type="date"]:focus{ border-color:var(--accent); }
+
+  .tabrow{
+    display:flex;
+    align-items:flex-end;
+    gap:1.4rem;
+    padding:0.5rem 1.1rem 0;
+    border-bottom:1px solid var(--border);
+    background:#fff;
+  }
+  .tabrow .tabitem{
+    font-size:0.75rem;
+    color:var(--text-sub);
+    padding-bottom:0.5rem;
+    cursor:pointer;
+    letter-spacing:0.02em;
+  }
+  .tabrow .tabitem.on{
+    color:var(--accent-dark);
+    font-weight:700;
+    border-bottom:2px solid var(--accent);
+  }
+
+  .grouprow{
+    display:flex;
+    align-items:stretch;
+    gap:0;
+    overflow-x:auto;
+    padding:0.55rem 0.6rem 0.3rem;
+  }
+  .group{
+    flex:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+    gap:0.3rem;
+    padding:0.3rem 0.9rem;
+    min-width:6.6rem;
+    height:4.7rem;
+  }
+  .group .group-control{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:0.25rem;
+    height:2.85rem;
+  }
+  .group .group-icon{ font-size:0.85rem; color:var(--accent-dark); line-height:1; }
+  .group input, .group select{
+    border:1px solid var(--border);
+    border-radius:0.25rem;
+    padding:0.15rem 0.3rem;
+    font-family:inherit;
+    font-size:16px;
+    background:#fff;
+    color:var(--text-main);
+    width:100%;
+    height:1.7rem;
+    text-align:center;
+    outline:none;
+  }
+  .group input:focus, .group select:focus{ border-color:var(--accent); }
+  .group input[type="color"]{ padding:0.1rem; height:1.5rem; cursor:pointer; }
+  .group.checkgroup{ flex-direction:row; align-items:center; gap:0.4rem; min-width:auto; height:4.7rem; }
+  .group.checkgroup input{ width:auto; }
+  .group-caption{
+    font-size:0.6rem;
+    color:var(--text-sub);
+    letter-spacing:0.02em;
+    white-space:nowrap;
+    line-height:1;
+  }
+  .divider{ flex:none; width:1px; background:var(--border); margin:0.3rem 0.2rem; }
+
+  .addgroup{
+    flex:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+    gap:0.3rem;
+    padding:0.3rem 0.9rem;
+    height:4.7rem;
+  }
+  .addgroup .group-control{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    height:2.85rem;
+  }
+  .addgroup .addtab{
+    width:2rem; height:2rem;
+    border-radius:0.3rem;
+    border:1.5px solid var(--accent);
+    color:var(--accent-dark);
+    background:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1rem;
+    cursor:pointer;
+    transition:background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  }
+  .addgroup .addtab:hover{ background:var(--accent-pale); transform:translateY(-1px); }
+  .addgroup .addtab.active{ background:var(--accent); color:#fff; border-color:var(--accent-dark); }
+  .addgroup .group-caption{ color:var(--accent-dark); font-weight:600; }
+
+  /* ===================== 時計エリア ===================== */
+  .clockarea{
+    display:flex;
+    justify-content:center;
+    padding:2rem 1rem;
+  }
+  #clocksvg{ width:100%; max-width:26rem; }
+  .wedge-group{ cursor:pointer; }
+  .empty-msg{ font-size:0.85rem; fill:#aaa; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="titlebar">
+    <div class="tb-left">
+      <span class="tb-icon">📅</span>
+      <span class="tb-title">1日の予定</span>
+    </div>
+    <input type="date" id="datePicker">
+  </div>
+
+  <div class="tabrow">
+    <span class="tabitem on" id="tabHome" data-tab="home">ホーム</span>
+    <span class="tabitem" id="tabAdd" data-tab="add">追加</span>
+  </div>
+
+  <div class="grouprow" id="homeGroups">
+    <div class="group">
+      <div class="group-control">
+        <span class="group-icon">A⇕</span>
+        <input type="number" id="setFontSize" min="6" max="30" value="13">
+      </div>
+      <span class="group-caption">文字サイズ</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="group-control">
+        <span class="group-icon">Aあ</span>
+        <select id="setFontFamily">
+          <option value="'Noto Sans JP', sans-serif">Noto Sans JP</option>
+          <option value="'Calibri', sans-serif">Calibri</option>
+          <option value="'Georgia', serif">Georgia</option>
+          <option value="'Courier New', monospace">Courier New</option>
+          <option value="'Arial', sans-serif">Arial</option>
+        </select>
+      </div>
+      <span class="group-caption">フォント</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="group-control">
+        <span class="group-icon">🎨</span>
+        <input type="color" id="setTextColor" value="#ffffff">
+      </div>
+      <span class="group-caption">文字の色</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="group checkgroup">
+      <input type="checkbox" id="setAutoFit">
+      <span class="group-caption">1列に自動縮小</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="group checkgroup">
+      <input type="checkbox" id="setSnapAngle">
+      <span class="group-caption">角度を合わせる</span>
+    </div>
+  </div>
+
+  <div class="grouprow" id="addGroups" style="display:none;">
+    <div class="group">
+      <div class="group-control">
+        <span class="group-icon">📝</span>
+        <input type="text" id="formLabel" placeholder="仕事">
+      </div>
+      <span class="group-caption">予定名</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="group-control">
+        <span class="group-icon">🕐</span>
+        <input type="time" id="formStart" value="09:00">
+      </div>
+      <span class="group-caption">開始時刻</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="group-control">
+        <span class="group-icon">🕐</span>
+        <input type="time" id="formEnd" value="10:00">
+      </div>
+      <span class="group-caption">終了時刻</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="group">
+      <div class="group-control">
+        <span class="group-icon">🎨</span>
+        <input type="color" id="formColor" value="#5b6fc4">
+      </div>
+      <span class="group-caption">色（自動・編集可）</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="addgroup">
+      <div class="group-control">
+        <div class="addtab" id="saveBtn" title="保存">💾</div>
+      </div>
+      <span class="group-caption">保存</span>
+    </div>
+
+    <div class="addgroup">
+      <div class="group-control">
+        <div class="addtab" id="cancelBtn" title="キャンセル">✕</div>
+      </div>
+      <span class="group-caption">キャンセル</span>
+    </div>
+
+    <div class="addgroup" id="deleteGroup" style="display:none;">
+      <div class="group-control">
+        <div class="addtab" id="deleteBtn" title="削除">🗑</div>
+      </div>
+      <span class="group-caption">削除</span>
+    </div>
+  </div>
+</div>
+
+<div class="clockarea">
+  <svg id="clocksvg" viewBox="0 0 300 300"></svg>
+</div>
+
+<script>
+  const STORAGE_PREFIX = "daySchedule_events_";
+  const SETTINGS_KEY = "daySchedule_settings_v1";
+
+  const PALETTE = [
+    "#5b6fc4","#5bb8e8","#7fbf7f","#a9d16b","#c7e050","#f4d13a",
+    "#f2b73c","#f0973f","#ef7c4a","#e05a8f","#e14b4b","#9b7fd1"
+  ];
+
+  function todayStr(){
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+
+  let currentDate = todayStr();
+  function loadEvents(dateStr){
+    return JSON.parse(localStorage.getItem(STORAGE_PREFIX+dateStr) || "[]");
+  }
+  let events = loadEvents(currentDate);
+
+  let settings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null") || {
+    fontSize:13, fontFamily:"'Noto Sans JP', sans-serif", textColor:"#ffffff", autoFit:false, snapAngle:false
+  };
+
+  let editingId = null; // null = 追加モード, それ以外 = 編集モード
+
+  const svg = document.getElementById("clocksvg");
+  const datePicker = document.getElementById("datePicker");
+  datePicker.value = currentDate;
+  datePicker.addEventListener("change", ()=>{
+    currentDate = datePicker.value || todayStr();
+    events = loadEvents(currentDate);
+    closeAdd();
+    render();
+  });
+
+  const tabHome = document.getElementById("tabHome");
+  const tabAdd = document.getElementById("tabAdd");
+  const homeGroups = document.getElementById("homeGroups");
+  const addGroups = document.getElementById("addGroups");
+  const deleteGroup = document.getElementById("deleteGroup");
+
+  const setFontSize = document.getElementById("setFontSize");
+  const setFontFamily = document.getElementById("setFontFamily");
+  const setTextColor = document.getElementById("setTextColor");
+  const setAutoFit = document.getElementById("setAutoFit");
+  const setSnapAngle = document.getElementById("setSnapAngle");
+
+  setFontSize.value = settings.fontSize;
+  setFontFamily.value = settings.fontFamily;
+  setTextColor.value = settings.textColor;
+  setAutoFit.checked = settings.autoFit;
+  setSnapAngle.checked = settings.snapAngle;
+
+  function saveSettings(){
+    settings = {
+      fontSize: parseFloat(setFontSize.value) || 13,
+      fontFamily: setFontFamily.value,
+      textColor: setTextColor.value,
+      autoFit: setAutoFit.checked,
+      snapAngle: setSnapAngle.checked
+    };
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    render();
+  }
+  [setFontSize, setFontFamily, setTextColor, setAutoFit, setSnapAngle].forEach(el=>{
+    el.addEventListener("input", saveSettings);
+    el.addEventListener("change", saveSettings);
+  });
+
+  function saveEvents(){
+    localStorage.setItem(STORAGE_PREFIX+currentDate, JSON.stringify(events));
+  }
+
+  function timeToHours(t){
+    const [h,m] = t.split(":").map(Number);
+    return h + m/60;
+  }
+  function hoursToTime(h){
+    const hh = Math.floor(h);
+    const mm = Math.round((h - hh)*60);
+    return String(hh).padStart(2,"0") + ":" + String(mm).padStart(2,"0");
+  }
+
+  function hourToRad(h){ return (h/24)*2*Math.PI - Math.PI/2; }
+  function polar(cx,cy,r,rad){ return { x: cx + r*Math.cos(rad), y: cy + r*Math.sin(rad) }; }
+
+  function wedgePath(cx,cy,r,startH,endH){
+    const a0 = hourToRad(startH);
+    const a1 = hourToRad(endH);
+    const p0 = polar(cx,cy,r,a0);
+    const p1 = polar(cx,cy,r,a1);
+    let span = endH - startH;
+    if(span < 0) span += 24;
+    const largeArc = span > 12 ? 1 : 0;
+    return `M${cx},${cy} L${p0.x.toFixed(2)},${p0.y.toFixed(2)} A${r},${r} 0 ${largeArc} 1 ${p1.x.toFixed(2)},${p1.y.toFixed(2)} Z`;
+  }
+
+  // canvasでテキスト幅を測定 → 1列に収まる最大フォントサイズを算出
+  const measureCanvas = document.createElement("canvas");
+  const mctx = measureCanvas.getContext("2d");
+  function fitFontSize(text, fontFamily, maxWidth, maxSize){
+    for(let size = maxSize; size >= 6; size--){
+      mctx.font = `${size}px ${fontFamily}`;
+      if(mctx.measureText(text).width <= maxWidth) return size;
+    }
+    return 6;
+  }
+
+  function render(){
+    const cx=150, cy=150, r=130;
+    let html = "";
+
+    // 予定が無い時間帯も含めて、常に背景よりわずかに違う色で円全体を埋めておく
+    html += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ececec"/>`;
+
+    events.forEach(e=>{
+      html += `<g class="wedge-group" data-id="${e.id}">`;
+      html += `<path d="${wedgePath(cx,cy,r,e.start,e.end)}" fill="${e.color}" stroke="#fff" stroke-width="2"/>`;
+
+      const mid = e.start + (((e.end - e.start) + 24) % 24)/2;
+      const rad = hourToRad(mid);
+      const p = polar(cx,cy,r*0.62,rad);
+
+      let span = e.end - e.start; if(span<0) span += 24;
+      const angle = (span/24)*2*Math.PI;
+      const chordWidth = 2 * (r*0.62) * Math.sin(angle/2) * 0.85;
+
+      const fontSize = settings.autoFit
+        ? fitFontSize(e.label, settings.fontFamily, Math.max(chordWidth,10), settings.fontSize)
+        : settings.fontSize;
+
+      let rotateAttr = "";
+      if(settings.snapAngle){
+        // 角度を合わせる: ラベルを扇形(三角)の角度に沿って回転させ、狭い扇形でもはみ出さずに収める
+        let deg = (rad * 180 / Math.PI) % 360;
+        if(deg < 0) deg += 360;
+        if(deg > 90 && deg < 270) deg -= 180; // 上下逆さまにならないよう補正
+        rotateAttr = ` transform="rotate(${deg.toFixed(1)} ${p.x.toFixed(1)} ${p.y.toFixed(1)})"`;
+      }
+
+      html += `<text x="${p.x.toFixed(1)}" y="${(p.y+fontSize*0.35).toFixed(1)}" text-anchor="middle" font-size="${fontSize}" fill="${settings.textColor}" font-family="${settings.fontFamily}"${rotateAttr}>${escapeHTML(e.label)}</text>`;
+      html += `</g>`;
+    });
+
+    // 3時間ごとの数字
+    [0,3,6,9,12,15,18,21].forEach(h=>{
+      const rad = hourToRad(h);
+      const p = polar(cx,cy,r+14,rad);
+      html += `<text x="${p.x.toFixed(1)}" y="${(p.y+4).toFixed(1)}" text-anchor="middle" font-size="12" fill="#999" font-family="Arial">${h}</text>`;
+    });
+    // 1時間ごとの短針目盛り
+    for(let h=0; h<24; h++){
+      if(h%3===0) continue;
+      const rad = hourToRad(h);
+      const p1 = polar(cx,cy,r,rad);
+      const p2 = polar(cx,cy,r-8,rad);
+      html += `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="#ccc" stroke-width="1.5"/>`;
+    }
+
+    svg.innerHTML = html;
+
+    svg.querySelectorAll(".wedge-group").forEach(g=>{
+      g.addEventListener("click", ()=>{
+        const id = g.dataset.id;
+        const ev = events.find(x=>x.id===id);
+        if(ev) openEdit(ev);
+      });
+    });
+  }
+
+  function escapeHTML(s){
+    return s.replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  // ---- 追加/編集タブ制御 ----
+  const formLabel = document.getElementById("formLabel");
+  const formStart = document.getElementById("formStart");
+  const formEnd = document.getElementById("formEnd");
+  const formColor = document.getElementById("formColor");
+  const deleteBtn = document.getElementById("deleteBtn");
+
+  function showTab(tab){
+    if(tab === "add"){
+      tabHome.classList.remove("on");
+      tabAdd.classList.add("on");
+      homeGroups.style.display = "none";
+      addGroups.style.display = "flex";
+    } else {
+      tabAdd.classList.remove("on");
+      tabHome.classList.add("on");
+      addGroups.style.display = "none";
+      homeGroups.style.display = "flex";
+    }
+  }
+
+  function openAdd(){
+    editingId = null;
+    deleteGroup.style.display = "none";
+    formLabel.value = "";
+    formStart.value = "09:00";
+    formEnd.value = "10:00";
+    formColor.value = PALETTE[events.length % PALETTE.length];
+    showTab("add");
+  }
+
+  function openEdit(ev){
+    editingId = ev.id;
+    deleteGroup.style.display = "flex";
+    formLabel.value = ev.label;
+    formStart.value = hoursToTime(ev.start);
+    formEnd.value = hoursToTime(ev.end);
+    formColor.value = ev.color;
+    showTab("add");
+  }
+
+  function closeAdd(){
+    editingId = null;
+    showTab("home");
+  }
+
+  tabHome.addEventListener("click", ()=>{ closeAdd(); });
+  tabAdd.addEventListener("click", ()=>{
+    if(addGroups.style.display === "flex"){ return; }
+    openAdd();
+  });
+
+  document.getElementById("cancelBtn").addEventListener("click", closeAdd);
+
+  document.getElementById("saveBtn").addEventListener("click", ()=>{
+    const label = formLabel.value.trim();
+    if(!label){ formLabel.focus(); return; }
+    const start = timeToHours(formStart.value);
+    const end = timeToHours(formEnd.value);
+    const color = formColor.value;
+
+    if(editingId){
+      const ev = events.find(x=>x.id===editingId);
+      if(ev){ ev.label=label; ev.start=start; ev.end=end; ev.color=color; }
+    } else {
+      events.push({ id: "e"+Date.now(), label, start, end, color });
+    }
+    saveEvents();
+    render();
+    closeAdd();
+  });
+
+  deleteBtn.addEventListener("click", ()=>{
+    events = events.filter(x=>x.id!==editingId);
+    saveEvents();
+    render();
+    closeAdd();
+  });
+
+  render();
+</script>
+</body>
+</html>
