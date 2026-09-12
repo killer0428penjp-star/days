@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<!--
+  クレジット表記:
+  「鬼ノ丞」の体のベースモデルには khronos/glTF-Sample-Assets の
+  無料サンプルモデル "RiggedFigure"(CC-BY 4.0, (c) 2017 Cesium GS, Inc.)を使用しています。
+  https://github.com/KhronosGroup/glTF-Sample-Assets
+  CC-BY 4.0 は利用時のクレジット表記が必須です。公開する場合はアプリ内(設定/クレジット画面など)に
+  この表記を残してください。
+-->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>3Dブラスタ - ロビー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<style>
+  :root{
+    --bg-deep:#0e1f18;
+    --stage-a:#173b2c;
+    --stage-b:#0c1f18;
+    --floor:#4a3323;
+    --panel:#2b2f45;
+    --panel-2:#363b58;
+    --panel-border:#1c1f30;
+    --accent-yellow:#ffce3b;
+    --accent-yellow-dark:#d99f12;
+    --accent-green:#4ade80;
+    --accent-red:#ef4444;
+    --accent-blue:#38bdf8;
+    --text-main:#f5f6fa;
+    --text-dim:#aab0c8;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;width:100%;height:100%;overflow:hidden;
+    font-family:'M PLUS Rounded 1c', sans-serif;
+    background:var(--bg-deep);
+    color:var(--text-main);
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+  #app{position:relative;width:100vw;height:100vh;overflow:hidden;}
+
+  /* ---------- 共通パネル ---------- */
+  .panel{
+    background:linear-gradient(180deg, var(--panel-2), var(--panel));
+    border:2px solid var(--panel-border);
+    border-radius:14px;
+    box-shadow:0 4px 0 var(--panel-border), 0 6px 12px rgba(0,0,0,.35);
+  }
+  .btn{
+    cursor:pointer;
+    border:none;
+    border-radius:14px;
+    font-family:inherit;
+    font-weight:700;
+    color:var(--text-main);
+    transition:transform .08s ease;
+  }
+  .btn:active{transform:scale(.94);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* ================= ログイン画面 ================= */
+  #loginScreen{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:22px;
+    background:
+      radial-gradient(circle at 50% 20%, #234a37 0%, var(--stage-a) 45%, var(--stage-b) 100%);
+    z-index:50;
+    padding:24px;
+    text-align:center;
+  }
+  .login-title{
+    font-size:38px;font-weight:800;letter-spacing:2px;
+    color:var(--accent-yellow);
+    text-shadow:0 3px 0 #7a4d00, 0 6px 10px rgba(0,0,0,.4);
+  }
+  .login-sub{color:var(--text-dim);font-size:14px;margin-top:-12px;}
+  .login-card{width:min(320px,86vw);padding:20px;display:flex;flex-direction:column;gap:14px;}
+  .welcome-back{
+    padding:16px;border-radius:12px;background:rgba(0,0,0,.25);
+    display:flex;flex-direction:column;gap:6px;align-items:center;
+  }
+  .welcome-back .wb-name{font-size:20px;font-weight:800;color:var(--accent-yellow);}
+  .welcome-back .wb-stats{display:flex;gap:14px;font-size:13px;color:var(--text-dim);}
+  .login-btn-primary{
+    background:linear-gradient(180deg,#ffe27a,var(--accent-yellow));
+    color:#4a3300;padding:16px;font-size:16px;
+    box-shadow:0 4px 0 var(--accent-yellow-dark);
+  }
+  .login-btn-secondary{
+    background:var(--panel-2);padding:14px;font-size:14px;color:var(--text-dim);
+    border:2px solid var(--panel-border);
+  }
+
+  /* ================= 名前設定モーダル ================= */
+  .modal-overlay{
+    position:absolute;inset:0;z-index:100;
+    background:rgba(0,0,0,.55);
+    display:none;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .modal-overlay.show{display:flex;}
+  .name-card{
+    width:min(340px,90vw);padding:26px 22px;text-align:center;
+    display:flex;flex-direction:column;gap:16px;
+  }
+  .name-card h2{margin:0;font-size:20px;color:var(--accent-yellow);}
+  .name-card p{margin:0;font-size:13px;color:var(--text-dim);}
+  #nameInput{
+    font-family:inherit;font-size:16px;padding:12px 14px;border-radius:10px;
+    border:2px solid var(--panel-border);background:#171a2b;color:var(--text-main);
+    text-align:center;outline:none;
+  }
+  #nameInput:focus{border-color:var(--accent-yellow);}
+  .name-error{color:var(--accent-red);font-size:12px;min-height:14px;}
+  .name-confirm-btn{
+    background:linear-gradient(180deg,#ffe27a,var(--accent-yellow));
+    color:#4a3300;padding:14px;font-size:15px;
+    box-shadow:0 4px 0 var(--accent-yellow-dark);
+  }
+
+  /* ================= ロビー画面 ================= */
+  #lobbyScreen{
+    position:absolute;inset:0;display:none;flex-direction:column;
+  }
+  #lobbyScreen.show{display:flex;}
+  #stage3d{
+    position:absolute;inset:0;
+    background:
+      linear-gradient(180deg, var(--stage-a) 0%, var(--stage-b) 60%, var(--floor) 100%);
+  }
+  #stage3d canvas{width:100%!important;height:100%!important;display:block;}
+
+  .lobby-topbar{
+    position:relative;z-index:5;
+    display:flex;justify-content:space-between;align-items:flex-start;
+    padding:10px 12px;gap:8px;
+  }
+  .topbar-left,.topbar-right{display:flex;gap:8px;align-items:flex-start;}
+  .topbar-right-col{flex-direction:column;align-items:flex-end;gap:6px;}
+  .avatar-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .name-plate{padding:2px 8px;font-size:10px;font-weight:700;color:var(--text-main);max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .currency-row{display:flex;gap:8px;}
+  .new-dot{
+    position:absolute;top:-4px;left:-4px;width:12px;height:12px;border-radius:50%;
+    background:var(--accent-red);border:2px solid var(--panel-border);display:none;
+  }
+  .new-dot.show{display:block;}
+  .menu-btn{position:relative;}
+  .char-icon-btn .new-tag{
+    position:absolute;top:-6px;left:-6px;background:var(--accent-red);color:#fff;
+    font-size:8px;font-weight:800;padding:1px 4px;border-radius:6px;border:2px solid var(--panel-border);
+  }
+  .profile-block{display:flex;gap:6px;}
+  .avatar-badge{
+    position:relative;width:52px;height:52px;border-radius:12px;
+    background:linear-gradient(160deg,#ff8fb2,#c23a63);
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+    border:2px solid var(--panel-border);
+  }
+  .level-pill{
+    position:absolute;top:-8px;left:-8px;background:var(--accent-blue);
+    color:#04263a;font-size:11px;font-weight:800;border-radius:8px;
+    padding:1px 5px;border:2px solid var(--panel-border);
+  }
+  .trophy-chip{
+    display:flex;flex-direction:column;gap:2px;padding:6px 10px;min-width:96px;
+  }
+  .trophy-row{display:flex;align-items:center;gap:5px;font-weight:800;font-size:15px;color:var(--accent-yellow);}
+  .rank-bar{height:6px;border-radius:4px;background:#1c1f30;overflow:hidden;}
+  .rank-bar-fill{height:100%;background:var(--accent-yellow-dark);width:0%;}
+  .currency-chip{
+    display:flex;align-items:center;gap:6px;padding:7px 12px;font-weight:800;font-size:14px;
+  }
+  .menu-btn{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+
+  .lobby-sides{
+    position:relative;z-index:5;flex:1;display:flex;justify-content:space-between;
+    padding:6px 10px;pointer-events:none;
+  }
+  .side-col{display:flex;flex-direction:column;gap:10px;pointer-events:auto;}
+  .side-col.right{align-items:flex-end;}
+  .side-btn{
+    width:76px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;
+    font-size:11px;position:relative;
+  }
+  .side-btn .icon{font-size:22px;}
+  .badge-count{
+    position:absolute;top:-6px;right:-6px;background:var(--accent-red);
+    border-radius:10px;font-size:10px;padding:1px 6px;border:2px solid var(--panel-border);
+  }
+
+  .lobby-bottombar{
+    position:relative;z-index:5;display:flex;align-items:center;gap:10px;
+    padding:10px 12px 14px;
+  }
+  .xp-block{display:flex;flex-direction:column;gap:4px;width:96px;}
+  .xp-track{height:14px;border-radius:8px;background:#1c1f30;overflow:hidden;border:2px solid var(--panel-border);}
+  .xp-fill{height:100%;background:linear-gradient(90deg,#ffd76a,var(--accent-yellow));}
+  .xp-label{font-size:10px;text-align:center;color:var(--text-dim);}
+  .mode-select{
+    flex:1;display:flex;align-items:center;gap:10px;padding:8px 14px;min-width:0;
+  }
+  .mode-select .mode-icon{font-size:26px;}
+  .mode-select .mode-text{display:flex;flex-direction:column;overflow:hidden;}
+  .mode-select .mode-title{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mode-select .mode-sub{font-size:11px;color:var(--text-dim);}
+  #playBtn{
+    background:linear-gradient(180deg,#ffe27a,var(--accent-yellow));
+    color:#4a3300;font-size:20px;padding:16px 26px;
+    box-shadow:0 4px 0 var(--accent-yellow-dark);
+    white-space:nowrap;
+  }
+
+  /* ================= キャラクター選択モーダル ================= */
+  #charModal .modal-box{
+    width:min(420px,92vw);max-height:88vh;display:flex;flex-direction:column;
+    padding:16px;gap:12px;
+  }
+  #charModal h2{margin:0;font-size:18px;color:var(--accent-yellow);text-align:center;}
+  #charPreviewWrap{
+    height:180px;border-radius:12px;overflow:hidden;position:relative;
+    background:radial-gradient(circle at 50% 30%, #234a37, #0c1f18);
+  }
+  #charPreviewWrap canvas{width:100%!important;height:100%!important;}
+  #charInfo{text-align:center;}
+  #charInfo .cname{font-weight:800;font-size:16px;color:var(--accent-yellow);}
+  #charInfo .cdesc{font-size:12px;color:var(--text-dim);margin-top:2px;}
+  .char-grid{
+    display:grid;grid-template-columns:repeat(5,1fr);gap:8px;overflow-y:auto;padding:2px;
+  }
+  .char-icon-btn{
+    aspect-ratio:1;border-radius:12px;border:2px solid var(--panel-border);
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+    background:#1c1f30;position:relative;
+  }
+  .char-icon-btn.selected{border-color:var(--accent-yellow);box-shadow:0 0 0 2px var(--accent-yellow) inset;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions .btn{flex:1;padding:12px;font-size:14px;}
+  .close-btn{background:var(--panel-2);color:var(--text-dim);}
+  .confirm-btn{background:linear-gradient(180deg,#ffe27a,var(--accent-yellow));color:#4a3300;}
+
+  /* ================= オフラインデータ確認トースト ================= */
+  #dataToast{
+    position:absolute;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    z-index:200;padding:14px 18px;opacity:0;pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    font-size:12px;text-align:left;line-height:1.7;
+  }
+  #dataToast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #dataToast b{color:var(--accent-yellow);}
+
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-thumb{background:var(--panel-2);border-radius:4px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ ログイン画面 ============ -->
+  <div id="loginScreen">
+    <div class="login-title">3Dブラスタ</div>
+    <div class="login-sub">魔界からのバトルロビー</div>
+
+    <div id="welcomeBackCard" class="panel login-card" style="display:none;">
+      <div class="welcome-back">
+        <div style="font-size:12px;color:var(--text-dim);">おかえりなさい</div>
+        <div class="wb-name" id="wbName"></div>
+        <div class="wb-stats">
+          <span id="wbLevel">Lv.1</span>
+          <span id="wbTrophy">🏆 0</span>
+        </div>
+      </div>
+      <button class="btn login-btn-primary" id="continueBtn">このデータでプレイ</button>
+      <button class="btn login-btn-secondary" id="resetDataBtn">データを削除して最初から</button>
+    </div>
+
+    <div id="freshLoginCard" class="panel login-card">
+      <button class="btn login-btn-primary" id="emailBtn" disabled title="後日実装予定">メールアドレスで登録する</button>
+      <button class="btn login-btn-secondary" id="offlineBtn">ログインせずにプレイ(オフライン)</button>
+    </div>
+  </div>
+
+  <!-- ============ 名前設定モーダル ============ -->
+  <div id="nameModal" class="modal-overlay">
+    <div class="panel name-card">
+      <h2>ようこそ、魔界へ</h2>
+      <p>ロビーで表示する名前を入力してください</p>
+      <input id="nameInput" type="text" maxlength="10" placeholder="例: ぺん">
+      <div class="name-error" id="nameError"></div>
+      <button class="btn name-confirm-btn" id="nameConfirmBtn">決定してロビーへ</button>
+    </div>
+  </div>
+
+  <!-- ============ ロビー画面 ============ -->
+  <div id="lobbyScreen">
+    <div id="stage3d"></div>
+
+    <div class="lobby-topbar">
+      <div class="topbar-left">
+        <div class="profile-block">
+          <div class="avatar-col">
+            <button class="btn panel avatar-badge" id="avatarBadgeBtn" style="border-radius:12px;">
+              <span class="level-pill" id="levelPill">39</span>
+              <span id="avatarEmoji">😈</span>
+            </button>
+            <div class="panel name-plate"><span id="playerNameLabel">-</span></div>
+          </div>
+          <div class="panel trophy-chip">
+            <div class="trophy-row"><span>🏆</span><span id="trophyCount">0</span></div>
+            <div class="rank-bar"><div class="rank-bar-fill" id="rankBarFill"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="currency-row">
+          <div class="panel currency-chip"><span>⚡</span><span id="gemCount">0</span></div>
+          <div class="panel currency-chip"><span>🪙</span><span id="coinCount">0</span></div>
+          <div class="panel currency-chip"><span>💎</span><span id="diamondCount">0</span></div>
+          <button class="btn panel menu-btn" id="menuBtn">☰<span class="new-dot" id="menuNewDot"></span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lobby-sides">
+      <div class="side-col">
+        <button class="btn panel side-btn"><span class="icon">🧪</span>バフィー</button>
+        <button class="btn panel side-btn"><span class="icon">🛍️</span>ショップ</button>
+        <button class="btn panel side-btn" id="charSideBtn">
+          <span class="icon">👥</span>キャラクター
+          <span class="badge-count">10</span>
+          <span class="new-dot" id="charSideNewDot"></span>
+        </button>
+      </div>
+      <div class="side-col right">
+        <button class="btn panel side-btn"><span class="icon">🙋</span>フレンド</button>
+        <button class="btn panel side-btn"><span class="icon">🏯</span>クラブ</button>
+        <button class="btn panel side-btn"><span class="icon">📰</span>ニュース</button>
+      </div>
+    </div>
+
+    <div class="lobby-bottombar">
+      <div class="panel xp-block">
+        <div class="xp-label"><span id="xpLabel">XP 0/100</span></div>
+        <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%;"></div></div>
+      </div>
+      <div class="panel mode-select">
+        <div class="mode-icon">💀</div>
+        <div class="mode-text">
+          <div class="mode-title">ソロバトルロイヤル</div>
+          <div class="mode-sub" id="selectedCharLabel">キャラ未選択</div>
+        </div>
+      </div>
+      <button class="btn" id="playBtn">プレイ</button>
+    </div>
+  </div>
+
+  <!-- ============ キャラクター選択モーダル ============ -->
+  <div id="charModal" class="modal-overlay">
+    <div class="panel modal-box">
+      <h2>キャラクターを選択</h2>
+      <div id="charPreviewWrap"></div>
+      <div id="charInfo">
+        <div class="cname" id="charInfoName">-</div>
+        <div class="cdesc" id="charInfoDesc">-</div>
+      </div>
+      <div class="char-grid" id="charGrid"></div>
+      <div class="modal-actions">
+        <button class="btn close-btn" id="charCloseBtn">閉じる</button>
+        <button class="btn confirm-btn" id="charConfirmBtn">このキャラに決定</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="dataToast" class="panel"></div>
+
+</div>
+
+<script>
+/* ==========================================================
+   データ管理
+   ========================================================== */
+const STORAGE_KEY = 'demonBrawlUserData';
+
+function loadUserData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function saveUserData(data){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+function defaultUserData(name){
+  return {
+    name: name,
+    level: 1,
+    xp: 0,
+    xpMax: 100,
+    trophies: 0,
+    gems: 0,
+    coins: 0,
+    diamonds: 0,
+    characterId: CHARACTERS[0].id,
+    ownedCharacters: CHARACTERS.map(c => c.id),
+    newCharacterIds: ['angel','cyborg'],
+    createdAt: Date.now()
+  };
+}
+
+let userData = null;
+
+/* ==========================================================
+   キャラクター定義(10体)
+   ========================================================== */
+const CHARACTERS = [
+  {id:'oni',      name:'鬼ノ丞',   emoji:'😈', color:0xd6473c, accent:0x1c1f2b, desc:'角と翼を持つ猛烈な鬼の戦士'},
+  {id:'robot',    name:'鉄郎',     emoji:'🤖', color:0x8a94a6, accent:0xffce3b, desc:'鋼鉄の巨体を誇る機械兵'},
+  {id:'ninja',    name:'影丸',     emoji:'🥷', color:0x2b2f45, accent:0xef4444, desc:'闇に紛れて奇襲する忍びの者'},
+  {id:'dragon',   name:'翠煉',     emoji:'🐉', color:0x2ecc71, accent:0xffffff, desc:'竜の血を引く翼持つ戦乙女'},
+  {id:'witch',    name:'紫苑',     emoji:'🔮', color:0x8e44ad, accent:0xffce3b, desc:'呪術と炎を操る魔女'},
+  {id:'samurai',  name:'武蔵丸',   emoji:'⚔️', color:0x34495e, accent:0xe74c3c, desc:'一刀両断を得意とする侍'},
+  {id:'ghost',    name:'ゆらり',   emoji:'👻', color:0xecf0f1, accent:0x9bd3e0, desc:'ふわふわ宙を漂う幽霊'},
+  {id:'skeleton', name:'骨次郎',   emoji:'💀', color:0xf5f5f5, accent:0x2b2f45, desc:'カタカタ踊る陽気な骸骨戦士'},
+  {id:'angel',    name:'セラフィナ', emoji:'👼', color:0xfff5cc, accent:0xffce3b, desc:'金色の翼を持つ天界の使者'},
+  {id:'cyborg',   name:'サイファー', emoji:'🦾', color:0x00e5ff, accent:0x142a20, desc:'ネオンに輝く改造戦闘体'},
+];
+function findChar(id){ return CHARACTERS.find(c => c.id === id) || CHARACTERS[0]; }
+
+/* ==========================================================
+   3Dキャラクター生成 (Three.js プリミティブ)
+   ========================================================== */
+function buildCharacterModel(def){
+  if(def.id === 'oni') return buildOniModelPrimitive(def); // GLTF読込に失敗した時のフォールバック用
+
+  const group = new THREE.Group();
+  const mat = (hex, opts) => new THREE.MeshStandardMaterial(Object.assign({color:hex, roughness:.55, metalness:.1}, opts||{}));
+
+  const bodyMat = mat(def.color);
+  const accentMat = mat(def.accent);
+
+  // 共通: 胴体 + 頭
+  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.7,1.1,10), bodyMat);
+  torso.position.y = 0.65;
+  group.add(torso);
+
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.55,16,16), bodyMat);
+  head.position.y = 1.55;
+  group.add(head);
+
+  // 脚
+  for(const dx of [-0.28,0.28]){
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.7,8), accentMat);
+    leg.position.set(dx, -0.35, 0);
+    group.add(leg);
+  }
+
+  switch(def.id){
+    case 'robot': {
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.18,0.1), mat(0xffce3b, {emissive:0xffce3b, emissiveIntensity:.6}));
+      visor.position.set(0,1.6,0.5);
+      group.add(visor);
+      const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,6), accentMat);
+      antenna.position.set(0,2.15,0);
+      group.add(antenna);
+      const shoulder = new THREE.Mesh(new THREE.BoxGeometry(1.5,0.35,0.7), accentMat);
+      shoulder.position.y = 1.1;
+      group.add(shoulder);
+      break;
+    }
+    case 'ninja': {
+      const mask = new THREE.Mesh(new THREE.SphereGeometry(0.58,16,16,0,Math.PI*2,0,Math.PI*0.55), accentMat);
+      mask.position.y = 1.65;
+      group.add(mask);
+      const scarf = new THREE.Mesh(new THREE.ConeGeometry(0.4,0.9,8), accentMat);
+      scarf.position.set(0.5,1.0,-0.3);
+      scarf.rotation.z = 1.0;
+      group.add(scarf);
+      break;
+    }
+    case 'dragon': {
+      for(const dx of [-0.75,0.75]){
+        const wing = new THREE.Mesh(new THREE.ConeGeometry(0.5,1.1,4), new THREE.MeshStandardMaterial({color:def.color, side:THREE.DoubleSide}));
+        wing.rotation.z = dx>0 ? -1.15 : 1.15;
+        wing.position.set(dx, 1.2, -0.15);
+        group.add(wing);
+      }
+      const tail = new THREE.Mesh(new THREE.ConeGeometry(0.14,0.8,8), accentMat);
+      tail.position.set(0,-0.15,-0.5);
+      tail.rotation.x = 1.5;
+      group.add(tail);
+      break;
+    }
+    case 'witch': {
+      const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.06,16), accentMat);
+      hatBrim.position.y = 1.85;
+      group.add(hatBrim);
+      const hatCone = new THREE.Mesh(new THREE.ConeGeometry(0.32,0.8,10), bodyMat);
+      hatCone.position.y = 2.25;
+      group.add(hatCone);
+      break;
+    }
+    case 'samurai': {
+      const helmet = new THREE.Mesh(new THREE.ConeGeometry(0.62,0.5,10), accentMat);
+      helmet.position.y = 1.95;
+      group.add(helmet);
+      const sword = new THREE.Mesh(new THREE.BoxGeometry(0.08,1.1,0.03), mat(0xdfe6ec, {metalness:.8, roughness:.2}));
+      sword.position.set(0.7,0.7,0.3);
+      sword.rotation.z = 0.5;
+      group.add(sword);
+      break;
+    }
+    case 'ghost': {
+      torso.material = new THREE.MeshStandardMaterial({color:def.color, transparent:true, opacity:.75});
+      head.material = torso.material;
+      const wisp = new THREE.Mesh(new THREE.ConeGeometry(0.6,0.5,8), torso.material);
+      wisp.position.y = -0.05;
+      group.add(wisp);
+      break;
+    }
+    case 'skeleton': {
+      for(let i=0;i<3;i++){
+        const rib = new THREE.Mesh(new THREE.TorusGeometry(0.4,0.04,6,12,Math.PI), accentMat);
+        rib.position.y = 0.9 - i*0.25;
+        rib.rotation.x = Math.PI/2;
+        group.add(rib);
+      }
+      break;
+    }
+    case 'angel': {
+      const halo = new THREE.Mesh(new THREE.TorusGeometry(0.4,0.05,8,20), mat(0xffce3b,{emissive:0xffce3b, emissiveIntensity:.8}));
+      halo.position.y = 2.15;
+      halo.rotation.x = Math.PI/2.2;
+      group.add(halo);
+      for(const dx of [-0.75,0.75]){
+        const wing = new THREE.Mesh(new THREE.ConeGeometry(0.45,1.0,6), mat(0xffffff));
+        wing.rotation.z = dx>0 ? -1.1 : 1.1;
+        wing.position.set(dx, 1.2, -0.2);
+        group.add(wing);
+      }
+      break;
+    }
+    case 'cyborg': {
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.1,8,8), mat(0x00e5ff,{emissive:0x00e5ff, emissiveIntensity:1}));
+      eye.position.set(0.2,1.6,0.48);
+      group.add(eye);
+      const core = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.2,10), mat(0x00e5ff,{emissive:0x00e5ff, emissiveIntensity:1}));
+      core.rotation.x = Math.PI/2;
+      core.position.set(0,0.65,0.65);
+      group.add(core);
+      break;
+    }
+  }
+
+  group.scale.set(0.9,0.9,0.9);
+  return group;
+}
+
+/* ----------------------------------------------------------
+   鬼ノ丞 プリミティブ版(GLTFモデルの読み込みに失敗した時の
+   フォールバック用。オフライン等でCDNにアクセスできない場合に使う)
+   ---------------------------------------------------------- */
+function buildOniModelPrimitive(def){
+  const group = new THREE.Group();
+  const M = (hex, opts) => new THREE.MeshStandardMaterial(Object.assign({color:hex, roughness:.5, metalness:.08}, opts||{}));
+
+  const skinMat   = M(0xe0503f);
+  const hairMat   = M(0x171a24);
+  const hornMat   = M(0xe9e6da, {roughness:.3});
+  const hornTipMat= M(0x3a1420);
+  const jacketMat = M(0x14161f);
+  const trimMat   = M(0xf3f3f3, {roughness:.35});
+  const goldMat   = M(0xffce3b, {metalness:.5, roughness:.3, emissive:0x7a5300, emissiveIntensity:.3});
+  const wingMat   = new THREE.MeshStandardMaterial({color:0x7a1420, roughness:.5, side:THREE.DoubleSide});
+  const eyeMat    = M(0xffe259, {emissive:0xffce3b, emissiveIntensity:.5});
+  const darkMat   = M(0x1a0e10);
+  const toothMat  = M(0xffffff, {roughness:.2});
+
+  /* ---- 頭部 ---- */
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.62,20,20), skinMat);
+  head.scale.set(1,0.95,0.9);
+  head.position.y = 1.55;
+  group.add(head);
+
+  // 目 (吊り目)
+  [-0.22,0.22].forEach(dx=>{
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), eyeMat);
+    eye.scale.set(1,0.55,0.25);
+    eye.position.set(dx,1.58,0.56);
+    group.add(eye);
+    const pupil = new THREE.Mesh(new THREE.ConeGeometry(0.03,0.05,6), darkMat);
+    pupil.rotation.x = Math.PI/2;
+    pupil.position.set(dx,1.58,0.64);
+    group.add(pupil);
+  });
+  // 吊り上がった眉
+  [[-0.24,0.35],[0.24,-0.35]].forEach(([dx,rot])=>{
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.04,0.04), hairMat);
+    brow.position.set(dx,1.79,0.58);
+    brow.rotation.z = rot;
+    group.add(brow);
+  });
+  // 開いた口(牙付きの笑み)
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.2,0.065,8,16,Math.PI*0.85), darkMat);
+  mouth.position.set(0,1.33,0.55);
+  mouth.rotation.set(Math.PI*0.06,0,Math.PI*0.08);
+  group.add(mouth);
+  for(let i=-2;i<=2;i++){
+    const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.032,0.08,4), toothMat);
+    tooth.position.set(i*0.075,1.42,0.6+Math.abs(i)*0.01);
+    tooth.rotation.x = Math.PI;
+    group.add(tooth);
+  }
+
+  /* ---- 非対称の尖った髪(押し出し形状) ---- */
+  function spikeGeo(w,h,curve){
+    const shape = new THREE.Shape();
+    shape.moveTo(-w*0.22,0);
+    shape.quadraticCurveTo(w*0.42,h*0.42,w*curve,h);
+    shape.quadraticCurveTo(w*0.12,h*0.5,0,0.02);
+    shape.lineTo(-w*0.22,0);
+    return new THREE.ExtrudeGeometry(shape, {depth:0.1, bevelEnabled:false});
+  }
+  // 土台の縁から生える大きめの房を3本だけに絞って、すっきりまとめる
+  const spikes = [
+    {w:0.55, h:0.55, c:0.4,  pos:[-0.4,1.9,-0.22], rot:0.55},
+    {w:0.42, h:0.42, c:0.5,  pos:[0.0,2.02,-0.3],   rot:0.05},
+    {w:0.55, h:0.55, c:-0.35,pos:[0.4,1.9,-0.22],   rot:-0.55},
+  ];
+  spikes.forEach(s=>{
+    const m = new THREE.Mesh(spikeGeo(s.w,s.h,s.c), hairMat);
+    m.position.set(...s.pos);
+    m.rotation.z = s.rot;
+    group.add(m);
+  });
+  // 左右のツインテール(頬の横で結ばれ、前に垂れる房)
+  [-1,1].forEach(side=>{
+    const tieBase = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), hairMat);
+    tieBase.position.set(side*0.58, 1.42, 0.28);
+    group.add(tieBase);
+    const strand = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.75,8), hairMat);
+    strand.position.set(side*0.62, 0.98, 0.28);
+    strand.rotation.z = side*0.08;
+    group.add(strand);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.05,8,8), hairMat);
+    tip.position.set(side*0.66, 0.62, 0.3);
+    group.add(tip);
+  });
+
+  /* ---- 角(髪の土台から突き出す、先端だけ色を変えたカーブ風) ---- */
+  [-1,1].forEach(side=>{
+    const base = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.42,10), hornMat);
+    base.position.set(side*0.24,2.15,0.18);
+    base.rotation.z = side*-0.22;
+    base.rotation.x = -0.15;
+    group.add(base);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.065,0.3,10), hornTipMat);
+    tip.position.set(side*0.36,2.48,0.1);
+    tip.rotation.z = side*-0.5;
+    tip.rotation.x = -0.15;
+    group.add(tip);
+  });
+
+  /* ---- 胴体(重ね着) ---- */
+  const torsoBase = new THREE.Mesh(new THREE.CylinderGeometry(0.48,0.6,1.0,14), jacketMat);
+  torsoBase.position.y = 0.72;
+  group.add(torsoBase);
+  const chestTrim = new THREE.Mesh(new THREE.ConeGeometry(0.5,0.3,14,1,true), trimMat);
+  chestTrim.position.y = 1.14;
+  chestTrim.rotation.x = Math.PI;
+  group.add(chestTrim);
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.36,0.06,8,16), trimMat);
+  collar.position.y = 1.22;
+  collar.rotation.x = Math.PI/2;
+  group.add(collar);
+  const belt = new THREE.Mesh(new THREE.TorusGeometry(0.48,0.06,8,16), goldMat);
+  belt.position.y = 0.28;
+  belt.rotation.x = Math.PI/2;
+  group.add(belt);
+  const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.13,0.13,0.06), goldMat);
+  buckle.position.set(0,0.28,0.5);
+  group.add(buckle);
+
+  /* ---- 肩当て ---- */
+  [-1,1].forEach(side=>{
+    const pauldron = new THREE.Mesh(new THREE.SphereGeometry(0.2,12,12), trimMat);
+    pauldron.scale.set(1,0.6,0.9);
+    pauldron.position.set(side*0.46,1.14,0.05);
+    group.add(pauldron);
+    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.055,0.18,8), hornMat);
+    spike.position.set(side*0.46,1.32,0.05);
+    group.add(spike);
+  });
+
+  /* ---- 羽(切れ込み入りの押し出し形状) ---- */
+  function wingGeo(){
+    const shape = new THREE.Shape();
+    shape.moveTo(0,0);
+    shape.lineTo(0.85,0.48);
+    shape.lineTo(0.7,0.34);
+    shape.lineTo(0.9,0.1);
+    shape.lineTo(0.66,0.04);
+    shape.lineTo(0.8,-0.24);
+    shape.lineTo(0.46,-0.14);
+    shape.lineTo(0.26,-0.38);
+    shape.lineTo(0,0);
+    return new THREE.ExtrudeGeometry(shape, {depth:0.035, bevelEnabled:false});
+  }
+  [-1,1].forEach(side=>{
+    const wing = new THREE.Mesh(wingGeo(), wingMat);
+    wing.scale.set(side,1,1);
+    wing.position.set(side*0.4, 0.95, -0.4);
+    wing.rotation.y = side*-0.5;
+    group.add(wing);
+  });
+
+  /* ---- 節ごとに細くなる尻尾(背後に大きく弧を描く) ---- */
+  for(let i=0;i<=7;i++){
+    const t = i/7;
+    const seg = new THREE.Mesh(new THREE.SphereGeometry(0.1-0.055*t,8,8), skinMat);
+    const ang = t*Math.PI*0.8;
+    seg.position.set(
+      Math.sin(ang)*0.5,
+      0.15 - t*0.75,
+      -0.55 - Math.cos(ang)*0.1 - t*0.2
+    );
+    group.add(seg);
+  }
+  const tailTip = new THREE.Mesh(new THREE.ConeGeometry(0.09,0.22,4), skinMat);
+  tailTip.position.set(0.5,-0.62,-0.85);
+  tailTip.rotation.z = -0.5;
+  group.add(tailTip);
+
+  /* ---- 脚とブーツ ---- */
+  [-0.24,0.24].forEach(dx=>{
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,0.5,10), jacketMat);
+    leg.position.set(dx,-0.22,0);
+    group.add(leg);
+    const boot = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.13,0.28,10), skinMat);
+    boot.position.set(dx,-0.55,0.04);
+    group.add(boot);
+    const heel = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.06,0.16), hornMat);
+    heel.position.set(dx,-0.7,0.02);
+    group.add(heel);
+  });
+
+  group.scale.set(0.85,0.85,0.85);
+  return group;
+}
+
+/* ----------------------------------------------------------
+   鬼ノ丞 実モデル版: khronos/glTF-Sample-Assets の
+   無料サンプル人型モデル「RiggedFigure」(CC-BY 4.0, (c) 2017 Cesium)
+   を読み込んでベースの体として使い、その上に顔・角・羽・髪・衣装を
+   自作パーツとして乗せる。プリミティブの積み上げだけに頼らない構成。
+   ---------------------------------------------------------- */
+const ONI_GLTF_URLS = [
+  'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/RiggedFigure/glTF-Binary/RiggedFigure.glb'
+  // 注: jsdelivrのgh CDNは検証したところ、このファイルにCORSヘッダーを付けず使えなかったため除外
+];
+let oniGltfPromise = null;
+function loadOniGltfTemplate(){
+  if(!oniGltfPromise){
+    oniGltfPromise = (async () => {
+      if(typeof THREE.GLTFLoader === 'undefined') throw new Error('GLTFLoader未読込');
+      let lastErr = null;
+      for(const url of ONI_GLTF_URLS){
+        try{
+          const scene = await new Promise((resolve, reject) => {
+            new THREE.GLTFLoader().load(url, (gltf) => resolve(gltf.scene), undefined, reject);
+          });
+          return scene;
+        }catch(e){
+          lastErr = e;
+          console.warn('鬼ノ丞モデルの取得元に失敗、次の候補を試します:', url);
+        }
+      }
+      throw lastErr || new Error('すべての取得元で失敗しました');
+    })();
+    oniGltfPromise.catch(() => { oniGltfPromise = null; }); // 失敗時は次回また取得し直せるようにする
+  }
+  return oniGltfPromise;
+}
+
+// 顔・髪・角(局所原点=頭の中心)。鬼ノ丞プリミティブ版と共通の見た目にする
+function buildOniHeadGroup(){
+  const M = (hex, opts) => new THREE.MeshStandardMaterial(Object.assign({color:hex, roughness:.5, metalness:.08}, opts||{}));
+  const skinMat   = M(0xe0503f);
+  const hairMat   = M(0x171a24);
+  const hornMat   = M(0xe9e6da, {roughness:.3});
+  const hornTipMat= M(0x3a1420);
+  const eyeMat    = M(0xffe259, {emissive:0xffce3b, emissiveIntensity:.5});
+  const darkMat   = M(0x1a0e10);
+  const toothMat  = M(0xffffff, {roughness:.2});
+
+  function spikeGeo(w,h,curve){
+    const shape = new THREE.Shape();
+    shape.moveTo(-w*0.22,0);
+    shape.quadraticCurveTo(w*0.42,h*0.42,w*curve,h);
+    shape.quadraticCurveTo(w*0.12,h*0.5,0,0.02);
+    shape.lineTo(-w*0.22,0);
+    return new THREE.ExtrudeGeometry(shape, {depth:0.1, bevelEnabled:false});
+  }
+
+  const g = new THREE.Group();
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.62,20,20), skinMat);
+  head.scale.set(1,0.95,0.9);
+  g.add(head);
+  [-0.22,0.22].forEach(dx=>{
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), eyeMat);
+    eye.scale.set(1,0.55,0.25);
+    eye.position.set(dx,0.03,0.56);
+    g.add(eye);
+    const pupil = new THREE.Mesh(new THREE.ConeGeometry(0.03,0.05,6), darkMat);
+    pupil.rotation.x = Math.PI/2;
+    pupil.position.set(dx,0.03,0.64);
+    g.add(pupil);
+  });
+  [[-0.24,0.35],[0.24,-0.35]].forEach(([dx,rot])=>{
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.04,0.04), hairMat);
+    brow.position.set(dx,0.24,0.58);
+    brow.rotation.z = rot;
+    g.add(brow);
+  });
+  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.2,0.065,8,16,Math.PI*0.85), darkMat);
+  mouth.position.set(0,-0.22,0.55);
+  mouth.rotation.set(Math.PI*0.06,0,Math.PI*0.08);
+  g.add(mouth);
+  for(let i=-2;i<=2;i++){
+    const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.032,0.08,4), toothMat);
+    tooth.position.set(i*0.075,-0.13,0.6+Math.abs(i)*0.01);
+    tooth.rotation.x = Math.PI;
+    g.add(tooth);
+  }
+  const spikes = [
+    {w:0.55, h:0.55, c:0.4,  pos:[-0.4,0.35,-0.22], rot:0.55},
+    {w:0.42, h:0.42, c:0.5,  pos:[0.0,0.47,-0.3],   rot:0.05},
+    {w:0.55, h:0.55, c:-0.35,pos:[0.4,0.35,-0.22],  rot:-0.55},
+  ];
+  spikes.forEach(s=>{
+    const m = new THREE.Mesh(spikeGeo(s.w,s.h,s.c), hairMat);
+    m.position.set(...s.pos);
+    m.rotation.z = s.rot;
+    g.add(m);
+  });
+  [-1,1].forEach(side=>{
+    const tieBase = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), hairMat);
+    tieBase.position.set(side*0.58, -0.13, 0.28);
+    g.add(tieBase);
+    const strand = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.75,8), hairMat);
+    strand.position.set(side*0.62, -0.57, 0.28);
+    strand.rotation.z = side*0.08;
+    g.add(strand);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.05,8,8), hairMat);
+    tip.position.set(side*0.66, -0.93, 0.3);
+    g.add(tip);
+  });
+  [-1,1].forEach(side=>{
+    const base = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.42,10), hornMat);
+    base.position.set(side*0.24,0.6,0.18);
+    base.rotation.z = side*-0.22;
+    base.rotation.x = -0.15;
+    g.add(base);
+    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.065,0.3,10), hornTipMat);
+    tip.position.set(side*0.36,0.93,0.1);
+    tip.rotation.z = side*-0.5;
+    tip.rotation.x = -0.15;
+    g.add(tip);
+  });
+  return g;
+}
+
+function buildOniWings(){
+  const wingMat = new THREE.MeshStandardMaterial({color:0x7a1420, roughness:.5, side:THREE.DoubleSide});
+  function wingGeo(){
+    const shape = new THREE.Shape();
+    shape.moveTo(0,0);
+    shape.lineTo(0.85,0.48);
+    shape.lineTo(0.7,0.34);
+    shape.lineTo(0.9,0.1);
+    shape.lineTo(0.66,0.04);
+    shape.lineTo(0.8,-0.24);
+    shape.lineTo(0.46,-0.14);
+    shape.lineTo(0.26,-0.38);
+    shape.lineTo(0,0);
+    return new THREE.ExtrudeGeometry(shape, {depth:0.035, bevelEnabled:false});
+  }
+  const g = new THREE.Group();
+  [-1,1].forEach(side=>{
+    const wing = new THREE.Mesh(wingGeo(), wingMat);
+    wing.scale.set(side,1,1);
+    wing.position.set(side*0.15, 0, -0.1);
+    wing.rotation.y = side*-0.5;
+    g.add(wing);
+  });
+  return g;
+}
+
+async function buildOniHybridModel(){
+  const template = await loadOniGltfTemplate(); // 失敗したら呼び出し元でプリミティブ版にフォールバック
+  const model = THREE.SkeletonUtils.clone(template);
+
+  const bodySkinMat = new THREE.MeshStandardMaterial({color:0xe0503f, roughness:.5, metalness:.08, skinning:true});
+  let neckBone=null, shoulderL=null, shoulderR=null, skinnedMesh=null;
+  model.traverse(o=>{
+    if(o.isMesh) o.material = bodySkinMat;
+    if(o.isBone){
+      if(o.name === 'neck_joint_2') neckBone = o;
+      if(o.name === 'arm_joint_L_1') shoulderL = o;
+      if(o.name === 'arm_joint_R_1') shoulderR = o;
+    }
+    if(o.isSkinnedMesh) skinnedMesh = o;
+  });
+  if(neckBone) neckBone.scale.set(0.02,0.02,0.02); // 素体の箱の頭を畳んで隠す
+  if(shoulderL) shoulderL.rotation.x = -1.55;       // Tポーズの腕を下ろす
+  if(shoulderR) shoulderR.rotation.x = -1.55;
+  model.updateMatrixWorld(true);
+  if(skinnedMesh) skinnedMesh.skeleton.update();
+
+  const group = new THREE.Group();
+  group.add(model);
+
+  const headScale = 0.27;
+  const headGroup = buildOniHeadGroup();
+  headGroup.scale.set(headScale,headScale,headScale);
+  headGroup.position.set(0, 1.19 + 0.62*0.9*headScale, 0.01);
+  group.add(headGroup);
+
+  const wings = buildOniWings();
+  wings.scale.set(headScale*1.6, headScale*1.6, headScale*1.6);
+  wings.position.set(0, 1.0, -0.05);
+  group.add(wings);
+
+  const jacketMat = new THREE.MeshStandardMaterial({color:0x14161f, roughness:.5});
+  const trimMat   = new THREE.MeshStandardMaterial({color:0xf3f3f3, roughness:.35});
+  const goldMat   = new THREE.MeshStandardMaterial({color:0xffce3b, metalness:.5, roughness:.3, emissive:0x7a5300, emissiveIntensity:.3});
+  const dress = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.22,0.55,14), jacketMat);
+  dress.position.set(0,0.78,0);
+  group.add(dress);
+  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.12,0.02,8,16), trimMat);
+  collar.position.set(0,1.06,0);
+  collar.rotation.x = Math.PI/2;
+  group.add(collar);
+  const belt = new THREE.Mesh(new THREE.TorusGeometry(0.17,0.018,8,16), goldMat);
+  belt.position.set(0,0.62,0);
+  belt.rotation.x = Math.PI/2;
+  group.add(belt);
+
+  group.scale.set(1.4,1.4,1.4); // 他のプリミティブキャラと見た目のサイズを揃える
+  return group;
+}
+
+/* ==========================================================
+   Three.js シーン管理(共通ヘルパー)
+   ========================================================== */
+function createSceneIn(container){
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, container.clientWidth/container.clientHeight || 1, 0.1, 100);
+  camera.position.set(0, 1.1, 4.2);
+  camera.lookAt(0,0.9,0);
+
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+  dir.position.set(2,4,3);
+  scene.add(dir);
+
+  const holder = new THREE.Group();
+  scene.add(holder);
+
+  function resize(){
+    const w = container.clientWidth, h = container.clientHeight;
+    if(!w || !h) return;
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  }
+  window.addEventListener('resize', resize);
+
+  let raf;
+  function animate(){
+    raf = requestAnimationFrame(animate);
+    holder.rotation.y += 0.008;
+    if(holder.userData.skinnedMesh) holder.userData.skinnedMesh.skeleton.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  let charToken = 0;
+  return {
+    async setCharacter(def){
+      const myToken = ++charToken;
+      while(holder.children.length) holder.remove(holder.children[0]);
+      holder.userData.skinnedMesh = null;
+
+      if(def.id === 'oni'){
+        try{
+          const group = await buildOniHybridModel();
+          if(myToken !== charToken) return; // 待っている間に別キャラへ切り替わっていたら破棄
+          while(holder.children.length) holder.remove(holder.children[0]);
+          holder.add(group);
+          group.traverse(o=>{ if(o.isSkinnedMesh) holder.userData.skinnedMesh = o; });
+          return;
+        }catch(e){
+          console.warn('鬼ノ丞の3Dモデル読み込みに失敗。プリミティブ版で表示します。', e);
+          if(myToken !== charToken) return;
+        }
+      }
+      holder.add(buildCharacterModel(def));
+    },
+    dispose(){
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', resize);
+      renderer.dispose();
+      if(renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
+    }
+  };
+}
+
+let lobbyScene = null;
+let modalScene = null;
+
+/* ==========================================================
+   画面遷移
+   ========================================================== */
+const loginScreen = document.getElementById('loginScreen');
+const lobbyScreen = document.getElementById('lobbyScreen');
+const welcomeBackCard = document.getElementById('welcomeBackCard');
+const freshLoginCard = document.getElementById('freshLoginCard');
+
+function refreshLoginScreen(){
+  const existing = loadUserData();
+  if(existing){
+    welcomeBackCard.style.display = 'flex';
+    freshLoginCard.style.display = 'none';
+    document.getElementById('wbName').textContent = existing.name;
+    document.getElementById('wbLevel').textContent = 'Lv.' + existing.level;
+    document.getElementById('wbTrophy').textContent = '🏆 ' + existing.trophies;
+  } else {
+    welcomeBackCard.style.display = 'none';
+    freshLoginCard.style.display = 'flex';
+  }
+}
+
+function enterLobby(){
+  userData = loadUserData();
+  if(!userData) return;
+  loginScreen.style.display = 'none';
+  lobbyScreen.classList.add('show');
+  renderLobbyStats();
+  if(!lobbyScene){
+    lobbyScene = createSceneIn(document.getElementById('stage3d'));
+  }
+  lobbyScene.setCharacter(findChar(userData.characterId));
+}
+
+function renderLobbyStats(){
+  document.getElementById('playerNameLabel').textContent = userData.name;
+  document.getElementById('trophyCount').textContent = userData.trophies;
+  document.getElementById('gemCount').textContent = userData.gems;
+  document.getElementById('coinCount').textContent = userData.coins;
+  document.getElementById('diamondCount').textContent = userData.diamonds;
+  document.getElementById('levelPill').textContent = userData.level;
+  document.getElementById('xpLabel').textContent = 'XP ' + userData.xp + '/' + userData.xpMax;
+  document.getElementById('xpFill').style.width = Math.min(100, (userData.xp/userData.xpMax)*100) + '%';
+  document.getElementById('rankBarFill').style.width = '0%';
+  const c = findChar(userData.characterId);
+  document.getElementById('avatarEmoji').textContent = c.emoji;
+  document.getElementById('selectedCharLabel').textContent = c.name;
+  updateNewIndicators();
+}
+
+/* ---- 新着(NEW)通知: 右上とキャラクターボタンに表示し、一覧を見たら消える ---- */
+function hasNewCharacters(){
+  return !!(userData.newCharacterIds && userData.newCharacterIds.length);
+}
+function updateNewIndicators(){
+  const on = hasNewCharacters();
+  document.getElementById('menuNewDot').classList.toggle('show', on);
+  document.getElementById('charSideNewDot').classList.toggle('show', on);
+}
+
+/* ---- 「オフラインでプレイ」クリック時: 既存データがあれば表示して即ロビーへ ---- */
+document.getElementById('offlineBtn').addEventListener('click', () => {
+  const existing = loadUserData();
+  if(existing){
+    showDataToast(existing);
+    setTimeout(enterLobby, 900);
+  } else {
+    document.getElementById('nameModal').classList.add('show');
+    document.getElementById('nameInput').focus();
+  }
+});
+document.getElementById('continueBtn').addEventListener('click', () => {
+  const existing = loadUserData();
+  showDataToast(existing);
+  setTimeout(enterLobby, 700);
+});
+document.getElementById('resetDataBtn').addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEY);
+  refreshLoginScreen();
+});
+
+function showDataToast(data){
+  const toast = document.getElementById('dataToast');
+  toast.innerHTML =
+    '保存データを読み込みました<br>' +
+    '名前: <b>' + data.name + '</b> / Lv.' + data.level +
+    ' / 🏆' + data.trophies + ' / ⚡' + data.gems + ' / 🪙' + data.coins;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+/* ---- 名前設定モーダル ---- */
+document.getElementById('nameConfirmBtn').addEventListener('click', submitName);
+document.getElementById('nameInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') submitName();
+});
+function submitName(){
+  const val = document.getElementById('nameInput').value.trim();
+  const errorEl = document.getElementById('nameError');
+  if(!val){ errorEl.textContent = '名前を入力してください'; return; }
+  if(val.length > 10){ errorEl.textContent = '10文字以内で入力してください'; return; }
+  errorEl.textContent = '';
+  const data = defaultUserData(val);
+  saveUserData(data);
+  document.getElementById('nameModal').classList.remove('show');
+  enterLobby();
+}
+
+/* ==========================================================
+   キャラクター選択モーダル
+   ========================================================== */
+const charModal = document.getElementById('charModal');
+const charGrid = document.getElementById('charGrid');
+let pendingCharId = null;
+let viewingNewIds = [];
+
+function openCharModal(){
+  pendingCharId = userData.characterId;
+  viewingNewIds = (userData.newCharacterIds || []).slice(); // このモーダルを開いた時点のNEW一覧を保持して表示に使う
+  buildCharGrid();
+  charModal.classList.add('show');
+  if(!modalScene){
+    modalScene = createSceneIn(document.getElementById('charPreviewWrap'));
+  }
+  updateModalPreview();
+
+  // 一覧を見たのでNEW通知を消す(次回このデータを開いた時にはNEWは表示されない)
+  if(hasNewCharacters()){
+    userData.newCharacterIds = [];
+    saveUserData(userData);
+    updateNewIndicators();
+  }
+}
+function closeCharModal(){
+  charModal.classList.remove('show');
+}
+function buildCharGrid(){
+  charGrid.innerHTML = '';
+  CHARACTERS.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'char-icon-btn' + (c.id === pendingCharId ? ' selected' : '');
+    btn.textContent = c.emoji;
+    btn.title = c.name;
+    if(viewingNewIds.includes(c.id)){
+      const tag = document.createElement('span');
+      tag.className = 'new-tag';
+      tag.textContent = 'NEW';
+      btn.appendChild(tag);
+    }
+    btn.addEventListener('click', () => {
+      pendingCharId = c.id;
+      buildCharGrid();
+      updateModalPreview();
+    });
+    charGrid.appendChild(btn);
+  });
+}
+function updateModalPreview(){
+  const c = findChar(pendingCharId);
+  modalScene.setCharacter(c);
+  document.getElementById('charInfoName').textContent = c.name;
+  document.getElementById('charInfoDesc').textContent = c.desc;
+}
+document.getElementById('charSideBtn').addEventListener('click', openCharModal);
+document.getElementById('avatarBadgeBtn').addEventListener('click', openCharModal);
+document.getElementById('charCloseBtn').addEventListener('click', closeCharModal);
+document.getElementById('charConfirmBtn').addEventListener('click', () => {
+  userData.characterId = pendingCharId;
+  saveUserData(userData);
+  renderLobbyStats();
+  lobbyScene.setCharacter(findChar(userData.characterId));
+  closeCharModal();
+});
+
+/* ---- プレイボタン: 対戦画面(別html)へ ---- */
+document.getElementById('playBtn').addEventListener('click', () => {
+  window.location.href = 'battle.html';
+});
+
+/* ==========================================================
+   初期化
+   ========================================================== */
+refreshLoginScreen();
+</script>
+</body>
+</html>
