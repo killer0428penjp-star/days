@@ -1,1218 +1,1822 @@
 <!DOCTYPE html>
-<!--
-  クレジット表記:
-  「鬼ノ丞」の体のベースモデルには khronos/glTF-Sample-Assets の
-  無料サンプルモデル "RiggedFigure"(CC-BY 4.0, (c) 2017 Cesium GS, Inc.)を使用しています。
-  https://github.com/KhronosGroup/glTF-Sample-Assets
-  CC-BY 4.0 は利用時のクレジット表記が必須です。公開する場合はアプリ内(設定/クレジット画面など)に
-  この表記を残してください。
--->
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>3Dブラスタ - ロビー</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<title>App Mockup</title>
 <style>
-  :root{
-    --bg-deep:#0e1f18;
-    --stage-a:#173b2c;
-    --stage-b:#0c1f18;
-    --floor:#4a3323;
-    --panel:#2b2f45;
-    --panel-2:#363b58;
-    --panel-border:#1c1f30;
-    --accent-yellow:#ffce3b;
-    --accent-yellow-dark:#d99f12;
-    --accent-green:#4ade80;
-    --accent-red:#ef4444;
-    --accent-blue:#38bdf8;
-    --text-main:#f5f6fa;
-    --text-dim:#aab0c8;
-  }
-  *{box-sizing:border-box;}
-  html,body{
-    margin:0;padding:0;width:100%;height:100%;overflow:hidden;
-    font-family:'M PLUS Rounded 1c', sans-serif;
-    background:var(--bg-deep);
-    color:var(--text-main);
-    -webkit-tap-highlight-color:transparent;
-    user-select:none;
-  }
-  #app{position:relative;width:100vw;height:100vh;overflow:hidden;}
-
-  /* ---------- 共通パネル ---------- */
-  .panel{
-    background:linear-gradient(180deg, var(--panel-2), var(--panel));
-    border:2px solid var(--panel-border);
-    border-radius:14px;
-    box-shadow:0 4px 0 var(--panel-border), 0 6px 12px rgba(0,0,0,.35);
-  }
-  .btn{
-    cursor:pointer;
-    border:none;
-    border-radius:14px;
-    font-family:inherit;
-    font-weight:700;
-    color:var(--text-main);
-    transition:transform .08s ease;
-  }
-  .btn:active{transform:scale(.94);}
-  .btn:disabled{opacity:.45;cursor:not-allowed;}
-
-  /* ================= ログイン画面 ================= */
-  #loginScreen{
-    position:absolute;inset:0;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:22px;
-    background:
-      radial-gradient(circle at 50% 20%, #234a37 0%, var(--stage-a) 45%, var(--stage-b) 100%);
-    z-index:50;
-    padding:24px;
-    text-align:center;
-  }
-  .login-title{
-    font-size:38px;font-weight:800;letter-spacing:2px;
-    color:var(--accent-yellow);
-    text-shadow:0 3px 0 #7a4d00, 0 6px 10px rgba(0,0,0,.4);
-  }
-  .login-sub{color:var(--text-dim);font-size:14px;margin-top:-12px;}
-  .login-card{width:min(320px,86vw);padding:20px;display:flex;flex-direction:column;gap:14px;}
-  .welcome-back{
-    padding:16px;border-radius:12px;background:rgba(0,0,0,.25);
-    display:flex;flex-direction:column;gap:6px;align-items:center;
-  }
-  .welcome-back .wb-name{font-size:20px;font-weight:800;color:var(--accent-yellow);}
-  .welcome-back .wb-stats{display:flex;gap:14px;font-size:13px;color:var(--text-dim);}
-  .login-btn-primary{
-    background:linear-gradient(180deg,#ffe27a,var(--accent-yellow));
-    color:#4a3300;padding:16px;font-size:16px;
-    box-shadow:0 4px 0 var(--accent-yellow-dark);
-  }
-  .login-btn-secondary{
-    background:var(--panel-2);padding:14px;font-size:14px;color:var(--text-dim);
-    border:2px solid var(--panel-border);
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
   }
 
-  /* ================= 名前設定モーダル ================= */
-  .modal-overlay{
-    position:absolute;inset:0;z-index:100;
-    background:rgba(0,0,0,.55);
-    display:none;align-items:center;justify-content:center;
-    padding:20px;
-  }
-  .modal-overlay.show{display:flex;}
-  .name-card{
-    width:min(340px,90vw);padding:26px 22px;text-align:center;
-    display:flex;flex-direction:column;gap:16px;
-  }
-  .name-card h2{margin:0;font-size:20px;color:var(--accent-yellow);}
-  .name-card p{margin:0;font-size:13px;color:var(--text-dim);}
-  #nameInput{
-    font-family:inherit;font-size:16px;padding:12px 14px;border-radius:10px;
-    border:2px solid var(--panel-border);background:#171a2b;color:var(--text-main);
-    text-align:center;outline:none;
-  }
-  #nameInput:focus{border-color:var(--accent-yellow);}
-  .name-error{color:var(--accent-red);font-size:12px;min-height:14px;}
-  .name-confirm-btn{
-    background:linear-gradient(180deg,#ffe27a,var(--accent-yellow));
-    color:#4a3300;padding:14px;font-size:15px;
-    box-shadow:0 4px 0 var(--accent-yellow-dark);
+  #stage-wrapper {
+    position: absolute;
+    top: 0; left: 0;
+    width: 2560px;
+    height: 1183px;
+    transform-origin: top left;
   }
 
-  /* ================= ロビー画面 ================= */
-  #lobbyScreen{
-    position:absolute;inset:0;display:none;flex-direction:column;
-  }
-  #lobbyScreen.show{display:flex;}
-  #stage3d{
-    position:absolute;inset:0;
-    background:
-      linear-gradient(180deg, var(--stage-a) 0%, var(--stage-b) 60%, var(--floor) 100%);
-  }
-  #stage3d canvas{width:100%!important;height:100%!important;display:block;}
-
-  .lobby-topbar{
-    position:relative;z-index:5;
-    display:flex;justify-content:space-between;align-items:flex-start;
-    padding:10px 12px;gap:8px;
-  }
-  .topbar-left,.topbar-right{display:flex;gap:8px;align-items:flex-start;}
-  .topbar-right-col{flex-direction:column;align-items:flex-end;gap:6px;}
-  .avatar-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
-  .name-plate{padding:2px 8px;font-size:10px;font-weight:700;color:var(--text-main);max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .currency-row{display:flex;gap:8px;}
-  .new-dot{
-    position:absolute;top:-4px;left:-4px;width:12px;height:12px;border-radius:50%;
-    background:var(--accent-red);border:2px solid var(--panel-border);display:none;
-  }
-  .new-dot.show{display:block;}
-  .menu-btn{position:relative;}
-  .char-icon-btn .new-tag{
-    position:absolute;top:-6px;left:-6px;background:var(--accent-red);color:#fff;
-    font-size:8px;font-weight:800;padding:1px 4px;border-radius:6px;border:2px solid var(--panel-border);
-  }
-  .profile-block{display:flex;gap:6px;}
-  .avatar-badge{
-    position:relative;width:52px;height:52px;border-radius:12px;
-    background:linear-gradient(160deg,#ff8fb2,#c23a63);
-    display:flex;align-items:center;justify-content:center;font-size:22px;
-    border:2px solid var(--panel-border);
-  }
-  .level-pill{
-    position:absolute;top:-8px;left:-8px;background:var(--accent-blue);
-    color:#04263a;font-size:11px;font-weight:800;border-radius:8px;
-    padding:1px 5px;border:2px solid var(--panel-border);
-  }
-  .trophy-chip{
-    display:flex;flex-direction:column;gap:2px;padding:6px 10px;min-width:96px;
-  }
-  .trophy-row{display:flex;align-items:center;gap:5px;font-weight:800;font-size:15px;color:var(--accent-yellow);}
-  .rank-bar{height:6px;border-radius:4px;background:#1c1f30;overflow:hidden;}
-  .rank-bar-fill{height:100%;background:var(--accent-yellow-dark);width:0%;}
-  .currency-chip{
-    display:flex;align-items:center;gap:6px;padding:7px 12px;font-weight:800;font-size:14px;
-  }
-  .menu-btn{width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:18px;}
-
-  .lobby-sides{
-    position:relative;z-index:5;flex:1;display:flex;justify-content:space-between;
-    padding:6px 10px;pointer-events:none;
-  }
-  .side-col{display:flex;flex-direction:column;gap:10px;pointer-events:auto;}
-  .side-col.right{align-items:flex-end;}
-  .side-btn{
-    width:76px;padding:8px 4px 6px;display:flex;flex-direction:column;align-items:center;gap:4px;
-    font-size:11px;position:relative;
-  }
-  .side-btn .icon{font-size:22px;}
-  .badge-count{
-    position:absolute;top:-6px;right:-6px;background:var(--accent-red);
-    border-radius:10px;font-size:10px;padding:1px 6px;border:2px solid var(--panel-border);
+  #stage {
+    width: 2560px;
+    height: 1183px;
+    background: linear-gradient(180deg, #2b1f4a 0%, #3a2a5c 40%, #4a3570 100%);
+    font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
   }
 
-  .lobby-bottombar{
-    position:relative;z-index:5;display:flex;align-items:center;gap:10px;
-    padding:10px 12px 14px;
-  }
-  .xp-block{display:flex;flex-direction:column;gap:4px;width:96px;}
-  .xp-track{height:14px;border-radius:8px;background:#1c1f30;overflow:hidden;border:2px solid var(--panel-border);}
-  .xp-fill{height:100%;background:linear-gradient(90deg,#ffd76a,var(--accent-yellow));}
-  .xp-label{font-size:10px;text-align:center;color:var(--text-dim);}
-  .mode-select{
-    flex:1;display:flex;align-items:center;gap:10px;padding:8px 14px;min-width:0;
-  }
-  .mode-select .mode-icon{font-size:26px;}
-  .mode-select .mode-text{display:flex;flex-direction:column;overflow:hidden;}
-  .mode-select .mode-title{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .mode-select .mode-sub{font-size:11px;color:var(--text-dim);}
-  #playBtn{
-    background:linear-gradient(180deg,#ffe27a,var(--accent-yellow));
-    color:#4a3300;font-size:20px;padding:16px 26px;
-    box-shadow:0 4px 0 var(--accent-yellow-dark);
-    white-space:nowrap;
+  .panel {
+    background: rgba(30, 25, 55, 0.85);
+    border: 3px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
   }
 
-  /* ================= キャラクター選択モーダル ================= */
-  #charModal .modal-box{
-    width:min(420px,92vw);max-height:88vh;display:flex;flex-direction:column;
-    padding:16px;gap:12px;
+  .icon {
+    display: inline-block;
+    flex-shrink: 0;
   }
-  #charModal h2{margin:0;font-size:18px;color:var(--accent-yellow);text-align:center;}
-  #charPreviewWrap{
-    height:180px;border-radius:12px;overflow:hidden;position:relative;
-    background:radial-gradient(circle at 50% 30%, #234a37, #0c1f18);
-  }
-  #charPreviewWrap canvas{width:100%!important;height:100%!important;}
-  #charInfo{text-align:center;}
-  #charInfo .cname{font-weight:800;font-size:16px;color:var(--accent-yellow);}
-  #charInfo .cdesc{font-size:12px;color:var(--text-dim);margin-top:2px;}
-  .char-grid{
-    display:grid;grid-template-columns:repeat(5,1fr);gap:8px;overflow-y:auto;padding:2px;
-  }
-  .char-icon-btn{
-    aspect-ratio:1;border-radius:12px;border:2px solid var(--panel-border);
-    display:flex;align-items:center;justify-content:center;font-size:22px;
-    background:#1c1f30;position:relative;
-  }
-  .char-icon-btn.selected{border-color:var(--accent-yellow);box-shadow:0 0 0 2px var(--accent-yellow) inset;}
-  .modal-actions{display:flex;gap:10px;}
-  .modal-actions .btn{flex:1;padding:12px;font-size:14px;}
-  .close-btn{background:var(--panel-2);color:var(--text-dim);}
-  .confirm-btn{background:linear-gradient(180deg,#ffe27a,var(--accent-yellow));color:#4a3300;}
+  .icon svg { width: 100%; height: 100%; display: block; }
 
-  /* ================= オフラインデータ確認トースト ================= */
-  #dataToast{
-    position:absolute;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
-    z-index:200;padding:14px 18px;opacity:0;pointer-events:none;
-    transition:opacity .25s ease, transform .25s ease;
-    font-size:12px;text-align:left;line-height:1.7;
+  .icon-circle-bg {
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  #dataToast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  #dataToast b{color:var(--accent-yellow);}
 
-  ::-webkit-scrollbar{width:6px;}
-  ::-webkit-scrollbar-thumb{background:var(--panel-2);border-radius:4px;}
+  .label {
+    font-size: 20px;
+    text-align: center;
+    color: #eee;
+  }
+
+  .clickable { cursor: pointer; }
+  .clickable:active { transform: scale(0.96); }
+
+  .screen { position: absolute; inset: 0; display: none; }
+  .screen.active { display: block; }
+
+  /* ---------- TOP LEFT: profile ---------- */
+  .profile-group {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 16px;
+  }
+  .level-badge {
+    position: absolute;
+    top: -13px;
+    left: -13px;
+    width: 78px;
+    height: 78px;
+    background: #2255cc;
+    border: 4px solid #ffd400;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 34px;
+    z-index: 2;
+  }
+  .avatar-box {
+    position: relative;
+    width: 221px;
+    height: 169px;
+  }
+  .avatar-placeholder {
+    width: 169px;
+    height: 169px;
+    margin-left: 39px;
+    background: #b03a4e;
+  }
+  .avatar-placeholder svg { width: 70%; height: 70%; }
+  .name-tag {
+    position: absolute;
+    bottom: 0;
+    left: 39px;
+    width: 169px;
+    background: rgba(0,0,0,0.5);
+    text-align: center;
+    font-size: 21px;
+    padding: 3px 0;
+    border-radius: 0 0 10px 10px;
+  }
+
+  .trophy-panel {
+    width: 390px;
+    height: 169px;
+    padding: 13px 18px;
+    position: relative;
+  }
+  .trophy-top {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    font-size: 44px;
+    font-weight: bold;
+    color: #ffd400;
+  }
+  .icon-40 { width: 52px; height: 52px; }
+  .trophy-bar {
+    margin-top: 13px;
+    height: 34px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .trophy-bar-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 20%;
+    background: #e0672a;
+    border-radius: 8px 0 0 8px;
+  }
+  .trophy-bar-icon {
+    position: absolute;
+    right: 8px;
+    width: 26px; height: 26px;
+  }
+  .rank-badge {
+    width: 169px;
+    height: 169px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .icon-60 { width: 78px; height: 78px; }
+  .rank-badge .roman {
+    font-weight: bold;
+    font-size: 26px;
+  }
+
+  /* ---------- TOP RIGHT: currency ---------- */
+  .currency-group {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+  }
+  .currency-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.35);
+    border-radius: 26px;
+    padding: 10px 23px;
+    font-size: 36px;
+    font-weight: bold;
+  }
+  .icon-32 { width: 42px; height: 42px; }
+  .menu-button {
+    width: 78px; height: 78px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .menu-button .icon { width: 42px; height: 42px; }
+
+  /* ---------- LEFT SIDEBAR ---------- */
+  .left-sidebar {
+    position: absolute;
+    top: 200px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 21px;
+  }
+  .side-button {
+    width: 195px;
+    height: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+  }
+  .icon-50 { width: 65px; height: 65px; }
+  .side-button .label { font-size: 26px; }
+  .badge-count {
+    position: absolute;
+    top: -10px;
+    right: 13px;
+    background: #e0333f;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    font-weight: bold;
+    z-index: 2;
+  }
+
+  .pass-bar {
+    width: 338px;
+    height: 78px;
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 0 13px;
+    margin-top: 10px;
+  }
+  .icon-44 { width: 57px; height: 57px; }
+  .pass-progress {
+    flex: 1;
+    height: 26px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 13px;
+  }
+  .pass-num { font-size: 29px; font-weight: bold; }
+  .pass-free { font-size: 21px; }
+
+  /* ---------- RIGHT SIDEBAR ---------- */
+  .right-sidebar {
+    position: absolute;
+    top: 200px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 21px;
+    align-items: flex-end;
+  }
+  .right-sidebar .side-button {
+    width: 195px;
+    height: 130px;
+  }
+  .event-timer {
+    font-size: 18px;
+    margin-top: 5px;
+    text-align: center;
+  }
+
+  /* ---------- CENTER: character/skin area ---------- */
+  .character-stage {
+    position: absolute;
+    top: 130px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 850px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .character-placeholder {
+    width: 460px;
+    height: 680px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    border: 2px dashed rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .skin3d-wrap { perspective: 1000px; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+  .skin3d-cube {
+    width: 220px; height: 220px; position: relative;
+    transform-style: preserve-3d;
+    animation: spin3d 9s linear infinite;
+  }
+  .skin3d-face {
+    position: absolute; width: 220px; height: 220px;
+    border: 4px solid rgba(255,255,255,0.45);
+    border-radius: 22px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 0 40px rgba(255,255,255,0.15);
+  }
+  .f-front  { background: linear-gradient(135deg,#ff8fd0,#d63b8e); transform: rotateY(0deg)   translateZ(110px); }
+  .f-back   { background: linear-gradient(135deg,#8fd0ff,#3b7bd6); transform: rotateY(180deg) translateZ(110px); }
+  .f-right  { background: linear-gradient(135deg,#ffd400,#ff9d40); transform: rotateY(90deg)  translateZ(110px); }
+  .f-left   { background: linear-gradient(135deg,#5be07a,#2fae55); transform: rotateY(-90deg) translateZ(110px); }
+  .f-top    { background: linear-gradient(135deg,#ffffff,#c8b8ff); transform: rotateX(90deg)  translateZ(110px); }
+  .f-bottom { background: linear-gradient(135deg,#7fd0ff,#3b56d6); transform: rotateX(-90deg) translateZ(110px); }
+  @keyframes spin3d {
+    from { transform: rotateY(0deg)   rotateX(18deg); }
+    to   { transform: rotateY(360deg) rotateX(18deg); }
+  }
+
+  .gem-badge {
+    position: absolute;
+    top: 130px;
+    left: 50%;
+    transform: translateX(-182px);
+    width: 143px;
+    height: 130px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-weight: bold;
+    font-size: 31px;
+  }
+
+  .accessory-cluster {
+    position: absolute;
+    top: 156px;
+    left: 50%;
+    transform: translateX(26px);
+    width: 286px;
+    height: 260px;
+  }
+  .accessory-row {
+    display: flex;
+    gap: 13px;
+    margin-bottom: 13px;
+  }
+  .accessory-icon {
+    width: 91px; height: 91px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .accessory-icon .icon { width: 55px; height: 55px; }
+
+  .plus-slot {
+    position: absolute;
+    top: 500px;
+    width: 110px;
+    height: 110px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 2px dashed rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    color: rgba(255,255,255,0.3);
+  }
+  .plus-slot.left { left: 700px; }
+  .plus-slot.right { right: 700px; }
+
+  .hanger-slot {
+    position: absolute;
+    top: 700px;
+    left: 900px;
+    width: 100px;
+    height: 100px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 2px dashed rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hanger-slot .icon { width: 44px; height: 44px; opacity: 0.6; }
+
+  .gift-box-placeholder {
+    position: absolute;
+    top: 780px;
+    left: 1380px;
+    width: 210px;
+    height: 170px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.05);
+    border: 2px dashed rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gift-box-placeholder .icon { width: 70px; height: 70px; opacity: 0.6; }
+
+  .speech-bubble {
+    position: absolute;
+    top: 950px;
+    left: 950px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .speech-avatar {
+    width: 90px; height: 90px;
+    border-radius: 16px;
+    background: #2255cc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .speech-avatar .icon { width: 55px; height: 55px; }
+  .speech-text {
+    background: #d63b8e;
+    border-radius: 20px;
+    padding: 10px 24px;
+    font-weight: bold;
+    font-size: 22px;
+  }
+
+  /* ---------- BOTTOM ---------- */
+  .bottom-left {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-end;
+  }
+  .xp-box {
+    width: 286px;
+    height: 117px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 18px;
+    gap: 8px;
+  }
+  .xp-bar {
+    height: 23px;
+    background: rgba(0,0,0,0.4);
+    border-radius: 12px;
+  }
+  .xp-label { font-size: 23px; font-weight: bold; }
+
+  .quest-box {
+    width: 169px;
+    height: 117px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 23px;
+    position: relative;
+  }
+  .quest-box .label { font-size: 26px; }
+  .new-flag {
+    position: absolute;
+    top: -13px;
+    right: -13px;
+    background: #e0333f;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 2;
+  }
+
+  .bottom-center {
+    position: absolute;
+    bottom: 20px;
+    left: 970px;
+    width: 1090px;
+    height: 130px;
+    display: flex;
+    align-items: center;
+    padding: 0 26px;
+    gap: 21px;
+  }
+  .mode-icon {
+    width: 91px; height: 91px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: #223a6b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mode-icon .icon { width: 57px; height: 57px; }
+  .mode-text-jp { font-size: 39px; font-weight: bold; }
+  .mode-text-en { font-size: 23px; color: #d63b8e; font-weight: bold; }
+  .new-badge {
+    background: #ffd400;
+    color: #333;
+    padding: 8px 18px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 23px;
+    margin-left: auto;
+  }
+  .next-map-info {
+    position: absolute;
+    top: -44px;
+    left: 26px;
+    font-size: 21px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .next-map-info .icon { width: 26px; height: 26px; }
+
+  .play-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 460px;
+    height: 100px;
+    background: linear-gradient(180deg, #ffe14d, #ffb300);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: bold;
+    color: #7a4a00;
+  }
+
+  /* ---------- DAILY WINS ---------- */
+  .daily-wins {
+    position: absolute;
+    bottom: 182px;
+    right: 20px;
+    width: 460px;
+    padding: 18px;
+  }
+  .daily-wins-title {
+    font-size: 23px;
+    font-weight: bold;
+    color: #ffd400;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .daily-wins-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .daily-wins-row .icon-55 {
+    width: 62px; height: 62px;
+  }
+  .win-slot {
+    width: 62px; height: 62px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ============ TROPHY ROAD SCREEN ============ */
+  .tr-header {
+    position: absolute; top: 0; left: 0; width: 100%; height: 130px;
+    background: rgba(0,0,0,0.55);
+    display: flex; align-items: center; padding: 0 30px; gap: 24px;
+  }
+  .tr-back, .tr-home {
+    width: 76px; height: 76px; border-radius: 16px;
+    background: rgba(255,255,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tr-back .icon, .tr-home .icon { width: 38px; height: 38px; }
+  .tr-titles { display: flex; flex-direction: column; gap: 2px; }
+  .tr-title { font-size: 38px; font-weight: bold; }
+  .tr-sub { font-size: 24px; color: #ffd400; font-weight: bold; }
+  .tr-trophy {
+    margin-left: auto; display: flex; align-items: center; gap: 12px;
+    background: rgba(0,0,0,0.4); padding: 12px 26px; border-radius: 22px;
+    font-size: 38px; font-weight: bold; color: #ffd400;
+  }
+  .tr-trophy .icon { width: 44px; height: 44px; }
+
+  .tr-track-wrap {
+    position: absolute; top: 420px; left: 0; width: 100%; height: 420px;
+    overflow-x: auto; display: flex; align-items: center;
+  }
+  .tr-track { position: relative; display: flex; align-items: flex-end; gap: 110px; padding: 0 120px; }
+  .tr-line {
+    position: absolute; left: 0; right: 0; top: 108px; height: 16px;
+    background: linear-gradient(90deg,#ffcf40,#ff9d40); border-radius: 8px; z-index: 0;
+  }
+  .tr-node { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 1; }
+  .tr-callout {
+    position: absolute; top: -64px; left: 50%; transform: translateX(-50%);
+    background: #2fa8ea; border: 3px solid rgba(255,255,255,0.6); border-radius: 14px;
+    padding: 8px 18px; display: flex; align-items: center; gap: 8px;
+    font-size: 24px; font-weight: bold; white-space: nowrap;
+  }
+  .tr-callout .icon { width: 28px; height: 28px; }
+  .tr-circle {
+    width: 220px; height: 220px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    border: 7px solid rgba(255,255,255,0.55); position: relative;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.3);
+  }
+  .tr-circle.tr-square { border-radius: 34px; }
+  .tr-circle .icon { width: 55%; height: 55%; }
+  .tr-check {
+    position: absolute; bottom: -20px; width: 68px; height: 68px; border-radius: 50%;
+    background: #3ecf5b; border: 6px solid #ffd400;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tr-check .icon { width: 36px; height: 36px; }
+  .tr-locked { opacity: 0.4; filter: grayscale(65%); }
+  .tr-claimable { animation: tr-pulse 1s ease-in-out infinite; cursor: pointer; }
+  @keyframes tr-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,212,0,0.7); }
+    50% { box-shadow: 0 0 0 16px rgba(255,212,0,0); }
+  }
+  .tr-num { margin-top: 38px; font-size: 28px; font-weight: bold; color: #ffd400; }
+  .tr-claim-btn {
+    margin-top: 10px; background: linear-gradient(180deg,#8dfa8d,#2fae55);
+    color: #123a1a; font-weight: bold; font-size: 22px;
+    padding: 8px 22px; border-radius: 12px; cursor: pointer;
+    border: 3px solid rgba(255,255,255,0.5);
+  }
+  .tr-claimed-label { margin-top: 10px; font-size: 20px; color: #3ecf5b; font-weight: bold; }
+
+  .tr-toast {
+    position: absolute; top: 160px; left: 50%; transform: translateX(-50%);
+    background: rgba(20,15,40,0.95); border: 3px solid #ffd400; border-radius: 16px;
+    padding: 16px 30px; font-size: 26px; font-weight: bold; color: #ffd400;
+    display: none; z-index: 20;
+  }
+  .tr-toast.show { display: block; }
+
+  /* ============ SHOP SCREEN ============ */
+  .shop-currency-row { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+
+  .shop-layout {
+    position: absolute; top: 130px; left: 0; right: 0; bottom: 0;
+    display: flex;
+  }
+  .shop-sidebar {
+    width: 320px; flex-shrink: 0;
+    background: rgba(0,0,0,0.3);
+    padding: 24px 16px; display: flex; flex-direction: column; gap: 16px;
+  }
+  .shop-nav-btn {
+    display: flex; align-items: center; gap: 16px;
+    background: rgba(255,255,255,0.08);
+    border: 3px solid rgba(255,255,255,0.15);
+    border-radius: 14px; padding: 16px 18px;
+    font-size: 24px; font-weight: bold;
+    cursor: pointer;
+  }
+  .shop-nav-btn .icon { width: 44px; height: 44px; flex-shrink: 0; }
+  .shop-nav-btn.active {
+    background: linear-gradient(180deg,#ffe14d,#ffb300);
+    color: #6a4400; border-color: #fff8d0;
+  }
+
+  .shop-content {
+    flex: 1; padding: 30px; overflow-x: auto; overflow-y: hidden;
+    display: flex; align-items: stretch; gap: 30px;
+  }
+
+  .big-card {
+    flex-shrink: 0; width: 760px; height: 100%;
+    border-radius: 26px; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    border: 4px solid rgba(255,255,255,0.25);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  }
+  .big-card-icons {
+    position: absolute; top: 30px; left: 30px; right: 30px;
+    display: flex; justify-content: space-between; opacity: 0.9;
+  }
+  .big-card-icons .icon { width: 60px; height: 60px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); }
+  .big-card-center {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+  }
+  .big-card-center .icon { width: 260px; height: 260px; filter: drop-shadow(0 10px 16px rgba(0,0,0,0.4)); }
+  .big-card-title {
+    font-size: 44px; font-weight: bold; padding: 0 34px;
+    text-shadow: 0 3px 6px rgba(0,0,0,0.5);
+  }
+  .big-card-desc {
+    font-size: 22px; padding: 10px 34px 0; color: rgba(255,255,255,0.9);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .big-card-footer {
+    margin: 26px 34px 34px; background: rgba(0,0,0,0.45);
+    border-radius: 16px; padding: 20px 26px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
+  }
+  .big-card-footer:active { transform: scale(0.98); }
+  .big-card-footer-label { font-size: 20px; color: rgba(255,255,255,0.8); }
+  .big-card-footer-price {
+    font-size: 34px; font-weight: bold; display: flex; align-items: center; gap: 10px;
+  }
+  .big-card-footer-price .icon { width: 34px; height: 34px; }
+
+  /* ============ CHARACTER UNLOCK SCREEN ============ */
+  .char-layout {
+    position: absolute; top: 130px; left: 0; right: 0; bottom: 0;
+    display: flex; gap: 30px; padding: 30px;
+  }
+  .char-featured {
+    width: 560px; flex-shrink: 0; border-radius: 26px; position: relative;
+    display: flex; flex-direction: column;
+    border: 4px solid rgba(255,255,255,0.25);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+  .char-featured-tag {
+    background: #ffd400; color: #6a4400; font-weight: bold; font-size: 22px;
+    padding: 8px 20px; display: inline-block; margin: 20px 0 0 20px; border-radius: 8px;
+  }
+  .char-featured-name { font-size: 36px; font-weight: bold; padding: 14px 26px 0; }
+  .char-featured-center { flex: 1; min-height: 260px; }
+  .char-credit { font-size: 15px; color: rgba(255,255,255,0.6); padding: 0 26px; margin-top: -4px; }
+  .char-progress-wrap { margin: 10px 26px 10px; }
+  .char-progress-label { display: flex; align-items: center; gap: 8px; font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+  .char-progress-label .icon { width: 30px; height: 30px; }
+  .char-progress-bar { height: 22px; background: rgba(0,0,0,0.4); border-radius: 11px; overflow: hidden; }
+  .char-progress-fill { height: 100%; background: linear-gradient(90deg,#8dfa8d,#2fae55); }
+  .char-featured-footer {
+    margin: 18px 26px 26px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .char-claim-btn, .char-gem-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-weight: bold; font-size: 26px; padding: 16px 0; border-radius: 14px; cursor: pointer;
+    border: 3px solid rgba(255,255,255,0.5);
+  }
+  .char-claim-btn { background: linear-gradient(180deg,#8dfa8d,#2fae55); color: #123a1a; }
+  .char-claim-btn.disabled { opacity: 0.4; cursor: default; }
+  .char-gem-btn { background: linear-gradient(180deg,#b6ffb0,#5be07a); color: #123a1a; }
+  .char-gem-btn .icon, .char-claim-btn .icon { width: 28px; height: 28px; }
+  .char-complete-msg { margin: auto; text-align: center; font-size: 30px; font-weight: bold; padding: 40px; }
+
+  /* horizontal slide carousel */
+  .char-grid {
+    flex: 1;
+    display: flex; flex-direction: column;
+  }
+  .char-grid-hint {
+    font-size: 18px; color: rgba(255,255,255,0.55); margin-bottom: 10px; text-align: center;
+  }
+  .char-carousel {
+    flex: 1;
+    display: flex; gap: 20px;
+    overflow-x: auto; overflow-y: hidden;
+    padding: 6px 6px 20px;
+    scroll-snap-type: x proximity;
+  }
+  .char-card {
+    flex-shrink: 0; width: 340px; height: 100%;
+    border-radius: 18px; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    border: 3px solid rgba(255,255,255,0.2); overflow: hidden;
+    scroll-snap-align: start;
+    background: rgba(255,255,255,0.05);
+  }
+  .char-card-embed { flex: 1; width: 100%; min-height: 0; }
+  .char-embed-wrap { width: 100%; height: 100%; pointer-events: auto; }
+  .char-embed-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .char-card-name {
+    width: 100%; text-align: center; padding: 8px 0 12px;
+    font-size: 17px; font-weight: bold; text-shadow: 0 2px 3px rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.35);
+  }
+  .char-credits {
+    font-size: 13px; color: rgba(255,255,255,0.45); text-align: center; padding-top: 10px;
+  }
+  .char-card.locked { filter: grayscale(80%) brightness(0.55); }
+  .char-lock-badge {
+    position: absolute; top: 10px; right: 10px; width: 36px; height: 36px;
+    background: rgba(0,0,0,0.6); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; z-index: 3;
+  }
+  .char-lock-badge .icon { width: 20px; height: 20px; }
+  .char-new-badge {
+    position: absolute; top: 10px; left: 10px; background: #e0333f;
+    padding: 4px 12px; border-radius: 8px; font-size: 16px; font-weight: bold; z-index: 3;
+  }
+  .char-card.selected { border-color: #ffd400; box-shadow: 0 0 0 3px rgba(255,212,0,0.5); }
+  .char-selected-badge {
+    position: absolute; top: 10px; right: 10px; width: 36px; height: 36px;
+    background: #ffd400; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; z-index: 3;
+  }
+  .char-selected-badge .icon { width: 20px; height: 20px; }
+
+  /* ---------- 3D turntable character figure ---------- */
+  .fig-wrap {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    perspective: 600px;
+  }
+  .fig {
+    position: relative;
+    transform-style: preserve-3d;
+    animation: figSpin 7s linear infinite;
+  }
+  @keyframes figSpin {
+    from { transform: rotateY(0deg); }
+    to   { transform: rotateY(360deg); }
+  }
+  .fig-side {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+  .fig-back { transform: rotateY(180deg); }
+
+  .fig-body {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    clip-path: polygon(14% 0%, 86% 0%, 100% 100%, 0% 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: inset 0 0 14px rgba(255,255,255,0.15);
+  }
+  .fig-badge { display: flex; align-items: center; justify-content: center; }
+  .fig-badge svg { width: 100%; height: 100%; }
+  .fig-head {
+    position: absolute; left: 50%; transform: translateX(-50%); top: 0;
+    box-shadow: inset -4px -4px 10px rgba(0,0,0,0.25), inset 4px 4px 10px rgba(255,255,255,0.35);
+  }
+  .fig-eye { position: absolute; border-radius: 50%; background: #241a3a; }
+  .fig-mouth { position: absolute; background: #241a3a; border-radius: 3px; }
+  .fig-arm { position: absolute; border-radius: 40%; }
+  .fig-arm-l { left: -6%; transform: rotate(-12deg); }
+  .fig-arm-r { right: -6%; transform: rotate(12deg); }
+  .fig-leg { position: absolute; border-radius: 30%; }
+  .fig-horn { position: absolute; width: 0; height: 0; }
+  .fig-horn-l { transform: rotate(-22deg); }
+  .fig-horn-r { transform: rotate(22deg); }
+  .fig-ear { position: absolute; border-radius: 50%; }
+  .fig-spike { position: absolute; width: 0; height: 0; left: 50%; transform: translateX(-50%); }
+  .fig-hairback {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    border-radius: 50% 50% 40% 40%;
+  }
+  .fig-cape {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 50% 88%, 0% 100%);
+  }
+
+  /* ============ GAME SCREEN (tic-tac-toe) ============ */
+  .game-header {
+    position: absolute; top: 0; left: 0; width: 100%; height: 130px;
+    background: rgba(0,0,0,0.55);
+    display: flex; align-items: center; padding: 0 30px; gap: 24px;
+  }
+  .game-title { font-size: 38px; font-weight: bold; }
+  .game-sub { font-size: 20px; color: #ffd400; margin-top: 2px; }
+  .board {
+    position: absolute; top: 300px; left: 50%; transform: translateX(-50%);
+    width: 620px; height: 620px;
+    display: grid; grid-template-columns: repeat(3,1fr); grid-template-rows: repeat(3,1fr);
+    gap: 16px;
+  }
+  .cell {
+    background: rgba(255,255,255,0.08);
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 110px; font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+  }
+  .cell.x { color: #7fd0ff; }
+  .cell.o { color: #ff5fd8; }
+
+  .result-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.72);
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px; z-index: 10;
+  }
+  .result-overlay.show { display: flex; }
+  .result-box {
+    background: rgba(30,25,55,0.96);
+    border: 4px solid rgba(255,255,255,0.25);
+    border-radius: 24px; padding: 56px 80px; text-align: center; min-width: 520px;
+  }
+  .result-title { font-size: 52px; font-weight: bold; margin-bottom: 26px; }
+  .result-detail { font-size: 28px; margin-bottom: 10px; font-weight: bold; }
+  .result-btn {
+    margin-top: 30px; background: linear-gradient(180deg,#ffe14d,#ffb300);
+    color: #7a4a00; font-weight: bold; font-size: 30px;
+    padding: 18px 56px; border-radius: 16px; display: inline-block; cursor: pointer;
+  }
 </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- ============ ログイン画面 ============ -->
-  <div id="loginScreen">
-    <div class="login-title">3Dブラスタ</div>
-    <div class="login-sub">魔界からのバトルロビー</div>
+<!-- ===== ICON SPRITE (generic flat icons) ===== -->
+<svg width="0" height="0" style="position:absolute">
+<defs>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="5" fill="currentColor"/><path d="M2 22c0-5.5 4.5-9 10-9s10 3.5 10 9" fill="currentColor"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l4 2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 3h12v3a6 6 0 0 1-12 0V3z" fill="currentColor"/><path d="M6 4H3v2a4 4 0 0 0 4 4M18 4h3v2a4 4 0 0 1-4 4" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="10" y="13" width="4" height="4" fill="currentColor"/><rect x="7" y="18" width="10" height="3" rx="1" fill="currentColor"/></symbol>
+  <symbol id="i-star-burst" viewBox="0 0 24 24"><path d="M12 1l2.5 6.5L21 9l-5 4.5L17.5 20 12 16.5 6.5 20 8 13.5 3 9l6.5-1.5z" fill="currentColor"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6z" fill="currentColor"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="12" r="6" fill="none" stroke="rgba(0,0,0,0.35)" stroke-width="1.5"/></symbol>
+  <symbol id="i-gem" viewBox="0 0 24 24"><path d="M4 9l4-6h8l4 6-10 12z" fill="currentColor"/><path d="M4 9h16M8 3l2 6-2 12M16 3l-2 6 2 12" stroke="rgba(0,0,0,0.3)" stroke-width="0.8" fill="none"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><rect y="4" width="24" height="3" rx="1.5" fill="currentColor"/><rect y="10.5" width="24" height="3" rx="1.5" fill="currentColor"/><rect y="17" width="24" height="3" rx="1.5" fill="currentColor"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-7-4.5-9.5-9C1 8.5 2.5 5 6 5c2 0 3.5 1.2 6 4 2.5-2.8 4-4 6-4 3.5 0 5 3.5 3.5 7-2.5 4.5-9.5 9-9.5 9z" fill="currentColor"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 8h12l1 13H5z" fill="currentColor"/><path d="M8 8V6a4 4 0 0 1 8 0v2" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-skull" viewBox="0 0 24 24"><path d="M12 2C7 2 4 6 4 10c0 3 1.5 5 3 6.5V20h2v-2h1v2h4v-2h1v2h2v-3.5c1.5-1.5 3-3.5 3-6.5 0-4-3-8-8-8z" fill="currentColor"/><circle cx="9" cy="10" r="1.6" fill="#241a3a"/><circle cx="15" cy="10" r="1.6" fill="#241a3a"/></symbol>
+  <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M2 8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z" fill="currentColor"/></symbol>
+  <symbol id="i-news" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1.5" fill="currentColor"/><rect x="6" y="7" width="7" height="5" fill="#241a3a"/><rect x="6" y="14" width="12" height="1.6" fill="#241a3a"/><rect x="6" y="17" width="12" height="1.6" fill="#241a3a"/><rect x="15" y="7" width="3" height="5" fill="#241a3a"/></symbol>
+  <symbol id="i-people" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3.5" fill="currentColor"/><circle cx="17" cy="9" r="3" fill="currentColor"/><path d="M2 21c0-4 3-6.5 6-6.5s6 2.5 6 6.5" fill="currentColor"/><path d="M13 21c0-3 2-5.5 4.5-5.5S22 18 22 21" fill="currentColor"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="10" rx="1" fill="currentColor"/><rect x="2" y="7" width="20" height="4" rx="1" fill="currentColor"/><rect x="11" y="7" width="2" height="13" fill="#241a3a"/><path d="M12 7c-2-4-7-3-6 0 1 1.5 6 0 6 0zM12 7c2-4 7-3 6 0-1 1.5-6 0-6 0z" fill="currentColor"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="1.5" fill="currentColor"/><rect x="3" y="5" width="18" height="4" fill="#241a3a"/><rect x="6" y="12" width="3" height="3" fill="#241a3a"/><rect x="11" y="12" width="3" height="3" fill="#241a3a"/><rect x="16" y="12" width="3" height="3" fill="#241a3a"/></symbol>
+  <symbol id="i-hanger" viewBox="0 0 24 24"><circle cx="12" cy="4" r="1.8" fill="currentColor"/><path d="M12 6v2M4 20l8-6 8 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 20h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-plus-slot" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="1.5" fill="currentColor"/><rect x="9" y="2" width="6" height="3" rx="1" fill="#241a3a"/><path d="M8 12l2 2 4-4" stroke="#241a3a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-crossed-swords" viewBox="0 0 24 24"><path d="M3 21l7-7M14 10l7-7M8 14l-2 2 2 2M16 16l2 2-2 2M3 3l7 7M14 14l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-shield-skull" viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z" fill="currentColor"/><circle cx="9.5" cy="11" r="1.4" fill="#241a3a"/><circle cx="14.5" cy="11" r="1.4" fill="#241a3a"/><path d="M10 15h4" stroke="#241a3a" stroke-width="1.4" stroke-linecap="round"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><rect x="11" y="10" width="2" height="7" fill="#241a3a"/><circle cx="12" cy="7" r="1.4" fill="#241a3a"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M12 2 2 10h3v10h6v-6h2v6h6V10h3z" fill="currentColor"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 4 6 12l9 8" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6" stroke="currentColor" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-pearl" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><polygon points="12,6.5 16,9.5 14.5,14.5 9.5,14.5 8,9.5" fill="rgba(0,0,0,0.22)"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" fill="currentColor"/><path d="M7 11V8a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="15.5" r="1.8" fill="#241a3a"/></symbol>
+</defs>
+</svg>
 
-    <div id="welcomeBackCard" class="panel login-card" style="display:none;">
-      <div class="welcome-back">
-        <div style="font-size:12px;color:var(--text-dim);">おかえりなさい</div>
-        <div class="wb-name" id="wbName"></div>
-        <div class="wb-stats">
-          <span id="wbLevel">Lv.1</span>
-          <span id="wbTrophy">🏆 0</span>
+<div id="stage-wrapper">
+<div id="stage">
+
+  <!-- ============ HOME SCREEN ============ -->
+  <div id="screen-home" class="screen active">
+
+    <div class="profile-group">
+      <div class="avatar-box">
+        <div class="level-badge">40</div>
+        <div class="avatar-placeholder icon-circle-bg icon">
+          <svg viewBox="0 0 24 24" style="color:#f2c9d1"><use href="#i-person"/></svg>
+        </div>
+        <div class="name-tag">ぺん</div>
+      </div>
+
+      <div class="panel trophy-panel clickable" onclick="openTrophyRoad()">
+        <div class="trophy-top">
+          <div class="icon icon-40" style="color:#7fd0ff"><svg viewBox="0 0 24 24"><use href="#i-clock"/></svg></div>
+          <div class="icon icon-40" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></div>
+          <span id="home-trophy-val">0</span>
+        </div>
+        <div class="trophy-bar">
+          <div class="trophy-bar-fill"></div>
+          <div class="icon trophy-bar-icon" style="color:#7fd0ff"><svg viewBox="0 0 24 24"><use href="#i-clock"/></svg></div>
         </div>
       </div>
-      <button class="btn login-btn-primary" id="continueBtn">このデータでプレイ</button>
-      <button class="btn login-btn-secondary" id="resetDataBtn">データを削除して最初から</button>
+
+      <div class="panel rank-badge">
+        <div class="icon icon-60" style="color:#ffb020"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
+        <div class="roman">II</div>
+      </div>
     </div>
 
-    <div id="freshLoginCard" class="panel login-card">
-      <button class="btn login-btn-primary" id="emailBtn" disabled title="後日実装予定">メールアドレスで登録する</button>
-      <button class="btn login-btn-secondary" id="offlineBtn">ログインせずにプレイ(オフライン)</button>
+    <div class="currency-group">
+      <div class="currency-item"><div class="icon icon-32" style="color:#ff5fd8"><svg viewBox="0 0 24 24"><use href="#i-bolt"/></svg></div><span id="val-energy">0</span></div>
+      <div class="currency-item"><div class="icon icon-32" style="color:#ffcf40"><svg viewBox="0 0 24 24"><use href="#i-coin"/></svg></div><span id="val-coin">0</span></div>
+      <div class="currency-item"><div class="icon icon-32" style="color:#5be07a"><svg viewBox="0 0 24 24"><use href="#i-gem"/></svg></div><span id="val-gem">0</span></div>
+      <div class="panel menu-button icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#i-menu"/></svg></div>
+    </div>
+
+    <div class="left-sidebar">
+      <div class="panel side-button">
+        <div class="icon icon-50" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-heart"/></svg></div>
+        <div class="label">バフィー</div>
+      </div>
+      <div class="panel side-button clickable" onclick="openShop()">
+        <div class="icon icon-50" style="color:#ff6fae"><svg viewBox="0 0 24 24"><use href="#i-bag"/></svg></div>
+        <div class="label">ショップ</div>
+      </div>
+      <div class="panel side-button clickable" onclick="openCharacters()">
+        <div class="badge-count" id="char-badge-count">17</div>
+        <div class="icon icon-50" style="color:#ffb020"><svg viewBox="0 0 24 24"><use href="#i-skull"/></svg></div>
+        <div class="label">キャラクター</div>
+      </div>
+      <div class="panel pass-bar">
+        <div class="icon icon-44" style="color:#7ee0ff"><svg viewBox="0 0 24 24"><use href="#i-ticket"/></svg></div>
+        <div class="pass-progress"></div>
+        <div class="pass-num">5</div>
+        <div class="pass-free">無料</div>
+      </div>
+    </div>
+
+    <div class="right-sidebar">
+      <div class="panel side-button">
+        <div class="icon icon-50" style="color:#8fd0ff"><svg viewBox="0 0 24 24"><use href="#i-news"/></svg></div>
+        <div class="label">ブロスタ<br>ニュース</div>
+      </div>
+      <div class="panel side-button">
+        <div class="icon icon-50" style="color:#ffd48a"><svg viewBox="0 0 24 24"><use href="#i-people"/></svg></div>
+        <div class="label">フレンド</div>
+      </div>
+      <div class="panel side-button">
+        <div class="badge-count">3</div>
+        <div class="icon icon-50" style="color:#ffcf40"><svg viewBox="0 0 24 24"><use href="#i-gift"/></svg></div>
+        <div class="event-timer">1日 21時間</div>
+      </div>
+      <div class="panel side-button">
+        <div class="icon icon-50" style="color:#ffb0b0"><svg viewBox="0 0 24 24"><use href="#i-calendar"/></svg></div>
+        <div class="event-timer">107<br>2日 23時間</div>
+      </div>
+    </div>
+
+    <!-- Center: selected character avatar -->
+    <div class="character-stage">
+      <div class="character-placeholder clickable" id="home-avatar-slot" onclick="openCharacters()"></div>
+    </div>
+
+    <div class="gem-badge">
+      <div class="icon icon-44" style="color:#ff8fd0"><svg viewBox="0 0 24 24"><use href="#i-gem"/></svg></div>
+      11
+    </div>
+
+    <div class="accessory-cluster">
+      <div class="accessory-row">
+        <div class="panel accessory-icon icon" style="color:#5be07a"><svg viewBox="0 0 24 24"><use href="#i-shield-skull"/></svg></div>
+        <div class="panel accessory-icon icon" style="color:#ffcf40"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
+      </div>
+      <div class="accessory-row">
+        <div class="panel accessory-icon icon" style="color:#7ee0ff"><svg viewBox="0 0 24 24"><use href="#i-clock"/></svg></div>
+        <div class="panel accessory-icon icon" style="color:#7ee0ff"><svg viewBox="0 0 24 24"><use href="#i-clock"/></svg></div>
+      </div>
+    </div>
+
+    <div class="plus-slot left icon" style="color:rgba(255,255,255,0.4)"><svg viewBox="0 0 24 24"><use href="#i-plus-slot"/></svg></div>
+    <div class="plus-slot right icon" style="color:rgba(255,255,255,0.4)"><svg viewBox="0 0 24 24"><use href="#i-plus-slot"/></svg></div>
+
+    <div class="hanger-slot icon" style="color:rgba(255,255,255,0.6)"><svg viewBox="0 0 24 24"><use href="#i-hanger"/></svg></div>
+
+    <div class="gift-box-placeholder icon" style="color:#5be0c0"><svg viewBox="0 0 24 24"><use href="#i-gift"/></svg></div>
+
+    <div class="bottom-left">
+      <div class="panel xp-box">
+        <div class="xp-label">XP</div>
+        <div class="xp-bar"></div>
+        <div class="xp-label">447/950</div>
+      </div>
+      <div class="panel quest-box">
+        <div class="new-flag">NEW</div>
+        <div class="icon icon-40" style="color:#ffcf40"><svg viewBox="0 0 24 24"><use href="#i-clipboard"/></svg></div>
+        <div class="label">クエスト</div>
+      </div>
+    </div>
+
+    <div class="panel bottom-center">
+      <div class="next-map-info">次のマップまで：1時間 3分
+        <div class="icon" style="color:#8fd0ff"><svg viewBox="0 0 24 24"><use href="#i-info"/></svg></div>
+      </div>
+      <div class="mode-icon icon" style="color:#ffb020"><svg viewBox="0 0 24 24"><use href="#i-shield-skull"/></svg></div>
+      <div>
+        <div class="mode-text-jp">ガチバトル</div>
+        <div class="mode-text-en">Random Modes</div>
+      </div>
+      <div class="new-badge">NEW!</div>
+    </div>
+
+    <div class="play-button clickable" onclick="openGame()">プレイ</div>
+
+    <div class="panel daily-wins">
+      <div class="daily-wins-title">毎日の勝利</div>
+      <div class="daily-wins-row">
+        <div class="win-slot icon icon-55" style="color:#5be07a"><svg viewBox="0 0 24 24"><use href="#i-shield-skull"/></svg></div>
+        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
+        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
+        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
+        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
+        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============ TROPHY ROAD SCREEN ============ -->
+  <div id="screen-trophyroad" class="screen">
+    <div class="tr-header">
+      <div class="tr-back clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></div>
+      <div class="tr-titles">
+        <div class="tr-title">トロフィー目標</div>
+        <div class="tr-sub">タウンスクエア</div>
+      </div>
+      <div class="tr-trophy">
+        <div class="icon" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></div>
+        <span id="tr-trophy-val">0</span>
+      </div>
+      <div class="tr-home clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg></div>
+    </div>
+
+    <div class="tr-toast" id="tr-toast"></div>
+
+    <div class="tr-track-wrap" id="tr-track-wrap">
+      <div class="tr-track" id="tr-track">
+        <div class="tr-line"></div>
+      </div>
     </div>
   </div>
 
-  <!-- ============ 名前設定モーダル ============ -->
-  <div id="nameModal" class="modal-overlay">
-    <div class="panel name-card">
-      <h2>ようこそ、魔界へ</h2>
-      <p>ロビーで表示する名前を入力してください</p>
-      <input id="nameInput" type="text" maxlength="10" placeholder="例: ぺん">
-      <div class="name-error" id="nameError"></div>
-      <button class="btn name-confirm-btn" id="nameConfirmBtn">決定してロビーへ</button>
+  <!-- ============ SHOP SCREEN ============ -->
+  <div id="screen-shop" class="screen">
+    <div class="tr-header">
+      <div class="tr-back clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></div>
+      <div class="tr-titles">
+        <div class="tr-title">ショップ</div>
+      </div>
+      <div class="shop-currency-row">
+        <div class="currency-item"><div class="icon icon-32" style="color:#ff5fd8"><svg viewBox="0 0 24 24"><use href="#i-bolt"/></svg></div><span id="shop-val-energy">0</span></div>
+        <div class="currency-item"><div class="icon icon-32" style="color:#ffcf40"><svg viewBox="0 0 24 24"><use href="#i-coin"/></svg></div><span id="shop-val-coin">0</span></div>
+        <div class="currency-item"><div class="icon icon-32" style="color:#f5f5f5"><svg viewBox="0 0 24 24"><use href="#i-pearl"/></svg></div><span id="shop-val-starcoin">0</span></div>
+        <div class="currency-item"><div class="icon icon-32" style="color:#5be07a"><svg viewBox="0 0 24 24"><use href="#i-gem"/></svg></div><span id="shop-val-gem">0</span></div>
+      </div>
+      <div class="tr-home clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg></div>
+    </div>
+
+    <div class="tr-toast" id="shop-toast"></div>
+
+    <div class="shop-layout">
+      <div class="shop-sidebar" id="shop-sidebar"></div>
+      <div class="shop-content" id="shop-content"></div>
     </div>
   </div>
 
-  <!-- ============ ロビー画面 ============ -->
-  <div id="lobbyScreen">
-    <div id="stage3d"></div>
-
-    <div class="lobby-topbar">
-      <div class="topbar-left">
-        <div class="profile-block">
-          <div class="avatar-col">
-            <button class="btn panel avatar-badge" id="avatarBadgeBtn" style="border-radius:12px;">
-              <span class="level-pill" id="levelPill">39</span>
-              <span id="avatarEmoji">😈</span>
-            </button>
-            <div class="panel name-plate"><span id="playerNameLabel">-</span></div>
-          </div>
-          <div class="panel trophy-chip">
-            <div class="trophy-row"><span>🏆</span><span id="trophyCount">0</span></div>
-            <div class="rank-bar"><div class="rank-bar-fill" id="rankBarFill"></div></div>
-          </div>
-        </div>
+  <!-- ============ CHARACTER UNLOCK SCREEN ============ -->
+  <div id="screen-characters" class="screen">
+    <div class="tr-header">
+      <div class="tr-back clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></div>
+      <div class="tr-titles">
+        <div class="tr-title">キャラクター</div>
       </div>
-      <div class="topbar-right">
-        <div class="currency-row">
-          <div class="panel currency-chip"><span>⚡</span><span id="gemCount">0</span></div>
-          <div class="panel currency-chip"><span>🪙</span><span id="coinCount">0</span></div>
-          <div class="panel currency-chip"><span>💎</span><span id="diamondCount">0</span></div>
-          <button class="btn panel menu-btn" id="menuBtn">☰<span class="new-dot" id="menuNewDot"></span></button>
-        </div>
+      <div class="shop-currency-row">
+        <div class="currency-item"><div class="icon icon-32" style="color:#4fd6e0"><svg viewBox="0 0 24 24"><use href="#i-skull"/></svg></div><span id="char-val-token">0</span></div>
+        <div class="currency-item"><div class="icon icon-32" style="color:#5be07a"><svg viewBox="0 0 24 24"><use href="#i-gem"/></svg></div><span id="char-val-gem">0</span></div>
       </div>
+      <div class="tr-home clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg></div>
     </div>
 
-    <div class="lobby-sides">
-      <div class="side-col">
-        <button class="btn panel side-btn"><span class="icon">🧪</span>バフィー</button>
-        <button class="btn panel side-btn"><span class="icon">🛍️</span>ショップ</button>
-        <button class="btn panel side-btn" id="charSideBtn">
-          <span class="icon">👥</span>キャラクター
-          <span class="badge-count">10</span>
-          <span class="new-dot" id="charSideNewDot"></span>
-        </button>
-      </div>
-      <div class="side-col right">
-        <button class="btn panel side-btn"><span class="icon">🙋</span>フレンド</button>
-        <button class="btn panel side-btn"><span class="icon">🏯</span>クラブ</button>
-        <button class="btn panel side-btn"><span class="icon">📰</span>ニュース</button>
-      </div>
-    </div>
+    <div class="tr-toast" id="char-toast"></div>
 
-    <div class="lobby-bottombar">
-      <div class="panel xp-block">
-        <div class="xp-label"><span id="xpLabel">XP 0/100</span></div>
-        <div class="xp-track"><div class="xp-fill" id="xpFill" style="width:0%;"></div></div>
-      </div>
-      <div class="panel mode-select">
-        <div class="mode-icon">💀</div>
-        <div class="mode-text">
-          <div class="mode-title">ソロバトルロイヤル</div>
-          <div class="mode-sub" id="selectedCharLabel">キャラ未選択</div>
-        </div>
-      </div>
-      <button class="btn" id="playBtn">プレイ</button>
-    </div>
-  </div>
-
-  <!-- ============ キャラクター選択モーダル ============ -->
-  <div id="charModal" class="modal-overlay">
-    <div class="panel modal-box">
-      <h2>キャラクターを選択</h2>
-      <div id="charPreviewWrap"></div>
-      <div id="charInfo">
-        <div class="cname" id="charInfoName">-</div>
-        <div class="cdesc" id="charInfoDesc">-</div>
-      </div>
-      <div class="char-grid" id="charGrid"></div>
-      <div class="modal-actions">
-        <button class="btn close-btn" id="charCloseBtn">閉じる</button>
-        <button class="btn confirm-btn" id="charConfirmBtn">このキャラに決定</button>
+    <div class="char-layout">
+      <div class="panel char-featured" id="char-featured"></div>
+      <div class="char-grid">
+        <div class="char-grid-hint">← スライドしてキャラクターを見る →</div>
+        <div class="char-carousel" id="char-carousel"></div>
+        <div class="char-credits" id="char-credits"></div>
       </div>
     </div>
   </div>
 
-  <div id="dataToast" class="panel"></div>
+  <!-- ============ GAME SCREEN (tic-tac-toe) ============ -->
+  <div id="screen-game" class="screen">
+    <div class="game-header">
+      <div class="tr-back clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></div>
+      <div>
+        <div class="game-title">まるばつバトル</div>
+        <div class="game-sub">勝利で🏆+10 / 敗北で🏆-3</div>
+      </div>
+    </div>
 
+    <div class="board" id="board">
+      <div class="cell" onclick="cellClick(0)"></div>
+      <div class="cell" onclick="cellClick(1)"></div>
+      <div class="cell" onclick="cellClick(2)"></div>
+      <div class="cell" onclick="cellClick(3)"></div>
+      <div class="cell" onclick="cellClick(4)"></div>
+      <div class="cell" onclick="cellClick(5)"></div>
+      <div class="cell" onclick="cellClick(6)"></div>
+      <div class="cell" onclick="cellClick(7)"></div>
+      <div class="cell" onclick="cellClick(8)"></div>
+    </div>
+
+    <div class="result-overlay" id="result-overlay">
+      <div class="result-box">
+        <div class="result-title" id="result-title">-</div>
+        <div id="result-detail-wrap"></div>
+        <div class="result-btn clickable" onclick="goHome()">ホームに戻る</div>
+      </div>
+    </div>
+  </div>
+
+</div>
 </div>
 
 <script>
-/* ==========================================================
-   データ管理
-   ========================================================== */
-const STORAGE_KEY = 'demonBrawlUserData';
-
-function loadUserData(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  }catch(e){ return null; }
-}
-function saveUserData(data){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-function defaultUserData(name){
-  return {
-    name: name,
-    level: 1,
-    xp: 0,
-    xpMax: 100,
-    trophies: 0,
-    gems: 0,
-    coins: 0,
-    diamonds: 0,
-    characterId: CHARACTERS[0].id,
-    ownedCharacters: CHARACTERS.map(c => c.id),
-    newCharacterIds: ['angel','cyborg'],
-    createdAt: Date.now()
-  };
-}
-
-let userData = null;
-
-/* ==========================================================
-   キャラクター定義(10体)
-   ========================================================== */
-const CHARACTERS = [
-  {id:'oni',      name:'鬼ノ丞',   emoji:'😈', color:0xd6473c, accent:0x1c1f2b, desc:'角と翼を持つ猛烈な鬼の戦士'},
-  {id:'robot',    name:'鉄郎',     emoji:'🤖', color:0x8a94a6, accent:0xffce3b, desc:'鋼鉄の巨体を誇る機械兵'},
-  {id:'ninja',    name:'影丸',     emoji:'🥷', color:0x2b2f45, accent:0xef4444, desc:'闇に紛れて奇襲する忍びの者'},
-  {id:'dragon',   name:'翠煉',     emoji:'🐉', color:0x2ecc71, accent:0xffffff, desc:'竜の血を引く翼持つ戦乙女'},
-  {id:'witch',    name:'紫苑',     emoji:'🔮', color:0x8e44ad, accent:0xffce3b, desc:'呪術と炎を操る魔女'},
-  {id:'samurai',  name:'武蔵丸',   emoji:'⚔️', color:0x34495e, accent:0xe74c3c, desc:'一刀両断を得意とする侍'},
-  {id:'ghost',    name:'ゆらり',   emoji:'👻', color:0xecf0f1, accent:0x9bd3e0, desc:'ふわふわ宙を漂う幽霊'},
-  {id:'skeleton', name:'骨次郎',   emoji:'💀', color:0xf5f5f5, accent:0x2b2f45, desc:'カタカタ踊る陽気な骸骨戦士'},
-  {id:'angel',    name:'セラフィナ', emoji:'👼', color:0xfff5cc, accent:0xffce3b, desc:'金色の翼を持つ天界の使者'},
-  {id:'cyborg',   name:'サイファー', emoji:'🦾', color:0x00e5ff, accent:0x142a20, desc:'ネオンに輝く改造戦闘体'},
-];
-function findChar(id){ return CHARACTERS.find(c => c.id === id) || CHARACTERS[0]; }
-
-/* ==========================================================
-   3Dキャラクター生成 (Three.js プリミティブ)
-   ========================================================== */
-function buildCharacterModel(def){
-  if(def.id === 'oni') return buildOniModelPrimitive(def); // GLTF読込に失敗した時のフォールバック用
-
-  const group = new THREE.Group();
-  const mat = (hex, opts) => new THREE.MeshStandardMaterial(Object.assign({color:hex, roughness:.55, metalness:.1}, opts||{}));
-
-  const bodyMat = mat(def.color);
-  const accentMat = mat(def.accent);
-
-  // 共通: 胴体 + 頭
-  const torso = new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.7,1.1,10), bodyMat);
-  torso.position.y = 0.65;
-  group.add(torso);
-
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.55,16,16), bodyMat);
-  head.position.y = 1.55;
-  group.add(head);
-
-  // 脚
-  for(const dx of [-0.28,0.28]){
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.16,0.7,8), accentMat);
-    leg.position.set(dx, -0.35, 0);
-    group.add(leg);
+  /* ---------- scaling ---------- */
+  function fitStage() {
+    const wrapper = document.getElementById('stage-wrapper');
+    const scale = Math.min(window.innerWidth / 2560, window.innerHeight / 1183);
+    wrapper.style.transform = 'scale(' + scale + ')';
+    wrapper.style.left = ((window.innerWidth - 2560 * scale) / 2) + 'px';
+    wrapper.style.top = ((window.innerHeight - 1183 * scale) / 2) + 'px';
   }
+  window.addEventListener('resize', fitStage);
+  window.addEventListener('load', fitStage);
+  fitStage();
 
-  switch(def.id){
-    case 'robot': {
-      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.18,0.1), mat(0xffce3b, {emissive:0xffce3b, emissiveIntensity:.6}));
-      visor.position.set(0,1.6,0.5);
-      group.add(visor);
-      const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.03,0.4,6), accentMat);
-      antenna.position.set(0,2.15,0);
-      group.add(antenna);
-      const shoulder = new THREE.Mesh(new THREE.BoxGeometry(1.5,0.35,0.7), accentMat);
-      shoulder.position.y = 1.1;
-      group.add(shoulder);
-      break;
-    }
-    case 'ninja': {
-      const mask = new THREE.Mesh(new THREE.SphereGeometry(0.58,16,16,0,Math.PI*2,0,Math.PI*0.55), accentMat);
-      mask.position.y = 1.65;
-      group.add(mask);
-      const scarf = new THREE.Mesh(new THREE.ConeGeometry(0.4,0.9,8), accentMat);
-      scarf.position.set(0.5,1.0,-0.3);
-      scarf.rotation.z = 1.0;
-      group.add(scarf);
-      break;
-    }
-    case 'dragon': {
-      for(const dx of [-0.75,0.75]){
-        const wing = new THREE.Mesh(new THREE.ConeGeometry(0.5,1.1,4), new THREE.MeshStandardMaterial({color:def.color, side:THREE.DoubleSide}));
-        wing.rotation.z = dx>0 ? -1.15 : 1.15;
-        wing.position.set(dx, 1.2, -0.15);
-        group.add(wing);
-      }
-      const tail = new THREE.Mesh(new THREE.ConeGeometry(0.14,0.8,8), accentMat);
-      tail.position.set(0,-0.15,-0.5);
-      tail.rotation.x = 1.5;
-      group.add(tail);
-      break;
-    }
-    case 'witch': {
-      const hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.55,0.55,0.06,16), accentMat);
-      hatBrim.position.y = 1.85;
-      group.add(hatBrim);
-      const hatCone = new THREE.Mesh(new THREE.ConeGeometry(0.32,0.8,10), bodyMat);
-      hatCone.position.y = 2.25;
-      group.add(hatCone);
-      break;
-    }
-    case 'samurai': {
-      const helmet = new THREE.Mesh(new THREE.ConeGeometry(0.62,0.5,10), accentMat);
-      helmet.position.y = 1.95;
-      group.add(helmet);
-      const sword = new THREE.Mesh(new THREE.BoxGeometry(0.08,1.1,0.03), mat(0xdfe6ec, {metalness:.8, roughness:.2}));
-      sword.position.set(0.7,0.7,0.3);
-      sword.rotation.z = 0.5;
-      group.add(sword);
-      break;
-    }
-    case 'ghost': {
-      torso.material = new THREE.MeshStandardMaterial({color:def.color, transparent:true, opacity:.75});
-      head.material = torso.material;
-      const wisp = new THREE.Mesh(new THREE.ConeGeometry(0.6,0.5,8), torso.material);
-      wisp.position.y = -0.05;
-      group.add(wisp);
-      break;
-    }
-    case 'skeleton': {
-      for(let i=0;i<3;i++){
-        const rib = new THREE.Mesh(new THREE.TorusGeometry(0.4,0.04,6,12,Math.PI), accentMat);
-        rib.position.y = 0.9 - i*0.25;
-        rib.rotation.x = Math.PI/2;
-        group.add(rib);
-      }
-      break;
-    }
-    case 'angel': {
-      const halo = new THREE.Mesh(new THREE.TorusGeometry(0.4,0.05,8,20), mat(0xffce3b,{emissive:0xffce3b, emissiveIntensity:.8}));
-      halo.position.y = 2.15;
-      halo.rotation.x = Math.PI/2.2;
-      group.add(halo);
-      for(const dx of [-0.75,0.75]){
-        const wing = new THREE.Mesh(new THREE.ConeGeometry(0.45,1.0,6), mat(0xffffff));
-        wing.rotation.z = dx>0 ? -1.1 : 1.1;
-        wing.position.set(dx, 1.2, -0.2);
-        group.add(wing);
-      }
-      break;
-    }
-    case 'cyborg': {
-      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.1,8,8), mat(0x00e5ff,{emissive:0x00e5ff, emissiveIntensity:1}));
-      eye.position.set(0.2,1.6,0.48);
-      group.add(eye);
-      const core = new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.15,0.2,10), mat(0x00e5ff,{emissive:0x00e5ff, emissiveIntensity:1}));
-      core.rotation.x = Math.PI/2;
-      core.position.set(0,0.65,0.65);
-      group.add(core);
-      break;
-    }
-  }
-
-  group.scale.set(0.9,0.9,0.9);
-  return group;
-}
-
-/* ----------------------------------------------------------
-   鬼ノ丞 プリミティブ版(GLTFモデルの読み込みに失敗した時の
-   フォールバック用。オフライン等でCDNにアクセスできない場合に使う)
-   ---------------------------------------------------------- */
-function buildOniModelPrimitive(def){
-  const group = new THREE.Group();
-  const M = (hex, opts) => new THREE.MeshStandardMaterial(Object.assign({color:hex, roughness:.5, metalness:.08}, opts||{}));
-
-  const skinMat   = M(0xe0503f);
-  const hairMat   = M(0x171a24);
-  const hornMat   = M(0xe9e6da, {roughness:.3});
-  const hornTipMat= M(0x3a1420);
-  const jacketMat = M(0x14161f);
-  const trimMat   = M(0xf3f3f3, {roughness:.35});
-  const goldMat   = M(0xffce3b, {metalness:.5, roughness:.3, emissive:0x7a5300, emissiveIntensity:.3});
-  const wingMat   = new THREE.MeshStandardMaterial({color:0x7a1420, roughness:.5, side:THREE.DoubleSide});
-  const eyeMat    = M(0xffe259, {emissive:0xffce3b, emissiveIntensity:.5});
-  const darkMat   = M(0x1a0e10);
-  const toothMat  = M(0xffffff, {roughness:.2});
-
-  /* ---- 頭部 ---- */
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.62,20,20), skinMat);
-  head.scale.set(1,0.95,0.9);
-  head.position.y = 1.55;
-  group.add(head);
-
-  // 目 (吊り目)
-  [-0.22,0.22].forEach(dx=>{
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), eyeMat);
-    eye.scale.set(1,0.55,0.25);
-    eye.position.set(dx,1.58,0.56);
-    group.add(eye);
-    const pupil = new THREE.Mesh(new THREE.ConeGeometry(0.03,0.05,6), darkMat);
-    pupil.rotation.x = Math.PI/2;
-    pupil.position.set(dx,1.58,0.64);
-    group.add(pupil);
-  });
-  // 吊り上がった眉
-  [[-0.24,0.35],[0.24,-0.35]].forEach(([dx,rot])=>{
-    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.04,0.04), hairMat);
-    brow.position.set(dx,1.79,0.58);
-    brow.rotation.z = rot;
-    group.add(brow);
-  });
-  // 開いた口(牙付きの笑み)
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.2,0.065,8,16,Math.PI*0.85), darkMat);
-  mouth.position.set(0,1.33,0.55);
-  mouth.rotation.set(Math.PI*0.06,0,Math.PI*0.08);
-  group.add(mouth);
-  for(let i=-2;i<=2;i++){
-    const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.032,0.08,4), toothMat);
-    tooth.position.set(i*0.075,1.42,0.6+Math.abs(i)*0.01);
-    tooth.rotation.x = Math.PI;
-    group.add(tooth);
-  }
-
-  /* ---- 非対称の尖った髪(押し出し形状) ---- */
-  function spikeGeo(w,h,curve){
-    const shape = new THREE.Shape();
-    shape.moveTo(-w*0.22,0);
-    shape.quadraticCurveTo(w*0.42,h*0.42,w*curve,h);
-    shape.quadraticCurveTo(w*0.12,h*0.5,0,0.02);
-    shape.lineTo(-w*0.22,0);
-    return new THREE.ExtrudeGeometry(shape, {depth:0.1, bevelEnabled:false});
-  }
-  // 土台の縁から生える大きめの房を3本だけに絞って、すっきりまとめる
-  const spikes = [
-    {w:0.55, h:0.55, c:0.4,  pos:[-0.4,1.9,-0.22], rot:0.55},
-    {w:0.42, h:0.42, c:0.5,  pos:[0.0,2.02,-0.3],   rot:0.05},
-    {w:0.55, h:0.55, c:-0.35,pos:[0.4,1.9,-0.22],   rot:-0.55},
+  /* ---------- character roster ---------- */
+  const CHARACTERS = [
+    { name: 'Low poly chibi base',                 author: 'torchwurm',       uid: '11769b72503d4a1cb92158c20af87c22' },
+    { name: 'LowPoly Character (Rigged)',           author: 'Tyronic_Games',   uid: '2a0bd3f2cb604e6ab8858e701e33642f' },
+    { name: 'Free Lowpoly Chibi Base Model',        author: 'mazko',           uid: '6f296bb009a14c49a368a0fd9472edcd' },
+    { name: 'Free Lowpoly Chibi Base Model (女性版)', author: 'mazko',         uid: '3772577dbf7c405fafd695e90a5b62dc' },
+    { name: 'Lowpoly Chibi Base',                   author: 'sarberry',        uid: '9f76b9a704854f159b211b4361e42ef3' },
+    { name: 'Chibi Character Lowpoly Base Mesh',    author: 'EnotoButerbrodo', uid: '40cf0491a7b541f7aee10c43b437e3f0' },
+    { name: 'Chibi Base Mesh Character (Female)',   author: 'BoxedbyTyler',    uid: '7008bf942159434b8e0c88430369b1ce' },
+    { name: 'Stylized Low Poly Character',          author: 'julink',         uid: '0a0b9ff6e422492d9e043f0f60264fda' },
+    { name: 'Game Ready Low Poly Character Tactical', author: 'DanlyVostok',   uid: '342501b0c84843a3a418319c31ea26fa' },
+    { name: 'Lowpoly Character (Blender)',          author: 'Mujib',           uid: '1746c19be81a46c884a279a13cb345b5' }
   ];
-  spikes.forEach(s=>{
-    const m = new THREE.Mesh(spikeGeo(s.w,s.h,s.c), hairMat);
-    m.position.set(...s.pos);
-    m.rotation.z = s.rot;
-    group.add(m);
-  });
-  // 左右のツインテール(頬の横で結ばれ、前に垂れる房)
-  [-1,1].forEach(side=>{
-    const tieBase = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), hairMat);
-    tieBase.position.set(side*0.58, 1.42, 0.28);
-    group.add(tieBase);
-    const strand = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.75,8), hairMat);
-    strand.position.set(side*0.62, 0.98, 0.28);
-    strand.rotation.z = side*0.08;
-    group.add(strand);
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.05,8,8), hairMat);
-    tip.position.set(side*0.66, 0.62, 0.3);
-    group.add(tip);
-  });
+  function charUnlockCost(index) { return 200 + (index - 1) * 300; }  // index: 2nd char = 1
+  function charGemPrice(index) { return 80 + (index - 1) * 20; }
 
-  /* ---- 角(髪の土台から突き出す、先端だけ色を変えたカーブ風) ---- */
-  [-1,1].forEach(side=>{
-    const base = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.42,10), hornMat);
-    base.position.set(side*0.24,2.15,0.18);
-    base.rotation.z = side*-0.22;
-    base.rotation.x = -0.15;
-    group.add(base);
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.065,0.3,10), hornTipMat);
-    tip.position.set(side*0.36,2.48,0.1);
-    tip.rotation.z = side*-0.5;
-    tip.rotation.x = -0.15;
-    group.add(tip);
-  });
-
-  /* ---- 胴体(重ね着) ---- */
-  const torsoBase = new THREE.Mesh(new THREE.CylinderGeometry(0.48,0.6,1.0,14), jacketMat);
-  torsoBase.position.y = 0.72;
-  group.add(torsoBase);
-  const chestTrim = new THREE.Mesh(new THREE.ConeGeometry(0.5,0.3,14,1,true), trimMat);
-  chestTrim.position.y = 1.14;
-  chestTrim.rotation.x = Math.PI;
-  group.add(chestTrim);
-  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.36,0.06,8,16), trimMat);
-  collar.position.y = 1.22;
-  collar.rotation.x = Math.PI/2;
-  group.add(collar);
-  const belt = new THREE.Mesh(new THREE.TorusGeometry(0.48,0.06,8,16), goldMat);
-  belt.position.y = 0.28;
-  belt.rotation.x = Math.PI/2;
-  group.add(belt);
-  const buckle = new THREE.Mesh(new THREE.BoxGeometry(0.13,0.13,0.06), goldMat);
-  buckle.position.set(0,0.28,0.5);
-  group.add(buckle);
-
-  /* ---- 肩当て ---- */
-  [-1,1].forEach(side=>{
-    const pauldron = new THREE.Mesh(new THREE.SphereGeometry(0.2,12,12), trimMat);
-    pauldron.scale.set(1,0.6,0.9);
-    pauldron.position.set(side*0.46,1.14,0.05);
-    group.add(pauldron);
-    const spike = new THREE.Mesh(new THREE.ConeGeometry(0.055,0.18,8), hornMat);
-    spike.position.set(side*0.46,1.32,0.05);
-    group.add(spike);
-  });
-
-  /* ---- 羽(切れ込み入りの押し出し形状) ---- */
-  function wingGeo(){
-    const shape = new THREE.Shape();
-    shape.moveTo(0,0);
-    shape.lineTo(0.85,0.48);
-    shape.lineTo(0.7,0.34);
-    shape.lineTo(0.9,0.1);
-    shape.lineTo(0.66,0.04);
-    shape.lineTo(0.8,-0.24);
-    shape.lineTo(0.46,-0.14);
-    shape.lineTo(0.26,-0.38);
-    shape.lineTo(0,0);
-    return new THREE.ExtrudeGeometry(shape, {depth:0.035, bevelEnabled:false});
-  }
-  [-1,1].forEach(side=>{
-    const wing = new THREE.Mesh(wingGeo(), wingMat);
-    wing.scale.set(side,1,1);
-    wing.position.set(side*0.4, 0.95, -0.4);
-    wing.rotation.y = side*-0.5;
-    group.add(wing);
-  });
-
-  /* ---- 節ごとに細くなる尻尾(背後に大きく弧を描く) ---- */
-  for(let i=0;i<=7;i++){
-    const t = i/7;
-    const seg = new THREE.Mesh(new THREE.SphereGeometry(0.1-0.055*t,8,8), skinMat);
-    const ang = t*Math.PI*0.8;
-    seg.position.set(
-      Math.sin(ang)*0.5,
-      0.15 - t*0.75,
-      -0.55 - Math.cos(ang)*0.1 - t*0.2
+  function charEmbedHtml(c) {
+    return (
+      '<div class="char-embed-wrap">' +
+        '<iframe loading="lazy" title="' + c.name + '" ' +
+        'src="https://sketchfab.com/models/' + c.uid + '/embed?autostart=0&ui_theme=dark&transparent=1&ui_infos=0&ui_watermark=0" ' +
+        'allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen></iframe>' +
+      '</div>'
     );
-    group.add(seg);
-  }
-  const tailTip = new THREE.Mesh(new THREE.ConeGeometry(0.09,0.22,4), skinMat);
-  tailTip.position.set(0.5,-0.62,-0.85);
-  tailTip.rotation.z = -0.5;
-  group.add(tailTip);
-
-  /* ---- 脚とブーツ ---- */
-  [-0.24,0.24].forEach(dx=>{
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.13,0.13,0.5,10), jacketMat);
-    leg.position.set(dx,-0.22,0);
-    group.add(leg);
-    const boot = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.13,0.28,10), skinMat);
-    boot.position.set(dx,-0.55,0.04);
-    group.add(boot);
-    const heel = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.06,0.16), hornMat);
-    heel.position.set(dx,-0.7,0.02);
-    group.add(heel);
-  });
-
-  group.scale.set(0.85,0.85,0.85);
-  return group;
-}
-
-/* ----------------------------------------------------------
-   鬼ノ丞 実モデル版: khronos/glTF-Sample-Assets の
-   無料サンプル人型モデル「RiggedFigure」(CC-BY 4.0, (c) 2017 Cesium)
-   を読み込んでベースの体として使い、その上に顔・角・羽・髪・衣装を
-   自作パーツとして乗せる。プリミティブの積み上げだけに頼らない構成。
-   ---------------------------------------------------------- */
-const ONI_GLTF_URLS = [
-  'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/RiggedFigure/glTF-Binary/RiggedFigure.glb'
-  // 注: jsdelivrのgh CDNは検証したところ、このファイルにCORSヘッダーを付けず使えなかったため除外
-];
-let oniGltfPromise = null;
-function loadOniGltfTemplate(){
-  if(!oniGltfPromise){
-    oniGltfPromise = (async () => {
-      if(typeof THREE.GLTFLoader === 'undefined') throw new Error('GLTFLoader未読込');
-      let lastErr = null;
-      for(const url of ONI_GLTF_URLS){
-        try{
-          const scene = await new Promise((resolve, reject) => {
-            new THREE.GLTFLoader().load(url, (gltf) => resolve(gltf.scene), undefined, reject);
-          });
-          return scene;
-        }catch(e){
-          lastErr = e;
-          console.warn('鬼ノ丞モデルの取得元に失敗、次の候補を試します:', url);
-        }
-      }
-      throw lastErr || new Error('すべての取得元で失敗しました');
-    })();
-    oniGltfPromise.catch(() => { oniGltfPromise = null; }); // 失敗時は次回また取得し直せるようにする
-  }
-  return oniGltfPromise;
-}
-
-// 顔・髪・角(局所原点=頭の中心)。鬼ノ丞プリミティブ版と共通の見た目にする
-function buildOniHeadGroup(){
-  const M = (hex, opts) => new THREE.MeshStandardMaterial(Object.assign({color:hex, roughness:.5, metalness:.08}, opts||{}));
-  const skinMat   = M(0xe0503f);
-  const hairMat   = M(0x171a24);
-  const hornMat   = M(0xe9e6da, {roughness:.3});
-  const hornTipMat= M(0x3a1420);
-  const eyeMat    = M(0xffe259, {emissive:0xffce3b, emissiveIntensity:.5});
-  const darkMat   = M(0x1a0e10);
-  const toothMat  = M(0xffffff, {roughness:.2});
-
-  function spikeGeo(w,h,curve){
-    const shape = new THREE.Shape();
-    shape.moveTo(-w*0.22,0);
-    shape.quadraticCurveTo(w*0.42,h*0.42,w*curve,h);
-    shape.quadraticCurveTo(w*0.12,h*0.5,0,0.02);
-    shape.lineTo(-w*0.22,0);
-    return new THREE.ExtrudeGeometry(shape, {depth:0.1, bevelEnabled:false});
   }
 
-  const g = new THREE.Group();
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.62,20,20), skinMat);
-  head.scale.set(1,0.95,0.9);
-  g.add(head);
-  [-0.22,0.22].forEach(dx=>{
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), eyeMat);
-    eye.scale.set(1,0.55,0.25);
-    eye.position.set(dx,0.03,0.56);
-    g.add(eye);
-    const pupil = new THREE.Mesh(new THREE.ConeGeometry(0.03,0.05,6), darkMat);
-    pupil.rotation.x = Math.PI/2;
-    pupil.position.set(dx,0.03,0.64);
-    g.add(pupil);
-  });
-  [[-0.24,0.35],[0.24,-0.35]].forEach(([dx,rot])=>{
-    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.2,0.04,0.04), hairMat);
-    brow.position.set(dx,0.24,0.58);
-    brow.rotation.z = rot;
-    g.add(brow);
-  });
-  const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.2,0.065,8,16,Math.PI*0.85), darkMat);
-  mouth.position.set(0,-0.22,0.55);
-  mouth.rotation.set(Math.PI*0.06,0,Math.PI*0.08);
-  g.add(mouth);
-  for(let i=-2;i<=2;i++){
-    const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.032,0.08,4), toothMat);
-    tooth.position.set(i*0.075,-0.13,0.6+Math.abs(i)*0.01);
-    tooth.rotation.x = Math.PI;
-    g.add(tooth);
+  function darkenColor(hex, percent) {
+    hex = hex.replace('#', '');
+    const num = parseInt(hex, 16);
+    let r = (num >> 16) - Math.round(2.55 * percent);
+    let g = ((num >> 8) & 0x00FF) - Math.round(2.55 * percent);
+    let b = (num & 0x0000FF) - Math.round(2.55 * percent);
+    r = Math.max(0, Math.min(255, r));
+    g = Math.max(0, Math.min(255, g));
+    b = Math.max(0, Math.min(255, b));
+    return '#' + (0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
-  const spikes = [
-    {w:0.55, h:0.55, c:0.4,  pos:[-0.4,0.35,-0.22], rot:0.55},
-    {w:0.42, h:0.42, c:0.5,  pos:[0.0,0.47,-0.3],   rot:0.05},
-    {w:0.55, h:0.55, c:-0.35,pos:[0.4,0.35,-0.22],  rot:-0.55},
+
+  // simple "3D" toy figure: round/square head with face + body with chest badge + arms
+  function charFigureHtml(c, scale) {
+    const head = Math.round(40 * scale);
+    const bodyW = Math.round(74 * scale);
+    const bodyH = Math.round(84 * scale);
+    const legW = Math.round(bodyW * 0.26);
+    const legH = Math.round(bodyH * 0.5);
+    const dark = darkenColor(c.color, 28);
+    const darker = darkenColor(c.color, 45);
+    const headRadius = c.head === 'square' ? Math.round(head * 0.22) + 'px' : '50%';
+    const eye = Math.max(3, Math.round(head * 0.13));
+    const badgeSize = Math.round(bodyW * 0.4);
+    const topPad = Math.round(head * 0.42);
+    const neckOverlap = Math.round(head * 0.65);
+    const armW = Math.round(bodyW * 0.22);
+    const armH = Math.round(bodyH * 0.62);
+    const headTop = topPad;
+    const bodyTop = topPad + neckOverlap;
+    const armTop = bodyTop + Math.round(bodyH * 0.1);
+    const legTop = bodyTop + bodyH - Math.round(legH * 0.12);
+    const totalH = legTop + legH;
+    const legGap = Math.round(bodyW * 0.06);
+
+    let accHtml = '';
+    if (c.acc === 'horns') {
+      const s = Math.round(head * 0.36);
+      const bw = Math.round(s * 0.4);
+      accHtml =
+        '<div class="fig-horn fig-horn-l" style="left:' + Math.round(head * 0.02) + 'px;top:' + Math.round(-s * 0.55) + 'px;border-bottom:' + s + 'px solid ' + dark + ';border-left:' + bw + 'px solid transparent;border-right:' + bw + 'px solid transparent;"></div>' +
+        '<div class="fig-horn fig-horn-r" style="right:' + Math.round(head * 0.02) + 'px;top:' + Math.round(-s * 0.55) + 'px;border-bottom:' + s + 'px solid ' + dark + ';border-left:' + bw + 'px solid transparent;border-right:' + bw + 'px solid transparent;"></div>';
+    } else if (c.acc === 'ears') {
+      const es = Math.round(head * 0.32);
+      accHtml =
+        '<div class="fig-ear" style="width:' + es + 'px;height:' + es + 'px;left:' + Math.round(-es * 0.25) + 'px;top:' + Math.round(-es * 0.35) + 'px;background:' + c.color + ';"></div>' +
+        '<div class="fig-ear" style="width:' + es + 'px;height:' + es + 'px;right:' + Math.round(-es * 0.25) + 'px;top:' + Math.round(-es * 0.35) + 'px;background:' + c.color + ';"></div>';
+    } else if (c.acc === 'spike') {
+      const sw = Math.round(head * 0.5);
+      const sh = Math.round(head * 0.42);
+      accHtml =
+        '<div class="fig-spike" style="top:' + Math.round(-sh * 0.85) + 'px;border-bottom:' + sh + 'px solid ' + dark + ';border-left:' + Math.round(sw * 0.5) + 'px solid transparent;border-right:' + Math.round(sw * 0.5) + 'px solid transparent;"></div>';
+    }
+
+    const legsHtml =
+      '<div class="fig-leg" style="width:' + legW + 'px;height:' + legH + 'px;top:' + legTop + 'px;left:' + (Math.round(bodyW / 2) - legW - legGap) + 'px;background:linear-gradient(160deg,' + c.color + ',' + dark + ');"></div>' +
+      '<div class="fig-leg" style="width:' + legW + 'px;height:' + legH + 'px;top:' + legTop + 'px;left:' + (Math.round(bodyW / 2) + legGap) + 'px;background:linear-gradient(160deg,' + c.color + ',' + dark + ');"></div>';
+
+    const armsHtml =
+      '<div class="fig-arm fig-arm-l" style="width:' + armW + 'px;height:' + armH + 'px;top:' + armTop + 'px;background:linear-gradient(160deg,' + c.color + ',' + dark + ');"></div>' +
+      '<div class="fig-arm fig-arm-r" style="width:' + armW + 'px;height:' + armH + 'px;top:' + armTop + 'px;background:linear-gradient(160deg,' + c.color + ',' + dark + ');"></div>';
+
+    // ---- front face: face, chest badge, accessory ----
+    const frontHtml =
+      '<div class="fig-side fig-front">' +
+        legsHtml + armsHtml +
+        '<div class="fig-body" style="width:' + bodyW + 'px;height:' + bodyH + 'px;top:' + bodyTop + 'px;background:linear-gradient(160deg,' + c.color + ',' + dark + ');">' +
+          '<div class="fig-badge icon" style="width:' + badgeSize + 'px;height:' + badgeSize + 'px;color:rgba(255,255,255,0.85)"><svg viewBox="0 0 24 24"><use href="#' + c.icon + '"/></svg></div>' +
+        '</div>' +
+        '<div class="fig-head" style="width:' + head + 'px;height:' + head + 'px;top:' + headTop + 'px;border-radius:' + headRadius + ';background:radial-gradient(circle at 35% 30%, #ffffff99, ' + c.color + ' 55%, ' + dark + ' 100%);">' +
+          accHtml +
+          '<div class="fig-eye" style="width:' + eye + 'px;height:' + eye + 'px;left:' + Math.round(head * 0.28) + 'px;top:' + Math.round(head * 0.38) + 'px;"></div>' +
+          '<div class="fig-eye" style="width:' + eye + 'px;height:' + eye + 'px;left:' + Math.round(head * 0.62) + 'px;top:' + Math.round(head * 0.38) + 'px;"></div>' +
+          '<div class="fig-mouth" style="width:' + Math.round(head * 0.32) + 'px;height:' + Math.max(2, Math.round(head * 0.06)) + 'px;left:' + Math.round(head * 0.34) + 'px;top:' + Math.round(head * 0.62) + 'px;"></div>' +
+        '</div>' +
+      '</div>';
+
+    // ---- back face: hair/head-back + cape, no facial features ----
+    const capeW = Math.round(bodyW * 1.15);
+    const capeH = Math.round(bodyH * 0.95);
+    const capeTop = bodyTop + Math.round(bodyH * 0.05);
+    const hairH = Math.round(head * 0.7);
+
+    const backHtml =
+      '<div class="fig-side fig-back">' +
+        legsHtml + armsHtml +
+        '<div class="fig-cape" style="width:' + capeW + 'px;height:' + capeH + 'px;top:' + capeTop + 'px;background:linear-gradient(180deg,' + dark + ',' + darker + ');"></div>' +
+        '<div class="fig-body" style="width:' + bodyW + 'px;height:' + bodyH + 'px;top:' + bodyTop + 'px;background:linear-gradient(160deg,' + dark + ',' + darker + ');"></div>' +
+        '<div class="fig-head" style="width:' + head + 'px;height:' + head + 'px;top:' + headTop + 'px;border-radius:' + headRadius + ';background:linear-gradient(200deg,' + dark + ',' + darker + ');">' +
+          accHtml +
+          '<div class="fig-hairback" style="width:' + Math.round(head * 1.06) + 'px;height:' + hairH + 'px;top:' + Math.round(head * 0.3) + 'px;background:linear-gradient(180deg,' + darker + ',' + dark + ');"></div>' +
+        '</div>' +
+      '</div>';
+
+    return (
+      '<div class="fig-wrap"><div class="fig" style="width:' + bodyW + 'px;height:' + totalH + 'px;">' +
+        frontHtml + backHtml +
+      '</div></div>'
+    );
+  }
+
+  /* ---------- state ---------- */
+  const STORAGE_KEY = 'bs_mock_state_v2';
+  let state = { trophies: 0, energy: 0, coin: 0, gem: 0, token: 0, starCoin: 0, claimed: {}, unlockedCount: 1 };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved) state = saved;
+  } catch (e) {}
+  if (!state.claimed) state.claimed = {};
+  state.token = state.token || 0;
+  state.starCoin = state.starCoin || 0;
+  state.unlockedCount = state.unlockedCount || 1;
+  state.selectedCharacter = (typeof state.selectedCharacter === 'number') ? state.selectedCharacter : 0;
+  // clamp in case saved state referenced the old 20-character roster
+  state.unlockedCount = Math.min(state.unlockedCount, CHARACTERS.length);
+  state.selectedCharacter = Math.min(state.selectedCharacter, CHARACTERS.length - 1);
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+  function renderCurrency() {
+    document.getElementById('val-energy').textContent = state.energy;
+    document.getElementById('val-coin').textContent = state.coin;
+    document.getElementById('val-gem').textContent = state.gem;
+    document.getElementById('shop-val-energy').textContent = state.energy;
+    document.getElementById('shop-val-coin').textContent = state.coin;
+    document.getElementById('shop-val-starcoin').textContent = state.starCoin;
+    document.getElementById('shop-val-gem').textContent = state.gem;
+    const charTokenEl = document.getElementById('char-val-token');
+    const charGemEl = document.getElementById('char-val-gem');
+    if (charTokenEl) charTokenEl.textContent = state.token;
+    if (charGemEl) charGemEl.textContent = state.gem;
+    const badge = document.getElementById('char-badge-count');
+    if (badge) badge.textContent = Math.max(0, CHARACTERS.length - state.unlockedCount);
+  }
+  function renderTrophy() {
+    document.getElementById('home-trophy-val').textContent = state.trophies;
+  }
+  renderCurrency();
+  renderTrophy();
+  renderHomeAvatar();
+
+  /* ---------- screen switching ---------- */
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+  function goHome() { showScreen('screen-home'); }
+  function openTrophyRoad() { showScreen('screen-trophyroad'); renderTrophyRoad(); }
+  function openGame() { showScreen('screen-game'); initGame(); }
+  function openShop() { showScreen('screen-shop'); renderCurrency(); renderShopSidebar(); selectShopTab(shopTab); }
+  function openCharacters() { showScreen('screen-characters'); renderCurrency(); renderCharacters(); renderCharCredits(); }
+
+  function showCharToast(text) {
+    const toast = document.getElementById('char-toast');
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(showCharToast._t);
+    showCharToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function renderCharacters() {
+    const featured = document.getElementById('char-featured');
+    const carousel = document.getElementById('char-carousel');
+
+    if (state.unlockedCount >= CHARACTERS.length) {
+      featured.innerHTML = '<div class="char-complete-msg">全キャラクター解放済み！</div>';
+    } else {
+      const nextIndex = state.unlockedCount; // 0-based index of next locked character
+      const next = CHARACTERS[nextIndex];
+      const cost = charUnlockCost(nextIndex + 1);
+      const gemPrice = charGemPrice(nextIndex + 1);
+      const ready = state.token >= cost;
+      const pct = Math.min(100, Math.floor((state.token / cost) * 100));
+
+      featured.innerHTML =
+        '<div class="char-featured-tag">次にアンロック</div>' +
+        '<div class="char-featured-name">' + next.name + '</div>' +
+        '<div class="char-featured-center">' + charEmbedHtml(next) + '</div>' +
+        '<div class="char-credit">by ' + next.author + ' (Sketchfab)</div>' +
+        '<div class="char-progress-wrap">' +
+          '<div class="char-progress-label"><div class="icon" style="color:#4fd6e0"><svg viewBox="0 0 24 24"><use href="#i-skull"/></svg></div>' + state.token + ' / ' + cost + '</div>' +
+          '<div class="char-progress-bar"><div class="char-progress-fill" style="width:' + pct + '%;"></div></div>' +
+        '</div>' +
+        '<div class="char-featured-footer">' +
+          '<div class="char-claim-btn' + (ready ? '' : ' disabled') + '" onclick="claimCharacterUnlock()">アンロック</div>' +
+          '<div class="char-gem-btn" onclick="gemUnlockCharacter()"><div class="icon" style="color:#123a1a"><svg viewBox="0 0 24 24"><use href="#i-gem"/></svg></div>今すぐアンロック ' + gemPrice + '</div>' +
+        '</div>';
+    }
+
+    carousel.innerHTML = CHARACTERS.map((c, i) => {
+      const unlocked = i < state.unlockedCount;
+      const isNext = i === state.unlockedCount;
+      const isSelected = i === state.selectedCharacter;
+      return (
+        '<div class="panel char-card' + (unlocked ? '' : ' locked') + (isSelected ? ' selected' : '') + '" onclick="selectCharacter(' + i + ')">' +
+          (unlocked ? '' : '<div class="char-lock-badge icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></div>') +
+          (isNext ? '<div class="char-new-badge">NEXT</div>' : '') +
+          (isSelected ? '<div class="char-selected-badge icon" style="color:#123a1a"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></div>' : '') +
+          '<div class="char-card-embed">' + charEmbedHtml(c) + '</div>' +
+          '<div class="char-card-name">' + c.name + (isSelected ? ' (使用中)' : '') + '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function renderCharCredits() {
+    const el = document.getElementById('char-credits');
+    if (!el) return;
+    el.innerHTML = 'モデル提供: ' + CHARACTERS.map(c => c.author).join(' / ') + '(各Sketchfab)';
+  }
+
+  function selectCharacter(i) {
+    if (i >= state.unlockedCount) {
+      showCharToast('先にアンロックしてください');
+      return;
+    }
+    state.selectedCharacter = i;
+    saveState();
+    renderCharacters();
+    renderHomeAvatar();
+  }
+
+  function renderHomeAvatar() {
+    const slot = document.getElementById('home-avatar-slot');
+    if (slot) slot.innerHTML = charEmbedHtml(CHARACTERS[state.selectedCharacter]);
+  }
+
+  function claimCharacterUnlock() {
+    if (state.unlockedCount >= CHARACTERS.length) return;
+    const nextIndex = state.unlockedCount;
+    const cost = charUnlockCost(nextIndex + 1);
+    if (state.token < cost) return;
+    state.token -= cost;
+    state.unlockedCount += 1;
+    saveState();
+    renderCurrency();
+    renderCharacters();
+    showCharToast(CHARACTERS[nextIndex].name + ' を解放しました！');
+  }
+
+  function gemUnlockCharacter() {
+    if (state.unlockedCount >= CHARACTERS.length) return;
+    const nextIndex = state.unlockedCount;
+    const price = charGemPrice(nextIndex + 1);
+    if (state.gem < price) { showCharToast('エメラルドが足りません'); return; }
+    state.gem -= price;
+    state.unlockedCount += 1;
+    saveState();
+    renderCurrency();
+    renderCharacters();
+    showCharToast(CHARACTERS[nextIndex].name + ' を解放しました！');
+  }
+
+  function showShopToast(text) {
+    const toast = document.getElementById('shop-toast');
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(showShopToast._t);
+    showShopToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  /* ---------- shop ---------- */
+  const SKIN_POOL = [
+    { name: 'クリムゾンスカル', icon: 'i-skull',        color: '#e0333f', price: 5000, desc: '真紅に染まった限定スキン', head: 'round',  acc: 'horns' },
+    { name: 'アイスブルー',     icon: 'i-shield-skull', color: '#2f7bd6', price: 4200, desc: '氷のように冷たい輝き',     head: 'square', acc: 'ears'  },
+    { name: 'ゴールデンスター', icon: 'i-star-burst',   color: '#d69a00', price: 8000, desc: '黄金に輝く豪華なデザイン', head: 'round',  acc: 'spike' },
+    { name: 'エメラルド',       icon: 'i-gem',           color: '#2fae55', price: 6500, desc: '深緑の宝石をまとった一着', head: 'square', acc: 'none'  },
+    { name: 'ネオンピンク',     icon: 'i-heart',         color: '#c23f9a', price: 4800, desc: '目を引く鮮やかなネオンカラー', head: 'round', acc: 'ears'  },
+    { name: 'サンダーイエロー', icon: 'i-bolt',          color: '#c98a00', price: 3900, desc: '電光石火のイメージカラー', head: 'square', acc: 'horns' }
   ];
-  spikes.forEach(s=>{
-    const m = new THREE.Mesh(spikeGeo(s.w,s.h,s.c), hairMat);
-    m.position.set(...s.pos);
-    m.rotation.z = s.rot;
-    g.add(m);
-  });
-  [-1,1].forEach(side=>{
-    const tieBase = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,10), hairMat);
-    tieBase.position.set(side*0.58, -0.13, 0.28);
-    g.add(tieBase);
-    const strand = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.75,8), hairMat);
-    strand.position.set(side*0.62, -0.57, 0.28);
-    strand.rotation.z = side*0.08;
-    g.add(strand);
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.05,8,8), hairMat);
-    tip.position.set(side*0.66, -0.93, 0.3);
-    g.add(tip);
-  });
-  [-1,1].forEach(side=>{
-    const base = new THREE.Mesh(new THREE.ConeGeometry(0.12,0.42,10), hornMat);
-    base.position.set(side*0.24,0.6,0.18);
-    base.rotation.z = side*-0.22;
-    base.rotation.x = -0.15;
-    g.add(base);
-    const tip = new THREE.Mesh(new THREE.ConeGeometry(0.065,0.3,10), hornTipMat);
-    tip.position.set(side*0.36,0.93,0.1);
-    tip.rotation.z = side*-0.5;
-    tip.rotation.x = -0.15;
-    g.add(tip);
-  });
-  return g;
-}
+  const OFFER_POOL = [
+    { name: 'レジェンドスキン: フェニックス', icon: 'i-star-burst', color: '#c98a00', price: 80,  desc: '期間限定の激レアスキン' },
+    { name: '新キャラクター解放',             icon: 'i-skull',      color: '#5c3fa0', price: 60,  desc: '新しいキャラクターをすぐに使用可能' },
+    { name: 'ミスティックスキン',             icon: 'i-gem',        color: '#2f9c86', price: 100, desc: '虹色に輝く特別なスキン' }
+  ];
+  const RESOURCE_POOL = [
+    { key: 'coin',   label: 'コインパック',     amount: 1000, icon: 'i-coin', color: '#c98a00', desc: 'バトルに使えるコインをまとめて入手' },
+    { key: 'energy', label: 'サンダーパック',   amount: 200,  icon: 'i-bolt', color: '#a03f7a', desc: 'サンダーを一気にチャージ' },
+    { key: 'gem',    label: 'エメラルドパック', amount: 20,   icon: 'i-gem',  color: '#2fae55', desc: '貴重なエメラルドを獲得' }
+  ];
 
-function buildOniWings(){
-  const wingMat = new THREE.MeshStandardMaterial({color:0x7a1420, roughness:.5, side:THREE.DoubleSide});
-  function wingGeo(){
-    const shape = new THREE.Shape();
-    shape.moveTo(0,0);
-    shape.lineTo(0.85,0.48);
-    shape.lineTo(0.7,0.34);
-    shape.lineTo(0.9,0.1);
-    shape.lineTo(0.66,0.04);
-    shape.lineTo(0.8,-0.24);
-    shape.lineTo(0.46,-0.14);
-    shape.lineTo(0.26,-0.38);
-    shape.lineTo(0,0);
-    return new THREE.ExtrudeGeometry(shape, {depth:0.035, bevelEnabled:false});
+  const SHOP_TABS = [
+    { id: 'offer', label: 'おすすめオファー', icon: 'i-star-burst' },
+    { id: 'skin',  label: '骨董品店',        icon: 'i-gem' },
+    { id: 'res',   label: '資源',            icon: 'i-gift' }
+  ];
+  let shopTab = 'offer';
+
+  function dailySeed() {
+    const d = new Date();
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
   }
-  const g = new THREE.Group();
-  [-1,1].forEach(side=>{
-    const wing = new THREE.Mesh(wingGeo(), wingMat);
-    wing.scale.set(side,1,1);
-    wing.position.set(side*0.15, 0, -0.1);
-    wing.rotation.y = side*-0.5;
-    g.add(wing);
-  });
-  return g;
-}
-
-async function buildOniHybridModel(){
-  const template = await loadOniGltfTemplate(); // 失敗したら呼び出し元でプリミティブ版にフォールバック
-  const model = THREE.SkeletonUtils.clone(template);
-
-  const bodySkinMat = new THREE.MeshStandardMaterial({color:0xe0503f, roughness:.5, metalness:.08, skinning:true});
-  let neckBone=null, shoulderL=null, shoulderR=null, skinnedMesh=null;
-  model.traverse(o=>{
-    if(o.isMesh) o.material = bodySkinMat;
-    if(o.isBone){
-      if(o.name === 'neck_joint_2') neckBone = o;
-      if(o.name === 'arm_joint_L_1') shoulderL = o;
-      if(o.name === 'arm_joint_R_1') shoulderR = o;
+  function seededPick(pool, n, seed) {
+    const arr = pool.slice();
+    let s = seed;
+    for (let i = arr.length - 1; i > 0; i--) {
+      s = (s * 9301 + 49297) % 233280;
+      const j = Math.floor((s / 233280) * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    if(o.isSkinnedMesh) skinnedMesh = o;
-  });
-  if(neckBone) neckBone.scale.set(0.02,0.02,0.02); // 素体の箱の頭を畳んで隠す
-  if(shoulderL) shoulderL.rotation.x = -1.55;       // Tポーズの腕を下ろす
-  if(shoulderR) shoulderR.rotation.x = -1.55;
-  model.updateMatrixWorld(true);
-  if(skinnedMesh) skinnedMesh.skeleton.update();
-
-  const group = new THREE.Group();
-  group.add(model);
-
-  const headScale = 0.27;
-  const headGroup = buildOniHeadGroup();
-  headGroup.scale.set(headScale,headScale,headScale);
-  headGroup.position.set(0, 1.19 + 0.62*0.9*headScale, 0.01);
-  group.add(headGroup);
-
-  const wings = buildOniWings();
-  wings.scale.set(headScale*1.6, headScale*1.6, headScale*1.6);
-  wings.position.set(0, 1.0, -0.05);
-  group.add(wings);
-
-  const jacketMat = new THREE.MeshStandardMaterial({color:0x14161f, roughness:.5});
-  const trimMat   = new THREE.MeshStandardMaterial({color:0xf3f3f3, roughness:.35});
-  const goldMat   = new THREE.MeshStandardMaterial({color:0xffce3b, metalness:.5, roughness:.3, emissive:0x7a5300, emissiveIntensity:.3});
-  const dress = new THREE.Mesh(new THREE.CylinderGeometry(0.16,0.22,0.55,14), jacketMat);
-  dress.position.set(0,0.78,0);
-  group.add(dress);
-  const collar = new THREE.Mesh(new THREE.TorusGeometry(0.12,0.02,8,16), trimMat);
-  collar.position.set(0,1.06,0);
-  collar.rotation.x = Math.PI/2;
-  group.add(collar);
-  const belt = new THREE.Mesh(new THREE.TorusGeometry(0.17,0.018,8,16), goldMat);
-  belt.position.set(0,0.62,0);
-  belt.rotation.x = Math.PI/2;
-  group.add(belt);
-
-  group.scale.set(1.4,1.4,1.4); // 他のプリミティブキャラと見た目のサイズを揃える
-  return group;
-}
-
-/* ==========================================================
-   Three.js シーン管理(共通ヘルパー)
-   ========================================================== */
-function createSceneIn(container){
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(35, container.clientWidth/container.clientHeight || 1, 0.1, 100);
-  camera.position.set(0, 1.1, 4.2);
-  camera.lookAt(0,0.9,0);
-
-  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  container.appendChild(renderer.domElement);
-
-  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-  dir.position.set(2,4,3);
-  scene.add(dir);
-
-  const holder = new THREE.Group();
-  scene.add(holder);
-
-  function resize(){
-    const w = container.clientWidth, h = container.clientHeight;
-    if(!w || !h) return;
-    camera.aspect = w/h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w,h);
+    return arr.slice(0, n);
   }
-  window.addEventListener('resize', resize);
 
-  let raf;
-  function animate(){
-    raf = requestAnimationFrame(animate);
-    holder.rotation.y += 0.008;
-    if(holder.userData.skinnedMesh) holder.userData.skinnedMesh.skeleton.update();
-    renderer.render(scene, camera);
+  function renderShopSidebar() {
+    const sidebar = document.getElementById('shop-sidebar');
+    sidebar.innerHTML = SHOP_TABS.map(t =>
+      '<div class="shop-nav-btn' + (t.id === shopTab ? ' active' : '') + '" onclick="selectShopTab(\'' + t.id + '\')">' +
+        '<div class="icon"><svg viewBox="0 0 24 24"><use href="#' + t.icon + '"/></svg></div>' + t.label +
+      '</div>'
+    ).join('');
   }
-  animate();
 
-  let charToken = 0;
-  return {
-    async setCharacter(def){
-      const myToken = ++charToken;
-      while(holder.children.length) holder.remove(holder.children[0]);
-      holder.userData.skinnedMesh = null;
+  function selectShopTab(id) {
+    shopTab = id;
+    renderShopSidebar();
 
-      if(def.id === 'oni'){
-        try{
-          const group = await buildOniHybridModel();
-          if(myToken !== charToken) return; // 待っている間に別キャラへ切り替わっていたら破棄
-          while(holder.children.length) holder.remove(holder.children[0]);
-          holder.add(group);
-          group.traverse(o=>{ if(o.isSkinnedMesh) holder.userData.skinnedMesh = o; });
-          return;
-        }catch(e){
-          console.warn('鬼ノ丞の3Dモデル読み込みに失敗。プリミティブ版で表示します。', e);
-          if(myToken !== charToken) return;
-        }
+    const content = document.getElementById('shop-content');
+    const seed = dailySeed();
+    let items = [];
+    let cardBuilder;
+
+    if (id === 'offer') {
+      items = seededPick(OFFER_POOL, OFFER_POOL.length, seed + 777);
+      cardBuilder = (o) => bigCardHtml(o.name, o.desc, o.icon, o.color,
+        'gem', o.price, "buyItem('gem'," + o.price + ",'" + o.name + "')");
+    } else if (id === 'skin') {
+      items = seededPick(SKIN_POOL, 4, seed);
+      cardBuilder = (s) => bigCardHtml(s.name, s.desc, s.icon, s.color,
+        'coin', s.price, "buyItem('coin'," + s.price + ",'" + s.name + "')", undefined, undefined, s);
+    } else {
+      items = RESOURCE_POOL;
+      cardBuilder = (r) => bigCardHtml(r.label, r.desc, r.icon, r.color,
+        null, null, "buyResource('" + r.key + "'," + r.amount + ",'" + r.label + "')", r.amount, r.icon);
+    }
+
+    content.innerHTML = items.map(cardBuilder).join('');
+  }
+
+  function bigCardHtml(title, desc, icon, color, priceCurrencyIcon, price, onclickJs, freeAmount, freeIcon, figureObj) {
+    const gradient = 'linear-gradient(160deg, ' + color + 'cc, ' + color + '55)';
+    let footer;
+    if (priceCurrencyIcon === 'gem') {
+      footer =
+        '<div class="big-card-footer-label">エメラルドで購入</div>' +
+        '<div class="big-card-footer-price"><div class="icon" style="color:#5be07a"><svg viewBox="0 0 24 24"><use href="#i-gem"/></svg></div>' + price + '</div>';
+    } else if (priceCurrencyIcon === 'coin') {
+      footer =
+        '<div class="big-card-footer-label">コインで購入</div>' +
+        '<div class="big-card-footer-price"><div class="icon" style="color:#ffcf40"><svg viewBox="0 0 24 24"><use href="#i-coin"/></svg></div>' + price + '</div>';
+    } else {
+      footer =
+        '<div class="big-card-footer-label">タップして入手</div>' +
+        '<div class="big-card-footer-price"><div class="icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#' + freeIcon + '"/></svg></div>+' + freeAmount + '</div>';
+    }
+    const centerHtml = figureObj
+      ? '<div class="big-card-center">' + charFigureHtml(figureObj, 3.4) + '</div>'
+      : '<div class="big-card-center icon" style="color:rgba(0,0,0,0.35)"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg></div>';
+    return (
+      '<div class="big-card" style="background:' + gradient + ';" onclick="' + onclickJs + '">' +
+        '<div class="big-card-icons">' +
+          '<div class="icon" style="color:rgba(255,255,255,0.6)"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>' +
+          '<div class="icon" style="color:rgba(255,255,255,0.6)"><svg viewBox="0 0 24 24"><use href="#' + icon + '"/></svg></div>' +
+        '</div>' +
+        centerHtml +
+        '<div class="big-card-title">' + title + '</div>' +
+        '<div class="big-card-desc">' + desc + '</div>' +
+        '<div class="big-card-footer">' + footer + '</div>' +
+      '</div>'
+    );
+  }
+
+  function buyItem(currency, price, name) {
+    if (state[currency] < price) {
+      showShopToast(currency === 'gem' ? 'エメラルドが足りません' : 'コインが足りません');
+      return;
+    }
+    state[currency] -= price;
+    saveState();
+    renderCurrency();
+    showShopToast(name + ' を獲得しました！');
+  }
+  function buyResource(key, amount, label) {
+    state[key] += amount;
+    saveState();
+    renderCurrency();
+    showShopToast(label + ' +' + amount);
+  }
+
+  /* ---------- trophy road: milestone schedule ---------- */
+  // 100〜1000: interval starts at 20, +10 every time trophies pass another 100.
+  // 1000〜2000: fixed interval of 100. 2000 is the max.
+  function buildMilestones() {
+    const list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+    let cur = 100;
+    while (cur < 1000) {
+      const block = Math.floor((cur - 100) / 100);
+      const interval = 20 + block * 10;
+      cur = Math.min(cur + interval, 1000);
+      list.push(cur);
+    }
+    for (let m = 1100; m <= 2000; m += 100) list.push(m);
+    return [...new Set(list)];
+  }
+  const MILESTONES = buildMilestones();
+
+  const REWARD_CYCLE = [
+    { type: 'energy',   amount: 100,  icon: 'i-bolt',        color: '#ff5fd8', shape: 'circle', label: () => '⚡100' },
+    { type: 'coin',     amount: 300,  icon: 'i-coin',        color: '#ffcf40', shape: 'circle', label: () => '🪙300' },
+    { type: 'token',    amount: 100,  icon: 'i-skull',       color: '#4fd6e0', shape: 'square', label: () => '💀100' },
+    { type: 'starCoin', amount: 100,  icon: 'i-pearl',       color: '#f5f5f5', shape: 'circle', label: () => '◇100' },
+    { type: 'bonus',    amount: null, icon: 'i-star-burst',  color: '#ffd400', shape: 'circle', label: () => 'ランダム' }
+  ];
+
+  function rewardForMilestone(m) {
+    const idx = MILESTONES.indexOf(m);
+    return REWARD_CYCLE[idx % REWARD_CYCLE.length];
+  }
+
+  function renderTrophyRoad() {
+    const track = document.getElementById('tr-track');
+    track.innerHTML = '<div class="tr-line"></div>';
+
+    MILESTONES.forEach(m => {
+      const reward = rewardForMilestone(m);
+      const claimed = !!state.claimed[m];
+      const claimable = !claimed && state.trophies >= m;
+      const locked = !claimed && state.trophies < m;
+
+      const node = document.createElement('div');
+      node.className = 'tr-node';
+
+      let circleClasses = 'tr-circle';
+      if (reward.shape === 'square') circleClasses += ' tr-square';
+      if (locked) circleClasses += ' tr-locked';
+      if (claimable) circleClasses += ' tr-claimable';
+
+      let bottomHtml;
+      if (claimed) {
+        bottomHtml = '<div class="tr-claimed-label">受取済み</div>';
+      } else if (claimable) {
+        bottomHtml = '<div class="tr-claim-btn" onclick="claimMilestone(' + m + ')">決定</div>';
+      } else {
+        bottomHtml = '';
       }
-      holder.add(buildCharacterModel(def));
-    },
-    dispose(){
-      cancelAnimationFrame(raf);
-      window.removeEventListener('resize', resize);
-      renderer.dispose();
-      if(renderer.domElement.parentNode) renderer.domElement.parentNode.removeChild(renderer.domElement);
-    }
-  };
-}
 
-let lobbyScene = null;
-let modalScene = null;
-
-/* ==========================================================
-   画面遷移
-   ========================================================== */
-const loginScreen = document.getElementById('loginScreen');
-const lobbyScreen = document.getElementById('lobbyScreen');
-const welcomeBackCard = document.getElementById('welcomeBackCard');
-const freshLoginCard = document.getElementById('freshLoginCard');
-
-function refreshLoginScreen(){
-  const existing = loadUserData();
-  if(existing){
-    welcomeBackCard.style.display = 'flex';
-    freshLoginCard.style.display = 'none';
-    document.getElementById('wbName').textContent = existing.name;
-    document.getElementById('wbLevel').textContent = 'Lv.' + existing.level;
-    document.getElementById('wbTrophy').textContent = '🏆 ' + existing.trophies;
-  } else {
-    welcomeBackCard.style.display = 'none';
-    freshLoginCard.style.display = 'flex';
-  }
-}
-
-function enterLobby(){
-  userData = loadUserData();
-  if(!userData) return;
-  loginScreen.style.display = 'none';
-  lobbyScreen.classList.add('show');
-  renderLobbyStats();
-  if(!lobbyScene){
-    lobbyScene = createSceneIn(document.getElementById('stage3d'));
-  }
-  lobbyScene.setCharacter(findChar(userData.characterId));
-}
-
-function renderLobbyStats(){
-  document.getElementById('playerNameLabel').textContent = userData.name;
-  document.getElementById('trophyCount').textContent = userData.trophies;
-  document.getElementById('gemCount').textContent = userData.gems;
-  document.getElementById('coinCount').textContent = userData.coins;
-  document.getElementById('diamondCount').textContent = userData.diamonds;
-  document.getElementById('levelPill').textContent = userData.level;
-  document.getElementById('xpLabel').textContent = 'XP ' + userData.xp + '/' + userData.xpMax;
-  document.getElementById('xpFill').style.width = Math.min(100, (userData.xp/userData.xpMax)*100) + '%';
-  document.getElementById('rankBarFill').style.width = '0%';
-  const c = findChar(userData.characterId);
-  document.getElementById('avatarEmoji').textContent = c.emoji;
-  document.getElementById('selectedCharLabel').textContent = c.name;
-  updateNewIndicators();
-}
-
-/* ---- 新着(NEW)通知: 右上とキャラクターボタンに表示し、一覧を見たら消える ---- */
-function hasNewCharacters(){
-  return !!(userData.newCharacterIds && userData.newCharacterIds.length);
-}
-function updateNewIndicators(){
-  const on = hasNewCharacters();
-  document.getElementById('menuNewDot').classList.toggle('show', on);
-  document.getElementById('charSideNewDot').classList.toggle('show', on);
-}
-
-/* ---- 「オフラインでプレイ」クリック時: 既存データがあれば表示して即ロビーへ ---- */
-document.getElementById('offlineBtn').addEventListener('click', () => {
-  const existing = loadUserData();
-  if(existing){
-    showDataToast(existing);
-    setTimeout(enterLobby, 900);
-  } else {
-    document.getElementById('nameModal').classList.add('show');
-    document.getElementById('nameInput').focus();
-  }
-});
-document.getElementById('continueBtn').addEventListener('click', () => {
-  const existing = loadUserData();
-  showDataToast(existing);
-  setTimeout(enterLobby, 700);
-});
-document.getElementById('resetDataBtn').addEventListener('click', () => {
-  localStorage.removeItem(STORAGE_KEY);
-  refreshLoginScreen();
-});
-
-function showDataToast(data){
-  const toast = document.getElementById('dataToast');
-  toast.innerHTML =
-    '保存データを読み込みました<br>' +
-    '名前: <b>' + data.name + '</b> / Lv.' + data.level +
-    ' / 🏆' + data.trophies + ' / ⚡' + data.gems + ' / 🪙' + data.coins;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2200);
-}
-
-/* ---- 名前設定モーダル ---- */
-document.getElementById('nameConfirmBtn').addEventListener('click', submitName);
-document.getElementById('nameInput').addEventListener('keydown', (e) => {
-  if(e.key === 'Enter') submitName();
-});
-function submitName(){
-  const val = document.getElementById('nameInput').value.trim();
-  const errorEl = document.getElementById('nameError');
-  if(!val){ errorEl.textContent = '名前を入力してください'; return; }
-  if(val.length > 10){ errorEl.textContent = '10文字以内で入力してください'; return; }
-  errorEl.textContent = '';
-  const data = defaultUserData(val);
-  saveUserData(data);
-  document.getElementById('nameModal').classList.remove('show');
-  enterLobby();
-}
-
-/* ==========================================================
-   キャラクター選択モーダル
-   ========================================================== */
-const charModal = document.getElementById('charModal');
-const charGrid = document.getElementById('charGrid');
-let pendingCharId = null;
-let viewingNewIds = [];
-
-function openCharModal(){
-  pendingCharId = userData.characterId;
-  viewingNewIds = (userData.newCharacterIds || []).slice(); // このモーダルを開いた時点のNEW一覧を保持して表示に使う
-  buildCharGrid();
-  charModal.classList.add('show');
-  if(!modalScene){
-    modalScene = createSceneIn(document.getElementById('charPreviewWrap'));
-  }
-  updateModalPreview();
-
-  // 一覧を見たのでNEW通知を消す(次回このデータを開いた時にはNEWは表示されない)
-  if(hasNewCharacters()){
-    userData.newCharacterIds = [];
-    saveUserData(userData);
-    updateNewIndicators();
-  }
-}
-function closeCharModal(){
-  charModal.classList.remove('show');
-}
-function buildCharGrid(){
-  charGrid.innerHTML = '';
-  CHARACTERS.forEach(c => {
-    const btn = document.createElement('button');
-    btn.className = 'char-icon-btn' + (c.id === pendingCharId ? ' selected' : '');
-    btn.textContent = c.emoji;
-    btn.title = c.name;
-    if(viewingNewIds.includes(c.id)){
-      const tag = document.createElement('span');
-      tag.className = 'new-tag';
-      tag.textContent = 'NEW';
-      btn.appendChild(tag);
-    }
-    btn.addEventListener('click', () => {
-      pendingCharId = c.id;
-      buildCharGrid();
-      updateModalPreview();
+      node.innerHTML =
+        '<div class="tr-callout"><div class="icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#' + reward.icon + '"/></svg></div>' + reward.label() + '</div>' +
+        '<div class="' + circleClasses + '" style="background:' + reward.color + ';"' + (claimable ? ' onclick="claimMilestone(' + m + ')"' : '') + '>' +
+          '<div class="icon" style="color:#241a3a"><svg viewBox="0 0 24 24"><use href="#' + reward.icon + '"/></svg></div>' +
+          (claimed ? '<div class="tr-check icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></div>' : '') +
+        '</div>' +
+        '<div class="tr-num">' + m + '</div>' +
+        bottomHtml;
+      track.appendChild(node);
     });
-    charGrid.appendChild(btn);
-  });
-}
-function updateModalPreview(){
-  const c = findChar(pendingCharId);
-  modalScene.setCharacter(c);
-  document.getElementById('charInfoName').textContent = c.name;
-  document.getElementById('charInfoDesc').textContent = c.desc;
-}
-document.getElementById('charSideBtn').addEventListener('click', openCharModal);
-document.getElementById('avatarBadgeBtn').addEventListener('click', openCharModal);
-document.getElementById('charCloseBtn').addEventListener('click', closeCharModal);
-document.getElementById('charConfirmBtn').addEventListener('click', () => {
-  userData.characterId = pendingCharId;
-  saveUserData(userData);
-  renderLobbyStats();
-  lobbyScene.setCharacter(findChar(userData.characterId));
-  closeCharModal();
-});
 
-/* ---- プレイボタン: 対戦画面(別html)へ ---- */
-document.getElementById('playBtn').addEventListener('click', () => {
-  window.location.href = 'battle.html';
-});
+    document.getElementById('tr-trophy-val').textContent = state.trophies;
 
-/* ==========================================================
-   初期化
-   ========================================================== */
-refreshLoginScreen();
+    requestAnimationFrame(() => {
+      const wrap = document.getElementById('tr-track-wrap');
+      const firstUnclaimed = MILESTONES.findIndex(m => !state.claimed[m]);
+      const targetIndex = firstUnclaimed === -1 ? MILESTONES.length - 1 : firstUnclaimed;
+      wrap.scrollLeft = Math.max(0, targetIndex * 330 - 400);
+    });
+  }
+
+  function showTrophyToast(text) {
+    const toast = document.getElementById('tr-toast');
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(showTrophyToast._t);
+    showTrophyToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function claimMilestone(m) {
+    if (state.claimed[m] || state.trophies < m) return;
+    const reward = rewardForMilestone(m);
+    let msg = '';
+
+    if (reward.type === 'bonus') {
+      if (Math.random() < 0.5) {
+        state.coin += 1000;
+        msg = 'コイン +1000';
+      } else {
+        state.energy += 500;
+        msg = 'サンダー +500';
+      }
+    } else {
+      state[reward.type] += reward.amount;
+      msg = reward.label() + ' 獲得';
+    }
+
+    if (m % 1000 === 0) {
+      state.gem += 50;
+      msg += ' / エメラルド +50';
+    }
+
+    state.claimed[m] = true;
+    saveState();
+    renderCurrency();
+    renderTrophyRoad();
+    showTrophyToast(msg);
+  }
+
+  /* ---------- tic-tac-toe ---------- */
+  let board = Array(9).fill(null);
+  let gameOver = false;
+
+  function initGame() {
+    board = Array(9).fill(null);
+    gameOver = false;
+    document.getElementById('result-overlay').classList.remove('show');
+    document.querySelectorAll('#board .cell').forEach(c => {
+      c.textContent = '';
+      c.className = 'cell';
+    });
+  }
+
+  function cellClick(i) {
+    if (gameOver || board[i]) return;
+    board[i] = 'X';
+    updateCell(i, 'X');
+    if (checkEnd()) return;
+    setTimeout(aiMove, 400);
+  }
+
+  function aiMove() {
+    if (gameOver) return;
+    const empty = board.map((v, i) => v ? null : i).filter(v => v !== null);
+    if (empty.length === 0) return;
+    const choice = empty[Math.floor(Math.random() * empty.length)];
+    board[choice] = 'O';
+    updateCell(choice, 'O');
+    checkEnd();
+  }
+
+  function updateCell(i, mark) {
+    const cell = document.querySelectorAll('#board .cell')[i];
+    cell.textContent = mark;
+    cell.classList.add(mark.toLowerCase());
+  }
+
+  function checkEnd() {
+    const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for (const [a,b,c] of lines) {
+      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+        gameOver = true;
+        endGame(board[a] === 'X' ? 'win' : 'lose');
+        return true;
+      }
+    }
+    if (board.every(v => v)) {
+      gameOver = true;
+      endGame('draw');
+      return true;
+    }
+    return false;
+  }
+
+  function endGame(result) {
+    let title = '';
+    let detail = '';
+
+    if (result === 'win') {
+      title = '勝利!';
+      state.trophies += 10;
+      detail += '<div class="result-detail">🏆 +10</div>';
+    } else if (result === 'lose') {
+      title = '敗北…';
+      state.trophies = Math.max(0, state.trophies - 3);
+      detail += '<div class="result-detail">🏆 -3</div>';
+    } else {
+      title = '引き分け';
+      detail += '<div class="result-detail">変化なし</div>';
+    }
+
+    saveState();
+    renderTrophy();
+    renderCurrency();
+
+    document.getElementById('result-title').textContent = title;
+    document.getElementById('result-detail-wrap').innerHTML = detail;
+    document.getElementById('result-overlay').classList.add('show');
+  }
 </script>
+
 </body>
 </html>
