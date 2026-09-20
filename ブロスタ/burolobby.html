@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <title>App Mockup</title>
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -924,6 +925,82 @@
     clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 50% 88%, 0% 100%);
   }
 
+  /* ============ SOCIAL (FRIENDS) SCREEN ============ */
+  .social-layout {
+    position: absolute; top: 130px; left: 0; right: 0; bottom: 0;
+    display: flex; gap: 24px; padding: 24px;
+  }
+  .social-tabs {
+    width: 260px; flex-shrink: 0; display: flex; flex-direction: column; gap: 14px;
+  }
+  .social-tab-btn {
+    padding: 20px 0; text-align: center; border-radius: 14px; font-weight: bold; font-size: 24px;
+    background: rgba(255,255,255,0.08); border: 3px solid rgba(255,255,255,0.15); cursor: pointer;
+  }
+  .social-tab-btn.active { background: linear-gradient(180deg,#ffe14d,#ffb300); color: #6a4400; border-color: #fff8d0; }
+  .social-add-btn {
+    margin-top: auto; padding: 18px 0; text-align: center; border-radius: 14px; font-weight: bold; font-size: 22px;
+    background: linear-gradient(180deg,#8dfa8d,#2fae55); color: #123a1a; cursor: pointer;
+    border: 3px solid rgba(255,255,255,0.4);
+  }
+
+  .social-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .social-list-title { font-size: 24px; font-weight: bold; margin-bottom: 14px; }
+  .social-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+
+  .friend-row {
+    display: flex; align-items: center; gap: 18px;
+    background: rgba(60,90,200,0.35); border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 12px; padding: 12px 20px;
+  }
+  .friend-row.self { background: linear-gradient(90deg,#ffd400,#ffb300); color: #4a3400; }
+  .friend-avatar {
+    width: 60px; height: 60px; border-radius: 10px; flex-shrink: 0;
+    background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;
+  }
+  .friend-avatar .icon { width: 34px; height: 34px; }
+  .friend-name { font-weight: bold; font-size: 22px; flex: 1; }
+  .friend-trophy { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 22px; }
+  .friend-trophy .icon { width: 26px; height: 26px; }
+  .friend-empty { text-align: center; color: rgba(255,255,255,0.5); font-size: 20px; padding: 40px 0; }
+
+  .invite-row { display: flex; align-items: center; gap: 16px; background: rgba(60,90,200,0.35); border-radius: 12px; padding: 14px 20px; }
+  .invite-name { font-weight: bold; font-size: 22px; flex: 1; }
+  .invite-btn { padding: 8px 20px; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; }
+  .invite-accept { background: #3ecf5b; color: #063; margin-right: 8px; }
+  .invite-decline { background: #e0333f; color: #fff; }
+
+  .social-search-box { display: flex; gap: 12px; margin-bottom: 16px; }
+  .social-search-box input {
+    flex: 1; padding: 12px 16px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.35); color: #fff; font-size: 18px;
+  }
+  .social-search-btn { padding: 12px 24px; border-radius: 10px; background: #ffd400; color: #4a3400; font-weight: bold; cursor: pointer; }
+  .search-result-row { display: flex; align-items: center; gap: 16px; background: rgba(60,90,200,0.35); border-radius: 12px; padding: 12px 20px; margin-bottom: 10px; }
+  .search-request-btn { padding: 8px 18px; border-radius: 10px; background: #3ecf5b; color: #063; font-weight: bold; cursor: pointer; font-size: 16px; }
+  .search-request-btn.disabled { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); cursor: default; }
+
+  /* account creation modal */
+  .account-modal {
+    position: absolute; inset: 0; z-index: 90; display: none;
+    align-items: center; justify-content: center; background: rgba(0,0,0,0.7);
+  }
+  .account-modal.show { display: flex; }
+  .account-box {
+    background: rgba(30,25,55,0.97); border: 4px solid rgba(255,255,255,0.25); border-radius: 24px;
+    padding: 50px 60px; text-align: center; min-width: 600px;
+  }
+  .account-box h2 { font-size: 34px; margin-bottom: 10px; }
+  .account-box p { font-size: 18px; color: rgba(255,255,255,0.7); margin-bottom: 24px; }
+  .account-box input {
+    width: 100%; box-sizing: border-box; padding: 16px 20px; font-size: 22px; border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.3); background: rgba(0,0,0,0.35); color: #fff; margin-bottom: 20px;
+  }
+  .account-box button {
+    width: 100%; padding: 16px 0; border-radius: 14px; font-weight: bold; font-size: 24px;
+    background: linear-gradient(180deg,#ffe14d,#ffb300); color: #6a4400; border: none; cursor: pointer;
+  }
+
   /* ============ GAME SCREEN (tic-tac-toe) ============ */
   .game-header {
     position: absolute; top: 0; left: 0; width: 100%; height: 130px;
@@ -1072,7 +1149,7 @@
         <div class="icon icon-50" style="color:#8fd0ff"><svg viewBox="0 0 24 24"><use href="#i-news"/></svg></div>
         <div class="label">ブロスタ<br>ニュース</div>
       </div>
-      <div class="panel side-button">
+      <div class="panel side-button clickable" onclick="openSocial()">
         <div class="icon icon-50" style="color:#ffd48a"><svg viewBox="0 0 24 24"><use href="#i-people"/></svg></div>
         <div class="label">フレンド</div>
       </div>
@@ -1226,6 +1303,29 @@
     </div>
   </div>
 
+  <!-- ============ SOCIAL (FRIENDS) SCREEN ============ -->
+  <div id="screen-social" class="screen">
+    <div class="tr-header">
+      <div class="tr-back clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></div>
+      <div class="tr-titles"><div class="tr-title">ソーシャル</div></div>
+      <div class="tr-home clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-home"/></svg></div>
+    </div>
+
+    <div class="tr-toast" id="social-toast"></div>
+
+    <div class="social-layout">
+      <div class="social-tabs">
+        <div class="social-tab-btn active" id="tab-friends" onclick="selectSocialTab('friends')">フレンド</div>
+        <div class="social-tab-btn" id="tab-invites" onclick="selectSocialTab('invites')">招待<span id="invite-badge"></span></div>
+        <div class="social-add-btn" onclick="openFriendSearch()">＋ フレンドを追加</div>
+      </div>
+      <div class="social-main">
+        <div class="social-list-title" id="social-list-title">フレンド</div>
+        <div class="social-list" id="social-list"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ GAME SCREEN (tic-tac-toe) ============ -->
   <div id="screen-game" class="screen">
     <div class="game-header">
@@ -1271,6 +1371,27 @@
     <div class="rare-pick-grid" id="rare-pick-grid"></div>
   </div>
 
+  <div class="account-modal" id="friend-search-modal">
+    <div class="account-box" style="min-width:900px;text-align:left;">
+      <h2 style="text-align:center;">フレンドを追加</h2>
+      <div class="social-search-box">
+        <input type="text" id="friend-search-input" placeholder="名前を検索">
+        <div class="social-search-btn" onclick="searchPlayers()">検索</div>
+      </div>
+      <div id="friend-search-results"></div>
+      <button style="margin-top:10px;background:rgba(255,255,255,0.15);color:#fff;" onclick="closeFriendSearch()">閉じる</button>
+    </div>
+  </div>
+
+  <div class="account-modal show" id="account-modal">
+    <div class="account-box">
+      <h2>ようこそ！</h2>
+      <p>プレイヤー名を入力してアカウントを作成してください</p>
+      <input type="text" id="account-name-input" placeholder="名前" maxlength="16">
+      <button onclick="createAccount()">アカウント作成</button>
+    </div>
+  </div>
+
 </div>
 
 </div>
@@ -1288,13 +1409,241 @@
   window.addEventListener('load', fitStage);
   fitStage();
 
+  /* =========================================================================
+     SOCIAL / FRIENDS SYSTEM (Supabase-backed)
+     ------------------------------------------------------------------------
+     Fill in your own Supabase project's URL and anon key below, and run the
+     SQL from the setup notes to create the `players`, `friendships`, and
+     `friend_requests` tables. Until these are filled in, the social screen
+     will show a connection error instead of data.
+  ========================================================================= */
+  const SUPABASE_URL = 'https://wuzyqbtkkxsfdxtbtijw.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_wD-Oy-LjEU9rxxs5BcrcuA_IjGynR2L';
+
+  let sb = null;
+  try {
+    if (window.supabase) {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } catch (e) { console.error('Supabase init failed', e); }
+
+  const PLAYER_KEY = 'bs_player_identity_v1';
+  let player = null;
+  try {
+    const savedPlayer = JSON.parse(localStorage.getItem(PLAYER_KEY));
+    if (savedPlayer && savedPlayer.id && savedPlayer.name) player = savedPlayer;
+  } catch (e) {}
+
+  function savePlayer() {
+    try { localStorage.setItem(PLAYER_KEY, JSON.stringify(player)); } catch (e) {}
+  }
+
+  function showAccountModalIfNeeded() {
+    if (!player) {
+      document.getElementById('account-modal').classList.add('show');
+    } else {
+      document.getElementById('account-modal').classList.remove('show');
+    }
+  }
+
+  async function createAccount() {
+    const input = document.getElementById('account-name-input');
+    const name = input.value.trim();
+    if (!name) { return; }
+    const id = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('p' + Date.now() + Math.random());
+    player = { id: id, name: name };
+    savePlayer();
+    document.getElementById('account-modal').classList.remove('show');
+
+    if (sb) {
+      try {
+        await sb.from('players').insert({ id: player.id, name: player.name, trophies: state.trophies || 0 });
+      } catch (e) { console.error('account create sync failed', e); }
+    }
+  }
+
+  // keep the players table's trophy count in sync (call after trophies change)
+  async function syncTrophiesToServer() {
+    if (!sb || !player) return;
+    try {
+      await sb.from('players').update({ trophies: state.trophies }).eq('id', player.id);
+    } catch (e) { console.error('trophy sync failed', e); }
+  }
+
+  function showSocialToast(text) {
+    const toast = document.getElementById('social-toast');
+    toast.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(showSocialToast._t);
+    showSocialToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  let socialTab = 'friends';
+
+  function openSocial() {
+    showScreen('screen-social');
+    selectSocialTab(socialTab);
+  }
+
+  function selectSocialTab(tab) {
+    socialTab = tab;
+    document.getElementById('tab-friends').classList.toggle('active', tab === 'friends');
+    document.getElementById('tab-invites').classList.toggle('active', tab === 'invites');
+    document.getElementById('social-list-title').textContent = tab === 'friends' ? 'フレンド' : '招待';
+    if (tab === 'friends') renderFriendsList();
+    else renderInvitesList();
+  }
+
+  async function renderFriendsList() {
+    const list = document.getElementById('social-list');
+    if (!sb) {
+      list.innerHTML = '<div class="friend-empty">サーバーに接続できませんでした</div>';
+      return;
+    }
+    if (!player) { list.innerHTML = ''; return; }
+
+    let html = '<div class="friend-row self"><div class="friend-avatar icon" style="color:#4a3400"><svg viewBox="0 0 24 24"><use href="#i-person"/></svg></div><div class="friend-name">' + player.name + '</div><div class="friend-trophy"><div class="icon" style="color:#4a3400"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></div>' + state.trophies + '</div></div>';
+
+    try {
+      const { data, error } = await sb
+        .from('friendships')
+        .select('player_a, player_b')
+        .or('player_a.eq.' + player.id + ',player_b.eq.' + player.id);
+      if (error) throw error;
+
+      const friendIds = (data || []).map(row => row.player_a === player.id ? row.player_b : row.player_a);
+      if (friendIds.length === 0) {
+        list.innerHTML = html + '<div class="friend-empty">まだフレンドがいません</div>';
+        return;
+      }
+      const { data: players, error: perr } = await sb.from('players').select('id, name, trophies').in('id', friendIds);
+      if (perr) throw perr;
+
+      const sorted = (players || []).slice().sort((a, b) => b.trophies - a.trophies);
+      sorted.forEach(p => {
+        html += '<div class="friend-row"><div class="friend-avatar icon" style="color:#ffd48a"><svg viewBox="0 0 24 24"><use href="#i-person"/></svg></div><div class="friend-name">' + p.name + '</div><div class="friend-trophy"><div class="icon" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></div>' + p.trophies + '</div></div>';
+      });
+      list.innerHTML = html;
+    } catch (e) {
+      console.error(e);
+      list.innerHTML = html + '<div class="friend-empty">読み込みに失敗しました</div>';
+    }
+  }
+
+  async function renderInvitesList() {
+    const list = document.getElementById('social-list');
+    if (!sb || !player) { list.innerHTML = ''; return; }
+    try {
+      const { data, error } = await sb
+        .from('friend_requests')
+        .select('id, from_id')
+        .eq('to_id', player.id)
+        .eq('status', 'pending');
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div class="friend-empty">招待はありません</div>';
+        updateInviteBadge(0);
+        return;
+      }
+      updateInviteBadge(data.length);
+
+      const fromIds = data.map(r => r.from_id);
+      const { data: fromPlayers } = await sb.from('players').select('id, name').in('id', fromIds);
+      const nameById = {};
+      (fromPlayers || []).forEach(p => { nameById[p.id] = p.name; });
+
+      list.innerHTML = data.map(r =>
+        '<div class="invite-row"><div class="invite-name">' + (nameById[r.from_id] || '???') + '</div>' +
+        '<div class="invite-btn invite-accept" onclick="respondInvite(\'' + r.id + '\', true)">承認</div>' +
+        '<div class="invite-btn invite-decline" onclick="respondInvite(\'' + r.id + '\', false)">拒否</div></div>'
+      ).join('');
+    } catch (e) {
+      console.error(e);
+      list.innerHTML = '<div class="friend-empty">読み込みに失敗しました</div>';
+    }
+  }
+
+  async function updateInviteBadge(count) {
+    const badge = document.getElementById('invite-badge');
+    badge.textContent = count > 0 ? (' (' + count + ')') : '';
+  }
+
+  async function respondInvite(requestId, accept) {
+    if (!sb) return;
+    try {
+      if (accept) {
+        const { data: reqRow } = await sb.from('friend_requests').select('from_id, to_id').eq('id', requestId).single();
+        if (reqRow) {
+          await sb.from('friendships').insert({ player_a: reqRow.from_id, player_b: reqRow.to_id });
+        }
+        await sb.from('friend_requests').update({ status: 'accepted' }).eq('id', requestId);
+        showSocialToast('フレンドになりました！');
+      } else {
+        await sb.from('friend_requests').update({ status: 'declined' }).eq('id', requestId);
+        showSocialToast('招待を拒否しました');
+      }
+      renderInvitesList();
+    } catch (e) {
+      console.error(e);
+      showSocialToast('エラーが発生しました');
+    }
+  }
+
+  function openFriendSearch() {
+    document.getElementById('friend-search-modal').classList.add('show');
+    document.getElementById('friend-search-input').value = '';
+    document.getElementById('friend-search-results').innerHTML = '';
+  }
+  function closeFriendSearch() {
+    document.getElementById('friend-search-modal').classList.remove('show');
+  }
+
+  async function searchPlayers() {
+    const q = document.getElementById('friend-search-input').value.trim();
+    const results = document.getElementById('friend-search-results');
+    if (!sb) { results.innerHTML = '<div class="friend-empty">サーバーに接続できませんでした</div>'; return; }
+    if (!q) return;
+    try {
+      const { data, error } = await sb.from('players').select('id, name, trophies').ilike('name', '%' + q + '%').neq('id', player.id).limit(20);
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        results.innerHTML = '<div class="friend-empty">見つかりませんでした</div>';
+        return;
+      }
+      results.innerHTML = data.map(p =>
+        '<div class="search-result-row"><div class="friend-name">' + p.name + '</div>' +
+        '<div class="friend-trophy"><div class="icon" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-trophy"/></svg></div>' + p.trophies + '</div>' +
+        '<div class="search-request-btn" onclick="sendFriendRequest(\'' + p.id + '\', this)">申請を送る</div></div>'
+      ).join('');
+    } catch (e) {
+      console.error(e);
+      results.innerHTML = '<div class="friend-empty">検索に失敗しました</div>';
+    }
+  }
+
+  async function sendFriendRequest(targetId, btnEl) {
+    if (!sb || !player) return;
+    try {
+      await sb.from('friend_requests').insert({ from_id: player.id, to_id: targetId, status: 'pending' });
+      btnEl.textContent = '送信済み';
+      btnEl.classList.add('disabled');
+      btnEl.onclick = null;
+    } catch (e) {
+      console.error(e);
+      showSocialToast('送信に失敗しました(既に申請済みの可能性があります)');
+    }
+  }
+
+  showAccountModalIfNeeded();
+
   /* ---------- character roster ----------
      Add new characters here directly in the code: copy a line, give it a
      unique id, a name, a rarity (コモン/レア/スーパーレア/ハイパーレア/レジェンドレア),
      and a direct .glb URL for <model-viewer>. That's it — no in-app form.
      コモン characters are unlocked from the very start automatically. */
-  const CHARACTERS_DEF = [
-     { id: 'c1', name: 'コレット', rarity: 'ハイパーレア',     glbUrl: 'colette_2024_new_brawl_stars.glb' },
+  const CHARACTERS_DEF = [ 
+    { id: 'c1', name: 'コレット', rarity: 'ハイパーレア',     glbUrl: 'colette_2024_new_brawl_stars.glb' }, 
   ];
 
   const CHAR_RARITY_ORDER = ['コモン', 'レア', 'スーパーレア', 'ハイパーレア', 'レジェンドレア'];
@@ -2293,6 +2642,7 @@
   function endGame(result) {
     if (result === 'win') {
       state.trophies += 10;
+      syncTrophiesToServer();
       checkDailyReset();
       if (state.dailyWins >= DAILY_WIN_SLOTS) {
         saveState();
@@ -2318,6 +2668,7 @@
     if (result === 'lose') {
       title = '敗北…';
       state.trophies = Math.max(0, state.trophies - 2);
+      syncTrophiesToServer();
       detail += '<div class="result-detail">🏆 -2</div>';
     } else {
       title = '引き分け';
