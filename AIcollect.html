@@ -4,7 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI HUB</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+.login-view{flex:1;display:flex;align-items:center;justify-content:center}
+.login-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:32px;width:300px}
+.login-box h2{color:var(--accent);margin-bottom:18px;font-size:18px}
+.login-box input{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px}
+.login-box button{width:100%;background:var(--accent);color:#001018;border:none;border-radius:6px;padding:10px;font-weight:700;cursor:pointer;margin-top:4px}
+.login-box .sub{background:transparent;color:var(--muted);border:1px solid var(--border);margin-top:8px}
+.login-msg{font-size:12px;margin-top:8px;min-height:16px}
+.app-item{display:flex;align-items:center;justify-content:space-between;border-radius:8px;padding:0 4px 0 0}
+.app-item .nav-item{flex:1}
+.app-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px 8px;border-radius:6px}
+.app-del:hover{color:var(--danger);background:rgba(255,71,87,.1)}
 :root{
   --bg:#0a0e14; --panel:#10161f; --panel2:#151d29; --border:#1e2937;
   --accent:#00e5ff; --accent2:#ff2ec4; --text:#dbe6f0; --muted:#5f7285;
@@ -99,7 +111,18 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 </head>
 <body>
 
-<div id="sidebar">
+<div class="login-view" id="login-view">
+  <div class="login-box">
+    <h2>AI HUB ログイン</h2>
+    <input id="l-email" type="email" placeholder="メールアドレス">
+    <input id="l-pass" type="password" placeholder="パスワード">
+    <button id="l-signin">ログイン</button>
+    <button id="l-signup" class="sub">新規登録</button>
+    <div class="login-msg" id="l-msg"></div>
+  </div>
+</div>
+
+<div id="sidebar" style="display:none">
   <div class="logo">AI HUB</div>
   <div class="nav-item active" data-nav="chat"><span>💬</span>チャット</div>
   <div class="nav-item" data-nav="accounts"><span>🔑</span>アカウント</div>
@@ -109,7 +132,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   <div class="add-btn" id="add-app-btn">+ アプリを追加 (<span id="app-count">0</span>/15)</div>
 </div>
 
-<div id="main">
+<div id="main" style="display:none">
   <div id="topbar">
     <span class="title" id="view-title">チャット</span>
   </div>
@@ -149,6 +172,11 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
           <input type="checkbox" id="notif-check"> 通知を有効にする
         </label>
       </div>
+    </div>
+    <div class="card">
+      <h4>アカウント</h4>
+      <p id="login-email"></p>
+      <button class="btn-sm btn-danger" id="logout-btn">ログアウト</button>
     </div>
   </div>
 </div>
@@ -219,7 +247,6 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 </div>
 
 <script>
-const LS_APPS='aihub_apps', LS_CONV='aihub_conv', LS_SETTINGS='aihub_settings';
 const COLORS=['#00e5ff','#ff2ec4','#2ed573','#ffa502','#a55eea'];
 
 const PROVIDERS = {
@@ -327,17 +354,89 @@ const CUSTOM_PRESETS = [
   {label:'Perplexity', keyPageUrl:'https://www.perplexity.ai/settings/api', endpoint:'https://api.perplexity.ai/chat/completions', model:'sonar', free:'カード登録が必要な場合あり'}
 ];
 
-let apps = JSON.parse(localStorage.getItem(LS_APPS) || '[]');
-let convs = JSON.parse(localStorage.getItem(LS_CONV) || '[]');
-let settings = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{"notifications":false}');
+// ▼▼ Supabaseプロジェクトの値に置き換えてください ▼▼
+const SUPABASE_URL = 'https://wuzyqbtkkxsfdxtbtijw.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_wD-Oy-LjEU9rxxs5BcrcuA_IjGynR2L';
+// ▲▲ ここまで ▲▲
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let apps = [];
+let convs = [];
+let settings = {notifications:false, theme:'dark'};
 let activeAppId = null;
 let activeConvId = null;
 let currentView = 'chat';
 
+let saveTimer = null;
 function save(){
-  localStorage.setItem(LS_APPS, JSON.stringify(apps));
-  localStorage.setItem(LS_CONV, JSON.stringify(convs));
-  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    const { data: { user } } = await sb.auth.getUser();
+    if(!user) return;
+    await sb.from('user_data').upsert({
+      user_id: user.id, apps, conversations: convs, settings, updated_at: new Date().toISOString()
+    });
+  }, 400); // 連続操作をまとめて1回のDB書き込みにする
+}
+
+// ---------- ログイン ----------
+document.getElementById('l-signin').onclick = async ()=>{
+  const { error } = await sb.auth.signInWithPassword({
+    email: document.getElementById('l-email').value,
+    password: document.getElementById('l-pass').value
+  });
+  document.getElementById('l-msg').style.color = error ? 'var(--danger)' : 'var(--ok)';
+  if(error) document.getElementById('l-msg').textContent = error.message;
+};
+document.getElementById('l-signup').onclick = async ()=>{
+  const { error } = await sb.auth.signUp({
+    email: document.getElementById('l-email').value,
+    password: document.getElementById('l-pass').value
+  });
+  document.getElementById('l-msg').style.color = error ? 'var(--danger)' : 'var(--ok)';
+  document.getElementById('l-msg').textContent = error ? error.message : '登録しました。確認メールを確認してください。';
+};
+document.getElementById('logout-btn').onclick = ()=> sb.auth.signOut();
+
+sb.auth.onAuthStateChange(async (event, session)=>{
+  if(session){
+    document.getElementById('login-view').style.display='none';
+    document.getElementById('sidebar').style.display='flex';
+    document.getElementById('main').style.display='flex';
+    document.getElementById('login-email').textContent = session.user.email;
+    await loadUserData(session.user.id);
+  } else {
+    document.getElementById('login-view').style.display='flex';
+    document.getElementById('sidebar').style.display='none';
+    document.getElementById('main').style.display='none';
+  }
+});
+
+async function loadUserData(userId){
+  let { data } = await sb.from('user_data').select('*').eq('user_id', userId).maybeSingle();
+  if(!data){
+    const { data: created } = await sb.from('user_data').insert({ user_id: userId }).select().single();
+    data = created;
+  }
+  apps = data.apps || [];
+  convs = data.conversations || [];
+  settings = data.settings || {notifications:false, theme:'dark'};
+
+  // 旧モデル名の自動移行
+  const OLD_GEMINI_MODELS = ['gemini-2.5-flash','gemini-2.5-pro','gemini-1.5-flash','gemini-1.5-pro',''];
+  let migrated = false;
+  apps.forEach(a=>{
+    if(a.provider==='gemini' && OLD_GEMINI_MODELS.includes(a.model)){
+      a.model = a.model.includes('pro') ? 'gemini-pro-latest' : 'gemini-flash-latest';
+      migrated = true;
+    }
+  });
+  if(migrated) save();
+
+  applyTheme(settings.theme || 'dark');
+  document.getElementById('notif-check').checked = !!settings.notifications;
+  renderAppList();
+  switchView('chat');
 }
 
 // ---------- Sidebar / nav ----------
@@ -345,11 +444,28 @@ function renderAppList(){
   const list = document.getElementById('app-list');
   list.innerHTML='';
   apps.forEach(a=>{
+    const wrap=document.createElement('div');
+    wrap.className='app-item';
     const el=document.createElement('div');
     el.className='nav-item' + (a.id===activeAppId && currentView==='chat' ? ' active':'');
     el.innerHTML=`<span class="app-dot" style="background:${a.color}"></span>${a.name}`;
     el.onclick=()=>{ activeAppId=a.id; switchView('chat'); };
-    list.appendChild(el);
+    const del=document.createElement('button');
+    del.className='app-del';
+    del.textContent='×';
+    del.title='削除';
+    del.onclick=(e)=>{
+      e.stopPropagation();
+      if(!confirm(`「${a.name}」を削除しますか?会話履歴も削除されます。`)) return;
+      apps = apps.filter(x=>x.id!==a.id);
+      convs = convs.filter(c=>c.appId!==a.id);
+      if(activeAppId===a.id) activeAppId=null;
+      save();
+      switchView('chat');
+    };
+    wrap.appendChild(el);
+    wrap.appendChild(del);
+    list.appendChild(wrap);
   });
   document.getElementById('app-count').textContent = apps.length;
 }
@@ -650,10 +766,8 @@ function applyTheme(theme){
 }
 document.getElementById('theme-dark').onclick = ()=>applyTheme('dark');
 document.getElementById('theme-light').onclick = ()=>applyTheme('light');
-applyTheme(settings.theme || 'dark');
 
 // ---------- Notifications ----------
-document.getElementById('notif-check').checked = !!settings.notifications;
 document.getElementById('notif-check').onchange = async (e)=>{
   if(e.target.checked){
     const perm = await Notification.requestPermission();
@@ -723,21 +837,6 @@ function renderHistory(){
     });
 }
 document.getElementById('history-search').oninput = renderHistory;
-
-// ---------- 旧モデル名の自動移行 ----------
-const OLD_GEMINI_MODELS = ['gemini-2.5-flash','gemini-2.5-pro','gemini-1.5-flash','gemini-1.5-pro',''];
-let migrated = false;
-apps.forEach(a=>{
-  if(a.provider==='gemini' && OLD_GEMINI_MODELS.includes(a.model)){
-    a.model = a.model.includes('pro') ? 'gemini-pro-latest' : 'gemini-flash-latest';
-    migrated = true;
-  }
-});
-if(migrated) save();
-
-// ---------- init ----------
-renderAppList();
-switchView('chat');
 </script>
 </body>
 </html>
