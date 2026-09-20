@@ -106,7 +106,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   <div class="nav-item" data-nav="history"><span>🕓</span>履歴</div>
   <div class="nav-item" data-nav="settings"><span>⚙</span>設定</div>
   <div class="app-list" id="app-list"></div>
-  <div class="add-btn" id="add-app-btn">+ アプリを追加 (<span id="app-count">0</span>/5)</div>
+  <div class="add-btn" id="add-app-btn">+ アプリを追加 (<span id="app-count">0</span>/15)</div>
 </div>
 
 <div id="main">
@@ -399,7 +399,7 @@ let wizKeyValid = false;
 let wizCustomModel = '';
 
 function openModal(){
-  if(apps.length>=5){ alert('アプリは最大5つまでです'); return; }
+  if(apps.length>=15){ alert('アプリは最大15個までです'); return; }
   wizStep = 1; wizProvider = null; wizKeyValid = false; wizCustomModel = '';
   document.getElementById('m-name').value='';
   document.getElementById('m-key').value='';
@@ -619,8 +619,9 @@ async function callProvider(app, messages){
     if(!res.ok) throw new Error(data.error?.message || 'Gemini API エラー');
     return data.candidates?.[0]?.content?.parts?.[0]?.text || '(応答なし)';
   }
-  if(app.provider==='openai' || app.provider==='custom'){
-    const url = app.provider==='custom' ? app.endpoint : 'https://api.openai.com/v1/chat/completions';
+  if(app.provider==='openai' || app.provider==='custom' || app.provider==='grok' || app.provider==='perplexity'){
+    const urlMap = { openai:'https://api.openai.com/v1/chat/completions', grok:'https://api.x.ai/v1/chat/completions', perplexity:'https://api.perplexity.ai/chat/completions' };
+    const url = app.provider==='custom' ? app.endpoint : urlMap[app.provider];
     const body = { model: app.model || 'gpt-4o-mini', messages: history.map(m=>({role:m.role==='user'?'user':'assistant', content:m.text})) };
     const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+app.apiKey}, body: JSON.stringify(body)});
     const data = await res.json();
@@ -722,6 +723,17 @@ function renderHistory(){
     });
 }
 document.getElementById('history-search').oninput = renderHistory;
+
+// ---------- 旧モデル名の自動移行 ----------
+const OLD_GEMINI_MODELS = ['gemini-2.5-flash','gemini-2.5-pro','gemini-1.5-flash','gemini-1.5-pro',''];
+let migrated = false;
+apps.forEach(a=>{
+  if(a.provider==='gemini' && OLD_GEMINI_MODELS.includes(a.model)){
+    a.model = a.model.includes('pro') ? 'gemini-pro-latest' : 'gemini-flash-latest';
+    migrated = true;
+  }
+});
+if(migrated) save();
 
 // ---------- init ----------
 renderAppList();
