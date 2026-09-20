@@ -195,7 +195,7 @@ const PROVIDERS = {
   gemini:{
     label:'Gemini', keyPageUrl:'https://aistudio.google.com/apikey',
     steps:['「キー取得ページを開く」をクリック','Googleアカウントでログイン','「Create API key」をクリック','表示されたキーをコピーして下の欄に貼り付け'],
-    defaultModels:[{id:'gemini-2.5-flash',label:'gemini-2.5-flash (推奨・高速)'},{id:'gemini-2.5-pro',label:'gemini-2.5-pro (高精度)'}],
+    defaultModels:[{id:'gemini-flash-latest',label:'gemini-flash-latest (推奨・自動で最新版)'},{id:'gemini-pro-latest',label:'gemini-pro-latest (高精度・自動で最新版)'},{id:'gemini-3.6-flash',label:'gemini-3.6-flash (固定バージョン)'}],
     needsEndpoint:false,
     validate: async (key)=>{
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
@@ -477,7 +477,7 @@ async function sendMessage(){
 async function callProvider(app, messages){
   const history = messages.filter(m=>m.role!=='error').map(m=>({role:m.role, text:m.text}));
   if(app.provider==='gemini'){
-    const model = app.model || 'gemini-2.5-flash';
+    const model = app.model || 'gemini-flash-latest';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${app.apiKey}`;
     const body = { contents: history.map(m=>({ role: m.role==='user'?'user':'model', parts:[{text:m.text}] })) };
     const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
