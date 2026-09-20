@@ -11,8 +11,12 @@
   --danger:#ff4757; --ok:#2ed573;
   font-family: 'Segoe UI', system-ui, sans-serif;
 }
+body.light{
+  --bg:#f4f6f9; --panel:#ffffff; --panel2:#eef1f5; --border:#dbe2ea;
+  --accent:#0091ab; --text:#1c2733; --muted:#6b7684;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden}
+body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden;transition:background .2s,color .2s}
 ::-webkit-scrollbar{width:6px}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
@@ -100,12 +104,9 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   <div class="nav-item active" data-nav="chat"><span>💬</span>チャット</div>
   <div class="nav-item" data-nav="accounts"><span>🔑</span>アカウント</div>
   <div class="nav-item" data-nav="history"><span>🕓</span>履歴</div>
+  <div class="nav-item" data-nav="settings"><span>⚙</span>設定</div>
   <div class="app-list" id="app-list"></div>
   <div class="add-btn" id="add-app-btn">+ アプリを追加 (<span id="app-count">0</span>/5)</div>
-  <div class="notif-toggle">
-    <span>通知</span>
-    <input type="checkbox" id="notif-check">
-  </div>
 </div>
 
 <div id="main">
@@ -131,6 +132,25 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
     <input id="history-search" placeholder="履歴を検索...">
     <div id="history-list"></div>
   </div>
+  <div id="settings-view" class="panel-view" style="display:none">
+    <div class="card">
+      <h4>テーマ</h4>
+      <p>画面の配色を切り替えます</p>
+      <div class="row">
+        <button class="btn-sm" id="theme-dark">ダークモード</button>
+        <button class="btn-sm" id="theme-light">ホワイトモード</button>
+      </div>
+    </div>
+    <div class="card">
+      <h4>通知</h4>
+      <p>他のタブを見ている間にAIから応答が来たら通知します</p>
+      <div class="row">
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <input type="checkbox" id="notif-check"> 通知を有効にする
+        </label>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="overlay" id="app-modal">
@@ -147,8 +167,18 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
     <!-- STEP 2: guided key acquisition + validation -->
     <div id="step-2" style="display:none">
       <div class="step-title">2. APIキーを取得して貼り付け</div>
+      <div class="field" id="custom-preset-field" style="display:none">
+        <label>よく使われるAIから選ぶ</label>
+        <select id="custom-preset">
+          <option value="">-- 選択してください --</option>
+        </select>
+      </div>
       <ol class="numbered" id="step2-instructions"></ol>
-      <a href="#" target="_blank" class="link-btn" id="open-key-page">キー取得ページを開く ↗</a>
+      <div class="hint" id="free-note" style="display:none;margin-bottom:8px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <a href="#" target="_blank" class="link-btn" id="open-key-page">キー取得ページを開く ↗</a>
+        <a href="#" target="_blank" class="link-btn" id="open-video-search">📺 公式動画を探す ↗</a>
+      </div>
       <div class="field" style="margin-top:12px">
         <label>表示名</label>
         <input id="m-name" placeholder="例: Gemini">
@@ -160,10 +190,11 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
       <div class="field">
         <label>APIキー</label>
         <input id="m-key" type="password" placeholder="ここに貼り付け">
+        <div class="hint" style="margin-top:4px">貼り付けるだけで、使えるキーかどうか自動で確認します。</div>
         <div class="validate-row">
-          <button class="btn-sm" id="validate-btn">キーを確認</button>
-          <span id="validate-status"></span>
+          <button class="btn-sm" id="paste-btn">📋 クリップボードから貼り付け</button>
         </div>
+        <div id="validate-status" style="margin-top:6px"></div>
       </div>
     </div>
 
@@ -194,34 +225,49 @@ const COLORS=['#00e5ff','#ff2ec4','#2ed573','#ffa502','#a55eea'];
 const PROVIDERS = {
   gemini:{
     label:'Gemini', keyPageUrl:'https://aistudio.google.com/apikey',
+    freeNote:'無料枠あり・クレジットカード登録不要で発行できます。',
     steps:['「キー取得ページを開く」をクリック','Googleアカウントでログイン','「Create API key」をクリック','表示されたキーをコピーして下の欄に貼り付け'],
     defaultModels:[{id:'gemini-flash-latest',label:'gemini-flash-latest (推奨・自動で最新版)'},{id:'gemini-pro-latest',label:'gemini-pro-latest (高精度・自動で最新版)'},{id:'gemini-3.6-flash',label:'gemini-3.6-flash (固定バージョン)'}],
     needsEndpoint:false,
     validate: async (key)=>{
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
-      if(!res.ok) throw new Error('キーが無効です');
+      if(!res.ok){
+        if(res.status===400) throw new Error('キーの形式が正しくありません。コピーし直してください');
+        if(res.status===403) throw new Error('キーが無効、または権限がありません。AI Studioで再発行してください');
+        throw new Error('確認できませんでした(通信エラー)');
+      }
       return true;
     }
   },
   openai:{
     label:'ChatGPT', keyPageUrl:'https://platform.openai.com/api-keys',
+    freeNote:'新規アカウントは少額の無料クレジットが付く場合があります。切れると支払い設定(クレカ登録)が必要です。',
     steps:['「キー取得ページを開く」をクリック','OpenAIアカウントでログイン(未登録なら新規作成)','「Create new secret key」をクリック','表示されたキーをコピーして下の欄に貼り付け(1度しか表示されません)'],
     defaultModels:[{id:'gpt-4o-mini',label:'gpt-4o-mini (推奨・低コスト)'},{id:'gpt-4o',label:'gpt-4o (高精度)'}],
     needsEndpoint:false,
     validate: async (key)=>{
       const res = await fetch('https://api.openai.com/v1/models', {headers:{'Authorization':'Bearer '+key}});
-      if(!res.ok) throw new Error('キーが無効、またはブラウザからの検証がブロックされました');
+      if(!res.ok){
+        if(res.status===401) throw new Error('キーが無効です。コピーし直してください');
+        if(res.status===429) throw new Error('支払い設定(クレカ登録)が未完了の可能性があります。platform.openai.comのBillingを確認してください');
+        throw new Error('確認できませんでした(ブラウザからの検証がブロックされた可能性があります)');
+      }
       return true;
     }
   },
   claude:{
     label:'Claude', keyPageUrl:'https://console.anthropic.com/settings/keys',
-    steps:['「キー取得ページを開く」をクリック','Anthropicアカウントでログイン','「Create Key」をクリック','表示されたキーをコピーして下の欄に貼り付け'],
+    freeNote:'利用には電話番号認証と少額のクレジット購入が必要な場合があります。',
+    steps:['「キー取得ページを開く」をクリック','Anthropicアカウントでログイン(電話番号認証が必要な場合あり)','「Create Key」をクリック','表示されたキーをコピーして下の欄に貼り付け'],
     defaultModels:[{id:'claude-sonnet-4-5',label:'claude-sonnet-4-5 (推奨)'},{id:'claude-opus-4-1',label:'claude-opus-4-1 (高精度)'}],
     needsEndpoint:false,
     validate: async (key)=>{
       const res = await fetch('https://api.anthropic.com/v1/models', {headers:{'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}});
-      if(!res.ok) throw new Error('キーが無効、またはブラウザからの検証がブロックされました');
+      if(!res.ok){
+        if(res.status===401) throw new Error('キーが無効です。コピーし直してください');
+        if(res.status===400) throw new Error('クレジット残高が不足している可能性があります。consoleで購入してください');
+        throw new Error('確認できませんでした(ブラウザからの検証がブロックされた可能性があります)');
+      }
       return true;
     }
   },
@@ -231,9 +277,39 @@ const PROVIDERS = {
     defaultModels:[], needsEndpoint:false, noKey:true,
     validate: async ()=>true
   },
+  grok:{
+    label:'Grok', keyPageUrl:'https://console.x.ai',
+    freeNote:'Xアカウントでログイン。無料枠は少なく、基本は有料クレジット購入が必要です。',
+    steps:['「キー取得ページを開く」をクリック','Xアカウントでログイン','「API Keys」から「Create API Key」をクリック','表示されたキーをコピーして下の欄に貼り付け'],
+    defaultModels:[{id:'grok-4',label:'grok-4 (推奨)'},{id:'grok-4-fast',label:'grok-4-fast (高速・低コスト)'}],
+    needsEndpoint:false,
+    validate: async (key)=>{
+      const res = await fetch('https://api.x.ai/v1/models', {headers:{'Authorization':'Bearer '+key}});
+      if(!res.ok){
+        if(res.status===401) throw new Error('キーが無効です。コピーし直してください');
+        throw new Error('確認できませんでした(支払い設定が未完了の可能性があります)');
+      }
+      return true;
+    }
+  },
+  perplexity:{
+    label:'Perplexity', keyPageUrl:'https://www.perplexity.ai/settings/api',
+    freeNote:'利用にはクレジットカード登録が必要な場合があります。',
+    steps:['「キー取得ページを開く」をクリック','Perplexityアカウントでログイン','「Generate」をクリックしてキーを発行','表示されたキーをコピーして下の欄に貼り付け'],
+    defaultModels:[{id:'sonar',label:'sonar (推奨・検索付き)'},{id:'sonar-pro',label:'sonar-pro (高精度)'}],
+    needsEndpoint:false,
+    validate: async (key)=>{
+      const res = await fetch('https://api.perplexity.ai/chat/completions', {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+key}, body: JSON.stringify({model:'sonar', messages:[{role:'user',content:'hi'}], max_tokens:1})});
+      if(!res.ok){
+        if(res.status===401) throw new Error('キーが無効です。コピーし直してください');
+        throw new Error('確認できませんでした(支払い設定が未完了の可能性があります)');
+      }
+      return true;
+    }
+  },
   custom:{
     label:'その他', keyPageUrl:'',
-    steps:['利用したいAI(Grok/DeepSeek等)の管理画面でAPIキーを発行','OpenAI互換のエンドポイントURLを確認','エンドポイントとキーを下欄に入力'],
+    steps:['下のプリセットから使いたいAIを選ぶと、取得ページとエンドポイントが自動入力されます','取得ページでキーを発行してコピー','下の欄に貼り付け'],
     defaultModels:[{id:'default',label:'(サービスのデフォルトモデル)'}],
     needsEndpoint:true,
     validate: async (key, endpoint)=>{
@@ -242,6 +318,14 @@ const PROVIDERS = {
     }
   }
 };
+
+const CUSTOM_PRESETS = [
+  {label:'OpenRouter (推奨・1キーで複数AI利用可)', keyPageUrl:'https://openrouter.ai/keys', endpoint:'https://openrouter.ai/api/v1/chat/completions', model:'openrouter/auto', free:'無料枠あり・カード登録不要'},
+  {label:'DeepSeek', keyPageUrl:'https://platform.deepseek.com/api_keys', endpoint:'https://api.deepseek.com/chat/completions', model:'deepseek-chat', free:'無料枠あり・低コスト'},
+  {label:'Mistral', keyPageUrl:'https://console.mistral.ai/api-keys', endpoint:'https://api.mistral.ai/v1/chat/completions', model:'mistral-small-latest', free:'無料枠あり'},
+  {label:'xAI Grok', keyPageUrl:'https://console.x.ai', endpoint:'https://api.x.ai/v1/chat/completions', model:'grok-4', free:'Xアカウントで登録・有料中心'},
+  {label:'Perplexity', keyPageUrl:'https://www.perplexity.ai/settings/api', endpoint:'https://api.perplexity.ai/chat/completions', model:'sonar', free:'カード登録が必要な場合あり'}
+];
 
 let apps = JSON.parse(localStorage.getItem(LS_APPS) || '[]');
 let convs = JSON.parse(localStorage.getItem(LS_CONV) || '[]');
@@ -282,6 +366,7 @@ function switchView(view){
   document.getElementById('chat-view').style.display='none';
   document.getElementById('accounts-view').style.display='none';
   document.getElementById('history-view').style.display='none';
+  document.getElementById('settings-view').style.display='none';
   document.getElementById('empty-state').style.display='none';
 
   if(view==='chat'){
@@ -299,6 +384,9 @@ function switchView(view){
     document.getElementById('history-view').style.display='block';
     document.getElementById('view-title').textContent='履歴';
     renderHistory();
+  } else if(view==='settings'){
+    document.getElementById('settings-view').style.display='block';
+    document.getElementById('view-title').textContent='設定';
   }
   renderAppList();
 }
@@ -308,10 +396,11 @@ const modal = document.getElementById('app-modal');
 let wizStep = 1;
 let wizProvider = null;
 let wizKeyValid = false;
+let wizCustomModel = '';
 
 function openModal(){
   if(apps.length>=5){ alert('アプリは最大5つまでです'); return; }
-  wizStep = 1; wizProvider = null; wizKeyValid = false;
+  wizStep = 1; wizProvider = null; wizKeyValid = false; wizCustomModel = '';
   document.getElementById('m-name').value='';
   document.getElementById('m-key').value='';
   document.getElementById('m-endpoint').value='';
@@ -330,7 +419,7 @@ function renderProviderGrid(){
   Object.entries(PROVIDERS).forEach(([key,p])=>{
     const el=document.createElement('div');
     el.className='provider-card' + (wizProvider===key?' sel':'');
-    el.textContent = p.label;
+    el.innerHTML = p.label + (p.badge ? `<div style="margin-top:4px"><span style="font-size:9px;background:rgba(46,213,115,.15);color:var(--ok);border:1px solid var(--ok);border-radius:4px;padding:2px 6px">${p.badge}</span></div>` : '');
     el.onclick=()=>{ wizProvider=key; renderProviderGrid(); };
     grid.appendChild(el);
   });
@@ -350,15 +439,42 @@ function goToStep(n){
     const p = PROVIDERS[wizProvider];
     document.getElementById('open-key-page').href = p.keyPageUrl || '#';
     document.getElementById('open-key-page').style.display = p.keyPageUrl ? 'inline-block':'none';
+    document.getElementById('open-video-search').href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(p.label + ' APIキー 取得方法');
     const list = document.getElementById('step2-instructions');
     list.innerHTML = p.steps.map(s=>`<li>${s}</li>`).join('');
+    const freeNoteEl = document.getElementById('free-note');
+    if(p.freeNote){ freeNoteEl.textContent = 'ℹ ' + p.freeNote; freeNoteEl.style.display='block'; }
+    else { freeNoteEl.style.display='none'; }
     document.getElementById('m-endpoint-field').style.display = p.needsEndpoint ? 'block':'none';
+    const presetField = document.getElementById('custom-preset-field');
+    presetField.style.display = wizProvider==='custom' ? 'block':'none';
+    if(wizProvider==='custom'){
+      const sel = document.getElementById('custom-preset');
+      sel.innerHTML = '<option value="">-- 選択してください --</option>' +
+        CUSTOM_PRESETS.map((cp,i)=>`<option value="${i}">${cp.label}</option>`).join('');
+      sel.onchange = ()=>{
+        if(sel.value===''){ return; }
+        const cp = CUSTOM_PRESETS[sel.value];
+        document.getElementById('open-key-page').href = cp.keyPageUrl;
+        document.getElementById('open-video-search').href = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(cp.label + ' APIキー 取得方法');
+        document.getElementById('m-endpoint').value = cp.endpoint;
+        document.getElementById('m-name').value = cp.label.split(' ')[0];
+        freeNoteEl.textContent = 'ℹ ' + cp.free;
+        freeNoteEl.style.display='block';
+        wizCustomModel = cp.model;
+      };
+    }
     const keyField = document.getElementById('m-key').closest('.field');
     keyField.style.display = p.noKey ? 'none' : 'block';
   }
   if(n===3 && wizProvider){
     const sel = document.getElementById('m-model');
-    sel.innerHTML = PROVIDERS[wizProvider].defaultModels.map(m=>`<option value="${m.id}">${m.label}</option>`).join('');
+    if(wizProvider==='custom' && wizCustomModel){
+      sel.innerHTML = `<option value="${wizCustomModel}">${wizCustomModel} (推奨)</option>` +
+        PROVIDERS.custom.defaultModels.map(m=>`<option value="${m.id}">${m.label}</option>`).join('');
+    } else {
+      sel.innerHTML = PROVIDERS[wizProvider].defaultModels.map(m=>`<option value="${m.id}">${m.label}</option>`).join('');
+    }
   }
 }
 
@@ -375,22 +491,40 @@ document.getElementById('m-next').onclick=()=>{
 };
 document.getElementById('m-back').onclick=()=>goToStep(wizStep-1);
 
-document.getElementById('validate-btn').onclick = async ()=>{
+document.getElementById('paste-btn').onclick = async ()=>{
+  try{
+    const text = await navigator.clipboard.readText();
+    document.getElementById('m-key').value = text.trim();
+    autoValidate();
+  }catch(e){
+    alert('クリップボードを読み取れませんでした。手動で貼り付けてください(Ctrl+V)');
+  }
+};
+
+let validateTimer = null;
+async function autoValidate(){
   const status = document.getElementById('validate-status');
   const p = PROVIDERS[wizProvider];
   const key = document.getElementById('m-key').value.trim();
   const endpoint = document.getElementById('m-endpoint').value.trim();
-  if(!key){ alert('APIキーを入力してください'); return; }
+  if(!key){ status.innerHTML=''; wizKeyValid=false; return; }
   status.innerHTML = '<span class="status-badge checking">確認中...</span>';
   try{
     await p.validate(key, endpoint);
     wizKeyValid = true;
-    status.innerHTML = '<span class="status-badge ok">✓ 有効なキーです</span>';
+    status.innerHTML = '<span class="status-badge ok">✓ そのまま使えます</span>';
   }catch(err){
     wizKeyValid = false;
     status.innerHTML = `<span class="status-badge err">✕ ${err.message}</span>`;
   }
-};
+}
+document.getElementById('m-key').addEventListener('input', ()=>{
+  clearTimeout(validateTimer);
+  validateTimer = setTimeout(autoValidate, 600); // 入力が止まって0.6秒後に自動確認
+});
+document.getElementById('m-key').addEventListener('paste', ()=>{
+  setTimeout(autoValidate, 300);
+});
 
 document.getElementById('m-save').onclick=()=>{
   const name = document.getElementById('m-name').value.trim();
@@ -506,6 +640,16 @@ async function callProvider(app, messages){
   }
   throw new Error('未対応のプロバイダです');
 }
+
+// ---------- Theme ----------
+function applyTheme(theme){
+  document.body.classList.toggle('light', theme==='light');
+  settings.theme = theme;
+  save();
+}
+document.getElementById('theme-dark').onclick = ()=>applyTheme('dark');
+document.getElementById('theme-light').onclick = ()=>applyTheme('light');
+applyTheme(settings.theme || 'dark');
 
 // ---------- Notifications ----------
 document.getElementById('notif-check').checked = !!settings.notifications;
