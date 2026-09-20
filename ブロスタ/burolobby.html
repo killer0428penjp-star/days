@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>App Mockup</title>
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -561,6 +562,12 @@
     align-items: center;
     justify-content: center;
   }
+  .win-slot.done { background: rgba(255,212,0,0.18); }
+  .daily-star-count { font-size: 18px; color: #fff; margin-left: 6px; }
+  .daily-wins-reset {
+    width: 100%; text-align: center; font-size: 20px; font-weight: bold; color: #ffd400;
+    padding: 10px 0;
+  }
 
   /* ============ TROPHY ROAD SCREEN ============ */
   .tr-header {
@@ -616,7 +623,12 @@
   }
   .tr-check .icon { width: 36px; height: 36px; }
   .tr-locked { opacity: 0.4; filter: grayscale(65%); }
-  .tr-claimable { animation: tr-pulse 1s ease-in-out infinite; cursor: pointer; }
+  .tr-claimable {
+    animation: tr-pulse 1s ease-in-out infinite;
+    cursor: pointer;
+    border-color: #ffd400 !important;
+    background: linear-gradient(160deg, #ffe98a, #ffb300) !important;
+  }
   @keyframes tr-pulse {
     0%,100% { box-shadow: 0 0 0 0 rgba(255,212,0,0.7); }
     50% { box-shadow: 0 0 0 16px rgba(255,212,0,0); }
@@ -637,6 +649,66 @@
     display: none; z-index: 20;
   }
   .tr-toast.show { display: block; }
+
+  /* ---------- reward reveal (rarity box-opening animation) ---------- */
+  .reward-overlay {
+    position: absolute; inset: 0; z-index: 50;
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+    text-align: center; cursor: pointer;
+    transition: background 0.5s ease;
+  }
+  .reward-overlay.show { display: flex; }
+  .reward-star {
+    width: 260px; height: 260px; color: #fff;
+    filter: drop-shadow(0 10px 24px rgba(0,0,0,0.35));
+    animation: reward-pop 0.5s ease;
+  }
+  @keyframes reward-pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    70% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .reward-title {
+    font-size: 56px; font-weight: bold; color: #fff; margin-top: 10px;
+    text-shadow: -3px 0 #000, 0 3px #000, 3px 0 #000, 0 -3px #000;
+  }
+  .reward-sub {
+    font-size: 26px; font-weight: bold; color: #fff; margin-top: 30px;
+    text-shadow: -2px 0 #000, 0 2px #000, 2px 0 #000, 0 -2px #000;
+  }
+  .reward-dots { display: flex; gap: 10px; margin-top: 16px; }
+  .reward-dot { width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.35); }
+  .reward-dot.filled { background: #fff; }
+  .reward-dot.current { background: #ffd400; }
+
+  .reward-final-box {
+    background: rgba(0,0,0,0.4); border-radius: 20px; padding: 30px 40px;
+    display: flex; flex-direction: column; gap: 14px; align-items: center;
+  }
+  .reward-line {
+    display: flex; align-items: center; gap: 12px; font-size: 32px; font-weight: bold; color: #fff;
+    text-shadow: -2px 0 #000, 0 2px #000, 2px 0 #000, 0 -2px #000;
+  }
+  .reward-line .icon { width: 40px; height: 40px; }
+  .reward-claim-btn {
+    margin-top: 20px; background: linear-gradient(180deg,#ffe14d,#ffb300); color: #6a4400;
+    font-weight: bold; font-size: 28px; padding: 14px 46px; border-radius: 14px;
+  }
+
+  .rare-pick-grid {
+    display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+    max-width: 1400px; margin-top: 20px;
+  }
+  .rare-pick-card {
+    width: 220px; height: 260px; border-radius: 16px; background: rgba(0,0,0,0.4);
+    border: 3px solid rgba(255,255,255,0.3); overflow: hidden; cursor: pointer;
+    display: flex; flex-direction: column;
+  }
+  .rare-pick-card .mv-wrap { flex: 1; }
+  .rare-pick-name {
+    padding: 8px 4px; text-align: center; font-size: 16px; font-weight: bold; color: #fff;
+    background: rgba(0,0,0,0.4);
+  }
 
   /* ============ SHOP SCREEN ============ */
   .shop-currency-row { margin-left: auto; display: flex; gap: 14px; align-items: center; }
@@ -706,98 +778,98 @@
   }
   .big-card-footer-price .icon { width: 34px; height: 34px; }
 
-  /* ============ CHARACTER UNLOCK SCREEN ============ */
+  /* ============ CHARACTER SCREEN (user-added roster) ============ */
   .char-layout {
     position: absolute; top: 130px; left: 0; right: 0; bottom: 0;
-    display: flex; gap: 30px; padding: 30px;
+    display: flex; gap: 24px; padding: 24px;
   }
-  .char-featured {
-    width: 560px; flex-shrink: 0; border-radius: 26px; position: relative;
-    display: flex; flex-direction: column;
-    border: 4px solid rgba(255,255,255,0.25);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    overflow: hidden;
+  .char-left {
+    width: 420px; flex-shrink: 0; display: flex; flex-direction: column; gap: 18px;
+    overflow-y: auto;
   }
-  .char-featured-tag {
-    background: #ffd400; color: #6a4400; font-weight: bold; font-size: 22px;
-    padding: 8px 20px; display: inline-block; margin: 20px 0 0 20px; border-radius: 8px;
-  }
-  .char-featured-name { font-size: 36px; font-weight: bold; padding: 14px 26px 0; }
-  .char-featured-center { flex: 1; min-height: 260px; }
-  .char-credit { font-size: 15px; color: rgba(255,255,255,0.6); padding: 0 26px; margin-top: -4px; }
-  .char-progress-wrap { margin: 10px 26px 10px; }
-  .char-progress-label { display: flex; align-items: center; gap: 8px; font-size: 24px; font-weight: bold; margin-bottom: 8px; }
-  .char-progress-label .icon { width: 30px; height: 30px; }
-  .char-progress-bar { height: 22px; background: rgba(0,0,0,0.4); border-radius: 11px; overflow: hidden; }
-  .char-progress-fill { height: 100%; background: linear-gradient(90deg,#8dfa8d,#2fae55); }
-  .char-featured-footer {
-    margin: 18px 26px 26px; display: flex; flex-direction: column; gap: 12px;
-  }
-  .char-claim-btn, .char-gem-btn {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-weight: bold; font-size: 26px; padding: 16px 0; border-radius: 14px; cursor: pointer;
-    border: 3px solid rgba(255,255,255,0.5);
-  }
-  .char-claim-btn { background: linear-gradient(180deg,#8dfa8d,#2fae55); color: #123a1a; }
-  .char-claim-btn.disabled { opacity: 0.4; cursor: default; }
-  .char-gem-btn { background: linear-gradient(180deg,#b6ffb0,#5be07a); color: #123a1a; }
-  .char-gem-btn .icon, .char-claim-btn .icon { width: 28px; height: 28px; }
-  .char-complete-msg { margin: auto; text-align: center; font-size: 30px; font-weight: bold; padding: 40px; }
 
-  /* horizontal slide carousel */
-  .char-grid {
-    flex: 1;
-    display: flex; flex-direction: column;
+  /* unlock target / active character panel */
+  .char-featured { padding: 20px; flex-shrink: 0; }
+  .char-featured-tag {
+    display: inline-block; font-weight: bold; font-size: 16px;
+    padding: 5px 14px; border-radius: 8px; margin-bottom: 10px;
   }
-  .char-grid-hint {
-    font-size: 18px; color: rgba(255,255,255,0.55); margin-bottom: 10px; text-align: center;
+  .char-featured-name { font-size: 26px; font-weight: bold; margin-bottom: 4px; }
+  .char-featured-rarity { font-size: 15px; font-weight: bold; margin-bottom: 12px; }
+  .char-featured-center { width: 100%; height: 220px; border-radius: 14px; overflow: hidden; background: rgba(0,0,0,0.25); margin-bottom: 12px; }
+  .char-progress-label { display: flex; align-items: center; gap: 8px; font-size: 18px; font-weight: bold; margin-bottom: 8px; }
+  .char-progress-label .icon { width: 24px; height: 24px; }
+  .char-progress-bar { height: 18px; background: rgba(0,0,0,0.4); border-radius: 9px; overflow: hidden; margin-bottom: 14px; }
+  .char-progress-fill { height: 100%; background: linear-gradient(90deg,#8dfa8d,#2fae55); }
+  .char-claim-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-weight: bold; font-size: 20px; padding: 12px 0; border-radius: 12px; cursor: pointer;
+    border: 3px solid rgba(255,255,255,0.5);
+    background: linear-gradient(180deg,#8dfa8d,#2fae55); color: #123a1a;
   }
+  .char-claim-btn.disabled { opacity: 0.4; cursor: default; }
+  .char-gem-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    font-weight: bold; font-size: 18px; padding: 10px 0; border-radius: 12px; cursor: pointer;
+    border: 3px solid rgba(255,255,255,0.5); margin-top: 8px;
+    background: linear-gradient(180deg,#b6ffb0,#5be07a); color: #123a1a;
+  }
+  .char-gem-btn .icon, .char-claim-btn .icon { width: 24px; height: 24px; }
+  .char-empty-msg { text-align: center; font-size: 16px; color: rgba(255,255,255,0.6); padding: 10px; }
+  .char-choose-btn {
+    text-align: center; padding: 14px 0; border-radius: 12px; cursor: pointer;
+    background: rgba(255,255,255,0.1); border: 2px dashed rgba(255,255,255,0.3);
+    font-weight: bold; font-size: 16px;
+  }
+
+  /* right: all-characters grid */
+  .char-right { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .char-grid-hint { font-size: 16px; color: rgba(255,255,255,0.55); margin-bottom: 10px; text-align: center; }
   .char-carousel {
     flex: 1;
-    display: flex; gap: 20px;
-    overflow-x: auto; overflow-y: hidden;
-    padding: 6px 6px 20px;
-    scroll-snap-type: x proximity;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 18px; align-content: start;
+    overflow-y: auto; padding: 4px;
   }
   .char-card {
-    flex-shrink: 0; width: 340px; height: 100%;
-    border-radius: 18px; position: relative;
+    height: 260px;
+    border-radius: 16px; position: relative;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
     border: 3px solid rgba(255,255,255,0.2); overflow: hidden;
-    scroll-snap-align: start;
     background: rgba(255,255,255,0.05);
+    cursor: pointer;
   }
   .char-card-embed { flex: 1; width: 100%; min-height: 0; }
-  .char-embed-wrap { width: 100%; height: 100%; pointer-events: auto; }
-  .char-embed-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .mv-wrap { width: 100%; height: 100%; }
+  .mv-wrap model-viewer { width: 100%; height: 100%; --poster-color: transparent; }
   .char-card-name {
-    width: 100%; text-align: center; padding: 8px 0 12px;
-    font-size: 17px; font-weight: bold; text-shadow: 0 2px 3px rgba(0,0,0,0.6);
+    width: 100%; text-align: center; padding: 6px 4px 4px;
+    font-size: 14px; font-weight: bold; text-shadow: 0 2px 3px rgba(0,0,0,0.6);
     background: rgba(0,0,0,0.35);
   }
-  .char-credits {
-    font-size: 13px; color: rgba(255,255,255,0.45); text-align: center; padding-top: 10px;
+  .char-card-rarity {
+    width: 100%; text-align: center; padding: 0 4px 8px;
+    font-size: 12px; font-weight: bold;
+    background: rgba(0,0,0,0.35);
   }
-  .char-card.locked { filter: grayscale(80%) brightness(0.55); }
+  .char-credits { font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; padding-top: 8px; }
+  .char-card.locked { filter: grayscale(70%) brightness(0.6); }
+  .char-card.target { border-color: #4fd6e0; box-shadow: 0 0 0 3px rgba(79,214,224,0.5); }
   .char-lock-badge {
-    position: absolute; top: 10px; right: 10px; width: 36px; height: 36px;
+    position: absolute; top: 8px; right: 8px; width: 32px; height: 32px;
     background: rgba(0,0,0,0.6); border-radius: 50%;
     display: flex; align-items: center; justify-content: center; z-index: 3;
   }
-  .char-lock-badge .icon { width: 20px; height: 20px; }
-  .char-new-badge {
-    position: absolute; top: 10px; left: 10px; background: #e0333f;
-    padding: 4px 12px; border-radius: 8px; font-size: 16px; font-weight: bold; z-index: 3;
-  }
+  .char-lock-badge .icon { width: 18px; height: 18px; }
   .char-card.selected { border-color: #ffd400; box-shadow: 0 0 0 3px rgba(255,212,0,0.5); }
   .char-selected-badge {
-    position: absolute; top: 10px; right: 10px; width: 36px; height: 36px;
+    position: absolute; top: 8px; right: 8px; width: 32px; height: 32px;
     background: #ffd400; border-radius: 50%;
     display: flex; align-items: center; justify-content: center; z-index: 3;
   }
-  .char-selected-badge .icon { width: 20px; height: 20px; }
+  .char-selected-badge .icon { width: 18px; height: 18px; }
 
-  /* ---------- 3D turntable character figure ---------- */
+  /* ---------- 3D turntable character figure (kept for shop skins) ---------- */
   .fig-wrap {
     width: 100%; height: 100%;
     display: flex; align-items: center; justify-content: center;
@@ -1072,14 +1144,7 @@
 
     <div class="panel daily-wins">
       <div class="daily-wins-title">毎日の勝利</div>
-      <div class="daily-wins-row">
-        <div class="win-slot icon icon-55" style="color:#5be07a"><svg viewBox="0 0 24 24"><use href="#i-shield-skull"/></svg></div>
-        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
-        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
-        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
-        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
-        <div class="icon icon-55" style="color:#ffd400"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
-      </div>
+      <div class="daily-wins-row" id="daily-wins-row"></div>
     </div>
 
   </div>
@@ -1149,9 +1214,12 @@
     <div class="tr-toast" id="char-toast"></div>
 
     <div class="char-layout">
-      <div class="panel char-featured" id="char-featured"></div>
-      <div class="char-grid">
-        <div class="char-grid-hint">← スライドしてキャラクターを見る →</div>
+      <div class="char-left">
+        <div class="panel char-featured" id="char-featured"></div>
+      </div>
+
+      <div class="char-right">
+        <div class="char-grid-hint">全キャラクター</div>
         <div class="char-carousel" id="char-carousel"></div>
         <div class="char-credits" id="char-credits"></div>
       </div>
@@ -1164,7 +1232,7 @@
       <div class="tr-back clickable icon" style="color:#fff" onclick="goHome()"><svg viewBox="0 0 24 24"><use href="#i-back"/></svg></div>
       <div>
         <div class="game-title">まるばつバトル</div>
-        <div class="game-sub">勝利で🏆+10 / 敗北で🏆-3</div>
+        <div class="game-sub">勝利で🏆+10 / 敗北で🏆-2</div>
       </div>
     </div>
 
@@ -1189,7 +1257,22 @@
     </div>
   </div>
 
+  <!-- ============ STAGE-LEVEL OVERLAYS (usable from any screen) ============ -->
+  <div class="reward-overlay" id="reward-overlay" onclick="advanceRewardReveal()">
+    <div class="reward-star icon"><svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg></div>
+    <div class="reward-title" id="reward-title"></div>
+    <div class="reward-sub" id="reward-sub"></div>
+    <div class="reward-dots" id="reward-dots"></div>
+    <div class="reward-final-box" id="reward-final-box" style="display:none;"></div>
+  </div>
+
+  <div class="reward-overlay" id="rare-pick-overlay">
+    <div class="reward-title">好きなレアキャラを1体選んでください</div>
+    <div class="rare-pick-grid" id="rare-pick-grid"></div>
+  </div>
+
 </div>
+
 </div>
 
 <script>
@@ -1205,28 +1288,25 @@
   window.addEventListener('load', fitStage);
   fitStage();
 
-  /* ---------- character roster ---------- */
-  const CHARACTERS = [
-    { name: 'Low poly chibi base',                 author: 'torchwurm',       uid: '11769b72503d4a1cb92158c20af87c22' },
-    { name: 'LowPoly Character (Rigged)',           author: 'Tyronic_Games',   uid: '2a0bd3f2cb604e6ab8858e701e33642f' },
-    { name: 'Free Lowpoly Chibi Base Model',        author: 'mazko',           uid: '6f296bb009a14c49a368a0fd9472edcd' },
-    { name: 'Free Lowpoly Chibi Base Model (女性版)', author: 'mazko',         uid: '3772577dbf7c405fafd695e90a5b62dc' },
-    { name: 'Lowpoly Chibi Base',                   author: 'sarberry',        uid: '9f76b9a704854f159b211b4361e42ef3' },
-    { name: 'Chibi Character Lowpoly Base Mesh',    author: 'EnotoButerbrodo', uid: '40cf0491a7b541f7aee10c43b437e3f0' },
-    { name: 'Chibi Base Mesh Character (Female)',   author: 'BoxedbyTyler',    uid: '7008bf942159434b8e0c88430369b1ce' },
-    { name: 'Stylized Low Poly Character',          author: 'julink',         uid: '0a0b9ff6e422492d9e043f0f60264fda' },
-    { name: 'Game Ready Low Poly Character Tactical', author: 'DanlyVostok',   uid: '342501b0c84843a3a418319c31ea26fa' },
-    { name: 'Lowpoly Character (Blender)',          author: 'Mujib',           uid: '1746c19be81a46c884a279a13cb345b5' }
+  /* ---------- character roster ----------
+     Add new characters here directly in the code: copy a line, give it a
+     unique id, a name, a rarity (コモン/レア/スーパーレア/ハイパーレア/レジェンドレア),
+     and a direct .glb URL for <model-viewer>. That's it — no in-app form.
+     コモン characters are unlocked from the very start automatically. */
+  const CHARACTERS_DEF = [
+     { id: 'c1', name: 'コレット', rarity: 'ハイパーレア',     glbUrl: 'colette_2024_new_brawl_stars.glb' },
   ];
-  function charUnlockCost(index) { return 200 + (index - 1) * 300; }  // index: 2nd char = 1
-  function charGemPrice(index) { return 80 + (index - 1) * 20; }
 
-  function charEmbedHtml(c) {
+  const CHAR_RARITY_ORDER = ['コモン', 'レア', 'スーパーレア', 'ハイパーレア', 'レジェンドレア'];
+  const RARITY_COLOR = { 'コモン': '#aaaaaa', 'レア': '#3f9cff', 'スーパーレア': '#5be07a', 'ハイパーレア': '#c060f0', 'レジェンドレア': '#ffd400' };
+  const RARITY_TOKEN_COST = { 'レア': 500, 'スーパーレア': 700, 'ハイパーレア': 1500, 'レジェンドレア': 3000 };
+  const RARITY_GEM_COST = { 'レア': 50, 'スーパーレア': 70, 'ハイパーレア': 150, 'レジェンドレア': 300 };
+
+  function mvHtml(glbUrl) {
+    if (!glbUrl) return '<div class="mv-wrap"></div>';
     return (
-      '<div class="char-embed-wrap">' +
-        '<iframe loading="lazy" title="' + c.name + '" ' +
-        'src="https://sketchfab.com/models/' + c.uid + '/embed?autostart=0&ui_theme=dark&transparent=1&ui_infos=0&ui_watermark=0" ' +
-        'allow="autoplay; fullscreen; xr-spatial-tracking" allowfullscreen></iframe>' +
+      '<div class="mv-wrap">' +
+        '<model-viewer src="' + glbUrl + '" camera-controls auto-rotate disable-zoom exposure="1"></model-viewer>' +
       '</div>'
     );
   }
@@ -1333,8 +1413,9 @@
   }
 
   /* ---------- state ---------- */
-  const STORAGE_KEY = 'bs_mock_state_v2';
-  let state = { trophies: 0, energy: 0, coin: 0, gem: 0, token: 0, starCoin: 0, claimed: {}, unlockedCount: 1 };
+  const STORAGE_KEY = 'bs_mock_state_v3';
+  let state = { trophies: 0, energy: 0, coin: 0, gem: 0, token: 0, starCoin: 0, claimed: {},
+                characters: [], selectedCharacterId: null, rareGrantedCount: 0, unlockTargetId: null };
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (saved) state = saved;
@@ -1342,11 +1423,12 @@
   if (!state.claimed) state.claimed = {};
   state.token = state.token || 0;
   state.starCoin = state.starCoin || 0;
-  state.unlockedCount = state.unlockedCount || 1;
-  state.selectedCharacter = (typeof state.selectedCharacter === 'number') ? state.selectedCharacter : 0;
-  // clamp in case saved state referenced the old 20-character roster
-  state.unlockedCount = Math.min(state.unlockedCount, CHARACTERS.length);
-  state.selectedCharacter = Math.min(state.selectedCharacter, CHARACTERS.length - 1);
+  state.characters = state.characters || [];
+  state.rareGrantedCount = state.rareGrantedCount || 0;
+  state.dailyWins = state.dailyWins || 0;
+  state.dailyResetAt = state.dailyResetAt || null;
+  if (typeof state.selectedCharacterId === 'undefined') state.selectedCharacterId = null;
+  if (typeof state.unlockTargetId === 'undefined') state.unlockTargetId = null;
 
   function saveState() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
@@ -1364,25 +1446,76 @@
     if (charTokenEl) charTokenEl.textContent = state.token;
     if (charGemEl) charGemEl.textContent = state.gem;
     const badge = document.getElementById('char-badge-count');
-    if (badge) badge.textContent = Math.max(0, CHARACTERS.length - state.unlockedCount);
+    if (badge) badge.textContent = state.characters.filter(c => !c.unlocked).length;
   }
   function renderTrophy() {
     document.getElementById('home-trophy-val').textContent = state.trophies;
   }
+
+  /* ---------- daily wins (all-star track, resets 17:00 daily) ---------- */
+  const DAILY_WIN_SLOTS = 6;
+
+  function computeNextReset(now) {
+    const d = new Date(now);
+    d.setHours(17, 0, 0, 0);
+    if (d.getTime() <= now) d.setDate(d.getDate() + 1);
+    return d.getTime();
+  }
+
+  function checkDailyReset() {
+    const now = Date.now();
+    if (!state.dailyResetAt || now >= state.dailyResetAt) {
+      state.dailyWins = 0;
+      state.dailyResetAt = computeNextReset(now);
+      saveState();
+    }
+  }
+
+  function renderDailyWins() {
+    checkDailyReset();
+    const wrap = document.getElementById('daily-wins-row');
+    if (!wrap) return;
+
+    if (state.dailyWins >= DAILY_WIN_SLOTS) {
+      const msLeft = Math.max(0, state.dailyResetAt - Date.now());
+      const h = Math.floor(msLeft / 3600000);
+      const m = Math.floor((msLeft % 3600000) / 60000);
+      wrap.innerHTML = '<div class="daily-wins-reset">更新まであと ' + h + '時間' + m + '分</div>';
+      return;
+    }
+
+    wrap.innerHTML = Array.from({ length: DAILY_WIN_SLOTS }).map((_, i) => {
+      const done = i < state.dailyWins;
+      return (
+        '<div class="win-slot icon icon-55' + (done ? ' done' : '') + '" style="color:' + (done ? '#ffd400' : 'rgba(255,255,255,0.3)') + '">' +
+          '<svg viewBox="0 0 24 24"><use href="#i-star-burst"/></svg>' +
+        '</div>'
+      );
+    }).join('');
+  }
   renderCurrency();
   renderTrophy();
+  syncCharacterDefs();
+  renderCurrency();
   renderHomeAvatar();
+  renderDailyWins();
 
   /* ---------- screen switching ---------- */
   function showScreen(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
-  function goHome() { showScreen('screen-home'); }
+  function goHome() { showScreen('screen-home'); renderDailyWins(); }
   function openTrophyRoad() { showScreen('screen-trophyroad'); renderTrophyRoad(); }
   function openGame() { showScreen('screen-game'); initGame(); }
   function openShop() { showScreen('screen-shop'); renderCurrency(); renderShopSidebar(); selectShopTab(shopTab); }
-  function openCharacters() { showScreen('screen-characters'); renderCurrency(); renderCharacters(); renderCharCredits(); }
+  function openCharacters() {
+    showScreen('screen-characters');
+    syncCharacterDefs();
+    renderCurrency();
+    renderCharacters();
+    renderCharCredits();
+  }
 
   function showCharToast(text) {
     const toast = document.getElementById('char-toast');
@@ -1392,46 +1525,88 @@
     showCharToast._t = setTimeout(() => toast.classList.remove('show'), 2200);
   }
 
+  // Merge the hardcoded CHARACTERS_DEF list into persisted state, keeping each
+  // character's unlocked/progress status stable across edits (matched by id).
+  // コモン characters are always unlocked automatically.
+  function syncCharacterDefs() {
+    const prevById = {};
+    (state.characters || []).forEach(c => { prevById[c.id] = c; });
+
+    state.characters = CHARACTERS_DEF.map(def => {
+      const prev = prevById[def.id];
+      const isCommon = def.rarity === 'コモン';
+      return {
+        id: def.id,
+        name: def.name,
+        rarity: def.rarity,
+        glbUrl: def.glbUrl,
+        unlocked: isCommon ? true : (prev ? prev.unlocked : false)
+      };
+    });
+
+    // keep selection valid; default to the first unlocked character if needed
+    if (!state.characters.some(c => c.id === state.selectedCharacterId && c.unlocked)) {
+      const firstUnlocked = state.characters.find(c => c.unlocked);
+      state.selectedCharacterId = firstUnlocked ? firstUnlocked.id : null;
+    }
+    saveState();
+  }
+
+
   function renderCharacters() {
     const featured = document.getElementById('char-featured');
     const carousel = document.getElementById('char-carousel');
 
-    if (state.unlockedCount >= CHARACTERS.length) {
-      featured.innerHTML = '<div class="char-complete-msg">全キャラクター解放済み！</div>';
-    } else {
-      const nextIndex = state.unlockedCount; // 0-based index of next locked character
-      const next = CHARACTERS[nextIndex];
-      const cost = charUnlockCost(nextIndex + 1);
-      const gemPrice = charGemPrice(nextIndex + 1);
-      const ready = state.token >= cost;
-      const pct = Math.min(100, Math.floor((state.token / cost) * 100));
-
-      featured.innerHTML =
-        '<div class="char-featured-tag">次にアンロック</div>' +
-        '<div class="char-featured-name">' + next.name + '</div>' +
-        '<div class="char-featured-center">' + charEmbedHtml(next) + '</div>' +
-        '<div class="char-credit">by ' + next.author + ' (Sketchfab)</div>' +
-        '<div class="char-progress-wrap">' +
+    if (state.characters.length === 0) {
+      featured.innerHTML = '<div class="char-empty-msg">コード内の CHARACTERS_DEF にキャラクターを追加してください</div>';
+    } else if (state.unlockTargetId) {
+      const target = state.characters.find(c => c.id === state.unlockTargetId);
+      if (!target || target.unlocked) {
+        state.unlockTargetId = null;
+        featured.innerHTML = '<div class="char-choose-btn">下の一覧でロック中のキャラをタップしてアンロック対象に選ぶ</div>';
+      } else {
+        const cost = RARITY_TOKEN_COST[target.rarity] || 500;
+        const gemCost = RARITY_GEM_COST[target.rarity] || 50;
+        const ready = state.token >= cost;
+        const pct = Math.min(100, Math.floor((state.token / cost) * 100));
+        featured.innerHTML =
+          '<div class="char-featured-tag" style="background:' + RARITY_COLOR[target.rarity] + ';color:#1a1a1a;">アンロック対象</div>' +
+          '<div class="char-featured-name">' + target.name + '</div>' +
+          '<div class="char-featured-rarity" style="color:' + RARITY_COLOR[target.rarity] + ';">' + target.rarity + '</div>' +
+          '<div class="char-featured-center">' + mvHtml(target.glbUrl) + '</div>' +
           '<div class="char-progress-label"><div class="icon" style="color:#4fd6e0"><svg viewBox="0 0 24 24"><use href="#i-skull"/></svg></div>' + state.token + ' / ' + cost + '</div>' +
           '<div class="char-progress-bar"><div class="char-progress-fill" style="width:' + pct + '%;"></div></div>' +
-        '</div>' +
-        '<div class="char-featured-footer">' +
-          '<div class="char-claim-btn' + (ready ? '' : ' disabled') + '" onclick="claimCharacterUnlock()">アンロック</div>' +
-          '<div class="char-gem-btn" onclick="gemUnlockCharacter()"><div class="icon" style="color:#123a1a"><svg viewBox="0 0 24 24"><use href="#i-gem"/></svg></div>今すぐアンロック ' + gemPrice + '</div>' +
-        '</div>';
+          '<div class="char-claim-btn' + (ready ? '' : ' disabled') + '" onclick="claimTargetUnlock()">アンロック</div>' +
+          '<div class="char-gem-btn" onclick="gemUnlockTarget()"><div class="icon" style="color:#123a1a"><svg viewBox="0 0 24 24"><use href="#i-gem"/></svg></div>今すぐアンロック ' + gemCost + '</div>';
+      }
+    } else {
+      const active = state.characters.find(c => c.id === state.selectedCharacterId);
+      if (active) {
+        featured.innerHTML =
+          '<div class="char-featured-tag" style="background:' + RARITY_COLOR[active.rarity] + ';color:#1a1a1a;">使用中</div>' +
+          '<div class="char-featured-name">' + active.name + '</div>' +
+          '<div class="char-featured-rarity" style="color:' + RARITY_COLOR[active.rarity] + ';">' + active.rarity + '</div>' +
+          '<div class="char-featured-center">' + mvHtml(active.glbUrl) + '</div>' +
+          '<div class="char-choose-btn" onclick="promptChooseTarget()">アンロックするキャラを選ぶ</div>';
+      } else {
+        featured.innerHTML = '<div class="char-choose-btn" onclick="promptChooseTarget()">アンロックするキャラを選ぶ</div>';
+      }
     }
 
-    carousel.innerHTML = CHARACTERS.map((c, i) => {
-      const unlocked = i < state.unlockedCount;
-      const isNext = i === state.unlockedCount;
-      const isSelected = i === state.selectedCharacter;
+    carousel.innerHTML = state.characters.map(c => {
+      const isSelected = c.id === state.selectedCharacterId;
+      const isTarget = c.id === state.unlockTargetId;
+      let cls = 'panel char-card';
+      if (!c.unlocked) cls += ' locked';
+      if (isSelected) cls += ' selected';
+      if (isTarget) cls += ' target';
       return (
-        '<div class="panel char-card' + (unlocked ? '' : ' locked') + (isSelected ? ' selected' : '') + '" onclick="selectCharacter(' + i + ')">' +
-          (unlocked ? '' : '<div class="char-lock-badge icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></div>') +
-          (isNext ? '<div class="char-new-badge">NEXT</div>' : '') +
+        '<div class="' + cls + '" onclick="cardClicked(\'' + c.id + '\')">' +
+          (!c.unlocked ? '<div class="char-lock-badge icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#i-lock"/></svg></div>' : '') +
           (isSelected ? '<div class="char-selected-badge icon" style="color:#123a1a"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></div>' : '') +
-          '<div class="char-card-embed">' + charEmbedHtml(c) + '</div>' +
-          '<div class="char-card-name">' + c.name + (isSelected ? ' (使用中)' : '') + '</div>' +
+          '<div class="char-card-embed">' + mvHtml(c.glbUrl) + '</div>' +
+          '<div class="char-card-name">' + c.name + '</div>' +
+          '<div class="char-card-rarity" style="color:' + RARITY_COLOR[c.rarity] + ';">' + c.rarity + '</div>' +
         '</div>'
       );
     }).join('');
@@ -1440,15 +1615,34 @@
   function renderCharCredits() {
     const el = document.getElementById('char-credits');
     if (!el) return;
-    el.innerHTML = 'モデル提供: ' + CHARACTERS.map(c => c.author).join(' / ') + '(各Sketchfab)';
+    el.textContent = state.characters.length + ' 体登録済み';
   }
 
-  function selectCharacter(i) {
-    if (i >= state.unlockedCount) {
-      showCharToast('先にアンロックしてください');
+  function promptChooseTarget() {
+    if (state.characters.every(c => c.unlocked)) {
+      showCharToast('全キャラクター解放済みです');
       return;
     }
-    state.selectedCharacter = i;
+    showCharToast('下の一覧でロック中のキャラをタップしてください');
+  }
+
+  function cardClicked(id) {
+    const c = state.characters.find(x => x.id === id);
+    if (!c) return;
+    if (c.unlocked) {
+      selectCharacter(id);
+    } else if (c.rarity === 'レア') {
+      showCharToast('トロフィーが1000貯まるごとに自動で解放されます');
+    } else {
+      state.unlockTargetId = id;
+      saveState();
+      renderCharacters();
+      showCharToast(c.name + ' をアンロック対象に設定しました');
+    }
+  }
+
+  function selectCharacter(id) {
+    state.selectedCharacterId = id;
     saveState();
     renderCharacters();
     renderHomeAvatar();
@@ -1456,33 +1650,43 @@
 
   function renderHomeAvatar() {
     const slot = document.getElementById('home-avatar-slot');
-    if (slot) slot.innerHTML = charEmbedHtml(CHARACTERS[state.selectedCharacter]);
+    if (!slot) return;
+    const active = state.characters.find(c => c.id === state.selectedCharacterId && c.unlocked);
+    slot.innerHTML = active ? mvHtml(active.glbUrl) : '';
   }
 
-  function claimCharacterUnlock() {
-    if (state.unlockedCount >= CHARACTERS.length) return;
-    const nextIndex = state.unlockedCount;
-    const cost = charUnlockCost(nextIndex + 1);
+  function claimTargetUnlock() {
+    if (!state.unlockTargetId) return;
+    const target = state.characters.find(c => c.id === state.unlockTargetId);
+    if (!target || target.unlocked) return;
+    const cost = RARITY_TOKEN_COST[target.rarity] || 500;
     if (state.token < cost) return;
     state.token -= cost;
-    state.unlockedCount += 1;
+    target.unlocked = true;
+    state.unlockTargetId = null;
+    if (!state.selectedCharacterId) state.selectedCharacterId = target.id;
     saveState();
     renderCurrency();
     renderCharacters();
-    showCharToast(CHARACTERS[nextIndex].name + ' を解放しました！');
+    renderHomeAvatar();
+    showCharToast(target.name + ' を解放しました！');
   }
 
-  function gemUnlockCharacter() {
-    if (state.unlockedCount >= CHARACTERS.length) return;
-    const nextIndex = state.unlockedCount;
-    const price = charGemPrice(nextIndex + 1);
-    if (state.gem < price) { showCharToast('エメラルドが足りません'); return; }
-    state.gem -= price;
-    state.unlockedCount += 1;
+  function gemUnlockTarget() {
+    if (!state.unlockTargetId) return;
+    const target = state.characters.find(c => c.id === state.unlockTargetId);
+    if (!target || target.unlocked) return;
+    const gemCost = RARITY_GEM_COST[target.rarity] || 50;
+    if (state.gem < gemCost) { showCharToast('エメラルドが足りません'); return; }
+    state.gem -= gemCost;
+    target.unlocked = true;
+    state.unlockTargetId = null;
+    if (!state.selectedCharacterId) state.selectedCharacterId = target.id;
     saveState();
     renderCurrency();
     renderCharacters();
-    showCharToast(CHARACTERS[nextIndex].name + ' を解放しました！');
+    renderHomeAvatar();
+    showCharToast(target.name + ' を解放しました！');
   }
 
   function showShopToast(text) {
@@ -1620,9 +1824,131 @@
     showShopToast(label + ' +' + amount);
   }
 
-  /* ---------- trophy road: milestone schedule ---------- */
-  // 100〜1000: interval starts at 20, +10 every time trophies pass another 100.
-  // 1000〜2000: fixed interval of 100. 2000 is the max.
+  /* ---------- currency display helper ---------- */
+  const CURRENCY_DISPLAY = {
+    energy:   { name: 'サンダー',   icon: 'i-bolt' },
+    coin:     { name: 'コイン',     icon: 'i-coin' },
+    token:    { name: 'ドクロ',     icon: 'i-skull' },
+    starCoin: { name: '白丸',       icon: 'i-pearl' },
+    gem:      { name: 'エメラルド', icon: 'i-gem' }
+  };
+
+  // Picks one entry from a list; entries may specify `weight` (percent).
+  // Entries without a weight split the remaining percentage evenly.
+  function pickWeighted(entries) {
+    const specified = entries.filter(e => typeof e.weight === 'number');
+    const unspecified = entries.filter(e => typeof e.weight !== 'number');
+    const usedWeight = specified.reduce((s, e) => s + e.weight, 0);
+    const each = unspecified.length > 0 ? (100 - usedWeight) / unspecified.length : 0;
+    const pool = entries.map(e => ({ e: e, w: (typeof e.weight === 'number') ? e.weight : each }));
+    const total = pool.reduce((s, p) => s + p.w, 0);
+    let r = Math.random() * total;
+    for (const p of pool) {
+      if (r < p.w) return p.e;
+      r -= p.w;
+    }
+    return pool[pool.length - 1].e;
+  }
+
+  function grantRandomCharacter(fallback) {
+    const locked = state.characters.filter(c => c.rarity !== 'コモン' && !c.unlocked);
+    if (locked.length === 0) return fallback();
+    const pick = locked[Math.floor(Math.random() * locked.length)];
+    pick.unlocked = true;
+    if (!state.selectedCharacterId) state.selectedCharacterId = pick.id;
+    return { kind: 'character', name: pick.name };
+  }
+
+  /* ---------- STAR system: rarity gacha box opened from wins / trophy road ---------- */
+  const STAR_RARITY_ORDER = ['レア', 'スーパーレア', 'ハイパーレア', 'ウルトラレア', 'レジェンドレア'];
+  const STAR_RARITY_WEIGHTS = [
+    { tier: 'レア',       weight: 50 },
+    { tier: 'スーパーレア', weight: 20 },
+    { tier: 'ハイパーレア', weight: 20 },
+    { tier: 'ウルトラレア', weight: 5  },
+    { tier: 'レジェンドレア', weight: 5 }
+  ];
+  const STAR_RARITY_BG = {
+    'レア':         'linear-gradient(160deg,#7fe89a,#2fae55)',
+    'スーパーレア': 'linear-gradient(160deg,#6fb0ff,#2f6fe0)',
+    'ハイパーレア': 'linear-gradient(160deg,#d08aff,#8a2fe0)',
+    'ウルトラレア': 'linear-gradient(160deg,#ffb07a,#e05a2f)',
+    'レジェンドレア': 'linear-gradient(160deg,#fff28a,#ffb300)'
+  };
+
+  function rollStarRarity(forcedTier) {
+    if (forcedTier) return forcedTier;
+    const total = STAR_RARITY_WEIGHTS.reduce((s, r) => s + r.weight, 0);
+    let r = Math.random() * total;
+    for (const item of STAR_RARITY_WEIGHTS) {
+      if (r < item.weight) return item.tier;
+      r -= item.weight;
+    }
+    return STAR_RARITY_WEIGHTS[STAR_RARITY_WEIGHTS.length - 1].tier;
+  }
+
+  function ultraLegendFallback() {
+    state.token += 1000;
+    return { kind: 'currency', type: 'token', amount: 1000 };
+  }
+
+  function resolveStarContent(rarity) {
+    if (rarity === 'レア') {
+      const opt = pickWeighted([
+        { type: 'energy', amount: 50 }, { type: 'starCoin', amount: 100 },
+        { type: 'coin', amount: 100 }, { type: 'token', amount: 100 }
+      ]);
+      state[opt.type] += opt.amount;
+      return { kind: 'currency', type: opt.type, amount: opt.amount };
+    }
+    if (rarity === 'スーパーレア') {
+      const opt = pickWeighted([
+        { type: 'energy', amount: 200 }, { type: 'starCoin', amount: 500 },
+        { type: 'coin', amount: 500 }, { type: 'token', amount: 200 }
+      ]);
+      state[opt.type] += opt.amount;
+      return { kind: 'currency', type: opt.type, amount: opt.amount };
+    }
+    if (rarity === 'ハイパーレア') {
+      const opt = pickWeighted([
+        { type: 'energy', amount: 500 }, { type: 'starCoin', amount: 1000 },
+        { type: 'coin', amount: 1000 }, { type: 'token', amount: 500 }
+      ]);
+      state[opt.type] += opt.amount;
+      return { kind: 'currency', type: opt.type, amount: opt.amount };
+    }
+    if (rarity === 'ウルトラレア') {
+      const opt = pickWeighted([
+        { type: 'energy', amount: 1000 }, { type: 'coin', amount: 2000 },
+        { type: 'token', amount: 700 }, { kind: 'character' },
+        { type: 'gem', amount: 20, weight: 10 }
+      ]);
+      if (opt.kind === 'character') return grantRandomCharacter(ultraLegendFallback);
+      state[opt.type] += opt.amount;
+      return { kind: 'currency', type: opt.type, amount: opt.amount };
+    }
+    // レジェンドレア
+    const opt = pickWeighted([
+      { type: 'token', amount: 2000 }, { type: 'gem', amount: 50 },
+      { kind: 'character', weight: 50 }
+    ]);
+    if (opt.kind === 'character') return grantRandomCharacter(ultraLegendFallback);
+    state[opt.type] += opt.amount;
+    return { kind: 'currency', type: opt.type, amount: opt.amount };
+  }
+
+  function openStarBox(forcedTier, goHomeOnClose) {
+    const rarity = rollStarRarity(forcedTier);
+    const content = resolveStarContent(rarity);
+    saveState();
+    renderCurrency();
+    renderHomeAvatar();
+    startRewardReveal({ rarity: rarity, content: content }, goHomeOnClose);
+  }
+
+  /* ---------- trophy road: milestone schedule & rewards ---------- */
+  // 10〜1000: interval grows every 100 trophies. 1000〜10000: fixed 100 spacing.
+  // Beyond 10000: fixed 200 spacing, extended dynamically as the player progresses.
   function buildMilestones() {
     const list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
     let cur = 100;
@@ -1632,30 +1958,77 @@
       cur = Math.min(cur + interval, 1000);
       list.push(cur);
     }
-    for (let m = 1100; m <= 2000; m += 100) list.push(m);
+    for (let m = 1100; m <= 10000; m += 100) list.push(m);
+    for (let m = 10200; m <= 14000; m += 200) list.push(m);
     return [...new Set(list)];
   }
-  const MILESTONES = buildMilestones();
+  let MILESTONES = buildMilestones();
+  function extendMilestonesIfNeeded() {
+    let max = MILESTONES[MILESTONES.length - 1];
+    while (state.trophies + 2000 > max) {
+      max += 200;
+      MILESTONES.push(max);
+    }
+  }
 
-  const REWARD_CYCLE = [
-    { type: 'energy',   amount: 100,  icon: 'i-bolt',        color: '#ff5fd8', shape: 'circle', label: () => '⚡100' },
-    { type: 'coin',     amount: 300,  icon: 'i-coin',        color: '#ffcf40', shape: 'circle', label: () => '🪙300' },
-    { type: 'token',    amount: 100,  icon: 'i-skull',       color: '#4fd6e0', shape: 'square', label: () => '💀100' },
-    { type: 'starCoin', amount: 100,  icon: 'i-pearl',       color: '#f5f5f5', shape: 'circle', label: () => '◇100' },
-    { type: 'bonus',    amount: null, icon: 'i-star-burst',  color: '#ffd400', shape: 'circle', label: () => 'ランダム' }
+  // the 7-slot repeating reward cycle (applies to milestones <=10000 that
+  // aren't an exact multiple of 1000)
+  const TROPHY_CYCLE_BASE = [
+    { type: 'energy',   name: 'サンダー', amount: 100, icon: 'i-bolt',       color: '#ff5fd8', shape: 'circle' },
+    { type: 'coin',     name: 'コイン',   amount: 200, icon: 'i-coin',       color: '#ffcf40', shape: 'circle' },
+    { type: 'starCoin', name: '白丸',     amount: 100, icon: 'i-pearl',      color: '#f5f5f5', shape: 'circle' },
+    { type: 'token',    name: 'ドクロ',   amount: 100, icon: 'i-skull',      color: '#4fd6e0', shape: 'square' },
+    { special: 'star',                    icon: 'i-star-burst', color: '#ffe066', shape: 'circle' },
+    { special: 'alt6',                    icon: 'i-coin',       color: '#ffcf40', shape: 'circle' },
+    { special: 'rarePick',                icon: 'i-star-burst', color: '#3f9cff', shape: 'circle' }
   ];
 
-  function rewardForMilestone(m) {
-    const idx = MILESTONES.indexOf(m);
-    return REWARD_CYCLE[idx % REWARD_CYCLE.length];
+  function cycleSlotCount(m) {
+    let count = 0;
+    for (const mm of MILESTONES) {
+      if (mm >= m) break;
+      if (mm % 1000 !== 0 && mm <= 10000) count++;
+    }
+    return count;
+  }
+
+  function rewardDefForMilestone(m) {
+    if (m % 1000 === 0) {
+      const multiple = m / 1000;
+      return (multiple % 2 === 1)
+        ? { special: 'legendStar', icon: 'i-star-burst', color: '#ffd400', shape: 'circle' }
+        : { special: 'emerald', amount: 50, icon: 'i-gem', color: '#5be07a', shape: 'circle' };
+    }
+    if (m > 10000) {
+      return { type: 'token', name: 'ドクロ', amount: 100, icon: 'i-skull', color: '#4fd6e0', shape: 'square' };
+    }
+    const count = cycleSlotCount(m);
+    const slotIdx = count % TROPHY_CYCLE_BASE.length;
+    const cycleNum = Math.floor(count / TROPHY_CYCLE_BASE.length);
+    const base = TROPHY_CYCLE_BASE[slotIdx];
+    if (base.special === 'alt6') {
+      return (cycleNum % 2 === 0)
+        ? { type: 'coin', name: 'コイン', amount: 1000, icon: 'i-coin', color: '#ffcf40', shape: 'circle' }
+        : { type: 'energy', name: 'サンダー', amount: 500, icon: 'i-bolt', color: '#ff5fd8', shape: 'circle' };
+    }
+    return base;
+  }
+
+  function rewardLabel(reward) {
+    if (reward.special === 'star' || reward.special === 'legendStar') return '⭐?';
+    if (reward.special === 'emerald') return '💎' + reward.amount;
+    if (reward.special === 'rarePick') return '🎯選択';
+    const iconChar = reward.icon === 'i-bolt' ? '⚡' : reward.icon === 'i-coin' ? '🪙' : reward.icon === 'i-skull' ? '💀' : '◇';
+    return iconChar + reward.amount;
   }
 
   function renderTrophyRoad() {
+    extendMilestonesIfNeeded();
     const track = document.getElementById('tr-track');
     track.innerHTML = '<div class="tr-line"></div>';
 
     MILESTONES.forEach(m => {
-      const reward = rewardForMilestone(m);
+      const reward = rewardDefForMilestone(m);
       const claimed = !!state.claimed[m];
       const claimable = !claimed && state.trophies >= m;
       const locked = !claimed && state.trophies < m;
@@ -1678,7 +2051,7 @@
       }
 
       node.innerHTML =
-        '<div class="tr-callout"><div class="icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#' + reward.icon + '"/></svg></div>' + reward.label() + '</div>' +
+        '<div class="tr-callout"><div class="icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#' + reward.icon + '"/></svg></div>' + rewardLabel(reward) + '</div>' +
         '<div class="' + circleClasses + '" style="background:' + reward.color + ';"' + (claimable ? ' onclick="claimMilestone(' + m + ')"' : '') + '>' +
           '<div class="icon" style="color:#241a3a"><svg viewBox="0 0 24 24"><use href="#' + reward.icon + '"/></svg></div>' +
           (claimed ? '<div class="tr-check icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#i-check"/></svg></div>' : '') +
@@ -1708,33 +2081,159 @@
 
   function claimMilestone(m) {
     if (state.claimed[m] || state.trophies < m) return;
-    const reward = rewardForMilestone(m);
-    let msg = '';
+    const reward = rewardDefForMilestone(m);
 
-    if (reward.type === 'bonus') {
-      if (Math.random() < 0.5) {
-        state.coin += 1000;
-        msg = 'コイン +1000';
+    if (reward.special === 'emerald') {
+      state.gem += reward.amount;
+      state.claimed[m] = true;
+      saveState();
+      renderCurrency();
+      renderTrophyRoad();
+      showTrophyToast('エメラルド +' + reward.amount);
+      return;
+    }
+
+    if (reward.special === 'legendStar' || reward.special === 'star') {
+      state.claimed[m] = true;
+      saveState();
+      renderTrophyRoad();
+      openStarBox(reward.special === 'legendStar' ? 'レジェンドレア' : null, false);
+      return;
+    }
+
+    if (reward.special === 'rarePick') {
+      const hasRare = state.characters.some(c => c.rarity === 'レア' && c.unlocked);
+      state.claimed[m] = true;
+      saveState();
+      renderTrophyRoad();
+      if (!hasRare) {
+        openRarePicker();
       } else {
-        state.energy += 500;
-        msg = 'サンダー +500';
+        state.token += 100;
+        saveState();
+        renderCurrency();
+        showTrophyToast('ドクロ +100');
       }
-    } else {
-      state[reward.type] += reward.amount;
-      msg = reward.label() + ' 獲得';
+      return;
     }
 
-    if (m % 1000 === 0) {
-      state.gem += 50;
-      msg += ' / エメラルド +50';
-    }
-
+    state[reward.type] += reward.amount;
     state.claimed[m] = true;
     saveState();
     renderCurrency();
     renderTrophyRoad();
-    showTrophyToast(msg);
+    showTrophyToast(reward.name + ' +' + reward.amount);
   }
+
+  function openRarePicker() {
+    const pool = state.characters.filter(c => c.rarity === 'レア' && !c.unlocked);
+    const grid = document.getElementById('rare-pick-grid');
+    if (pool.length === 0) {
+      state.token += 100;
+      saveState();
+      renderCurrency();
+      showTrophyToast('選べるレアキャラがないためドクロ +100');
+      return;
+    }
+    grid.innerHTML = pool.map(c =>
+      '<div class="rare-pick-card" onclick="pickRareCharacterFree(\'' + c.id + '\')">' +
+        mvHtml(c.glbUrl) +
+        '<div class="rare-pick-name">' + c.name + '</div>' +
+      '</div>'
+    ).join('');
+    document.getElementById('rare-pick-overlay').classList.add('show');
+  }
+
+  function pickRareCharacterFree(id) {
+    const c = state.characters.find(x => x.id === id);
+    if (!c || c.unlocked) return;
+    c.unlocked = true;
+    if (!state.selectedCharacterId) state.selectedCharacterId = c.id;
+    saveState();
+    renderCurrency();
+    renderHomeAvatar();
+    document.getElementById('rare-pick-overlay').classList.remove('show');
+    showTrophyToast(c.name + ' を仲間にしました！');
+  }
+
+  /* ---------- reward reveal animation (always exactly 4 taps) ---------- */
+  let rewardRevealState = null;
+
+  function buildRevealSequence(finalTier) {
+    const idx = STAR_RARITY_ORDER.indexOf(finalTier);
+    let climb = STAR_RARITY_ORDER.slice(0, idx + 1);
+    if (climb.length < 4) {
+      while (climb.length < 4) climb.push(finalTier);
+    } else if (climb.length > 4) {
+      climb = climb.slice(climb.length - 4);
+    }
+    return climb;
+  }
+
+  function startRewardReveal(data, goHomeOnClose) {
+    const sequence = buildRevealSequence(data.rarity);
+    rewardRevealState = { sequence: sequence, step: 0, phase: 'climbing', data: data, goHomeOnClose: !!goHomeOnClose };
+    document.getElementById('reward-overlay').classList.add('show');
+    document.getElementById('reward-final-box').style.display = 'none';
+    document.getElementById('reward-sub').style.display = 'block';
+    document.getElementById('reward-dots').style.display = 'flex';
+    renderRewardClimbStep();
+  }
+
+  function renderRewardClimbStep() {
+    const { sequence, step } = rewardRevealState;
+    const tier = sequence[step];
+    const overlay = document.getElementById('reward-overlay');
+    overlay.style.background = STAR_RARITY_BG[tier];
+    document.getElementById('reward-title').textContent = tier;
+    document.getElementById('reward-sub').textContent = 'レア度上昇チャンス';
+    document.getElementById('reward-dots').innerHTML = sequence.map((t, i) =>
+      '<div class="reward-dot' + (i < step ? ' filled' : '') + (i === step ? ' current' : '') + '"></div>'
+    ).join('');
+    const starEl = document.querySelector('#reward-overlay .reward-star');
+    starEl.style.animation = 'none';
+    void starEl.offsetWidth;
+    starEl.style.animation = '';
+  }
+
+  function advanceRewardReveal() {
+    if (!rewardRevealState || rewardRevealState.phase === 'detail') return;
+    const { sequence } = rewardRevealState;
+    if (rewardRevealState.step < sequence.length - 1) {
+      rewardRevealState.step++;
+      renderRewardClimbStep();
+    } else {
+      rewardRevealState.phase = 'detail';
+      renderRewardDetail();
+    }
+  }
+
+  function renderRewardDetail() {
+    const data = rewardRevealState.data;
+    document.getElementById('reward-sub').style.display = 'none';
+    document.getElementById('reward-dots').style.display = 'none';
+    const box = document.getElementById('reward-final-box');
+    box.style.display = 'flex';
+
+    let html = '';
+    const c = data.content;
+    if (c.kind === 'character') {
+      html += '<div class="reward-line">🎉 新キャラ「' + c.name + '」解放！</div>';
+    } else {
+      const disp = CURRENCY_DISPLAY[c.type];
+      html += '<div class="reward-line"><div class="icon" style="color:#fff"><svg viewBox="0 0 24 24"><use href="#' + disp.icon + '"/></svg></div>' + disp.name + ' +' + c.amount + '</div>';
+    }
+    html += '<div class="reward-claim-btn" onclick="event.stopPropagation(); closeRewardReveal();">受け取る</div>';
+    box.innerHTML = html;
+  }
+
+  function closeRewardReveal() {
+    document.getElementById('reward-overlay').classList.remove('show');
+    const shouldGoHome = rewardRevealState && rewardRevealState.goHomeOnClose;
+    rewardRevealState = null;
+    if (shouldGoHome) goHome();
+  }
+
 
   /* ---------- tic-tac-toe ---------- */
   let board = Array(9).fill(null);
@@ -1792,17 +2291,34 @@
   }
 
   function endGame(result) {
+    if (result === 'win') {
+      state.trophies += 10;
+      checkDailyReset();
+      if (state.dailyWins >= DAILY_WIN_SLOTS) {
+        saveState();
+        renderTrophy();
+        renderCurrency();
+        document.getElementById('result-title').textContent = '勝利!';
+        document.getElementById('result-detail-wrap').innerHTML =
+          '<div class="result-detail">🏆 +10</div><div class="result-detail">本日のスター上限に到達しました</div>';
+        document.getElementById('result-overlay').classList.add('show');
+        return;
+      }
+      state.dailyWins++;
+      saveState();
+      renderTrophy();
+      renderCurrency();
+      renderDailyWins();
+      openStarBox(null, true);
+      return;
+    }
+
     let title = '';
     let detail = '';
-
-    if (result === 'win') {
-      title = '勝利!';
-      state.trophies += 10;
-      detail += '<div class="result-detail">🏆 +10</div>';
-    } else if (result === 'lose') {
+    if (result === 'lose') {
       title = '敗北…';
-      state.trophies = Math.max(0, state.trophies - 3);
-      detail += '<div class="result-detail">🏆 -3</div>';
+      state.trophies = Math.max(0, state.trophies - 2);
+      detail += '<div class="result-detail">🏆 -2</div>';
     } else {
       title = '引き分け';
       detail += '<div class="result-detail">変化なし</div>';
