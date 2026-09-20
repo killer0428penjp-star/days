@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI HUB</title>
+<style>
+:root{
+  --bg:#0a0e14; --panel:#10161f; --panel2:#151d29; --border:#1e2937;
+  --accent:#00e5ff; --accent2:#ff2ec4; --text:#dbe6f0; --muted:#5f7285;
+  --danger:#ff4757; --ok:#2ed573;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Sidebar */
+#sidebar{width:220px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 10px}
+.logo{font-size:16px;font-weight:700;letter-spacing:2px;color:var(--accent);text-shadow:0 0 8px rgba(0,229,255,.5);padding:6px 10px 20px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);transition:.15s}
+.nav-item:hover{background:var(--panel2);color:var(--text)}
+.nav-item.active{background:rgba(0,229,255,.08);color:var(--accent);border:1px solid rgba(0,229,255,.3)}
+.app-list{margin-top:14px;display:flex;flex-direction:column;gap:6px;flex:1;overflow-y:auto}
+.app-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.add-btn{margin-top:10px;padding:10px;border:1px dashed var(--border);border-radius:8px;text-align:center;color:var(--muted);cursor:pointer;font-size:12px}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.notif-toggle{margin-top:14px;padding:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between}
+
+/* Main */
+#main{flex:1;display:flex;flex-direction:column;min-width:0}
+#topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--panel)}
+#topbar .title{font-size:14px;font-weight:600}
+
+#chat-view{flex:1;display:flex;flex-direction:column;min-height:0}
+#messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:70%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;white-space:pre-wrap}
+.msg.user{align-self:flex-end;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.3)}
+.msg.ai{align-self:flex-start;background:var(--panel2);border:1px solid var(--border)}
+.msg.err{align-self:flex-start;background:rgba(255,71,87,.1);border:1px solid var(--danger);color:var(--danger)}
+#input-bar{display:flex;gap:8px;padding:14px;border-top:1px solid var(--border);background:var(--panel)}
+#input-bar textarea{flex:1;resize:none;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:13px;height:44px}
+#input-bar button{background:var(--accent);color:#001018;border:none;border-radius:8px;padding:0 18px;font-weight:700;cursor:pointer}
+#input-bar button:disabled{opacity:.4;cursor:not-allowed}
+#empty-state{flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;flex-direction:column;gap:10px}
+
+/* Panels: accounts / history */
+.panel-view{flex:1;overflow-y:auto;padding:20px}
+.card{background:var(--panel2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.card h4{font-size:13px;margin-bottom:4px}
+.card p{font-size:11px;color:var(--muted);margin-bottom:8px}
+.row{display:flex;gap:8px;align-items:center}
+.card input{flex:1;background:var(--panel);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 8px;font-size:12px}
+.btn-sm{background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer}
+.btn-sm:hover{background:rgba(0,229,255,.1)}
+.btn-danger{border-color:var(--danger);color:var(--danger)}
+
+/* History */
+#history-search{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:12px;margin-bottom:12px}
+.hist-item{padding:10px 12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;cursor:pointer;font-size:12px}
+.hist-item:hover{border-color:var(--accent)}
+.hist-item .t{font-weight:600;margin-bottom:2px}
+.hist-item .m{color:var(--muted);font-size:11px}
+
+/* Modal / wizard */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:50}
+.overlay.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px;width:380px;max-height:88vh;overflow-y:auto}
+.modal h3{font-size:15px;margin-bottom:4px;color:var(--accent)}
+.step-indicator{display:flex;gap:6px;margin-bottom:16px}
+.step-indicator span{flex:1;height:3px;border-radius:2px;background:var(--border)}
+.step-indicator span.done{background:var(--accent)}
+.field{margin-bottom:12px}
+.field label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px}
+.field input,.field select{width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:12px}
+.modal-actions{display:flex;gap:8px;margin-top:16px;justify-content:space-between}
+.hint{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6}
+.provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.provider-card{border:1px solid var(--border);border-radius:8px;padding:12px 10px;text-align:center;cursor:pointer;font-size:12px}
+.provider-card:hover{border-color:var(--accent)}
+.provider-card.sel{border-color:var(--accent);background:rgba(0,229,255,.08);color:var(--accent)}
+.step-title{font-size:12px;font-weight:600;margin-bottom:8px;color:var(--text)}
+.validate-row{display:flex;gap:8px;align-items:center;margin-top:6px}
+.status-badge{font-size:11px;padding:4px 8px;border-radius:6px}
+.status-badge.ok{background:rgba(46,213,115,.12);color:var(--ok);border:1px solid var(--ok)}
+.status-badge.err{background:rgba(255,71,87,.12);color:var(--danger);border:1px solid var(--danger)}
+.status-badge.checking{background:rgba(0,229,255,.1);color:var(--accent);border:1px solid var(--accent)}
+.link-btn{display:inline-block;background:var(--panel2);border:1px solid var(--accent);color:var(--accent);padding:8px 12px;border-radius:8px;font-size:12px;text-decoration:none;margin-top:4px}
+.link-btn:hover{background:rgba(0,229,255,.1)}
+.numbered{list-style:none;counter-reset:step;margin:8px 0}
+.numbered li{counter-increment:step;padding-left:22px;position:relative;font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.5}
+.numbered li::before{content:counter(step);position:absolute;left:0;top:0;width:16px;height:16px;border-radius:50%;background:var(--panel2);border:1px solid var(--accent);color:var(--accent);font-size:10px;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <div class="logo">AI HUB</div>
+  <div class="nav-item active" data-nav="chat"><span>💬</span>チャット</div>
+  <div class="nav-item" data-nav="accounts"><span>🔑</span>アカウント</div>
+  <div class="nav-item" data-nav="history"><span>🕓</span>履歴</div>
+  <div class="app-list" id="app-list"></div>
+  <div class="add-btn" id="add-app-btn">+ アプリを追加 (<span id="app-count">0</span>/5)</div>
+  <div class="notif-toggle">
+    <span>通知</span>
+    <input type="checkbox" id="notif-check">
+  </div>
+</div>
+
+<div id="main">
+  <div id="topbar">
+    <span class="title" id="view-title">チャット</span>
+  </div>
+
+  <div id="chat-view" style="display:none">
+    <div id="messages"></div>
+    <div id="input-bar">
+      <textarea id="input" placeholder="メッセージを入力 (Shift+Enterで改行)"></textarea>
+      <button id="send-btn">送信</button>
+    </div>
+  </div>
+
+  <div id="empty-state">
+    <div>まだアプリが登録されていません</div>
+    <div class="btn-sm" id="empty-add-btn">アプリを追加</div>
+  </div>
+
+  <div id="accounts-view" class="panel-view" style="display:none"></div>
+  <div id="history-view" class="panel-view" style="display:none">
+    <input id="history-search" placeholder="履歴を検索...">
+    <div id="history-list"></div>
+  </div>
+</div>
+
+<div class="overlay" id="app-modal">
+  <div class="modal">
+    <h3>アプリを追加</h3>
+    <div class="step-indicator"><span id="si-1"></span><span id="si-2"></span><span id="si-3"></span></div>
+
+    <!-- STEP 1: provider select -->
+    <div id="step-1">
+      <div class="step-title">1. どのAIを追加しますか?</div>
+      <div class="provider-grid" id="provider-grid"></div>
+    </div>
+
+    <!-- STEP 2: guided key acquisition + validation -->
+    <div id="step-2" style="display:none">
+      <div class="step-title">2. APIキーを取得して貼り付け</div>
+      <ol class="numbered" id="step2-instructions"></ol>
+      <a href="#" target="_blank" class="link-btn" id="open-key-page">キー取得ページを開く ↗</a>
+      <div class="field" style="margin-top:12px">
+        <label>表示名</label>
+        <input id="m-name" placeholder="例: Gemini">
+      </div>
+      <div class="field" id="m-endpoint-field" style="display:none">
+        <label>エンドポイントURL</label>
+        <input id="m-endpoint" placeholder="https://api.example.com/v1/chat/completions">
+      </div>
+      <div class="field">
+        <label>APIキー</label>
+        <input id="m-key" type="password" placeholder="ここに貼り付け">
+        <div class="validate-row">
+          <button class="btn-sm" id="validate-btn">キーを確認</button>
+          <span id="validate-status"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: model select -->
+    <div id="step-3" style="display:none">
+      <div class="step-title">3. モデルを選択</div>
+      <div class="field">
+        <select id="m-model"></select>
+      </div>
+      <div class="hint">迷ったら一番上（推奨）のままでOKです。</div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-sm btn-danger" id="m-cancel">キャンセル</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn-sm" id="m-back" style="display:none">戻る</button>
+        <button class="btn-sm" id="m-next">次へ</button>
+        <button class="btn-sm" id="m-save" style="display:none">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS_APPS='aihub_apps', LS_CONV='aihub_conv', LS_SETTINGS='aihub_settings';
+const COLORS=['#00e5ff','#ff2ec4','#2ed573','#ffa502','#a55eea'];
+
+const PROVIDERS = {
+  gemini:{
+    label:'Gemini', keyPageUrl:'https://aistudio.google.com/apikey',
+    steps:['「キー取得ページを開く」をクリック','Googleアカウントでログイン','「Create API key」をクリック','表示されたキーをコピーして下の欄に貼り付け'],
+    defaultModels:[{id:'gemini-2.5-flash',label:'gemini-2.5-flash (推奨・高速)'},{id:'gemini-2.5-pro',label:'gemini-2.5-pro (高精度)'}],
+    needsEndpoint:false,
+    validate: async (key)=>{
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+      if(!res.ok) throw new Error('キーが無効です');
+      return true;
+    }
+  },
+  openai:{
+    label:'ChatGPT', keyPageUrl:'https://platform.openai.com/api-keys',
+    steps:['「キー取得ページを開く」をクリック','OpenAIアカウントでログイン(未登録なら新規作成)','「Create new secret key」をクリック','表示されたキーをコピーして下の欄に貼り付け(1度しか表示されません)'],
+    defaultModels:[{id:'gpt-4o-mini',label:'gpt-4o-mini (推奨・低コスト)'},{id:'gpt-4o',label:'gpt-4o (高精度)'}],
+    needsEndpoint:false,
+    validate: async (key)=>{
+      const res = await fetch('https://api.openai.com/v1/models', {headers:{'Authorization':'Bearer '+key}});
+      if(!res.ok) throw new Error('キーが無効、またはブラウザからの検証がブロックされました');
+      return true;
+    }
+  },
+  claude:{
+    label:'Claude', keyPageUrl:'https://console.anthropic.com/settings/keys',
+    steps:['「キー取得ページを開く」をクリック','Anthropicアカウントでログイン','「Create Key」をクリック','表示されたキーをコピーして下の欄に貼り付け'],
+    defaultModels:[{id:'claude-sonnet-4-5',label:'claude-sonnet-4-5 (推奨)'},{id:'claude-opus-4-1',label:'claude-opus-4-1 (高精度)'}],
+    needsEndpoint:false,
+    validate: async (key)=>{
+      const res = await fetch('https://api.anthropic.com/v1/models', {headers:{'x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'}});
+      if(!res.ok) throw new Error('キーが無効、またはブラウザからの検証がブロックされました');
+      return true;
+    }
+  },
+  copilot:{
+    label:'Copilot', keyPageUrl:'https://copilot.microsoft.com',
+    steps:['Copilotは個人向け公開APIがありません','このアプリからはチャットできません','「アカウント」タブからログイン画面のみ開けます'],
+    defaultModels:[], needsEndpoint:false, noKey:true,
+    validate: async ()=>true
+  },
+  custom:{
+    label:'その他', keyPageUrl:'',
+    steps:['利用したいAI(Grok/DeepSeek等)の管理画面でAPIキーを発行','OpenAI互換のエンドポイントURLを確認','エンドポイントとキーを下欄に入力'],
+    defaultModels:[{id:'default',label:'(サービスのデフォルトモデル)'}],
+    needsEndpoint:true,
+    validate: async (key, endpoint)=>{
+      if(!endpoint) throw new Error('エンドポイントURLを入力してください');
+      return true; // 汎用のため検証はスキップし保存時に実際の通信で確認
+    }
+  }
+};
+
+let apps = JSON.parse(localStorage.getItem(LS_APPS) || '[]');
+let convs = JSON.parse(localStorage.getItem(LS_CONV) || '[]');
+let settings = JSON.parse(localStorage.getItem(LS_SETTINGS) || '{"notifications":false}');
+let activeAppId = null;
+let activeConvId = null;
+let currentView = 'chat';
+
+function save(){
+  localStorage.setItem(LS_APPS, JSON.stringify(apps));
+  localStorage.setItem(LS_CONV, JSON.stringify(convs));
+  localStorage.setItem(LS_SETTINGS, JSON.stringify(settings));
+}
+
+// ---------- Sidebar / nav ----------
+function renderAppList(){
+  const list = document.getElementById('app-list');
+  list.innerHTML='';
+  apps.forEach(a=>{
+    const el=document.createElement('div');
+    el.className='nav-item' + (a.id===activeAppId && currentView==='chat' ? ' active':'');
+    el.innerHTML=`<span class="app-dot" style="background:${a.color}"></span>${a.name}`;
+    el.onclick=()=>{ activeAppId=a.id; switchView('chat'); };
+    list.appendChild(el);
+  });
+  document.getElementById('app-count').textContent = apps.length;
+}
+
+document.querySelectorAll('.nav-item[data-nav]').forEach(el=>{
+  el.onclick=()=>switchView(el.dataset.nav);
+});
+
+function switchView(view){
+  currentView = view;
+  document.querySelectorAll('.nav-item[data-nav]').forEach(el=>{
+    el.classList.toggle('active', el.dataset.nav===view);
+  });
+  document.getElementById('chat-view').style.display='none';
+  document.getElementById('accounts-view').style.display='none';
+  document.getElementById('history-view').style.display='none';
+  document.getElementById('empty-state').style.display='none';
+
+  if(view==='chat'){
+    if(!activeAppId && apps.length) activeAppId=apps[0].id;
+    if(!activeAppId){ document.getElementById('empty-state').style.display='flex'; document.getElementById('view-title').textContent='チャット'; renderAppList(); return; }
+    document.getElementById('chat-view').style.display='flex';
+    const app = apps.find(a=>a.id===activeAppId);
+    document.getElementById('view-title').textContent = app.name;
+    renderMessages();
+  } else if(view==='accounts'){
+    document.getElementById('accounts-view').style.display='block';
+    document.getElementById('view-title').textContent='アカウント';
+    renderAccounts();
+  } else if(view==='history'){
+    document.getElementById('history-view').style.display='block';
+    document.getElementById('view-title').textContent='履歴';
+    renderHistory();
+  }
+  renderAppList();
+}
+
+// ---------- Add-app wizard ----------
+const modal = document.getElementById('app-modal');
+let wizStep = 1;
+let wizProvider = null;
+let wizKeyValid = false;
+
+function openModal(){
+  if(apps.length>=5){ alert('アプリは最大5つまでです'); return; }
+  wizStep = 1; wizProvider = null; wizKeyValid = false;
+  document.getElementById('m-name').value='';
+  document.getElementById('m-key').value='';
+  document.getElementById('m-endpoint').value='';
+  document.getElementById('validate-status').innerHTML='';
+  renderProviderGrid();
+  goToStep(1);
+  modal.classList.add('show');
+}
+document.getElementById('add-app-btn').onclick=openModal;
+document.getElementById('empty-add-btn').onclick=openModal;
+document.getElementById('m-cancel').onclick=()=>modal.classList.remove('show');
+
+function renderProviderGrid(){
+  const grid = document.getElementById('provider-grid');
+  grid.innerHTML='';
+  Object.entries(PROVIDERS).forEach(([key,p])=>{
+    const el=document.createElement('div');
+    el.className='provider-card' + (wizProvider===key?' sel':'');
+    el.textContent = p.label;
+    el.onclick=()=>{ wizProvider=key; renderProviderGrid(); };
+    grid.appendChild(el);
+  });
+}
+
+function goToStep(n){
+  wizStep = n;
+  [1,2,3].forEach(i=>{
+    document.getElementById('step-'+i).style.display = i===n ? 'block':'none';
+    document.getElementById('si-'+i).classList.toggle('done', i<=n);
+  });
+  document.getElementById('m-back').style.display = n>1 ? 'inline-block':'none';
+  document.getElementById('m-next').style.display = n<3 ? 'inline-block':'none';
+  document.getElementById('m-save').style.display = n===3 ? 'inline-block':'none';
+
+  if(n===2 && wizProvider){
+    const p = PROVIDERS[wizProvider];
+    document.getElementById('open-key-page').href = p.keyPageUrl || '#';
+    document.getElementById('open-key-page').style.display = p.keyPageUrl ? 'inline-block':'none';
+    const list = document.getElementById('step2-instructions');
+    list.innerHTML = p.steps.map(s=>`<li>${s}</li>`).join('');
+    document.getElementById('m-endpoint-field').style.display = p.needsEndpoint ? 'block':'none';
+    const keyField = document.getElementById('m-key').closest('.field');
+    keyField.style.display = p.noKey ? 'none' : 'block';
+  }
+  if(n===3 && wizProvider){
+    const sel = document.getElementById('m-model');
+    sel.innerHTML = PROVIDERS[wizProvider].defaultModels.map(m=>`<option value="${m.id}">${m.label}</option>`).join('');
+  }
+}
+
+document.getElementById('m-next').onclick=()=>{
+  if(wizStep===1){
+    if(!wizProvider){ alert('AIを選択してください'); return; }
+    goToStep(2);
+  } else if(wizStep===2){
+    const p = PROVIDERS[wizProvider];
+    if(!document.getElementById('m-name').value.trim()){ alert('表示名を入力してください'); return; }
+    if(!p.noKey && !wizKeyValid){ if(!confirm('キーが未確認です。確認せずに進みますか?')) return; }
+    goToStep(3);
+  }
+};
+document.getElementById('m-back').onclick=()=>goToStep(wizStep-1);
+
+document.getElementById('validate-btn').onclick = async ()=>{
+  const status = document.getElementById('validate-status');
+  const p = PROVIDERS[wizProvider];
+  const key = document.getElementById('m-key').value.trim();
+  const endpoint = document.getElementById('m-endpoint').value.trim();
+  if(!key){ alert('APIキーを入力してください'); return; }
+  status.innerHTML = '<span class="status-badge checking">確認中...</span>';
+  try{
+    await p.validate(key, endpoint);
+    wizKeyValid = true;
+    status.innerHTML = '<span class="status-badge ok">✓ 有効なキーです</span>';
+  }catch(err){
+    wizKeyValid = false;
+    status.innerHTML = `<span class="status-badge err">✕ ${err.message}</span>`;
+  }
+};
+
+document.getElementById('m-save').onclick=()=>{
+  const name = document.getElementById('m-name').value.trim();
+  if(!name){ alert('表示名を入力してください'); return; }
+  const app = {
+    id: 'app_'+Date.now(),
+    name,
+    provider: wizProvider,
+    model: document.getElementById('m-model').value,
+    apiKey: document.getElementById('m-key').value.trim(),
+    endpoint: document.getElementById('m-endpoint').value.trim(),
+    accountLabel: '',
+    color: COLORS[apps.length % COLORS.length]
+  };
+  apps.push(app);
+  save();
+  modal.classList.remove('show');
+  activeAppId = app.id;
+  switchView('chat');
+};
+
+// ---------- Chat ----------
+function currentConv(){
+  return convs.find(c=>c.id===activeConvId && c.appId===activeAppId);
+}
+function ensureConv(){
+  let c = currentConv();
+  if(!c){
+    c = { id:'conv_'+Date.now(), appId:activeAppId, title:'新規会話', messages:[], updatedAt:Date.now() };
+    convs.unshift(c);
+    activeConvId = c.id;
+  }
+  return c;
+}
+function renderMessages(){
+  const box = document.getElementById('messages');
+  box.innerHTML='';
+  const c = convs.find(c=>c.appId===activeAppId && c.id===activeConvId);
+  (c ? c.messages : []).forEach(m=>{
+    const el=document.createElement('div');
+    el.className='msg ' + (m.role==='user'?'user':(m.role==='error'?'err':'ai'));
+    el.textContent = m.text;
+    box.appendChild(el);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+
+document.getElementById('send-btn').onclick=sendMessage;
+document.getElementById('input').addEventListener('keydown', e=>{
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
+
+async function sendMessage(){
+  const input = document.getElementById('input');
+  const text = input.value.trim();
+  if(!text) return;
+  const app = apps.find(a=>a.id===activeAppId);
+  if(!app) return;
+  if(app.provider==='copilot'){
+    alert('Copilotは公開APIがないためチャット不可です。「アカウント」からログイン画面を開いてください。');
+    return;
+  }
+  const c = ensureConv();
+  c.messages.push({role:'user', text});
+  if(c.title==='新規会話') c.title = text.slice(0,24);
+  c.updatedAt = Date.now();
+  input.value='';
+  renderMessages();
+  save();
+
+  document.getElementById('send-btn').disabled = true;
+  try{
+    const reply = await callProvider(app, c.messages);
+    c.messages.push({role:'ai', text: reply});
+    notifyIfHidden(app.name, reply);
+  }catch(err){
+    c.messages.push({role:'error', text: 'エラー: ' + err.message});
+  }
+  save();
+  renderMessages();
+  document.getElementById('send-btn').disabled = false;
+}
+
+async function callProvider(app, messages){
+  const history = messages.filter(m=>m.role!=='error').map(m=>({role:m.role, text:m.text}));
+  if(app.provider==='gemini'){
+    const model = app.model || 'gemini-2.5-flash';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${app.apiKey}`;
+    const body = { contents: history.map(m=>({ role: m.role==='user'?'user':'model', parts:[{text:m.text}] })) };
+    const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error?.message || 'Gemini API エラー');
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '(応答なし)';
+  }
+  if(app.provider==='openai' || app.provider==='custom'){
+    const url = app.provider==='custom' ? app.endpoint : 'https://api.openai.com/v1/chat/completions';
+    const body = { model: app.model || 'gpt-4o-mini', messages: history.map(m=>({role:m.role==='user'?'user':'assistant', content:m.text})) };
+    const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+app.apiKey}, body: JSON.stringify(body)});
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error?.message || 'API エラー');
+    return data.choices?.[0]?.message?.content || '(応答なし)';
+  }
+  if(app.provider==='claude'){
+    const url='https://api.anthropic.com/v1/messages';
+    const body={ model: app.model || 'claude-sonnet-4-5', max_tokens:1024, messages: history.map(m=>({role:m.role==='user'?'user':'assistant', content:m.text})) };
+    const res = await fetch(url, {method:'POST', headers:{
+      'Content-Type':'application/json','x-api-key':app.apiKey,'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    }, body: JSON.stringify(body)});
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error?.message || 'Claude API エラー (ブラウザ直呼び出しがブロックされている可能性があります)');
+    return data.content?.[0]?.text || '(応答なし)';
+  }
+  throw new Error('未対応のプロバイダです');
+}
+
+// ---------- Notifications ----------
+document.getElementById('notif-check').checked = !!settings.notifications;
+document.getElementById('notif-check').onchange = async (e)=>{
+  if(e.target.checked){
+    const perm = await Notification.requestPermission();
+    settings.notifications = perm==='granted';
+    e.target.checked = settings.notifications;
+  } else {
+    settings.notifications = false;
+  }
+  save();
+};
+function notifyIfHidden(appName, text){
+  if(settings.notifications && document.hidden && 'Notification' in window && Notification.permission==='granted'){
+    new Notification(appName + ' から応答', { body: text.slice(0,100) });
+  }
+}
+
+// ---------- Accounts view ----------
+function renderAccounts(){
+  const box = document.getElementById('accounts-view');
+  box.innerHTML = '<p class="hint" style="margin-bottom:14px">※ ブラウザのセキュリティ制限により、他サイトのログイン状態は自動検出できません。ニックネームを控えてログイン画面をすぐ開けるようにする一覧です。</p>';
+  if(apps.length===0){ box.innerHTML += '<p class="hint">アプリを追加してください</p>'; return; }
+  apps.forEach(a=>{
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML = `
+      <h4><span class="app-dot" style="background:${a.color};display:inline-block;margin-right:6px"></span>${a.name}</h4>
+      <p>${a.provider}</p>
+      <div class="row">
+        <input placeholder="アカウント名/メモ" value="${a.accountLabel||''}" data-id="${a.id}" class="acc-label">
+        <button class="btn-sm" data-open="${a.provider}">ログイン画面を開く</button>
+      </div>
+    `;
+    box.appendChild(card);
+  });
+  box.querySelectorAll('.acc-label').forEach(inp=>{
+    inp.onchange = ()=>{
+      const a = apps.find(x=>x.id===inp.dataset.id);
+      a.accountLabel = inp.value;
+      save();
+    };
+  });
+  box.querySelectorAll('[data-open]').forEach(btn=>{
+    const url = {gemini:'https://gemini.google.com', openai:'https://chatgpt.com', claude:'https://claude.ai', copilot:'https://copilot.microsoft.com'}[btn.dataset.open] || '#';
+    btn.onclick = ()=> window.open(url, '_blank');
+  });
+}
+
+// ---------- History view ----------
+function renderHistory(){
+  const list = document.getElementById('history-list');
+  const q = document.getElementById('history-search').value.toLowerCase();
+  list.innerHTML='';
+  convs.filter(c=> c.title.toLowerCase().includes(q) || c.messages.some(m=>m.text.toLowerCase().includes(q)))
+    .sort((a,b)=>b.updatedAt-a.updatedAt)
+    .forEach(c=>{
+      const app = apps.find(a=>a.id===c.appId);
+      const el=document.createElement('div');
+      el.className='hist-item';
+      el.innerHTML = `<div class="t">${c.title}</div><div class="m">${app?app.name:'(削除済み)'} ・ ${new Date(c.updatedAt).toLocaleString('ja-JP')}</div>`;
+      el.onclick=()=>{
+        if(!app) return;
+        activeAppId = app.id;
+        activeConvId = c.id;
+        switchView('chat');
+      };
+      list.appendChild(el);
+    });
+}
+document.getElementById('history-search').oninput = renderHistory;
+
+// ---------- init ----------
+renderAppList();
+switchView('chat');
+</script>
+</body>
+</html>
