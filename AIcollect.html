@@ -33,21 +33,45 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 
 /* Sidebar */
-#sidebar{width:220px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 10px}
-.logo{font-size:16px;font-weight:700;letter-spacing:2px;color:var(--accent);text-shadow:0 0 8px rgba(0,229,255,.5);padding:6px 10px 20px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);transition:.15s}
+#sidebar{width:min(220px, 22vw);min-width:180px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:16px 10px;transition:width .2s,min-width .2s,padding .2s;flex-shrink:0}
+#sidebar.collapsed{width:56px;min-width:56px;padding:16px 6px}
+#sidebar.collapsed .logo,#sidebar.collapsed .nav-item span:last-child,#sidebar.collapsed .app-dot + span,#sidebar.collapsed .add-btn span:last-child,#sidebar.collapsed .app-del{display:none}
+#sidebar.collapsed .nav-item{justify-content:center}
+#sidebar.collapsed .app-item{justify-content:center}
+#sidebar.collapsed .add-btn{font-size:16px}
+.logo{font-size:16px;font-weight:700;letter-spacing:2px;color:var(--accent);text-shadow:0 0 8px rgba(0,229,255,.5);padding:6px 10px 20px;white-space:nowrap;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#collapse-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;flex-shrink:0}
+#collapse-btn:hover{color:var(--accent);background:var(--panel2)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);transition:.15s;white-space:nowrap;overflow:hidden}
 .nav-item:hover{background:var(--panel2);color:var(--text)}
 .nav-item.active{background:rgba(0,229,255,.08);color:var(--accent);border:1px solid rgba(0,229,255,.3)}
 .app-list{margin-top:14px;display:flex;flex-direction:column;gap:6px;flex:1;overflow-y:auto}
 .app-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.add-btn{margin-top:10px;padding:10px;border:1px dashed var(--border);border-radius:8px;text-align:center;color:var(--muted);cursor:pointer;font-size:12px}
+.add-btn{margin-top:10px;padding:10px;border:1px dashed var(--border);border-radius:8px;text-align:center;color:var(--muted);cursor:pointer;font-size:12px;white-space:nowrap;overflow:hidden}
 .add-btn:hover{border-color:var(--accent);color:var(--accent)}
 .notif-toggle{margin-top:14px;padding:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;align-items:center;justify-content:space-between}
 
 /* Main */
 #main{flex:1;display:flex;flex-direction:column;min-width:0}
-#topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:var(--panel)}
-#topbar .title{font-size:14px;font-weight:600}
+#topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 4vw;background:var(--panel);gap:10px}
+#topbar .title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#mobile-menu-btn{display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer}
+
+/* スマホ・タブレット対応 */
+@media (max-width: 860px){
+  #sidebar{position:fixed;inset:0 auto 0 0;z-index:40;width:min(78vw,260px);min-width:0;transform:translateX(-100%);box-shadow:0 0 24px rgba(0,0,0,.4)}
+  #sidebar.mobile-open{transform:translateX(0)}
+  #sidebar.collapsed{width:min(78vw,260px);padding:16px 10px}
+  #sidebar.collapsed .logo,#sidebar.collapsed .nav-item span:last-child,#sidebar.collapsed .add-btn span:last-child,#sidebar.collapsed .app-del{display:flex}
+  #sidebar.collapsed .nav-item{justify-content:flex-start}
+  #collapse-btn{display:none}
+  #mobile-menu-btn{display:block}
+  #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30}
+  #sidebar-overlay.show{display:block}
+  .msg-wrap{max-width:88%}
+  .modal{width:92vw}
+  #topbar{padding:0 3vw}
+}
 
 #chat-view{flex:1;display:flex;flex-direction:column;min-height:0}
 #messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
@@ -55,6 +79,16 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 .msg.user{align-self:flex-end;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.3)}
 .msg.ai{align-self:flex-start;background:var(--panel2);border:1px solid var(--border)}
 .msg.err{align-self:flex-start;background:rgba(255,71,87,.1);border:1px solid var(--danger);color:var(--danger)}
+.msg-wrap{display:flex;flex-direction:column;max-width:70%}
+.msg-wrap.user{align-self:flex-end;align-items:flex-end}
+.msg-wrap.ai{align-self:flex-start;align-items:flex-start}
+.msg-actions{display:flex;gap:4px;margin-top:3px}
+.msg-actions button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 5px;border-radius:4px}
+.msg-actions button:hover{color:var(--accent);background:var(--panel2)}
+.edit-box{width:100%}
+.edit-box textarea{width:100%;background:var(--panel2);border:1px solid var(--accent);border-radius:8px;color:var(--text);padding:8px;font-size:13px;resize:vertical;min-height:44px}
+.edit-box .row{margin-top:4px;justify-content:flex-end}
+#typing-indicator{color:var(--muted);font-style:italic}
 #input-bar{display:flex;gap:8px;padding:14px;border-top:1px solid var(--border);background:var(--panel)}
 #input-bar textarea{flex:1;resize:none;background:var(--panel2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:10px;font-size:13px;height:44px}
 #input-bar button{background:var(--accent);color:#001018;border:none;border-radius:8px;padding:0 18px;font-weight:700;cursor:pointer}
@@ -122,8 +156,9 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   </div>
 </div>
 
+<div id="sidebar-overlay"></div>
 <div id="sidebar" style="display:none">
-  <div class="logo">AI HUB</div>
+  <div class="logo"><span>AI HUB</span><button id="collapse-btn" title="折りたたむ">⏴</button></div>
   <div class="nav-item active" data-nav="chat"><span>💬</span>チャット</div>
   <div class="nav-item" data-nav="accounts"><span>🔑</span>アカウント</div>
   <div class="nav-item" data-nav="history"><span>🕓</span>履歴</div>
@@ -134,7 +169,9 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 
 <div id="main" style="display:none">
   <div id="topbar">
+    <button id="mobile-menu-btn">☰</button>
     <span class="title" id="view-title">チャット</span>
+    <button class="btn-sm" id="new-conv-btn" style="display:none">＋ 新規作成</button>
   </div>
 
   <div id="chat-view" style="display:none">
@@ -435,6 +472,10 @@ async function loadUserData(userId){
 
   applyTheme(settings.theme || 'dark');
   document.getElementById('notif-check').checked = !!settings.notifications;
+  if(settings.sidebarCollapsed && window.innerWidth > 860){
+    document.getElementById('sidebar').classList.add('collapsed');
+    document.getElementById('collapse-btn').textContent = '⏵';
+  }
   renderAppList();
   switchView('chat');
 }
@@ -449,7 +490,11 @@ function renderAppList(){
     const el=document.createElement('div');
     el.className='nav-item' + (a.id===activeAppId && currentView==='chat' ? ' active':'');
     el.innerHTML=`<span class="app-dot" style="background:${a.color}"></span>${a.name}`;
-    el.onclick=()=>{ activeAppId=a.id; switchView('chat'); };
+    el.onclick=()=>{
+      activeAppId=a.id; switchView('chat');
+      document.getElementById('sidebar').classList.remove('mobile-open');
+      document.getElementById('sidebar-overlay').classList.remove('show');
+    };
     const del=document.createElement('button');
     del.className='app-del';
     del.textContent='×';
@@ -484,13 +529,20 @@ function switchView(view){
   document.getElementById('history-view').style.display='none';
   document.getElementById('settings-view').style.display='none';
   document.getElementById('empty-state').style.display='none';
+  document.getElementById('new-conv-btn').style.display='none';
 
   if(view==='chat'){
     if(!activeAppId && apps.length) activeAppId=apps[0].id;
     if(!activeAppId){ document.getElementById('empty-state').style.display='flex'; document.getElementById('view-title').textContent='チャット'; renderAppList(); return; }
     document.getElementById('chat-view').style.display='flex';
+    document.getElementById('new-conv-btn').style.display='inline-block';
     const app = apps.find(a=>a.id===activeAppId);
     document.getElementById('view-title').textContent = app.name;
+    // このAIの会話一覧の中に今のactiveConvIdが無ければ、最新の会話を自動選択する
+    const appConvs = convs.filter(c=>c.appId===activeAppId);
+    if(!appConvs.some(c=>c.id===activeConvId)){
+      activeConvId = appConvs.length ? appConvs.sort((a,b)=>b.updatedAt-a.updatedAt)[0].id : null;
+    }
     renderMessages();
   } else if(view==='accounts'){
     document.getElementById('accounts-view').style.display='block';
@@ -679,13 +731,140 @@ function renderMessages(){
   const box = document.getElementById('messages');
   box.innerHTML='';
   const c = convs.find(c=>c.appId===activeAppId && c.id===activeConvId);
-  (c ? c.messages : []).forEach(m=>{
-    const el=document.createElement('div');
-    el.className='msg ' + (m.role==='user'?'user':(m.role==='error'?'err':'ai'));
-    el.textContent = m.text;
-    box.appendChild(el);
+  (c ? c.messages : []).forEach((m,i)=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'msg-wrap ' + (m.role==='user'?'user':'ai');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg ' + (m.role==='user'?'user':(m.role==='error'?'err':'ai'));
+    bubble.textContent = m.text;
+    wrap.appendChild(bubble);
+
+    if(m.role!=='error'){
+      const actions = document.createElement('div');
+      actions.className = 'msg-actions';
+
+      const copyBtn = document.createElement('button');
+      copyBtn.textContent = '📋 コピー';
+      copyBtn.onclick = ()=>{
+        navigator.clipboard.writeText(m.text).catch(()=>{});
+        copyBtn.textContent = '✓ コピーしました';
+        setTimeout(()=>copyBtn.textContent='📋 コピー', 1200);
+      };
+      actions.appendChild(copyBtn);
+
+      if(m.role==='user'){
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '✏️ 編集して聞き直す';
+        editBtn.onclick = ()=> startEdit(wrap, i, m.text);
+        actions.appendChild(editBtn);
+      } else {
+        const regenBtn = document.createElement('button');
+        regenBtn.textContent = '🔄 もう一度聞く';
+        regenBtn.onclick = ()=> regenerate(i);
+        actions.appendChild(regenBtn);
+      }
+      wrap.appendChild(actions);
+    }
+    box.appendChild(wrap);
   });
   box.scrollTop = box.scrollHeight;
+}
+
+function startEdit(wrap, i, oldText){
+  wrap.innerHTML = '';
+  const box = document.createElement('div');
+  box.className = 'edit-box';
+  const ta = document.createElement('textarea');
+  ta.value = oldText;
+  const row = document.createElement('div');
+  row.className = 'row';
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn-sm btn-danger';
+  cancelBtn.textContent = 'キャンセル';
+  cancelBtn.onclick = ()=> renderMessages();
+  const sendBtn = document.createElement('button');
+  sendBtn.className = 'btn-sm';
+  sendBtn.textContent = '送信して聞き直す';
+  sendBtn.onclick = ()=> submitEdit(i, ta.value.trim());
+  row.appendChild(cancelBtn);
+  row.appendChild(sendBtn);
+  box.appendChild(ta);
+  box.appendChild(row);
+  wrap.appendChild(box);
+  ta.focus();
+}
+
+async function submitEdit(i, newText){
+  if(!newText) return;
+  const c = currentConv();
+  if(!c) return;
+  c.messages = c.messages.slice(0, i); // それ以降(古い回答含む)は破棄
+  c.messages.push({role:'user', text:newText});
+  renderMessages();
+  save();
+  const app = apps.find(a=>a.id===activeAppId);
+  await fetchAndAppendReply(app, c);
+}
+
+async function regenerate(i){
+  const c = currentConv();
+  if(!c) return;
+  c.messages = c.messages.slice(0, i); // このAI回答以降を破棄して、直前のユーザー発言までに戻す
+  renderMessages();
+  save();
+  const app = apps.find(a=>a.id===activeAppId);
+  await fetchAndAppendReply(app, c);
+}
+
+function showTyping(on){
+  const box = document.getElementById('messages');
+  let el = document.getElementById('typing-indicator');
+  if(on){
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'typing-indicator';
+      el.className = 'msg ai';
+      el.textContent = '生成を待っています…';
+      box.appendChild(el);
+      box.scrollTop = box.scrollHeight;
+    }
+  } else if(el){
+    el.remove();
+  }
+}
+
+function friendlyError(err){
+  const msg = ((err && err.message) || String(err)).toLowerCase();
+  if(msg.includes('quota') || msg.includes('credit') || msg.includes('billing') || msg.includes('insufficient') || msg.includes('残高'))
+    return '利用上限(クレジット/無料枠)に達しています。提供元のサイトでチャージするか、翌日以降にお試しください。';
+  if(msg.includes('unauthorized') || msg.includes('401') || (msg.includes('key') && msg.includes('invalid')))
+    return 'APIキーが正しくないか、期限切れの可能性があります。「アカウント」または再登録でキーを確認してください。';
+  if(msg.includes('rate limit') || msg.includes('429') || msg.includes('too many'))
+    return '短時間にリクエストが集中しています。少し時間を置いてからもう一度お試しください。';
+  if(msg.includes('failed to fetch') || msg.includes('network') || msg.includes('load failed'))
+    return '通信エラーが発生しました。インターネット接続を確認してもう一度お試しください。';
+  if(msg.includes('no longer available') || msg.includes('deprecated') || msg.includes('not found'))
+    return 'このAIのモデルが変更・廃止された可能性があります。アプリを削除して再登録し、モデルを選び直してください。';
+  if(msg.includes('未対応のプロバイダ') || msg.includes('公開apiがない'))
+    return err.message;
+  return '応答の取得に失敗しました。しばらくしてからもう一度お試しください。';
+}
+
+async function fetchAndAppendReply(app, c){
+  document.getElementById('send-btn').disabled = true;
+  showTyping(true);
+  try{
+    const reply = await callProvider(app, c.messages);
+    c.messages.push({role:'ai', text: reply});
+    notifyIfHidden(app.name, reply);
+  }catch(err){
+    c.messages.push({role:'error', text: friendlyError(err)});
+  }
+  c.updatedAt = Date.now();
+  save();
+  renderMessages(); // typing表示もここで一緒に消える
+  document.getElementById('send-btn').disabled = false;
 }
 
 document.getElementById('send-btn').onclick=sendMessage;
@@ -710,18 +889,7 @@ async function sendMessage(){
   input.value='';
   renderMessages();
   save();
-
-  document.getElementById('send-btn').disabled = true;
-  try{
-    const reply = await callProvider(app, c.messages);
-    c.messages.push({role:'ai', text: reply});
-    notifyIfHidden(app.name, reply);
-  }catch(err){
-    c.messages.push({role:'error', text: 'エラー: ' + err.message});
-  }
-  save();
-  renderMessages();
-  document.getElementById('send-btn').disabled = false;
+  await fetchAndAppendReply(app, c);
 }
 
 async function callProvider(app, messages){
@@ -757,6 +925,29 @@ async function callProvider(app, messages){
   }
   throw new Error('未対応のプロバイダです');
 }
+
+// ---------- サイドバー: 折りたたみ / モバイル開閉 ----------
+document.getElementById('collapse-btn').onclick = ()=>{
+  const collapsed = document.getElementById('sidebar').classList.toggle('collapsed');
+  document.getElementById('collapse-btn').textContent = collapsed ? '⏵' : '⏴';
+  settings.sidebarCollapsed = collapsed;
+  save();
+};
+document.getElementById('mobile-menu-btn').onclick = ()=>{
+  document.getElementById('sidebar').classList.add('mobile-open');
+  document.getElementById('sidebar-overlay').classList.add('show');
+};
+document.getElementById('sidebar-overlay').onclick = ()=>{
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-overlay').classList.remove('show');
+};
+// アプリを選ぶ/画面を切り替えたらスマホ用メニューは自動で閉じる
+document.querySelectorAll('.nav-item[data-nav]').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    document.getElementById('sidebar').classList.remove('mobile-open');
+    document.getElementById('sidebar-overlay').classList.remove('show');
+  });
+});
 
 // ---------- Theme ----------
 function applyTheme(theme){
