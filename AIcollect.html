@@ -59,6 +59,8 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 #topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 4vw;background:var(--panel);gap:10px}
 #topbar .title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #mobile-menu-btn{display:none;background:none;border:none;color:var(--text);font-size:20px;cursor:pointer}
+#expand-sidebar-btn{display:none;background:none;border:1px solid var(--border);color:var(--muted);font-size:14px;cursor:pointer;border-radius:6px;padding:4px 8px;flex-shrink:0}
+#expand-sidebar-btn:hover{color:var(--accent);border-color:var(--accent);background:var(--panel2)}
 
 /* スマホ・タブレット対応 */
 @media (max-width: 860px){
@@ -76,6 +78,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   .modal{width:92vw}
   #topbar{padding:0 3vw}
   #code-preview-panel{position:fixed;inset:0;z-index:45;width:100%;min-width:0}
+  #expand-sidebar-btn{display:none !important}
   #code-mode-btn span.btn-label{display:none}
   .cp-actions button .btn-label{display:none}
 
@@ -193,6 +196,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 <div id="main" style="display:none">
   <div id="topbar">
     <button id="mobile-menu-btn">☰</button>
+    <button id="expand-sidebar-btn" title="サイドバーを開く" style="display:none">⏵</button>
     <span class="title" id="view-title">チャット</span>
     <button class="btn-sm" id="new-conv-btn" style="display:none">＋ 新規作成</button>
   </div>
@@ -557,8 +561,7 @@ async function loadUserData(userId){
   applyTheme(settings.theme || 'dark');
   document.getElementById('notif-check').checked = !!settings.notifications;
   if(settings.sidebarCollapsed && window.innerWidth > 860){
-    document.getElementById('sidebar').classList.add('collapsed');
-    document.getElementById('collapse-btn').textContent = '⏵';
+    applySidebarCollapsedUI(true);
   }
   renderAppList();
   switchView('chat');
@@ -1073,12 +1076,21 @@ async function callProvider(app, messages, systemInstruction){
 }
 
 // ---------- サイドバー: 折りたたみ / モバイル開閉 ----------
-document.getElementById('collapse-btn').onclick = ()=>{
-  const collapsed = document.getElementById('sidebar').classList.toggle('collapsed');
+function applySidebarCollapsedUI(collapsed){
+  document.getElementById('sidebar').classList.toggle('collapsed', collapsed);
   document.getElementById('collapse-btn').textContent = collapsed ? '⏵' : '⏴';
+  // 折りたたむと開閉ボタン自体が隠れてしまうため、チャット上部に戻すボタンを表示する
+  document.getElementById('expand-sidebar-btn').style.display = collapsed ? 'inline-block' : 'none';
+}
+function setSidebarCollapsed(collapsed){
+  applySidebarCollapsedUI(collapsed);
   settings.sidebarCollapsed = collapsed;
   saveNow();
+}
+document.getElementById('collapse-btn').onclick = ()=>{
+  setSidebarCollapsed(!document.getElementById('sidebar').classList.contains('collapsed'));
 };
+document.getElementById('expand-sidebar-btn').onclick = ()=> setSidebarCollapsed(false);
 document.getElementById('mobile-menu-btn').onclick = ()=>{
   document.getElementById('sidebar').classList.add('mobile-open');
   document.getElementById('sidebar-overlay').classList.add('show');
