@@ -75,6 +75,9 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   .msg-wrap{max-width:88%}
   .modal{width:92vw}
   #topbar{padding:0 3vw}
+  #code-preview-panel{position:fixed;inset:0;z-index:45;width:100%;min-width:0}
+  #code-mode-btn span.btn-label{display:none}
+  .cp-actions button .btn-label{display:none}
 
   /* iOSでの入力欄タップ時の自動拡大を防止(16px未満だと拡大される) */
   input,textarea,select{font-size:16px !important}
@@ -83,7 +86,17 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   .msg-actions button .btn-label{display:none}
 }
 
-#chat-view{flex:1;display:flex;flex-direction:column;min-height:0}
+#chat-view{flex:1;display:flex;flex-direction:row;min-height:0}
+#chat-main{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0}
+#code-preview-panel{display:none;flex-direction:column;width:46%;min-width:260px;border-left:1px solid var(--border);background:var(--panel2)}
+#code-preview-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;flex-shrink:0}
+.cp-actions{display:flex;gap:6px}
+.cp-actions button{background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 8px;font-size:11px;cursor:pointer;white-space:nowrap}
+.cp-actions button:hover{color:var(--accent);border-color:var(--accent)}
+#code-preview-frame{flex:1;border:none;background:#fff;width:100%}
+#code-mode-btn{flex-shrink:0;background:var(--panel2);border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:0 12px;font-size:12px;cursor:pointer;white-space:nowrap}
+#code-mode-btn:hover{border-color:var(--accent)}
+#code-mode-btn.active{background:rgba(0,229,255,.15);border-color:var(--accent);color:var(--accent)}
 #messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
 .msg{max-width:70%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
 .msg.user{align-self:flex-end;background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.3)}
@@ -185,10 +198,24 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   </div>
 
   <div id="chat-view" style="display:none">
-    <div id="messages"></div>
-    <div id="input-bar">
-      <textarea id="input" placeholder="メッセージを入力 (Shift+Enterで改行)"></textarea>
-      <button id="send-btn">送信</button>
+    <div id="chat-main">
+      <div id="messages"></div>
+      <div id="input-bar">
+        <button id="code-mode-btn" type="button" title="ONにすると、AIに単一のHTMLファイルでコードを生成させ、右側にプレビュー表示します">🖥️ <span class="btn-label">コード</span></button>
+        <textarea id="input" placeholder="メッセージを入力 (Shift+Enterで改行)"></textarea>
+        <button id="send-btn">送信</button>
+      </div>
+    </div>
+    <div id="code-preview-panel">
+      <div id="code-preview-header">
+        <span>🖥️ プレビュー</span>
+        <div class="cp-actions">
+          <button id="cp-newtab" title="新しいタブで開く">🔗 <span class="btn-label">新しいタブ</span></button>
+          <button id="cp-download" title="HTMLファイルとしてダウンロード">⬇ <span class="btn-label">ダウンロード</span></button>
+          <button id="cp-close" title="閉じる">✕</button>
+        </div>
+      </div>
+      <iframe id="code-preview-frame" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-same-origin"></iframe>
     </div>
   </div>
 
@@ -414,6 +441,34 @@ let activeAppId = null;
 let activeConvId = null;
 let currentView = 'chat';
 
+// ---------- コードモード ----------
+let codeMode = false;
+const CODE_MODE_INSTRUCTION = 'あなたはこれから、ユーザーの要望に応える成果物を、HTML・CSS・JavaScriptをすべて含んだ単一のHTMLファイル1つとして生成してください。外部ファイルへの分割は禁止です。ライブラリやフレームワークが必要な場合はCDN経由でscriptタグから読み込んでください。回答には、完全なHTMLコード全体を```html と ```で囲んだコードブロックとして必ず1つだけ含めてください。コードブロックの前後に短い説明を添えても構いませんが、簡潔にしてください。';
+
+function extractCodeFromReply(text){
+  const fenceMatch = text.match(/```(?:html|HTML)?\n?([\s\S]*?)```/);
+  if(fenceMatch){
+    const code = fenceMatch[1].trim();
+    if(!code) return null;
+    const rest = (text.slice(0, fenceMatch.index) + text.slice(fenceMatch.index + fenceMatch[0].length)).trim();
+    return { code, rest };
+  }
+  const trimmed = text.trim();
+  if(/^<!DOCTYPE html/i.test(trimmed) || /^<html[\s>]/i.test(trimmed)){
+    return { code: trimmed, rest: '' };
+  }
+  return null;
+}
+
+function showCodePreview(code){
+  document.getElementById('code-preview-frame').srcdoc = code;
+  document.getElementById('code-preview-panel').style.display = 'flex';
+}
+function hideCodePreview(){
+  document.getElementById('code-preview-panel').style.display = 'none';
+  document.getElementById('code-preview-frame').srcdoc = '';
+}
+
 let saveTimer = null;
 function save(){
   clearTimeout(saveTimer);
@@ -520,6 +575,7 @@ function renderAppList(){
     el.className='nav-item' + (a.id===activeAppId && currentView==='chat' ? ' active':'');
     el.innerHTML=`<span class="app-dot" style="background:${a.color}"></span>${a.name}`;
     el.onclick=()=>{
+      hideCodePreview();
       activeAppId=a.id; switchView('chat');
       document.getElementById('sidebar').classList.remove('mobile-open');
       document.getElementById('sidebar-overlay').classList.remove('show');
@@ -739,6 +795,7 @@ document.getElementById('m-save').onclick=()=>{
   apps.push(app);
   save();
   modal.classList.remove('show');
+  hideCodePreview();
   activeAppId = app.id;
   switchView('chat');
 };
@@ -766,8 +823,18 @@ function renderMessages(){
 
     const bubble = document.createElement('div');
     bubble.className = 'msg ' + (m.role==='user'?'user':(m.role==='error'?'err':'ai'));
-    bubble.textContent = m.text;
+    if(m.role==='ai' && m.code){
+      bubble.textContent = (m.displayText && m.displayText.length) ? m.displayText : '🖥️ HTMLコードを生成しました。右側のプレビューをご確認ください。';
+    } else {
+      bubble.textContent = m.text;
+    }
     wrap.appendChild(bubble);
+    if(m.role==='user' && m.codeMode){
+      const tag = document.createElement('div');
+      tag.style.cssText = 'font-size:10px;color:var(--accent);margin-top:2px';
+      tag.textContent = '🖥️ コードモード';
+      wrap.appendChild(tag);
+    }
 
     if(m.role!=='error'){
       const actions = document.createElement('div');
@@ -793,6 +860,12 @@ function renderMessages(){
         reloadBtn.onclick = ()=> regenerateFrom(i);
         actions.appendChild(reloadBtn);
       } else {
+        if(m.code){
+          const previewBtn = document.createElement('button');
+          previewBtn.innerHTML = '🖥️ <span class="btn-label">プレビュー</span>';
+          previewBtn.onclick = ()=> showCodePreview(m.code);
+          actions.appendChild(previewBtn);
+        }
         const regenBtn = document.createElement('button');
         regenBtn.innerHTML = '🔄 <span class="btn-label">もう一度聞く</span>';
         regenBtn.onclick = ()=> regenerateFrom(i-1);
@@ -834,11 +907,11 @@ async function submitEdit(i, newText){
   const c = currentConv();
   if(!c) return;
   c.messages = c.messages.slice(0, i); // それ以降(古い回答含む)は破棄
-  c.messages.push({role:'user', text:newText});
+  c.messages.push({role:'user', text:newText, codeMode});
   renderMessages();
   save();
   const app = apps.find(a=>a.id===activeAppId);
-  await fetchAndAppendReply(app, c);
+  await fetchAndAppendReply(app, c, codeMode);
 }
 
 async function regenerateFrom(uptoIndex){
@@ -848,7 +921,9 @@ async function regenerateFrom(uptoIndex){
   renderMessages();
   save();
   const app = apps.find(a=>a.id===activeAppId);
-  await fetchAndAppendReply(app, c);
+  const lastMsg = c.messages[uptoIndex];
+  const useCodeMode = (lastMsg && lastMsg.role==='user') ? !!lastMsg.codeMode : false;
+  await fetchAndAppendReply(app, c, useCodeMode);
 }
 
 function showTyping(on){
@@ -885,13 +960,20 @@ function friendlyError(err){
   return '応答の取得に失敗しました。しばらくしてからもう一度お試しください。';
 }
 
-async function fetchAndAppendReply(app, c){
+async function fetchAndAppendReply(app, c, useCodeMode){
   document.getElementById('send-btn').disabled = true;
   showTyping(true);
   try{
-    const reply = await callProvider(app, c.messages);
-    c.messages.push({role:'ai', text: reply});
-    notifyIfHidden(app.name, reply);
+    const codeInstruction = useCodeMode ? CODE_MODE_INSTRUCTION : null;
+    const reply = await callProvider(app, c.messages, codeInstruction);
+    let code = null, displayText = null;
+    if(useCodeMode){
+      const extracted = extractCodeFromReply(reply);
+      if(extracted){ code = extracted.code; displayText = extracted.rest; }
+    }
+    c.messages.push({role:'ai', text: reply, code, displayText});
+    if(code) showCodePreview(code);
+    notifyIfHidden(app.name, code ? '🖥️ コードを生成しました' : reply);
   }catch(err){
     c.messages.push({role:'error', text: friendlyError(err)});
   }
@@ -906,6 +988,31 @@ document.getElementById('input').addEventListener('keydown', e=>{
   if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
 });
 
+document.getElementById('code-mode-btn').onclick = ()=>{
+  codeMode = !codeMode;
+  document.getElementById('code-mode-btn').classList.toggle('active', codeMode);
+  document.getElementById('input').placeholder = codeMode
+    ? '作りたいアプリやツールの内容を入力 (コードモードON)'
+    : 'メッセージを入力 (Shift+Enterで改行)';
+};
+
+document.getElementById('cp-close').onclick = hideCodePreview;
+document.getElementById('cp-newtab').onclick = ()=>{
+  const code = document.getElementById('code-preview-frame').srcdoc;
+  if(!code) return;
+  const blob = new Blob([code], {type:'text/html'});
+  window.open(URL.createObjectURL(blob), '_blank');
+};
+document.getElementById('cp-download').onclick = ()=>{
+  const code = document.getElementById('code-preview-frame').srcdoc;
+  if(!code) return;
+  const blob = new Blob([code], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'preview.html';
+  a.click();
+};
+
 async function sendMessage(){
   const input = document.getElementById('input');
   const text = input.value.trim();
@@ -916,22 +1023,24 @@ async function sendMessage(){
     alert('Copilotは公開APIがないためチャット不可です。「アカウント」からログイン画面を開いてください。');
     return;
   }
+  const useCodeMode = codeMode;
   const c = ensureConv();
-  c.messages.push({role:'user', text});
+  c.messages.push({role:'user', text, codeMode: useCodeMode});
   if(c.title==='新規会話') c.title = text.slice(0,24);
   c.updatedAt = Date.now();
   input.value='';
   renderMessages();
   save();
-  await fetchAndAppendReply(app, c);
+  await fetchAndAppendReply(app, c, useCodeMode);
 }
 
-async function callProvider(app, messages){
+async function callProvider(app, messages, systemInstruction){
   const history = messages.filter(m=>m.role!=='error').map(m=>({role:m.role, text:m.text}));
   if(app.provider==='gemini'){
     const model = app.model || 'gemini-flash-latest';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${app.apiKey}`;
     const body = { contents: history.map(m=>({ role: m.role==='user'?'user':'model', parts:[{text:m.text}] })) };
+    if(systemInstruction) body.systemInstruction = { parts:[{text: systemInstruction}] };
     const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
     const data = await res.json();
     if(!res.ok) throw new Error(data.error?.message || 'Gemini API エラー');
@@ -940,7 +1049,9 @@ async function callProvider(app, messages){
   if(app.provider==='openai' || app.provider==='custom' || app.provider==='grok' || app.provider==='perplexity'){
     const urlMap = { openai:'https://api.openai.com/v1/chat/completions', grok:'https://api.x.ai/v1/chat/completions', perplexity:'https://api.perplexity.ai/chat/completions' };
     const url = app.provider==='custom' ? app.endpoint : urlMap[app.provider];
-    const body = { model: app.model || 'gpt-4o-mini', messages: history.map(m=>({role:m.role==='user'?'user':'assistant', content:m.text})) };
+    const chatMessages = history.map(m=>({role:m.role==='user'?'user':'assistant', content:m.text}));
+    if(systemInstruction) chatMessages.unshift({role:'system', content: systemInstruction});
+    const body = { model: app.model || 'gpt-4o-mini', messages: chatMessages };
     const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+app.apiKey}, body: JSON.stringify(body)});
     const data = await res.json();
     if(!res.ok) throw new Error(data.error?.message || 'API エラー');
@@ -948,7 +1059,8 @@ async function callProvider(app, messages){
   }
   if(app.provider==='claude'){
     const url='https://api.anthropic.com/v1/messages';
-    const body={ model: app.model || 'claude-sonnet-4-5', max_tokens:1024, messages: history.map(m=>({role:m.role==='user'?'user':'assistant', content:m.text})) };
+    const body={ model: app.model || 'claude-sonnet-4-5', max_tokens: systemInstruction ? 4096 : 1024, messages: history.map(m=>({role:m.role==='user'?'user':'assistant', content:m.text})) };
+    if(systemInstruction) body.system = systemInstruction;
     const res = await fetch(url, {method:'POST', headers:{
       'Content-Type':'application/json','x-api-key':app.apiKey,'anthropic-version':'2023-06-01',
       'anthropic-dangerous-direct-browser-access':'true'
@@ -1056,6 +1168,7 @@ function renderHistory(){
       el.innerHTML = `<div class="t">${c.title}</div><div class="m">${app?app.name:'(削除済み)'} ・ ${new Date(c.updatedAt).toLocaleString('ja-JP')}</div>`;
       el.onclick=()=>{
         if(!app) return;
+        hideCodePreview();
         activeAppId = app.id;
         activeConvId = c.id;
         switchView('chat');
