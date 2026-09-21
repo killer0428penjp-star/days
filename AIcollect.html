@@ -473,10 +473,18 @@ function hideCodePreview(){
   document.getElementById('code-preview-frame').srcdoc = '';
 }
 
+// 今どのアプリ/どの会話を見ているかもsettingsに記録しておく(リロードしても同じ会話に戻れるようにするため)。
+function syncActiveSelectionToSettings(){
+  settings.activeAppId = activeAppId;
+  settings.activeConvId = activeConvId; // undefined(未選択)は保存されないため、その場合はnullとして扱う
+  if(settings.activeConvId === undefined) settings.activeConvId = null;
+}
+
 let saveTimer = null;
 function save(){
   clearTimeout(saveTimer);
   saveTimer = setTimeout(async ()=>{
+    syncActiveSelectionToSettings();
     const { data: { user } } = await sb.auth.getUser();
     if(!user) return;
     await sb.from('user_data').upsert({
@@ -489,6 +497,7 @@ function save(){
 // これを待たずにタブ切り替えや再読み込みをしても、直前の変更が失われないようにするため。
 async function saveNow(){
   clearTimeout(saveTimer);
+  syncActiveSelectionToSettings();
   const { data: { user } } = await sb.auth.getUser();
   if(!user) return;
   await sb.from('user_data').upsert({
