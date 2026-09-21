@@ -43,6 +43,8 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 .logo{font-size:16px;font-weight:700;letter-spacing:2px;color:var(--accent);text-shadow:0 0 8px rgba(0,229,255,.5);padding:6px 10px 20px;white-space:nowrap;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:8px}
 #collapse-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;flex-shrink:0}
 #collapse-btn:hover{color:var(--accent);background:var(--panel2)}
+#mobile-close-btn{display:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;flex-shrink:0}
+#mobile-close-btn:hover{color:var(--danger);background:var(--panel2)}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted);transition:.15s;white-space:nowrap;overflow:hidden}
 .nav-item:hover{background:var(--panel2);color:var(--text)}
 .nav-item.active{background:rgba(0,229,255,.08);color:var(--accent);border:1px solid rgba(0,229,255,.3)}
@@ -66,6 +68,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
   #sidebar.collapsed .logo,#sidebar.collapsed .nav-item span:last-child,#sidebar.collapsed .add-btn span:last-child,#sidebar.collapsed .app-del{display:flex}
   #sidebar.collapsed .nav-item{justify-content:flex-start}
   #collapse-btn{display:none}
+  #mobile-close-btn{display:block}
   #mobile-menu-btn{display:block}
   #sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30}
   #sidebar-overlay.show{display:block}
@@ -165,7 +168,7 @@ body{background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:h
 
 <div id="sidebar-overlay"></div>
 <div id="sidebar" style="display:none">
-  <div class="logo"><span>AI HUB</span><button id="collapse-btn" title="折りたたむ">⏴</button></div>
+  <div class="logo"><span>AI HUB</span><button id="collapse-btn" title="折りたたむ">⏴</button><button id="mobile-close-btn" title="閉じる">✕</button></div>
   <div class="nav-item active" data-nav="chat"><span>💬</span>チャット</div>
   <div class="nav-item" data-nav="accounts"><span>🔑</span>アカウント</div>
   <div class="nav-item" data-nav="history"><span>🕓</span>履歴</div>
@@ -949,10 +952,12 @@ document.getElementById('mobile-menu-btn').onclick = ()=>{
   document.getElementById('sidebar').classList.add('mobile-open');
   document.getElementById('sidebar-overlay').classList.add('show');
 };
-document.getElementById('sidebar-overlay').onclick = ()=>{
+function closeMobileSidebar(){
   document.getElementById('sidebar').classList.remove('mobile-open');
   document.getElementById('sidebar-overlay').classList.remove('show');
-};
+}
+document.getElementById('sidebar-overlay').onclick = closeMobileSidebar;
+document.getElementById('mobile-close-btn').onclick = closeMobileSidebar;
 // アプリを選ぶ/画面を切り替えたらスマホ用メニューは自動で閉じる
 document.querySelectorAll('.nav-item[data-nav]').forEach(el=>{
   el.addEventListener('click', ()=>{
