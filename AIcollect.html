@@ -442,7 +442,7 @@ let apps = [];
 let convs = [];
 let settings = {notifications:false, theme:'dark'};
 let activeAppId = null;
-let activeConvId = null;
+let activeConvId; // undefined = まだこのアプリを開いていない(自動で最新を選ぶ) / null = 「新規作成」で明示的に空にした状態
 let currentView = 'chat';
 
 // ---------- コードモード ----------
@@ -531,6 +531,8 @@ sb.auth.onAuthStateChange(async (event, session)=>{
     }
   } else {
     userDataLoadedFor = null;
+    activeAppId = null;
+    activeConvId = undefined;
     document.getElementById('login-view').style.display='flex';
     document.getElementById('sidebar').style.display='none';
     document.getElementById('main').style.display='none';
@@ -628,7 +630,9 @@ function switchView(view){
     document.getElementById('view-title').textContent = app.name;
     // このAIの会話一覧の中に今のactiveConvIdが無ければ、最新の会話を自動選択する
     const appConvs = convs.filter(c=>c.appId===activeAppId);
-    if(!appConvs.some(c=>c.id===activeConvId)){
+    // activeConvIdがundefined(このアプリをまだ開いていない)の時だけ最新の会話を自動選択する。
+    // null(「新規作成」で明示的に空にした状態)や、履歴から選んだ有効な会話IDはそのまま維持する。
+    if(activeConvId === undefined || (activeConvId !== null && !appConvs.some(c=>c.id===activeConvId))){
       activeConvId = appConvs.length ? appConvs.sort((a,b)=>b.updatedAt-a.updatedAt)[0].id : null;
     }
     renderMessages();
@@ -807,6 +811,11 @@ document.getElementById('m-save').onclick=()=>{
 function currentConv(){
   return convs.find(c=>c.id===activeConvId && c.appId===activeAppId);
 }
+document.getElementById('new-conv-btn').onclick = ()=>{
+  hideCodePreview();
+  activeConvId = null; // 明示的に空にする。メッセージ送信時にensureConv()が新しい会話を作る
+  switchView('chat');
+};
 function ensureConv(){
   let c = currentConv();
   if(!c){
@@ -868,6 +877,15 @@ function renderMessages(){
           previewBtn.innerHTML = '🖥️ <span class="btn-label">プレビュー</span>';
           previewBtn.onclick = ()=> showCodePreview(m.code);
           actions.appendChild(previewBtn);
+
+          const copyCodeBtn = document.createElement('button');
+          copyCodeBtn.innerHTML = '📋 <span class="btn-label">コードをコピー</span>';
+          copyCodeBtn.onclick = ()=>{
+            navigator.clipboard.writeText(m.code).catch(()=>{});
+            copyCodeBtn.innerHTML = '✓ <span class="btn-label">コピーしました</span>';
+            setTimeout(()=>copyCodeBtn.innerHTML='📋 <span class="btn-label">コードをコピー</span>', 1200);
+          };
+          actions.appendChild(copyCodeBtn);
         }
         const regenBtn = document.createElement('button');
         regenBtn.innerHTML = '🔄 <span class="btn-label">もう一度聞く</span>';
