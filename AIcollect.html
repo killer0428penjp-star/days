@@ -426,6 +426,17 @@ function save(){
   }, 400); // 連続操作をまとめて1回のDB書き込みにする
 }
 
+// 設定(折りたたみ/テーマ/通知)は変更頻度が低いため、debounceを待たず即保存する。
+// これを待たずにタブ切り替えや再読み込みをしても、直前の変更が失われないようにするため。
+async function saveNow(){
+  clearTimeout(saveTimer);
+  const { data: { user } } = await sb.auth.getUser();
+  if(!user) return;
+  await sb.from('user_data').upsert({
+    user_id: user.id, apps, conversations: convs, settings, updated_at: new Date().toISOString()
+  });
+}
+
 // ---------- ログイン ----------
 document.getElementById('l-signin').onclick = async ()=>{
   const { error } = await sb.auth.signInWithPassword({
@@ -445,14 +456,22 @@ document.getElementById('l-signup').onclick = async ()=>{
 };
 document.getElementById('logout-btn').onclick = ()=> sb.auth.signOut();
 
+// タブ切り替えやトークン自動更新のたびにonAuthStateChangeが再発火しても、
+// 初回ログイン時以外はloadUserData()でローカルの状態(折りたたみ状態など)を
+// DBの内容で上書きしてしまわないようにするためのフラグ。
+let userDataLoadedFor = null;
 sb.auth.onAuthStateChange(async (event, session)=>{
   if(session){
     document.getElementById('login-view').style.display='none';
     document.getElementById('sidebar').style.display='flex';
     document.getElementById('main').style.display='flex';
     document.getElementById('login-email').textContent = session.user.email;
-    await loadUserData(session.user.id);
+    if(userDataLoadedFor !== session.user.id){
+      userDataLoadedFor = session.user.id;
+      await loadUserData(session.user.id);
+    }
   } else {
+    userDataLoadedFor = null;
     document.getElementById('login-view').style.display='flex';
     document.getElementById('sidebar').style.display='none';
     document.getElementById('main').style.display='none';
@@ -946,7 +965,7 @@ document.getElementById('collapse-btn').onclick = ()=>{
   const collapsed = document.getElementById('sidebar').classList.toggle('collapsed');
   document.getElementById('collapse-btn').textContent = collapsed ? '⏵' : '⏴';
   settings.sidebarCollapsed = collapsed;
-  save();
+  saveNow();
 };
 document.getElementById('mobile-menu-btn').onclick = ()=>{
   document.getElementById('sidebar').classList.add('mobile-open');
@@ -972,8 +991,8 @@ function applyTheme(theme){
   settings.theme = theme;
   save();
 }
-document.getElementById('theme-dark').onclick = ()=>applyTheme('dark');
-document.getElementById('theme-light').onclick = ()=>applyTheme('light');
+document.getElementById('theme-dark').onclick = ()=>{ applyTheme('dark'); saveNow(); };
+document.getElementById('theme-light').onclick = ()=>{ applyTheme('light'); saveNow(); };
 
 // ---------- Notifications ----------
 document.getElementById('notif-check').onchange = async (e)=>{
@@ -984,7 +1003,7 @@ document.getElementById('notif-check').onchange = async (e)=>{
   } else {
     settings.notifications = false;
   }
-  save();
+  saveNow();
 };
 function notifyIfHidden(appName, text){
   if(settings.notifications && document.hidden && 'Notification' in window && Notification.permission==='granted'){
