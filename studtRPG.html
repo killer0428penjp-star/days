@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>勉強RPG</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#1b1f2a;color:#eee;font-family:sans-serif;overflow:hidden}
+.scr{position:fixed;inset:0;display:none;align-items:center;justify-content:center}
+.scr.on{display:flex}
+button,input,select{font:inherit;padding:.6em 1em;border-radius:6px;border:1px solid #556;background:#2b3245;color:#eee}
+button{cursor:pointer}button:hover{background:#3a4560}
+.card{background:#252b3b;padding:5vmin;border-radius:12px;width:min(92vw,420px);display:flex;flex-direction:column;gap:2.2vmin;max-height:94vh;overflow:auto}
+.row{display:flex;gap:2vmin}.row>*{flex:1}
+#hud{position:fixed;top:1.5vmin;left:1.5vmin;z-index:20;display:none;text-align:left;font-size:max(14px,2.2vmin);line-height:1.5}
+#lang{position:fixed;top:1.5vmin;right:1.5vmin;z-index:20}
+#map svg{width:100%;height:100%;background:#2d6fa8}
+#map text{fill:#fff;font-size:2.4px;cursor:pointer}
+#town{flex-direction:column;background:#111}
+#cv{width:min(100vw,calc(100vh*1.5));aspect-ratio:3/2;image-rendering:pixelated;touch-action:none;background:#000}
+#hint{position:fixed;top:9vmin;left:50%;transform:translateX(-50%);background:#000a;padding:.4em 1em;border-radius:20px;z-index:10;display:none;font-size:max(13px,2.2vmin)}
+#dlg{position:fixed;left:2%;right:2%;bottom:2%;min-height:22%;background:#0a0f1cee;border:2px solid #fff;border-radius:10px;padding:2.5vmin 3vmin;z-index:50;display:none;cursor:pointer;font-family:var(--f);font-size:var(--s)}
+#dnm{color:#fc6;font-weight:bold;margin-bottom:.4em}
+#gear{position:absolute;top:6px;right:8px;background:none;border:0;font-size:1.3em;padding:2px 6px}
+#set{display:none;position:absolute;bottom:105%;right:0;background:#252b3b;border:1px solid #889;border-radius:8px;padding:12px;width:min(90vw,300px);font-size:14px;gap:8px;flex-direction:column;cursor:default;font-family:sans-serif}
+#battle{flex-direction:column;gap:2vmin;padding:2vmin;background:#202638;justify-content:flex-start}
+.bar{height:2.4vmin;min-height:14px;background:#400;border-radius:8px;overflow:hidden;width:min(90vw,520px)}
+.bar i{display:block;height:100%;background:#3c6;transition:width .4s}
+#q{font-size:max(20px,4vmin);margin:3vmin 0;text-align:center}
+#ch{display:grid;grid-template-columns:1fr 1fr;gap:2vmin;width:min(92vw,520px)}
+#ch button{padding:1.8em .5em;font-size:max(16px,3vmin)}
+.ok{background:#2a7a42!important}.ng{background:#9a2f2f!important}
+#modal{position:fixed;inset:0;background:#000a;z-index:60;display:none;align-items:center;justify-content:center}
+.slot{border:1px dashed #667;border-radius:8px;padding:1.5vmin;color:#99a;font-size:.85em}
+</style></head><body>
+
+<button id="lang" onclick="setLang()">EN / JA</button>
+<button id="hud" onclick="openProf()"></button>
+<div id="hint"></div>
+
+<!-- 認証 -->
+<div id="auth" class="scr on"><div class="card">
+<h2 style="margin:0" data-i="title"></h2>
+<input id="em" type="email" data-p="email"><input id="pw" type="password" data-p="pass">
+<input id="nm" data-p="name"><div class="row"><input id="ag" type="number" min="1" max="120" data-p="age">
+<select id="ge"><option value="m" data-i="male"></option><option value="f" data-i="female"></option><option value="n" data-i="none"></option></select></div>
+<div class="row"><button onclick="login()" data-i="login"></button><button onclick="signup()" data-i="signup"></button></div>
+<button onclick="google()" data-i="google"></button>
+<button onclick="guest()" data-i="guest"></button>
+<div id="msg" style="color:#fa8;min-height:1.2em"></div>
+</div></div>
+
+<!-- 世界マップ -->
+<div id="map" class="scr"><svg viewBox="0 0 100 50" preserveAspectRatio="xMidYMid slice">
+<g fill="#5a9a52" stroke="#3a6a3a" stroke-width=".3">
+<path d="M8 8L28 6L30 18L24 28L18 26L10 16Z"/><path d="M24 30L34 32L30 46L26 44Z"/>
+<path d="M44 10L56 9L58 22L54 40L47 38L46 24Z"/><path d="M56 8L92 10L90 26L72 30L62 22Z"/><path d="M78 36L92 36L90 44L80 44Z"/></g>
+<g onclick="goTown()"><circle cx="47" cy="17" r="1.1" fill="#f44"/><text x="49" y="18" id="mk"></text></g>
+</svg></div>
+
+<!-- 町 -->
+<div id="town" class="scr"><canvas id="cv" width="720" height="480"></canvas></div>
+
+<!-- バトル -->
+<div id="battle" class="scr">
+<div id="en"></div><div class="bar"><i id="eh" style="width:100%"></i></div>
+<div id="q"></div><div id="ch"></div>
+<div class="bar"><i id="mh" style="width:100%"></i></div><div id="mn"></div>
+</div>
+
+<!-- 会話 -->
+<div id="dlg" style="--f:sans-serif;--s:18px"><button id="gear">⚙</button>
+<div id="set">
+<label><span data-i="size"></span> <input id="s1" type="range" min="12" max="36" value="18"></label>
+<label><span data-i="font"></span> <select id="s2"><option value="sans-serif">Sans</option><option value="serif">Serif</option><option value="monospace">Mono</option><option value="'Hiragino Maru Gothic ProN',cursive">Maru</option></select></label>
+<label><input id="s3" type="checkbox"> <span data-i="auto"></span></label>
+<label><span data-i="speed"></span> <input id="s4" type="range" min="10" max="120" value="40"></label>
+</div><div id="dnm"></div><div id="dtx"></div></div>
+
+<!-- プロフィール -->
+<div id="modal"><div class="card">
+<h3 style="margin:0" data-i="profile"></h3>
+<div class="row"><input id="pn"><button onclick="saveName()" data-i="save"></button></div>
+<div id="pi" style="line-height:1.8"></div>
+<div class="slot" data-i="slot"></div><div class="slot" data-i="slot"></div>
+<div class="row"><button onclick="logout()" data-i="logout"></button><button onclick="$('modal').style.display='none'" data-i="close"></button></div>
+</div></div>
+
+<script>
+const SB_URL='https://wxvodrdrkapoulivmzyr.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dm9kcmRya2Fwb3VsaXZtenlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxOTEwODUsImV4cCI6MjEwODc2NzA4NX0.D54gcTMqfdHNYjs29U41zgEQpRC8v4QkBC7m4XkUSXE'; // ← SupabaseのProject URLとanon keyを入れる
+const sb=(SB_URL&&window.supabase)?supabase.createClient(SB_URL,SB_KEY):null;
+const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const T={ja:{title:'勉強RPG',email:'メールアドレス',pass:'パスワード',name:'名前',age:'年齢',male:'男性',female:'女性',none:'選択しない',login:'ログイン',signup:'新規登録',google:'Googleでログイン',guest:'ゲストで始める',logout:'ログアウト',coin:'コイン',lv:'Lv',days:'始めて何日目',profile:'プロフィール',save:'保存',close:'閉じる',slot:'(今後追加予定)',size:'文字サイズ',font:'フォント',auto:'オート',speed:'再生速度(小さいほど速い)',town:'始まりの町',hint:'まず長老の家へ行ってみよう',locked:'この家にはまだ入れないようだ…',nosb:'Supabase未設定です。ゲストで始めてください',need:'メールとパスワードを入力してください',correct:'正解!',wrong:'不正解…',win:'勝利!',draw:'引き分け',lose:'敗北…',ageL:'年齢'},
+en:{title:'Study RPG',email:'Email',pass:'Password',name:'Name',age:'Age',male:'Male',female:'Female',none:'Prefer not to say',login:'Log in',signup:'Sign up',google:'Log in with Google',guest:'Play as guest',logout:'Log out',coin:'Coins',lv:'Lv',days:'Day',profile:'Profile',save:'Save',close:'Close',slot:'(coming soon)',size:'Text size',font:'Font',auto:'Auto',speed:'Speed (lower = faster)',town:'Starting Town',hint:"Visit the Elder's house first",locked:"You can't enter this house yet...",nosb:'Supabase is not configured. Play as guest.',need:'Enter email and password',correct:'Correct!',wrong:'Wrong...',win:'Victory!',draw:'Draw',lose:'Defeated...',ageL:'Age'}};
+let S=JSON.parse(localStorage.getItem('rpgstudy')||'null')||{lang:'ja',name:'',age:'',gender:'n',start:Date.now(),coin:0,prologue:false,cleared:false};
+let user=null,ts={size:18,font:'sans-serif',auto:false,speed:40};
+const t=k=>(T[S.lang]||T.ja)[k]||k;
+const save=()=>localStorage.setItem('rpgstudy',JSON.stringify(S));
+function i18n(){document.documentElement.lang=S.lang;
+ document.querySelectorAll('[data-i]').forEach(e=>e.textContent=t(e.dataset.i));
+ document.querySelectorAll('[data-p]').forEach(e=>e.placeholder=t(e.dataset.p));
+ $('mk').textContent=t('town');hud();}
+function setLang(){S.lang=S.lang=='ja'?'en':'ja';save();i18n();}
+const lvl=()=>1+Math.floor(S.coin/1000);
+function hud(){const h=$('hud');h.innerHTML=`${S.name||'-'} &nbsp; ${t('lv')}.${lvl()}<br>💰 ${S.coin}`;}
+function show(id){document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));
+ $('hud').style.display=id=='auth'?'none':'block';$('hint').style.display=(id=='town'&&!S.cleared)?'block':'none';}
+
+/* ===== 認証 ===== */
+const msg=m=>$('msg').textContent=m||'';
+function form(){return{name:$('nm').value.trim(),age:+$('ag').value||'',gender:$('ge').value}}
+async function signup(){if(!sb)return msg(t('nosb'));const f=form(),e=$('em').value,p=$('pw').value;
+ if(!e||!p||!f.name)return msg(t('need'));
+ const{error}=await sb.auth.signUp({email:e,password:p,options:{data:f}});
+ msg(error?error.message:'📧 確認メールを送信しました / Check your email');}
+async function login(){if(!sb)return msg(t('nosb'));
+ const{error}=await sb.auth.signInWithPassword({email:$('em').value,password:$('pw').value});
+ if(error)return msg(error.message);afterLogin();}
+async function google(){if(!sb)return msg(t('nosb'));
+ await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('#')[0]}});}
+async function afterLogin(){const{data:{session}}=await sb.auth.getSession();if(!session)return;user=session.user;
+ let{data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
+ if(p&&!p.name){const n=prompt(t('name'));const a=prompt(t('ageL'));
+  if(n){await sb.from('profiles').update({name:n,age:+a||null}).eq('id',user.id);p.name=n;p.age=+a||null;}}
+ if(p){S.name=p.name;S.age=p.age;S.gender=p.gender;S.coin=p.coin;S.start=new Date(p.created_at).getTime();}
+ sb.from('profiles').update({last_login_at:new Date().toISOString()}).eq('id',user.id);
+ save();start();}
+function guest(){const f=form();S.name=f.name||'ゲスト';S.age=f.age;S.gender=f.gender;if(!S.start)S.start=Date.now();save();start();}
+async function logout(){if(sb)await sb.auth.signOut();user=null;$('modal').style.display='none';show('auth');}
+if(sb)sb.auth.getSession().then(({data:{session}})=>{if(session)afterLogin();});
+
+/* ===== 会話 ===== */
+function applyTs(){const d=$('dlg');d.style.setProperty('--f',ts.font);d.style.setProperty('--s',ts.size+'px');}
+$('gear').onclick=e=>{e.stopPropagation();$('set').style.display=$('set').style.display=='flex'?'none':'flex';};
+$('set').onclick=e=>e.stopPropagation();
+$('s1').oninput=e=>{ts.size=+e.target.value;applyTs()};$('s2').onchange=e=>{ts.font=e.target.value;applyTs()};
+$('s3').onchange=e=>ts.auto=e.target.checked;$('s4').oninput=e=>ts.speed=+e.target.value;
+function dlg(lines,who=''){return new Promise(res=>{const box=$('dlg'),tx=$('dtx');let i=0,full='',n=0,typing=false,timer,tok=0;
+ box.style.display='block';$('dnm').textContent=who;
+ const end=()=>{clearInterval(timer);typing=false;const k=tok;if(ts.auto)setTimeout(()=>{if(k==tok&&box.style.display=='block')next()},1300);};
+ const next=()=>{if(i>=lines.length){box.style.display='none';$('set').style.display='none';box.onclick=null;res();return}
+  tok++;full=lines[i++];n=0;typing=true;tx.textContent='';clearInterval(timer);
+  timer=setInterval(()=>{tx.textContent=full.slice(0,++n);if(n>=full.length)end()},ts.speed)};
+ box.onclick=()=>{if(typing){tx.textContent=full;end()}else next()};next();});}
+
+const PROLOGUE=['むかしむかし、この世界は平和だった。','だが ある日、魔王「おすC大魔神」が現れ、世界を支配してしまった。','しかし大魔神には 弱点があった。……それは「勉強がまったくできない」こと。','主人公「ならば、ぼくが勉強して、おすCに勉強を教えよう。そうすれば、世界の支配もやめてくれるはずだ!」','こうして、勉強で世界を救う旅が始まった。','まずは「始まりの町」を目指そう。'];
+
+/* ===== 流れ ===== */
+async function start(){hud();if(!S.prologue){show('map');await dlg(PROLOGUE,'');S.prologue=true;save();}show('map');}
+function goTown(){show('town');draw();}
+function openProf(){const d=Math.floor((Date.now()-S.start)/864e5)+1,g={m:t('male'),f:t('female'),n:t('none')}[S.gender]||'';
+ $('pn').value=S.name;$('pi').innerHTML=`${t('lv')}.${lvl()} / 💰 ${S.coin}<br>${t('days')}: ${d}<br>${t('age')}: ${S.age||'-'} / ${g}`;$('modal').style.display='flex';}
+async function saveName(){const n=$('pn').value.trim();if(!n)return;S.name=n;save();hud();
+ if(sb&&user)await sb.from('profiles').update({name:n}).eq('id',user.id);}
+
+/* ===== 町 ===== */
+const MAP=["TTTTTTTTTTTTTTT","TGGHHGGGGHHGGGT","TGGHEGGGGHdGGGT","TGGGRGGGGGRGGGT","TRRRRRRRRRRRRRT","TGGGGGGRGGGGGGT","TGGGGGGRGGGGGGT","TGGGGGGRGGGGGGT","TGGGGGGRGGGGGGT","TTTTTTTXTTTTTTT"];
+const TS=48,cv=$('cv'),cx=cv.getContext('2d');let px=7,py=6,dir='d',busy=false,bob=0;
+function tile(c,x,y){const X=x*TS,Y=y*TS;cx.fillStyle=c=='R'||c=='X'?'#cdb67e':'#5aa845';cx.fillRect(X,Y,TS,TS);
+ if(c=='T'){cx.fillStyle='#2f6b2f';cx.beginPath();cx.arc(X+24,Y+24,21,0,7);cx.fill();}
+ if(c=='H'){cx.fillStyle='#b5603a';cx.fillRect(X,Y,TS,TS);cx.fillStyle='#7a2e22';cx.fillRect(X,Y,TS,14);}
+ if(c=='E'||c=='d'){cx.fillStyle='#b5603a';cx.fillRect(X,Y,TS,TS);cx.fillStyle=c=='E'?'#fc6':'#888';cx.fillRect(X+12,Y+8,24,40);}
+ if(c=='X'){cx.fillStyle='#fff';cx.font='20px sans-serif';cx.fillText('▼',X+13,Y+32);}}
+function draw(){cx.clearRect(0,0,720,480);MAP.forEach((r,y)=>[...r].forEach((c,x)=>tile(c,x,y)));
+ const X=px*TS+24,Y=py*TS+26;cx.fillStyle='#38c';cx.fillRect(X-12,Y,24,18);
+ cx.fillStyle='#fdb';cx.beginPath();cx.arc(X,Y-6,12,0,7);cx.fill();
+ cx.fillStyle='#432';cx.beginPath();cx.arc(X,Y-9,12,Math.PI,0);cx.fill();if(dir=='u')cx.fillRect(X-12,Y-9,24,8);
+ cx.fillStyle='#000';if(dir=='d'){cx.fillRect(X-6,Y-6,3,4);cx.fillRect(X+3,Y-6,3,4)}
+ if(dir=='l')cx.fillRect(X-8,Y-6,3,4);if(dir=='r')cx.fillRect(X+5,Y-6,3,4);
+ if(!S.cleared){cx.fillStyle='#f44';cx.font='24px sans-serif';cx.fillText('▼',4*TS+12,2*TS-4+Math.sin(bob)*4);}
+ $('hint').textContent=t('hint');}
+setInterval(()=>{bob+=.3;if($('town').classList.contains('on')&&!S.cleared)draw()},60);
+async function mv(dx,dy,d){if(busy||!$('town').classList.contains('on'))return;dir=d;const nx=px+dx,ny=py+dy,c=(MAP[ny]||'')[nx];
+ if(!c||'TH'.includes(c)){draw();return}const ox=px,oy=py;px=nx;py=ny;draw();
+ if(c=='E'){busy=true;await enter();busy=false}
+ if(c=='d'){busy=true;await dlg([t('locked')]);px=ox;py=oy;draw();busy=false}
+ if(c=='X'){px=7;py=8;show('map')}}
+addEventListener('keydown',e=>{const m={ArrowUp:[0,-1,'u'],w:[0,-1,'u'],ArrowDown:[0,1,'d'],s:[0,1,'d'],ArrowLeft:[-1,0,'l'],a:[-1,0,'l'],ArrowRight:[1,0,'r'],d:[1,0,'r']}[e.key];
+ if(m){e.preventDefault();mv(...m)}});
+let tx0,ty0;cv.addEventListener('touchstart',e=>{tx0=e.touches[0].clientX;ty0=e.touches[0].clientY},{passive:true});
+cv.addEventListener('touchmove',e=>{e.preventDefault();const x=e.touches[0].clientX,y=e.touches[0].clientY,dx=x-tx0,dy=y-ty0;
+ if(Math.max(Math.abs(dx),Math.abs(dy))<28)return;
+ if(Math.abs(dx)>Math.abs(dy))mv(Math.sign(dx),0,dx>0?'r':'l');else mv(0,Math.sign(dy),dy>0?'d':'u');tx0=x;ty0=y},{passive:false});
+
+/* ===== 問題(中1数学50問・固定生成) ===== */
+const BANK=(()=>{let s=7;const r=(a,b)=>{s=(s*1103515245+12345)&0x7fffffff;return a+s%(b-a+1)};const B=[];
+ const add=(q,a)=>{const w=new Set();[a+1,a-1,-a,a+2,a-2,a*2,a+10].forEach(v=>{if(v!==a&&w.size<3)w.add(v)});B.push({q,a,w:[...w]})};
+ for(let i=0;i<10;i++){const a=r(2,15),b=r(2,15);add(`(-${a}) + ${b} = ?`,b-a)}
+ for(let i=0;i<10;i++){const a=r(2,9),b=r(2,9);add(`(-${a}) × ${b} = ?`,-a*b)}
+ for(let i=0;i<10;i++){const a=r(2,15),b=r(a+1,30);add(`x + ${a} = ${b} のとき x = ?`,b-a)}
+ for(let i=0;i<10;i++){const a=r(2,9),x=r(2,12);add(`${a}x = ${a*x} のとき x = ?`,x)}
+ for(let i=0;i<10;i++){const a=r(1,5),b=r(2,6),k=r(2,6);add(`${a} : ${b} = ${a*k} : x のとき x = ?`,b*k)}
+ return B})();
+const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+
+/* ===== 長老イベント&バトル ===== */
+async function enter(){
+ await dlg(['長老「おお、よく来たのう。わしは長老ざいがす。」','長老「大魔神に挑むなら、まず わしの試練を受けるのじゃ。」','長老「勉強の力で、わしを倒してみせよ!」'],'長老ざいがす');
+ const res=await battle();
+ await dlg([res=='win'?'長老「見事じゃ……!これが勉強の力か。」':res=='draw'?'長老「ふむ、互角じゃな。また来るがよい。」':'長老「まだまだじゃな。出直してまいれ。」'],'長老ざいがす');
+ if(res=='win')S.cleared=true;save();px=4;py=3;dir='d';show('town');draw();}
+async function battle(){show('battle');let me=2000,en=2000;const qs=shuf(BANK).slice(0,10);
+ $('en').textContent='長老ざいがす';$('mn').textContent=S.name;
+ const bars=()=>{$('eh').style.width=en/20+'%';$('mh').style.width=me/20+'%'};bars();
+ for(let i=0;i<10&&me>0&&en>0;i++){const q=qs[i];$('q').textContent=`(${i+1}/10) ${q.q}`;
+  const ok=await new Promise(res=>{$('ch').innerHTML='';shuf([q.a,...q.w]).forEach(v=>{const b=document.createElement('button');b.textContent=v;
+   b.onclick=()=>{[...$('ch').children].forEach(x=>{x.disabled=true;if(+x.textContent===q.a)x.classList.add('ok')});
+    if(v!==q.a)b.classList.add('ng');setTimeout(()=>res(v===q.a),800)};$('ch').appendChild(b)})});
+  if(ok)en-=400;else me-=400;bars();}
+ const r=me>en?'win':me<en?'lose':'draw';const gain={win:1000,draw:300,lose:0}[r];
+ await dlg([`${t(r)}  +${gain} ${t('coin')}`]);
+ if(sb&&user){await sb.rpc('finish_battle',{result:r});const{data:p}=await sb.from('profiles').select('coin').eq('id',user.id).single();if(p)S.coin=p.coin}
+ else S.coin+=gain;
+ save();hud();return r;}
+
+i18n();applyTs();
+</script></body></html>
