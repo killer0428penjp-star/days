@@ -45,7 +45,6 @@ button{cursor:pointer}button:hover{background:#3a4560}
 <input id="nm" data-p="name"><div class="row"><input id="ag" type="number" min="1" max="120" data-p="age">
 <select id="ge"><option value="m" data-i="male"></option><option value="f" data-i="female"></option><option value="n" data-i="none"></option></select></div>
 <div class="row"><button onclick="login()" data-i="login"></button><button onclick="signup()" data-i="signup"></button></div>
-<button onclick="google()" data-i="google"></button>
 <button onclick="guest()" data-i="guest"></button>
 <div id="msg" style="color:#fa8;min-height:1.2em"></div>
 </div></div>
@@ -117,8 +116,6 @@ async function signup(){if(!sb)return msg(t('nosb'));const id=$('em').value.trim
 async function login(){if(!sb)return msg(t('nosb'));
  const{error}=await sb.auth.signInWithPassword({email:mail($('em').value.trim()),password:$('pw').value});
  if(error)return msg(error.message);afterLogin();}
-async function google(){if(!sb)return msg(t('nosb'));
- await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('#')[0]}});}
 async function afterLogin(){const{data:{session}}=await sb.auth.getSession();if(!session)return;user=session.user;
  let{data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
  if(p&&!p.name){const n=prompt(t('name'));const a=prompt(t('ageL'));
