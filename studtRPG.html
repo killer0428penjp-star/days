@@ -41,7 +41,7 @@ button{cursor:pointer}button:hover{background:#3a4560}
 <!-- 認証 -->
 <div id="auth" class="scr on"><div class="card">
 <h2 style="margin:0" data-i="title"></h2>
-<input id="em" type="email" data-p="email"><input id="pw" type="password" data-p="pass">
+<input id="em" data-p="uid" autocapitalize="none" autocomplete="username" maxlength="20"><input id="pw" type="password" data-p="pass" autocomplete="current-password">
 <input id="nm" data-p="name"><div class="row"><input id="ag" type="number" min="1" max="120" data-p="age">
 <select id="ge"><option value="m" data-i="male"></option><option value="f" data-i="female"></option><option value="n" data-i="none"></option></select></div>
 <div class="row"><button onclick="login()" data-i="login"></button><button onclick="signup()" data-i="signup"></button></div>
@@ -90,8 +90,8 @@ button{cursor:pointer}button:hover{background:#3a4560}
 const SB_URL='https://wxvodrdrkapoulivmzyr.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dm9kcmRya2Fwb3VsaXZtenlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxOTEwODUsImV4cCI6MjEwODc2NzA4NX0.D54gcTMqfdHNYjs29U41zgEQpRC8v4QkBC7m4XkUSXE'; // ← SupabaseのProject URLとanon keyを入れる
 const sb=(SB_URL&&window.supabase)?supabase.createClient(SB_URL,SB_KEY):null;
 const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
-const T={ja:{title:'勉強RPG',email:'メールアドレス',pass:'パスワード',name:'名前',age:'年齢',male:'男性',female:'女性',none:'選択しない',login:'ログイン',signup:'新規登録',google:'Googleでログイン',guest:'ゲストで始める',logout:'ログアウト',coin:'コイン',lv:'Lv',days:'始めて何日目',profile:'プロフィール',save:'保存',close:'閉じる',slot:'(今後追加予定)',size:'文字サイズ',font:'フォント',auto:'オート',speed:'再生速度(小さいほど速い)',town:'始まりの町',hint:'まず長老の家へ行ってみよう',locked:'この家にはまだ入れないようだ…',nosb:'Supabase未設定です。ゲストで始めてください',need:'メールとパスワードを入力してください',correct:'正解!',wrong:'不正解…',win:'勝利!',draw:'引き分け',lose:'敗北…',ageL:'年齢'},
-en:{title:'Study RPG',email:'Email',pass:'Password',name:'Name',age:'Age',male:'Male',female:'Female',none:'Prefer not to say',login:'Log in',signup:'Sign up',google:'Log in with Google',guest:'Play as guest',logout:'Log out',coin:'Coins',lv:'Lv',days:'Day',profile:'Profile',save:'Save',close:'Close',slot:'(coming soon)',size:'Text size',font:'Font',auto:'Auto',speed:'Speed (lower = faster)',town:'Starting Town',hint:"Visit the Elder's house first",locked:"You can't enter this house yet...",nosb:'Supabase is not configured. Play as guest.',need:'Enter email and password',correct:'Correct!',wrong:'Wrong...',win:'Victory!',draw:'Draw',lose:'Defeated...',ageL:'Age'}};
+const T={ja:{title:'勉強RPG',email:'メールアドレス',pass:'パスワード',name:'名前',age:'年齢',male:'男性',female:'女性',none:'選択しない',login:'ログイン',signup:'新規登録',uid:'ID(英数字3〜20字)',pass:'パスワード(6文字以上)',confirmon:'SupabaseのConfirm emailがONです。OFFにしてください',google:'Googleでログイン',guest:'ゲストで始める',logout:'ログアウト',coin:'コイン',lv:'Lv',days:'始めて何日目',profile:'プロフィール',save:'保存',close:'閉じる',slot:'(今後追加予定)',size:'文字サイズ',font:'フォント',auto:'オート',speed:'再生速度(小さいほど速い)',town:'始まりの町',hint:'まず長老の家へ行ってみよう',locked:'この家にはまだ入れないようだ…',nosb:'Supabase未設定です。ゲストで始めてください',need:'ID(英数字3〜20字)・パスワード(6文字以上)・名前を入力してください',correct:'正解!',wrong:'不正解…',win:'勝利!',draw:'引き分け',lose:'敗北…',ageL:'年齢'},
+en:{title:'Study RPG',email:'Email',pass:'Password',name:'Name',age:'Age',male:'Male',female:'Female',none:'Prefer not to say',login:'Log in',signup:'Sign up',uid:'ID (3-20 letters/digits)',pass:'Password (6+ chars)',confirmon:'Supabase Confirm email is ON. Turn it OFF.',google:'Log in with Google',guest:'Play as guest',logout:'Log out',coin:'Coins',lv:'Lv',days:'Day',profile:'Profile',save:'Save',close:'Close',slot:'(coming soon)',size:'Text size',font:'Font',auto:'Auto',speed:'Speed (lower = faster)',town:'Starting Town',hint:"Visit the Elder's house first",locked:"You can't enter this house yet...",nosb:'Supabase is not configured. Play as guest.',need:'Enter ID (3-20 letters/digits), password (6+) and name',correct:'Correct!',wrong:'Wrong...',win:'Victory!',draw:'Draw',lose:'Defeated...',ageL:'Age'}};
 let S=JSON.parse(localStorage.getItem('rpgstudy')||'null')||{lang:'ja',name:'',age:'',gender:'n',start:Date.now(),coin:0,prologue:false,cleared:false};
 let user=null,ts={size:18,font:'sans-serif',auto:false,speed:40};
 const t=k=>(T[S.lang]||T.ja)[k]||k;
@@ -109,12 +109,13 @@ function show(id){document.querySelectorAll('.scr').forEach(e=>e.classList.toggl
 /* ===== 認証 ===== */
 const msg=m=>$('msg').textContent=m||'';
 function form(){return{name:$('nm').value.trim(),age:+$('ag').value||'',gender:$('ge').value}}
-async function signup(){if(!sb)return msg(t('nosb'));const f=form(),e=$('em').value,p=$('pw').value;
- if(!e||!p||!f.name)return msg(t('need'));
- const{error}=await sb.auth.signUp({email:e,password:p,options:{data:f}});
- msg(error?error.message:'📧 確認メールを送信しました / Check your email');}
+const mail=id=>id.toLowerCase()+'@studyrpg.example.com',okId=id=>/^[A-Za-z0-9_]{3,20}$/.test(id);
+async function signup(){if(!sb)return msg(t('nosb'));const id=$('em').value.trim(),p=$('pw').value,f=form();
+ if(!okId(id)||p.length<6||!f.name)return msg(t('need'));
+ const{data,error}=await sb.auth.signUp({email:mail(id),password:p,options:{data:f}});
+ if(error)return msg(error.message);if(!data.session)return msg(t('confirmon'));afterLogin();}
 async function login(){if(!sb)return msg(t('nosb'));
- const{error}=await sb.auth.signInWithPassword({email:$('em').value,password:$('pw').value});
+ const{error}=await sb.auth.signInWithPassword({email:mail($('em').value.trim()),password:$('pw').value});
  if(error)return msg(error.message);afterLogin();}
 async function google(){if(!sb)return msg(t('nosb'));
  await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('#')[0]}});}
