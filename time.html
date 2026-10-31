@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>自習</title>
+<style>
+:root{--bg:#f6f1e6;--card:#fffaf0;--bd:#b8975a;--tx:#3b2f1e}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif}
+button,input,select{font:inherit;padding:.5em .9em;border-radius:8px;border:2px solid var(--bd);background:#fff;color:var(--tx)}
+button{cursor:pointer;box-shadow:0 2px 0 var(--bd)}button:hover{background:#f6e7c1}button:active{transform:translateY(2px);box-shadow:none}
+#app{position:fixed;inset:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:3vmin 2vmin;background:linear-gradient(#cfe9ff,#e9f5d6)}
+.card{background:var(--card);border:3px solid var(--bd);padding:16px clamp(12px,5vw,22px);border-radius:14px;width:min(94vw,460px);display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 20px #0003;margin:auto 0}
+.row{display:flex;gap:12px}.row>*{flex:1;min-width:0}.col{display:flex;flex-direction:column;gap:6px}
+.c{border:3px solid;border-radius:10px;padding:6px;text-align:center}.c small{display:block;font-size:11px;font-weight:bold;white-space:nowrap}.c b{display:block;font-size:clamp(11px,3.6vw,15px);white-space:nowrap}.c{min-width:0}.lv small{font-size:clamp(9px,2.6vw,11px)}
+.btns{gap:8px}.btns button{padding:.5em .2em;font-size:clamp(11px,3.4vw,14px);white-space:nowrap}
+.lv{background:#eee3ff;border-color:#8b5cf6;color:#5b34b8;flex:1.5}.dy{background:#dff5df;border-color:#3a9a3a;color:#1f6a1f}.co{background:#fff3c4;border-color:#d4a017;color:#8a6200}
+.tabs{display:flex;gap:10px}.tabs button{flex:1;padding:.5em .3em;font-size:12px;white-space:nowrap}.tabs button.on{background:#f3d27a;border-color:#d4a017}
+.tbox{position:relative;border:3px solid #8a6d3b;border-radius:12px;background:#fff;padding:12px;text-align:center;box-shadow:0 0 0 3px #e8d49a}
+#lb{font-weight:bold;color:#b5651d}#tm{font-size:min(13vw,60px);font-weight:bold;font-family:monospace;color:#3b2f1e;white-space:nowrap}
+#an{width:min(62vw,230px);display:block;margin:4px auto}.tbox.dg #an{display:none}.tbox.an #tm{font-size:22px}
+.mini{position:absolute;top:6px;right:6px;padding:.2em .5em;font-size:15px}
+.bar{height:10px;background:#ddd;border-radius:6px;overflow:hidden;border:1px solid #444;margin-top:6px}.bar i{display:block;height:100%;width:0;background:#8b5cf6;transition:width .4s}
+.sm{font-size:12px;color:#8a7a50}
+.exp{background:#fff6d8;border:2px solid #e0c060;border-radius:10px;padding:8px 10px;font-size:14px;line-height:1.6}
+.rw{cursor:pointer;padding:3px 0;border-bottom:1px dotted #e0c98a}
+#toast{position:fixed;left:50%;bottom:8%;transform:translateX(-50%);background:#3b2f1ee6;color:#fff;padding:.5em 1.2em;border-radius:20px;z-index:90;display:none;max-width:90vw;text-align:center}
+#modal{position:fixed;inset:0;background:#0006;z-index:60;display:none;align-items:center;justify-content:center}
+.pf{width:min(94vw,460px);max-height:92vh;overflow:auto;background:var(--card);border:4px solid #8a6d3b;border-radius:16px;box-shadow:0 0 0 3px #e8d49a,0 8px 24px #0005}
+.ph{padding:12px 14px;background:linear-gradient(135deg,#f3d27a,#e29a4a);border-bottom:4px solid #8a6d3b;color:#fff;font-weight:bold;font-size:18px;text-shadow:0 1px 2px #6a3b0a}
+.pb{padding:14px;display:flex;flex-direction:column;gap:10px}.pf>.row{padding:0 14px 14px}
+#dlg{position:fixed;inset:0;background:#0006;z-index:80;display:none;align-items:center;justify-content:center}#dm{font-size:14px;line-height:1.6}
+#yt{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:0;bottom:0}
+.u{display:flex;gap:10px}.u input{padding:.3em .5em;min-width:0}.u input:first-child{flex:.8}.u input:last-child{flex:1.4}
+</style></head><body>
+<div id="app"><div class="card">
+<div class="c lv"><small id="cd"></small><b id="ck" style="font-size:22px"></b></div>
+<div class="row"><div class="c dy"><small>今日</small><b id="td"></b></div><div class="c co"><small>累計</small><b id="tt"></b></div></div>
+<select id="sub" onchange="cfg.sub=this.value;sc()"></select>
+<div class="tabs" id="mt"><button onclick="setMode(0)">📖 勉強モード</button><button onclick="setMode(1)">⏱ タイマー</button><button onclick="setMode(2)">⏳ 制限</button></div>
+<div id="m0" class="col"><select id="pm" onchange="cfg.pm=this.value;sc();if(!active)rem=full();render()"><option value="s">標準:25分勉強 → 5分休憩</option><option value="c">カスタム</option></select>
+<div id="cus" class="row sm" style="align-items:center">勉強<input id="cw" type="number" min="1" max="180">分 / 休憩<input id="cb" type="number" min="1" max="60">分</div></div>
+<div id="m2" class="row sm" style="align-items:center"><label>制限(分)<input id="lim" type="number" min="1" max="600" style="width:100%"></label><label style="display:flex;gap:6px;align-items:center"><input id="rep" type="checkbox" style="width:auto">繰り返す</label></div>
+<div class="tbox dg" id="tbx"><button class="mini" onclick="cfg.dial=!cfg.dial;sc();render()">🕐</button><div id="lb"></div><svg id="an" viewBox="0 0 200 200"></svg><div id="tm"></div><div class="bar"><i id="pg"></i></div></div>
+<div class="col"><button id="go" onclick="toggle()"></button><button onclick="resetT()">↺ リセット</button><button onclick="skipT()">⏩ タイマーを進める</button><button id="bb" onclick="openBgm()">🎵 BGM</button><button onclick="openHist()">📊 記録</button></div>
+</div></div>
+<div id="dlg"><div class="pf"><div class="ph" id="dh"></div><div class="pb" id="dm"></div><div class="row" id="db"></div></div></div>
+<div id="yt"></div><div id="toast"></div>
+<div id="modal"><div class="pf"><div class="ph" id="mh"></div><div class="pb" id="mb"></div><div class="row"><button onclick="$('modal').style.display='none'">閉じる</button></div></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const SUBJ=['未設定','数学','英語','社会','理科','国語','家庭科','技術','音楽','美術','保体','その他'],COL=['#bbb','#3a7ad9','#2a9a6a','#d99a2a','#8a5ad9','#d95a5a','#e07aa0','#6a8a9a','#e0b030','#c06a3a','#4aa84a','#999'];
+let cfg=Object.assign({mode:0,lim:30,rep:false,bgm:0,vol:50,urls:Array(10).fill(''),bn:['雨の音','波の音','小川のせせらぎ','森と鳥の声','焚き火の音','風の音','雷雨','カフェの環境音','作業用ピアノ','Lo-fi'],pm:'s',w:25,b:5,sub:'未設定',dial:false,skip:5},JSON.parse(localStorage.getItem('studycfg')||'{}'));
+if(!cfg.v2){cfg.sub='未設定';cfg.v2=1;localStorage.setItem('studycfg',JSON.stringify(cfg))}
+let S=JSON.parse(localStorage.getItem('studysess')||'[]');
+const sv=()=>localStorage.setItem('studysess',JSON.stringify(S)),sc=()=>localStorage.setItem('studycfg',JSON.stringify(cfg));
+function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2600)}
+const sum=a=>a.reduce((x,y)=>x+y,0),p2=n=>String(n).padStart(2,'0'),dk=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+const hm=s=>{s=Math.round(s);if(s<60)return'1分未満';const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}時間${m}分`:`${m}分`};
+const clk=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return(h?h+':'+p2(m):m)+':'+p2(s%60)};
+const tm=ms=>{const d=new Date(ms);return p2(d.getHours())+':'+p2(d.getMinutes())};
+const D0=k=>new Date(k+'T00:00').getTime();
+function dayArr(k){const a=D0(k),b=a+864e5;return S.map((g,i)=>({s:Math.max(g.s,a),e:Math.min(g.e,b),u:g.u,i})).filter(g=>g.e-g.s>=1000)}
+const dayTot=k=>sum(dayArr(k).map(g=>g.e-g.s))/1000;
+/* ===== タイマー ===== */
+const PM=()=>cfg.pm=='c'?[cfg.w*60,cfg.b*60]:[1500,300];
+let run=false,active=false,last=0,rem=1500,el=0,brk=false,n=0;
+const full=()=>cfg.mode==0?PM()[brk?1:0]:cfg.lim*60;
+function beep(){try{const a=new(window.AudioContext||window.webkitAudioContext)();[880,1175,880].forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+i*.22;o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.22)})}catch(e){}}
+function addLog(dt){const t=Date.now(),g=S[S.length-1];if(g&&g.u==cfg.sub&&t-g.e<3000)g.e=t;else S.push({s:t-dt*1000,e:t,u:cfg.sub})}
+function render(){const m=cfg.mode,v=m==1?el:Math.max(0,rem);
+ [...$('mt').children].forEach((b,i)=>b.classList.toggle('on',i==m));
+ $('m0').style.display=m==0?'flex':'none';$('m2').style.display=m==2?'flex':'none';$('cus').style.display=cfg.pm=='c'?'flex':'none';
+ $('lb').textContent=m==0?(brk?'☕ 休憩中':`📖 勉強中(${PM()[0]/60}分)`):m==1?'⏱ 勉強時間':'⏳ 制限タイマー';
+ $('tm').textContent=clk(m==1?Math.floor(v):Math.ceil(v));
+ $('an').querySelector('#hs').setAttribute('transform',`rotate(${(v%60)*6} 100 100)`);$('an').querySelector('#hn').setAttribute('transform',`rotate(${(v/60%60)*6} 100 100)`);
+ $('pg').style.width=m==1?'0':Math.min(100,(1-rem/full())*100)+'%';$('tbx').className='tbox '+(cfg.dial?'an':'dg');
+ $('go').textContent=run?'⏸ 一時停止':active?'▶ 再開':'▶ スタート';
+ $('td').textContent=hm(dayTot(dk(new Date())));$('tt').textContent=hm(sum(S.map(g=>g.e-g.s))/1000);$('bb').textContent=playing?'🎵 BGM ♪':'🎵 BGM'}
+function resetT(){run=false;active=false;brk=false;el=0;rem=full();sv();render()}
+function toggle(){if(!run){if(!active){brk=false;el=0;rem=full()}run=true;active=true;last=Date.now()}else{run=false;sv()}render()}
+async function setMode(m){if(m==cfg.mode)return;if(active&&!await ask('モードを切り替えますか?','タイマーが動いている途中、または一時停止中です。<br>切り替えると<b>タイマーはリセット</b>されます。','リセットして切り替える'))return;cfg.mode=m;sc();resetT()}
+function step(dt){const m=cfg.mode;
+ if(m==1){el+=dt;addLog(dt);return}
+ if(m==2||!brk)addLog(dt);
+ rem-=dt;chk()}
+function chk(){if(rem>0)return;const m=cfg.mode,lo=Math.min(0,rem);beep();
+ if(m==0){brk=!brk;rem=Math.max(1,PM()[brk?1:0]+lo);toast(brk?`☕ 休憩の時間です(${PM()[1]/60}分)`:`📖 勉強スタート(${PM()[0]/60}分)`)}
+ else if(cfg.rep){rem=Math.max(1,cfg.lim*60+lo);toast('🔁 もう一度はじめます')}
+ else{run=false;active=false;rem=0;sv();toast('⏰ 時間になりました!おつかれさま!')}}
+async function skipT(){if(!active)return toast('スタートしてから使えます');
+ if(!await ask('⏩ タイマーを進める',`何分進めますか?<br><span class="sm">進めた分は勉強時間に含まれません。</span><input id="sk" type="number" min="1" max="600" value="${cfg.skip}" style="width:100%;margin-top:8px">`,'進める'))return;
+ const x=Math.max(1,Math.min(600,+$('sk').value||5));cfg.skip=x;sc();
+ if(cfg.mode==1)el+=x*60;else{rem-=x*60;chk()}last=Date.now();render()}
+setInterval(()=>{if(!run)return;const t=Date.now(),dt=Math.min((t-last)/1000,5);last=t;step(dt);if(++n%8==0)sv();render()},250);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)sv()});
+setInterval(()=>{const d=new Date(),w='日月火水木金土'[d.getDay()];$('cd').textContent=`${d.getMonth()+1}月${d.getDate()}日(${w})`;$('ck').textContent=tm(d)},1000);
+/* 初期化(アナログ文字盤・入力欄) */
+(()=>{let f='<circle cx="100" cy="100" r="96" fill="#fff" stroke="#8a6d3b" stroke-width="4"/>';
+ for(let i=0;i<60;i++){const a=i*6*Math.PI/180,l=i%5?4:9,s=Math.sin(a),c=-Math.cos(a);f+=`<line x1="${100+s*92}" y1="${100+c*92}" x2="${100+s*(92-l)}" y2="${100+c*(92-l)}" stroke="#3b2f1e" stroke-width="${i%5?1:2.5}"/>`}
+ for(let i=0;i<12;i++){const a=i*30*Math.PI/180;f+=`<text x="${100+Math.sin(a)*72}" y="${100-Math.cos(a)*72}" font-size="13" text-anchor="middle" dominant-baseline="middle" fill="#3b2f1e">${i*5}</text>`}
+ f+='<line id="hn" x1="100" y1="100" x2="100" y2="40" stroke="#3b2f1e" stroke-width="5" stroke-linecap="round"/><line id="hs" x1="100" y1="112" x2="100" y2="18" stroke="#e33" stroke-width="2.5" stroke-linecap="round"/><circle cx="100" cy="100" r="5" fill="#e33"/>';
+ $('an').innerHTML=f;
+ $('sub').innerHTML=SUBJ.map(s=>`<option>${s}</option>`).join('');$('sub').value=cfg.sub;
+ $('pm').value=cfg.pm;$('cw').value=cfg.w;$('cb').value=cfg.b;$('lim').value=cfg.lim;$('rep').checked=cfg.rep;
+ const cl=(e,k,lo,hi,fn)=>$(e).onchange=ev=>{cfg[k]=Math.max(lo,Math.min(hi,+ev.target.value||lo));ev.target.value=cfg[k];sc();if(!active)rem=full();render()};
+ cl('cw','w',1,180);cl('cb','b',1,60);cl('lim','lim',1,600);$('rep').onchange=e=>{cfg.rep=e.target.checked;sc()}})();
+/* ===== 確認ダイアログ(デザイン付き) ===== */
+function ask(t,m,ok='OK',cancel='キャンセル'){return new Promise(r=>{$('dh').textContent=t;$('dm').innerHTML=m;
+ $('db').innerHTML=`<button id="dc">${cancel}</button><button id="dk" style="background:#f3d27a;border-color:#d4a017">${ok}</button>`;$('dlg').style.display='flex';
+ const f=v=>{$('dlg').style.display='none';r(v)};$('dk').onclick=()=>f(true);$('dc').onclick=()=>f(false)})}
+/* ===== モーダル ===== */
+function modal(t,h){$('mh').textContent=t;$('mb').innerHTML=h;$('modal').style.display='flex'}
+/* ===== 記録 ===== */
+let hT='d',hD=dk(new Date()),wO=0;
+const openHist=()=>histR();
+function histR(){modal('📊 勉強の記録',`<div class="tabs"><button class="${hT=='d'?'on':''}" onclick="hT='d';histR()">日別</button><button class="${hT=='w'?'on':''}" onclick="hT='w';histR()">週間</button></div>`+(hT=='d'?dayHTML():weekHTML()))}
+function pie(k,a){const C=150,R=110,pt=(d,r)=>[C+r*Math.sin(d*Math.PI/180),C-r*Math.cos(d*Math.PI/180)],d0=D0(k);
+ let h=`<svg viewBox="0 0 300 300" style="width:100%;max-width:340px;align-self:center;background:#fff;border:2px solid #e0c98a;border-radius:12px"><circle cx="150" cy="150" r="${R}" fill="#f4f1ea" stroke="#b8975a"/>`;
+ a.forEach((g,i)=>{const s=(g.s-d0)/864e5*360,e=Math.max((g.e-d0)/864e5*360,s+1.2),[x1,y1]=pt(s,R),[x2,y2]=pt(e,R);
+  h+=`<path d="M150 150L${x1} ${y1}A${R} ${R} 0 ${e-s>180?1:0} 1 ${x2} ${y2}Z" fill="${COL[SUBJ.indexOf(g.u)]}" style="cursor:pointer" onclick="seg(${i})"/>`});
+ for(let i=0;i<24;i++){const[x,y]=pt(i*15,R);h+=`<line x1="150" y1="150" x2="${x}" y2="${y}" stroke="#0003" stroke-width="${i%6?.5:1.2}" pointer-events="none"/>`;
+  if(i%3==0){const[a1,b1]=pt(i*15,R+14);h+=`<text x="${a1}" y="${b1}" font-size="11" text-anchor="middle" dominant-baseline="middle">${i}</text>`}}
+ return h+'</svg>'}
+function dayHTML(){const ks=[...new Set([dk(new Date()),...S.flatMap(g=>[dk(new Date(g.s)),dk(new Date(g.e))])])].sort().reverse(),wd='日月火水木金土';
+ if(!ks.includes(hD))hD=ks[0];
+ const a=dayArr(hD),by={};a.forEach(g=>by[g.u]=(by[g.u]||0)+(g.e-g.s)/1000);
+ return `<select onchange="hD=this.value;histR()">${ks.map(k=>{const d=new Date(k+'T00:00');return`<option value="${k}" ${k==hD?'selected':''}>${d.getMonth()+1}/${d.getDate()}(${wd[d.getDay()]}) ${hm(dayTot(k))}</option>`}).join('')}</select>`
+ +pie(hD,a)+`<div id="sg" class="exp">円グラフ(上が0時・時計まわり24時間)の色をタップすると、何時から何時までかわかります</div>`
+ +Object.entries(by).sort((x,y)=>y[1]-x[1]).map(([u,s])=>`<div class="sm"><span style="color:${COL[SUBJ.indexOf(u)]}">●</span> ${u} ${hm(s)}</div>`).join('')
+ +(a.length?'<div class="sm">▼ 勉強した時間帯(タップで強調)</div>':'<div class="sm">この日の記録はありません</div>')
+ +a.map((g,i)=>`<div class="rw sm" onclick="seg(${i})" style="display:flex;align-items:center;gap:8px"><span style="flex:1"><span style="color:${COL[SUBJ.indexOf(g.u)]}">●</span> ${tm(g.s)}〜${tm(g.e)} ${g.u}(${hm((g.e-g.s)/1000)})</span><button style="padding:.1em .5em" onclick="event.stopPropagation();delSeg(${i})">🗑</button></div>`).join('')
+ +(a.length?'<button onclick="delDay()">🗑 この日の記録をすべて削除</button>':'')}
+async function delSeg(i){const g=dayArr(hD)[i];if(!await ask('記録を削除',`${tm(g.s)}〜${tm(g.e)} ${g.u}<br>この記録を削除しますか?(元に戻せません)`,'削除'))return;S.splice(g.i,1);sv();render();histR()}
+async function delDay(){const a=dayArr(hD);if(!await ask('この日の記録を削除',`${hD} の記録 ${a.length}件(合計 ${hm(dayTot(hD))})をすべて削除しますか?<br>元に戻せません。`,'すべて削除'))return;const t0=D0(hD),t1=t0+864e5;S=S.filter(g=>!(g.e>t0&&g.s<t1));sv();render();histR()}
+function seg(i){const g=dayArr(hD)[i];$('sg').innerHTML=`<b>${tm(g.s)} 〜 ${tm(g.e)}</b><br>${g.u} ・ ${hm((g.e-g.s)/1000)}`}
+function weekHTML(){const e=new Date();e.setHours(0,0,0,0);e.setDate(e.getDate()+wO*7);
+ const ds=[...Array(7)].map((_,i)=>{const d=new Date(e);d.setDate(e.getDate()-6+i);return d}),vs=ds.map(d=>dayTot(dk(d))),av=sum(vs)/7,mx=Math.max(...vs,3600),wd='日月火水木金土';
+ let s='<svg viewBox="0 0 300 190" style="width:100%;background:#fff;border:2px solid #e0c98a;border-radius:12px"><line x1="8" y1="150" x2="292" y2="150" stroke="#888"/>';
+ vs.forEach((v,i)=>{const x=16+i*39,h=v/mx*115;s+=`<rect x="${x}" y="${150-h}" width="28" height="${h}" rx="3" fill="#8b5cf6"/><text x="${x+14}" y="${145-h}" font-size="9" text-anchor="middle">${v>=60?hm(v):''}</text><text x="${x+14}" y="164" font-size="10" text-anchor="middle">${ds[i].getMonth()+1}/${ds[i].getDate()}</text><text x="${x+14}" y="177" font-size="10" text-anchor="middle" fill="#888">${wd[ds[i].getDay()]}</text>`});
+ const ay=150-av/mx*115;s+=`<line x1="8" y1="${ay}" x2="292" y2="${ay}" stroke="#e33" stroke-dasharray="4"/></svg>`;
+ const f=d=>`${d.getMonth()+1}/${d.getDate()}`;
+ return `<div class="row" style="align-items:center"><button onclick="wO--;histR()">◀</button><div class="sm" style="text-align:center;flex:3">${f(ds[0])} 〜 ${f(ds[6])}</div><button onclick="wO=Math.min(0,wO+1);histR()">▶</button></div>`+s
+ +`<div class="c co"><small>1日の平均(この7日間)</small><b>${hm(av)}</b></div><div class="sm">赤い点線が平均、棒は1日の勉強時間です</div>`}
+/* ===== BGM(YouTube埋め込み・ループ) ===== */
+let yp=null,playing=false;
+const vid=s=>{const m=(s||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:/^[\w-]{11}$/.test(s||'')?s:''};
+function openBgm(){modal('🎵 BGM(ループ再生)',`<select id="bs" onchange="cfg.bgm=+this.value;sc();if(playing)bgmPlay()">${cfg.bn.map((b,i)=>`<option value="${i}" ${i==cfg.bgm?'selected':''}>${b}</option>`).join('')}</select>
+<div class="row" style="align-items:center"><button id="bp" onclick="playing?bgmStop():bgmPlay()">${playing?'⏹ 停止':'▶ 再生'}</button><label class="sm" style="display:flex;align-items:center;gap:6px">音量<input type="range" min="0" max="100" value="${cfg.vol}" style="padding:0" oninput="cfg.vol=+this.value;sc();yp&&yp.setVolume&&yp.setVolume(cfg.vol)"></label></div>
+<div class="sm">▼ メモのように、名前とYouTubeのURLを自由に書き換えられます(雨の音など)。再生許可のあるフリー音源のURLを入れてください。</div>`
++cfg.bn.map((b,i)=>`<div class="u"><input value="${b}" oninput="cfg.bn[${i}]=this.value;sc();$('bs').options[${i}].text=this.value"><input placeholder="https://www.youtube.com/watch?v=..." value="${cfg.urls[i]||''}" oninput="cfg.urls[${i}]=this.value.trim();sc()"></div>`).join(''))}
+function loadYT(cb){if(window.YT&&YT.Player)return cb();window.onYouTubeIframeAPIReady=cb;const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)}
+function bgmPlay(){const id=vid(cfg.urls[cfg.bgm]);if(!id)return toast('この曲のYouTubeのURLを入れてください');
+ playing=true;if($('bp'))$('bp').textContent='⏹ 停止';render();
+ loadYT(()=>{if(yp&&yp.loadVideoById){yp.loadVideoById(id);yp.setVolume(cfg.vol)}else if(!yp)yp=new YT.Player('yt',{width:1,height:1,videoId:id,playerVars:{playsinline:1},events:{onReady:e=>{e.target.setVolume(cfg.vol);e.target.playVideo()},onStateChange:e=>{if(e.data===0&&playing)e.target.playVideo()}}})})}
+function bgmStop(){playing=false;if($('bp'))$('bp').textContent='▶ 再生';if(yp&&yp.stopVideo)yp.stopVideo();render()}
+resetT();
+</script></body></html>
