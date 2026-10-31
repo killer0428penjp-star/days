@@ -88,7 +88,7 @@ details{border:2px solid #e0c98a;border-radius:8px;padding:6px 10px;background:#
 
 <button id="hud" onclick="openProf()"></button>
 <div id="tb"><button id="back" onclick="backToMap()">← 戻る</button><button onclick="setLang()">EN/JA</button><button class="mb" id="gb" onclick="toggleMenu()" title="メニュー">⚙</button></div>
-<div id="menu"><button onclick="toggleMenu(0);openItems()">🎒 持ち物</button><button onclick="toggleMenu(0);openHist()">📖 履歴・復習</button><button onclick="toggleMenu(0);openQStat()">📂 問題ファイル</button><button id="bs" onclick="toggleSnd()">🔊 サウンド</button><button id="bv" onclick="toggleVoice()">🗣 ボイス</button></div>
+<div id="menu"><button onclick="toggleMenu(0);openItems()">🎒 持ち物</button><button onclick="toggleMenu(0);openHist()">📖 履歴・復習</button><button onclick="toggleMenu(0);openQStat()">📂 問題ファイル</button><button onclick="toggleMenu(0);diagSave()">🩺 保存の診断</button><button id="bs" onclick="toggleSnd()">🔊 サウンド</button><button id="bv" onclick="toggleVoice()">🗣 ボイス</button></div>
 <div id="nav"><button onclick="navGo('study')"><span>📚</span>自習</button><button onclick="navGo('cos')"><span>👕</span>コスチューム</button><button class="c" onclick="navGo('map')"><span>🗺</span>マップ</button><button onclick="navGo('fr')"><span>👥</span>フレンド</button><button id="nb" onclick="navGo('sub')"><span>⚔</span>対戦・作成</button></div>
 <div id="sub"><button onclick="subGo('battle')">⚔ 対戦</button><button onclick="subGo('make')">✍ 問題作成</button></div>
 <div id="hint"></div><div id="toast"></div>
@@ -206,8 +206,28 @@ let user=null,ts={size:18,font:'sans-serif',auto:false,speed:40};
 const t=k=>(T[S.lang]||T.ja)[k]||k;
 const save=()=>localStorage.setItem('rpgstudy',JSON.stringify(S));
 /* ===== 保存(ローカル+クラウド) ===== */
-let st;const prog=()=>({prologue:S.prologue,defeated:S.defeated,inv:S.inv,hist:S.hist.slice(-300),pos:{a:cur,x:px,y:py},snd:S.snd,av:S.av});
-function persist(){save();if(!sb||!user)return;clearTimeout(st);st=setTimeout(()=>sb.from('progress').upsert({user_id:user.id,data:prog(),updated_at:new Date().toISOString()}),700)}
+let st,lastErr=0;const prog=()=>({prologue:S.prologue,defeated:S.defeated,inv:S.inv,hist:S.hist.slice(-300),pos:{a:cur,x:px,y:py},snd:S.snd,av:S.av,ts:S.ts});
+function showSaveErr(m){if(Date.now()-lastErr<60000)return;lastErr=Date.now();toast('☁ サーバーへの保存に失敗しました。⚙→🩺保存の診断 を確認してください'+(m?'('+m.slice(0,40)+')':''))}
+function persist(now){S.ts=Date.now();if(S.hist.length>300)S.hist=S.hist.slice(-300);save();if(!sb||!user)return Promise.resolve();clearTimeout(st);
+ const go=()=>sb.from('progress').upsert({user_id:user.id,data:prog(),updated_at:new Date().toISOString()}).then(r=>{if(r&&r.error)showSaveErr(r.error.message)},e=>showSaveErr(String(e)));
+ if(now)return go();st=setTimeout(go,1200);return Promise.resolve()}
+addEventListener('pagehide',()=>{try{save()}catch(e){}});
+async function flushPend(){if(!sb||!user||!(S.pend&&S.pend.length))return;const rest=[];let any=false;
+ for(const x of S.pend){const{error}=await sb.rpc('finish_battle',{result:x.result,xp:x.xp,lv:levelOf(S.exp),gain:x.gain});if(error)rest.push(x);else any=true}
+ S.pend=rest;const{data:p}=await sb.from('profiles').select('coin,exp').eq('id',user.id).single();
+ if(p){S.coin=p.coin+rest.reduce((a,x)=>a+x.gain,0);S.exp=p.exp+rest.reduce((a,x)=>a+x.xp,0)}
+ if(any&&!rest.length)toast('☁ 未保存だった結果をクラウドに保存しました');save()}
+async function diagSave(){const rows=[],add=(n,ok,m)=>rows.push(`<div class="li" style="cursor:default"><b>${ok?'✅':'❌'} ${n}<br><small>${esc(m||'')}</small></b></div>`);
+ openModal(H('🩺','保存の診断'),'<div class="sm">確認中…</div>');
+ if(!sb)add('Supabase接続',0,'未設定です');
+ else if(!user)add('ログイン',0,'ゲストです。進行はこのブラウザ(localStorage)にだけ保存されます。ブラウザのデータ削除・別の端末・プライベートモードでは引き継げません。');
+ else{add('ログイン',1,'ユーザーID '+user.id.slice(0,8)+'…');
+  let r=await sb.from('profiles').select('exp,coin,level').eq('id',user.id).single();add('profiles の exp 列(レベル・EXPの保存)',!r.error,r.error?r.error.message:`サーバー上: coin ${r.data.coin} / exp ${r.data.exp}`);
+  r=await sb.from('progress').upsert({user_id:user.id,data:prog(),updated_at:new Date().toISOString()});add('progress テーブル(進行状況の保存)',!r.error,r.error?r.error.message:'書き込みOK');
+  r=await sb.rpc('finish_battle',{result:'lose',xp:0,lv:lvl(),gain:0});add('finish_battle 関数(コイン・EXPの保存)',!r.error,r.error?r.error.message:'OK');
+  r=await sb.rpc('spend_coin',{n:0});const sc=!r.error||/not enough coin/.test(r.error.message||'');add('spend_coin 関数(武器屋)',sc,sc?'OK':r.error.message);
+  add('未送信の結果',!(S.pend&&S.pend.length),(S.pend&&S.pend.length)?S.pend.length+'件が未送信(SQL修正後、次回ログイン時に自動で送ります)':'なし')}
+ $('mbody').innerHTML=rows.join('')+'<div class="sm">❌がある場合は、Supabaseの SQL Editor で supabase_setup.sql を実行してください。</div>'}
 function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2200)}
 /* ===== レベル(必要EXPは1.3倍ずつ) ===== */
 const need=L=>Math.round(1000*Math.pow(1.3,L-1));
@@ -296,8 +316,10 @@ async function afterLogin(){const{data:{session}}=await sb.auth.getSession();if(
   if(p.age==null){const a=+prompt(t('ageL'));if(a)u.age=a}
   if(Object.keys(u).length){const{error}=await sb.from('profiles').update(u).eq('id',user.id);if(error)alert(error.message);else Object.assign(p,u)}
   const{data:pr}=await sb.from('progress').select('data').eq('user_id',user.id).maybeSingle();
-  const d=(pr&&pr.data)||{},keep={lang:S.lang,snd:S.snd};
-  S=Object.assign(DEF(),keep,{guest:false,name:p.name||'',age:p.age||'',gender:p.gender||'n',coin:p.coin,exp:p.exp||0,start:new Date(p.created_at).getTime()},d);
+  const d=(pr&&pr.data)||{},keep={lang:S.lang,snd:S.snd},lc=(S.uid==user.id||(!S.uid&&!S.guest&&S.name&&S.name===(p.name||'')))?S:null,useLocal=!!lc&&(lc.ts||0)>(d.ts||0);
+  const base=useLocal?{prologue:lc.prologue,defeated:lc.defeated,inv:lc.inv,hist:lc.hist,pos:lc.pos,av:lc.av,snd:lc.snd}:d,pend=lc&&lc.pend?lc.pend:[];
+  S=Object.assign(DEF(),keep,{guest:false,uid:user.id,name:p.name||'',age:p.age||'',gender:p.gender||'n',coin:p.coin+pend.reduce((a,x)=>a+x.gain,0),exp:(p.exp||0)+pend.reduce((a,x)=>a+x.xp,0),start:new Date(p.created_at).getTime(),pend},base,{ts:Math.max(lc?lc.ts||0:0,d.ts||0)});
+  await flushPend();if(useLocal)persist(true);
   if(S.pos&&S.pos.a)cur=S.pos.a;
   sb.from('profiles').update({last_login_at:new Date().toISOString()}).eq('id',user.id);}
  save();start();}
@@ -356,7 +378,7 @@ function openItems(){openModal(H('🎒','持ち物'),Object.keys(ITEMS).map(k=>`
 function openShop(){const p=openModal(H('🛡','武器屋'),`<div class="c co"><small>所持コイン</small><b>💰 ${S.coin}</b></div>`+Object.keys(ITEMS).map(k=>`<div class="li"><b>${ITEMS[k].n}<br><small>${ITEMS[k].d}</small></b><span>×${S.inv[k]}</span><button onclick="buy('${k}')">5000💰</button></div>`).join(''));return p}
 async function buy(k){if(S.coin<5000)return toast('コインが足りません');
  if(sb&&user){const{data,error}=await sb.rpc('spend_coin',{n:5000});if(error)return toast(error.message);S.coin=data}else S.coin-=5000;
- S.inv[k]++;persist();hud();SE.buy();openShop()}
+ S.inv[k]++;persist(true);hud();SE.buy();openShop()}
 
 /* ===== 履歴・復習 ===== */
 const hk=h=>h.k||('2|'+h.s),hid=h=>h.id||('2-'+SKEY[h.s]+'-'+String(h.i+1).padStart(3,'0'));
@@ -670,10 +692,10 @@ async function battle(e){await ready;show('battle');let me=2000,en=2000,boost=fa
   await new Promise(r=>$('nx').onclick=r);}
  const r=surr?'lose':me>en?'win':me<en?'lose':'draw',gain=r=='win'?ST.coin:0,xp=r=='win'?ST.xp:0,L0=lvl();
  let okSv=false;
- if(sb&&user){const{data,error}=await sb.rpc('finish_battle',{result:r,xp,lv:levelOf(S.exp+xp),gain});if(!error&&data&&data[0]){S.coin=data[0].coin;S.exp=data[0].exp;okSv=true}else toast('保存に失敗: '+(error?error.message:''))}
- if(!okSv){S.coin+=gain;S.exp+=xp}
+ if(sb&&user){const{data,error}=await sb.rpc('finish_battle',{result:r,xp,lv:levelOf(S.exp+xp),gain});if(!error&&data&&data[0]){S.coin=data[0].coin;S.exp=data[0].exp;okSv=true}else showSaveErr(error&&error.message)}
+ if(!okSv){S.coin+=gain;S.exp+=xp;if(sb&&user)S.pend=(S.pend||[]).concat({result:r,xp,gain})}
  if(r=='win'&&!isDef(e.id))S.defeated.push(e.id);
- const L1=lvl();persist();hud();
+ const L1=lvl();await persist(true);hud();
  r=='win'?SE.win():r=='lose'?SE.lose():SE.item();if(L1>L0)setTimeout(SE.lvup,900);
  $('q').style.display=$('ch').style.display=$('items').style.display=$('fig').style.display='none';
  $('ex').innerHTML=`<div class="rc ${r=='lose'?'lose':''}"><h2>${surr?'🏳 降参':r=='win'?'🏆 '+t(r):r=='draw'?'🤝 '+t(r):'💧 '+t(r)}</h2>
