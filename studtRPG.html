@@ -2,9 +2,9 @@
 <html lang="ja"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>勉強RPG</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
 <style>
 :root{--bg:#f6f1e6;--card:#fffaf0;--bd:#b8975a;--tx:#3b2f1e}
 *{box-sizing:border-box}
@@ -83,13 +83,13 @@ details{border:2px solid #e0c98a;border-radius:8px;padding:6px 10px;background:#
 #nav button{flex:1;min-width:0;padding:2px;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.2;box-shadow:none;white-space:nowrap}
 #nav button span{font-size:22px}#nav button.c{background:#f3d27a;border-color:#d4a017}
 #sub{position:fixed;right:6px;bottom:calc(70px + env(safe-area-inset-bottom));z-index:31;display:none;flex-direction:column;gap:6px;background:var(--card);border:3px solid var(--bd);border-radius:12px;padding:8px;box-shadow:0 4px 14px #0004}
-#map,#town{bottom:calc(62px + env(safe-area-inset-bottom))}
+#map,#town,#study{bottom:calc(62px + env(safe-area-inset-bottom))}#study{background:#fff}#stf{width:100%;height:100%;border:0;display:block}
 </style></head><body>
 
 <button id="hud" onclick="openProf()"></button>
 <div id="tb"><button id="back" onclick="backToMap()">← 戻る</button><button onclick="setLang()">EN/JA</button><button class="mb" id="gb" onclick="toggleMenu()" title="メニュー">⚙</button></div>
-<div id="menu"><button onclick="toggleMenu(0);openItems()">🎒 持ち物</button><button onclick="toggleMenu(0);openHist()">📖 履歴・復習</button><button onclick="toggleMenu(0);openQStat()">📂 問題ファイル</button><button onclick="toggleMenu(0);diagSave()">🩺 保存の診断</button><button id="bs" onclick="toggleSnd()">🔊 サウンド</button><button id="bv" onclick="toggleVoice()">🗣 ボイス</button></div>
-<div id="nav"><button onclick="navGo('study')"><span>📚</span>自習</button><button onclick="navGo('cos')"><span>👕</span>コスチューム</button><button class="c" onclick="navGo('map')"><span>🗺</span>マップ</button><button onclick="navGo('fr')"><span>👥</span>フレンド</button><button id="nb" onclick="navGo('sub')"><span>⚔</span>対戦・作成</button></div>
+<div id="menu"><button onclick="toggleMenu(0);openItems()">🎒 持ち物</button><button onclick="toggleMenu(0);openHist()">📖 履歴・復習</button><button onclick="toggleMenu(0);openQStat()">📚 問題の数</button><button onclick="toggleMenu(0);diagSave()">🩺 保存の診断</button><button id="bs" onclick="toggleSnd()">🔊 サウンド</button><button id="bv" onclick="toggleVoice()">🗣 ボイス</button></div>
+<div id="nav"><button id="nst" onclick="navGo('study')"><span>📚</span>自習</button><button onclick="navGo('cos')"><span>👕</span>コスチューム</button><button class="c" onclick="navGo('map')"><span>🗺</span>マップ</button><button onclick="navGo('fr')"><span>👥</span>フレンド</button><button id="nb" onclick="navGo('sub')"><span>⚔</span>対戦・作成</button></div>
 <div id="sub"><button onclick="subGo('battle')">⚔ 対戦</button><button onclick="subGo('make')">✍ 問題作成</button></div>
 <div id="hint"></div><div id="toast"></div>
 
@@ -108,6 +108,7 @@ details{border:2px solid #e0c98a;border-radius:8px;padding:6px 10px;background:#
 <div id="map" class="scr"><div id="lmap"></div></div>
 <div id="town" class="scr"><canvas id="cv" width="720" height="480"></canvas></div>
 
+<div id="study" class="scr"><iframe id="stf" title="自習"></iframe></div>
 <div id="battle" class="scr">
 <div id="field">
  <div class="hb" id="ehb"><b id="en"></b><div class="bar"><i id="eh"></i></div><small id="et"></small></div>
@@ -134,6 +135,439 @@ details{border:2px solid #e0c98a;border-radius:8px;padding:6px 10px;background:#
 </div>
 <div id="modal"><div class="pf"><div id="mhead"></div><div class="pb" id="mbody"></div><div class="row"><button onclick="closeModal()" data-i="close"></button></div></div></div>
 
+<!-- ############ ここから問題データ(★=難易度 × 教科。ブロックごとに独立。1つ壊れても他は動きます) ############ -->
+<script>window.QB={};function Q(star,subj,rows){var M={math:'数学',japanese:'国語',english:'英語',science:'理科',social:'社会'};subj=M[subj]||subj;var k=star+'|'+subj;if(!QB[k])QB[k]=[];for(var i=0;i<rows.length;i++)QB[k].push(rows[i])}</script>
+<!-- ================ ★1(小学生の範囲) 数学 ================ -->
+<script>Q(1,'数学',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★1(小学生の範囲) 国語 ================ -->
+<script>Q(1,'国語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★1(小学生の範囲) 英語 ================ -->
+<script>Q(1,'英語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★1(小学生の範囲) 理科 ================ -->
+<script>Q(1,'理科',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★1(小学生の範囲) 社会 ================ -->
+<script>Q(1,'社会',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★2(中1基礎) 数学 ================ -->
+<script>Q(2,'数学',[
+  ["(-2) + 13 = ?", "11", "15", "-15", "-11", "A", "符号がちがう足し算は、絶対値の大きい方から小さい方をひき、大きい方の符号をつけます。13 - 2 = 11"],
+  ["(-9) - 9 = ?", "18", "-18", "0", "-19", "B", "ひき算は、ひく数の符号を変えて足し算にします。(-9) - 9 = (-9) + (-9) = -18"],
+  ["(-11) + 7 = ?", "18", "-18", "-4", "4", "C", "符号がちがう足し算は、絶対値の大きい方から小さい方をひき、大きい方の符号をつけます。7 - 11 = -4"],
+  ["(-7) - 5 = ?", "12", "2", "-2", "-12", "D", "ひき算は、ひく数の符号を変えて足し算にします。(-7) - 5 = (-7) + (-5) = -12"],
+  ["(-5) + 7 = ?", "2", "12", "-12", "-2", "A", "符号がちがう足し算は、絶対値の大きい方から小さい方をひき、大きい方の符号をつけます。7 - 5 = 2"],
+  ["(-8) - 14 = ?", "22", "-22", "-6", "6", "B", "ひき算は、ひく数の符号を変えて足し算にします。(-8) - 14 = (-8) + (-14) = -22"],
+  ["(-10) + 2 = ?", "12", "-12", "-8", "8", "C", "符号がちがう足し算は、絶対値の大きい方から小さい方をひき、大きい方の符号をつけます。2 - 10 = -8"],
+  ["(-6) - 7 = ?", "13", "-1", "1", "-13", "D", "ひき算は、ひく数の符号を変えて足し算にします。(-6) - 7 = (-6) + (-7) = -13"],
+  ["(-9) + 11 = ?", "2", "20", "-20", "-2", "A", "符号がちがう足し算は、絶対値の大きい方から小さい方をひき、大きい方の符号をつけます。11 - 9 = 2"],
+  ["(-7) - 7 = ?", "14", "-14", "0", "-15", "B", "ひき算は、ひく数の符号を変えて足し算にします。(-7) - 7 = (-7) + (-7) = -14"],
+  ["(-9) × (-5) = ?", "-45", "14", "45", "-14", "C", "負の数どうしのかけ算は、答えが正の数になります。9 × 5 = 45"],
+  ["45 ÷ (-9) = ?", "5", "-9", "9", "-5", "D", "正の数 ÷ 負の数は、答えが負の数になります。45 ÷ 9 = 5 なので、答えは -5"],
+  ["16 ÷ (-4) = ?", "-4", "4", "-5", "-2", "A", "正の数 ÷ 負の数は、答えが負の数になります。16 ÷ 4 = 4 なので、答えは -4"],
+  ["x = -5 のとき、5x + 4 の値は?", "29", "-21", "-29", "-20", "B", "x に -5 を代入します。5 × (-5) + 4 = -25 + 4 = -21"],
+  ["x = -2 のとき、6x + 9 の値は?", "21", "-21", "-3", "-2", "C", "x に -2 を代入します。6 × (-2) + 9 = -12 + 9 = -3"],
+  ["x = -5 のとき、5x + 6 の値は?", "31", "-31", "-18", "-19", "D", "x に -5 を代入します。5 × (-5) + 6 = -25 + 6 = -19"],
+  ["x = -5 のとき、6x + 9 の値は?", "-21", "39", "-39", "-20", "A", "x に -5 を代入します。6 × (-5) + 9 = -30 + 9 = -21"],
+  ["x = -5 のとき、3x + 7 の値は?", "22", "-8", "-22", "-7", "B", "x に -5 を代入します。3 × (-5) + 7 = -15 + 7 = -8"],
+  ["x = -1 のとき、2x + 5 の値は?", "7", "-7", "3", "4", "C", "x に -1 を代入します。2 × (-1) + 5 = -2 + 5 = 3"],
+  ["5x - 9 = -9 のとき、x = ?", "1", "-1", "2", "0", "D", "-9 を移項すると 5x = -9 + 9 = 0。両辺を 5 でわって x = 0"],
+  ["2x - 6 = -2 のとき、x = ?", "2", "3", "1", "-2", "A", "-6 を移項すると 2x = -2 + 6 = 4。両辺を 2 でわって x = 2"],
+  ["3x + 9 = 12 のとき、x = ?", "2", "1", "0", "-1", "B", "+9 を移項すると 3x = 12 - 9 = 3。両辺を 3 でわって x = 1"],
+  ["5x - 4 = -29 のとき、x = ?", "-4", "-6", "-5", "5", "C", "-4 を移項すると 5x = -29 + 4 = -25。両辺を 5 でわって x = -5"],
+  ["3x - 8 = -14 のとき、x = ?", "-1", "-3", "2", "-2", "D", "-8 を移項すると 3x = -14 + 8 = -6。両辺を 3 でわって x = -2"],
+  ["4x + 2 = 22 のとき、x = ?", "5", "6", "4", "-5", "A", "+2 を移項すると 4x = 22 - 2 = 20。両辺を 4 でわって x = 5"],
+  ["6x - 6 = -24 のとき、x = ?", "-2", "-3", "-4", "3", "B", "-6 を移項すると 6x = -24 + 6 = -18。両辺を 6 でわって x = -3"],
+  ["6x - 8 = -32 のとき、x = ?", "-3", "-5", "-4", "4", "C", "-8 を移項すると 6x = -32 + 8 = -24。両辺を 6 でわって x = -4"],
+  ["y は x に比例し、x = 2 のとき y = 8 です。x = 8 のとき y = ?", "36", "28", "12", "32", "D", "比例なので y = ax と表せます。8 = a × 2 より a = 4。よって y = 4x で、x = 8 のとき y = 32"],
+  ["y は x に比例し、x = 2 のとき y = 12 です。x = 7 のとき y = ?", "42", "48", "36", "13", "A", "比例なので y = ax と表せます。12 = a × 2 より a = 6。よって y = 6x で、x = 7 のとき y = 42"],
+  ["y は x に比例し、x = 2 のとき y = 8 です。x = 9 のとき y = ?", "40", "36", "32", "13", "B", "比例なので y = ax と表せます。8 = a × 2 より a = 4。よって y = 4x で、x = 9 のとき y = 36"],
+  ["y は x に反比例し、x = 1 のとき y = 12 です。x = 2 のとき y = ?", "8", "5", "6", "12", "C", "反比例なので y = a/x と表せ、x × y = 一定です。1 × 12 = 12 より a = 12。y = 12 ÷ 2 = 6"],
+  ["y は x に反比例し、x = 1 のとき y = 36 です。x = 2 のとき y = ?", "20", "17", "36", "18", "D", "反比例なので y = a/x と表せ、x × y = 一定です。1 × 36 = 36 より a = 36。y = 36 ÷ 2 = 18"],
+  ["y は x に反比例し、x = 3 のとき y = 4 です。x = 2 のとき y = ?", "6", "8", "5", "4", "A", "反比例なので y = a/x と表せ、x × y = 一定です。3 × 4 = 12 より a = 12。y = 12 ÷ 2 = 6"],
+  ["半径 5cm の円の周の長さは?(円周率はπ)", "5π cm", "10π cm", "25π cm", "50π cm", "B", "円周 = 2 × π × 半径 = 2 × π × 5 = 10π (cm)"],
+  ["半径 6cm の円の周の長さは?(円周率はπ)", "6π cm", "36π cm", "12π cm", "72π cm", "C", "円周 = 2 × π × 半径 = 2 × π × 6 = 12π (cm)"],
+  ["半径 6cm の円の面積は?(円周率はπ)", "12π cm²", "6π cm²", "72π cm²", "36π cm²", "D", "円の面積 = π × 半径 × 半径 = π × 6 × 6 = 36π (cm²)"],
+  ["半径 3cm の円の面積は?(円周率はπ)", "9π cm²", "6π cm²", "3π cm²", "18π cm²", "A", "円の面積 = π × 半径 × 半径 = π × 3 × 3 = 9π (cm²)"],
+  ["半径 6cm、中心角 60° のおうぎ形の弧の長さは?", "4π cm", "2π cm", "3π cm", "6π cm", "B", "弧の長さ = 2π × 半径 × (中心角 ÷ 360) = 2π × 6 × 60/360 = 2π (cm)"],
+  ["底面の半径 2cm、高さ 7cm の円柱の体積は?", "14π cm³", "56π cm³", "28π cm³", "11π cm³", "C", "円柱の体積 = 底面積 × 高さ = π × 2² × 7 = 28π (cm³)"],
+  ["半径 3cm の球の表面積は?", "18π cm²", "9π cm²", "12π cm²", "36π cm²", "D", "球の表面積 = 4π × 半径² = 4π × 3² = 36π (cm²)"],
+  ["次のうち、素数はどれ?", "19", "51", "63", "21", "A", "素数とは、1 とその数自身しか約数をもたない数です。19 はどの数でもわり切れないので素数です。ほかの数は 3 や 7 でわり切れます。"],
+  ["24 を素因数分解すると?", "2² × 3", "2³ × 3", "2 × 3²", "2² × 5", "B", "小さい素数から順にわっていきます。24 = 2³ × 3"],
+  ["60 を素因数分解すると?", "2² × 3", "2 × 3²", "2² × 3 × 5", "2² × 5", "C", "小さい素数から順にわっていきます。60 = 2² × 3 × 5"],
+  ["18 と 27 の最大公約数は?", "18", "3", "11", "9", "D", "18 と 27 を割り切れる最大の数が最大公約数です。素因数分解して共通部分をかけると 9 になります。"],
+  ["5人の点数は 71, 58, 85, 81, 75 です。平均点は?", "74", "75", "73", "77", "A", "平均 = 合計 ÷ 人数。合計は 370 なので 370 ÷ 5 = 74"],
+  ["データ 25, 28, 32, 88, 84 の中央値は?", "25", "32", "28", "84", "B", "値を小さい順に並べると 25, 28, 32, 84, 88。真ん中(3番目)の値が中央値で、32 です。"],
+  ["図の三角形で、∠x の大きさは?", "60°", "80°", "70°", "110°", "C", "三角形の内角の和は180°です。180 − (50 + 60) = 70°", "<svg viewBox=\"0 0 220 130\" style=\"width:min(100%,220px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><polygon points=\"20,110 190,110 90,20\" fill=\"#eaf4ff\" stroke=\"#345\" stroke-width=\"2\"/><text x=\"28\" y=\"104\" font-size=\"13\">50°<\/text><text x=\"146\" y=\"104\" font-size=\"13\">60°<\/text><text x=\"84\" y=\"46\" font-size=\"15\" font-weight=\"bold\">x<\/text><text x=\"6\" y=\"124\" font-size=\"12\">A<\/text><text x=\"194\" y=\"124\" font-size=\"12\">B<\/text><text x=\"88\" y=\"14\" font-size=\"12\">C<\/text><\/svg>"],
+  ["数直線上の点Aが表す数は?", "3", "-2", "-4", "-3", "D", "0より左にあるので負の数です。0から3目盛り左なので -3 です。", "<svg viewBox=\"0 0 260 90\" style=\"width:min(100%,260px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><line x1=\"10\" y1=\"55\" x2=\"250\" y2=\"55\" stroke=\"#345\" stroke-width=\"2\"/><line x1=\"20\" y1=\"49\" x2=\"20\" y2=\"61\" stroke=\"#345\"/><text x=\"20\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">-5<\/text><line x1=\"42\" y1=\"49\" x2=\"42\" y2=\"61\" stroke=\"#345\"/><text x=\"42\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">-4<\/text><line x1=\"64\" y1=\"49\" x2=\"64\" y2=\"61\" stroke=\"#345\"/><text x=\"64\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">-3<\/text><line x1=\"86\" y1=\"49\" x2=\"86\" y2=\"61\" stroke=\"#345\"/><text x=\"86\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">-2<\/text><line x1=\"108\" y1=\"49\" x2=\"108\" y2=\"61\" stroke=\"#345\"/><text x=\"108\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">-1<\/text><line x1=\"130\" y1=\"49\" x2=\"130\" y2=\"61\" stroke=\"#345\"/><text x=\"130\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">0<\/text><line x1=\"152\" y1=\"49\" x2=\"152\" y2=\"61\" stroke=\"#345\"/><text x=\"152\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">1<\/text><line x1=\"174\" y1=\"49\" x2=\"174\" y2=\"61\" stroke=\"#345\"/><text x=\"174\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">2<\/text><line x1=\"196\" y1=\"49\" x2=\"196\" y2=\"61\" stroke=\"#345\"/><text x=\"196\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">3<\/text><line x1=\"218\" y1=\"49\" x2=\"218\" y2=\"61\" stroke=\"#345\"/><text x=\"218\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">4<\/text><line x1=\"240\" y1=\"49\" x2=\"240\" y2=\"61\" stroke=\"#345\"/><text x=\"240\" y=\"78\" font-size=\"11\" text-anchor=\"middle\">5<\/text><circle cx=\"64\" cy=\"55\" r=\"6\" fill=\"#e33\"/><text x=\"64\" y=\"38\" font-size=\"14\" font-weight=\"bold\" text-anchor=\"middle\" fill=\"#e33\">A<\/text><\/svg>"],
+  ["図の平行四辺形の面積は?", "40cm²", "13cm²", "26cm²", "80cm²", "A", "平行四辺形の面積 = 底辺 × 高さ = 8 × 5 = 40 (cm²)", "<svg viewBox=\"0 0 260 130\" style=\"width:min(100%,260px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><polygon points=\"40,100 190,100 230,40 80,40\" fill=\"#fff3c4\" stroke=\"#345\" stroke-width=\"2\"/><line x1=\"80\" y1=\"40\" x2=\"80\" y2=\"100\" stroke=\"#e33\" stroke-dasharray=\"4\"/><rect x=\"80\" y=\"92\" width=\"8\" height=\"8\" fill=\"none\" stroke=\"#e33\"/><text x=\"115\" y=\"118\" font-size=\"13\">8cm<\/text><text x=\"86\" y=\"75\" font-size=\"13\" fill=\"#e33\">5cm<\/text><\/svg>"],
+  ["図で、∠x の大きさは?", "110°", "70°", "20°", "290°", "B", "対頂角は等しいので、∠x = 70° です。", "<svg viewBox=\"0 0 220 130\" style=\"width:min(100%,220px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><line x1=\"30\" y1=\"65\" x2=\"190\" y2=\"65\" stroke=\"#345\" stroke-width=\"2\"/><line x1=\"130.5\" y1=\"8.6\" x2=\"89.5\" y2=\"121.4\" stroke=\"#345\" stroke-width=\"2\"/><text x=\"136\" y=\"52\" font-size=\"14\">70°<\/text><text x=\"76\" y=\"88\" font-size=\"15\" font-weight=\"bold\">x<\/text><\/svg>"],
+  ["図のおうぎ形の面積は?(円周率はπ)", "12π cm²", "36π cm²", "6π cm²", "3π cm²", "C", "面積 = π × 6² × 60/360 = 6π (cm²)", "<svg viewBox=\"0 0 220 130\" style=\"width:min(100%,220px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><path d=\"M50 115 L130 115 A80 80 0 0 0 90 45.7 Z\" fill=\"#dff5df\" stroke=\"#345\" stroke-width=\"2\"/><text x=\"82\" y=\"130\" font-size=\"12\">6cm<\/text><text x=\"68\" y=\"105\" font-size=\"12\">60°<\/text><\/svg>"],
+]);</script>
+<!-- ================ ★2(中1基礎) 国語 ================ -->
+<script>Q(2,'国語',[
+  ["次の漢字の読みは?「穀物」", "こくもつ", "ごくもつ", "こくぶつ", "ごくぶつ", "A", "「穀」は音読みで「こく」と読みます。穀物=こくもつ。"],
+  ["次の漢字の読みは?「批判」", "ひばん", "ひはん", "ひぱん", "ひわん", "B", "「批」は「ひ」、「判」は「はん」と読みます。"],
+  ["次の漢字の読みは?「推測」", "ついそく", "すいぞく", "すいそく", "すいてき", "C", "「推」は「すい」、「測」は「そく」と読みます。"],
+  ["次の漢字の読みは?「誤解」", "こかい", "ごがい", "ごげ", "ごかい", "D", "「誤」は「ご」、「解」は「かい」と読みます。"],
+  ["次の漢字の読みは?「就職」", "しゅうしょく", "じゅうしょく", "しゅうじょく", "しゅしょく", "A", "「就」は「しゅう」と読みます。就職=しゅうしょく。"],
+  ["「町のこうがいに住む」の「こうがい」を漢字で書くと?", "校外", "郊外", "口外", "港外", "B", "町の中心から離れた地域は「郊外」です。"],
+  ["「ありがとうのかんしゃ」の「かんしゃ」を漢字で書くと?", "観謝", "間謝", "感謝", "幹謝", "C", "感じて謝意を表すので「感謝」と書きます。"],
+  ["「拡大」の対義語(反対の意味の言葉)は?", "拡張", "拡散", "縮図", "縮小", "D", "大きくすることの反対は、小さくする「縮小」です。"],
+  ["「原因」の対義語は?", "結果", "理由", "原料", "結末", "A", "物事を引き起こすもとが「原因」、その結果生じたことが「結果」です。"],
+  ["「具体」の対義語は?", "具現", "抽象", "実体", "抽出", "B", "はっきりした形がある「具体」に対し、共通点を取り出した考えを「抽象」といいます。"],
+  ["「美しい」の品詞は?", "形容動詞", "動詞", "形容詞", "名詞", "C", "言い切りが「い」で終わり、物事の様子を表すので形容詞です。"],
+  ["「静かだ」の品詞は?", "形容詞", "副詞", "名詞", "形容動詞", "D", "言い切りが「だ」で終わり、様子を表すので形容動詞です。"],
+  ["「ゆっくり歩く」の「ゆっくり」の品詞は?", "副詞", "形容詞", "名詞", "助詞", "A", "主に用言(動詞など)を修飾する語は副詞です。"],
+  ["「鳥が空を飛ぶ。」の主語は?", "空を", "鳥が", "飛ぶ", "空を飛ぶ", "B", "「何が」にあたる部分が主語です。ここでは「鳥が」です。"],
+  ["「私は本を読む。」を文節に区切ると、いくつになる?", "2", "4", "3", "5", "C", "「ネ」を入れて区切ります。私は/本を/読む で3つです。"],
+  ["「先生が来る」を尊敬語にすると?", "参る", "伺う", "申す", "いらっしゃる", "D", "相手の動作を高めるのが尊敬語。「来る」の尊敬語は「いらっしゃる」です。"],
+  ["「私が見る」を謙譲語にすると?", "拝見する", "ご覧になる", "お見えになる", "見られる", "A", "自分の動作をへりくだるのが謙譲語。「見る」の謙譲語は「拝見する」です。"],
+  ["「木」という漢字の成り立ちは?", "指事文字", "象形文字", "会意文字", "形声文字", "B", "物の形をかたどってできた文字が象形文字です。"],
+  ["「明」(日+月)の成り立ちは?", "象形文字", "指事文字", "会意文字", "形声文字", "C", "意味を持つ字を組み合わせて新しい意味を表すのが会意文字です。"],
+  ["「上」の成り立ちは?", "象形文字", "会意文字", "形声文字", "指事文字", "D", "形のないものを印などで示した文字が指事文字です。"],
+]);</script>
+<!-- ================ ★2(中1基礎) 英語 ================ -->
+<script>Q(2,'英語',[
+  ["( ) am a student.「私は生徒です。」", "I", "You", "He", "She", "A", "主語がIのとき、be動詞はamを使います。"],
+  ["She ( ) my friend.", "am", "is", "are", "be", "B", "主語がsheのとき、be動詞はisです。"],
+  ["They ( ) from Japan.", "is", "am", "are", "be", "C", "主語がtheyのとき、be動詞はareです。"],
+  ["( ) this a pen?「これはペンですか?」", "Am", "Are", "Do", "Is", "D", "be動詞の疑問文は、be動詞を文の最初に置きます。thisにはIsです。"],
+  ["I ( ) not a teacher.「私は先生ではありません。」", "am", "is", "are", "do", "A", "I am not ~. の形になります。"],
+  ["He ( ) soccer every day.", "play", "plays", "playing", "is play", "B", "主語が3人称単数の現在形では、動詞にsをつけます。"],
+  ["Do you ( ) English?", "speaks", "speaking", "speak", "speaked", "C", "Do you のあとの動詞は原形です。"],
+  ["apple の複数形は?", "applees", "appleses", "apple", "apples", "D", "ふつうの名詞は語尾にsをつけて複数形にします。"],
+  ["box の複数形は?", "boxes", "boxs", "boxies", "boxen", "A", "x, s, ch, sh で終わる語にはesをつけます。"],
+  ["I go to school ( ) bus.「バスで学校へ行く」", "in", "by", "on", "at", "B", "交通手段は by + 乗り物(冠詞なし)で表します。"],
+  ["Monday の次の曜日は?", "Sunday", "Wednesday", "Tuesday", "Thursday", "C", "Monday(月)→Tuesday(火)の順です。"],
+  ["「赤い」を表す英語は?", "blue", "green", "yellow", "red", "D", "red=赤、blue=青、green=緑、yellow=黄色です。"],
+  ["How ( ) are you?「あなたは何歳ですか?」", "old", "long", "tall", "much", "A", "年齢をたずねるときは How old を使います。"],
+  ["「私の」を表す語は?", "me", "my", "I", "mine", "B", "I(私は)-my(私の)-me(私を)-mine(私のもの)です。"],
+  ["「彼女は」を表す語は?", "he", "her", "she", "they", "C", "she=彼女は、he=彼は、her=彼女の/彼女を です。"],
+  ["Can you swim? に「はい、できます」と答える文は? Yes, I ( ).", "am", "do", "is", "can", "D", "can の疑問文には can を使って答えます。"],
+  ["I ( ) a dog.「私は犬を飼っています。」", "have", "has", "am", "is", "A", "主語がIのときは have を使います。"],
+  ["What ( ) is it?「何時ですか?」", "day", "time", "color", "old", "B", "時刻をたずねるときは What time is it? です。"],
+  ["「ネコ」を表す英語は?", "dog", "bird", "cat", "fish", "C", "cat=ネコ、dog=犬、bird=鳥、fish=魚です。"],
+  ["Where ( ) you from?「出身はどこですか?」", "is", "am", "do", "are", "D", "主語がyouのとき、be動詞はareです。"],
+]);</script>
+<!-- ================ ★2(中1基礎) 理科 ================ -->
+<script>Q(2,'理科',[
+  ["鏡で光が反射するとき、入射角が40°なら反射角は?", "40°", "50°", "80°", "20°", "A", "反射の法則:入射角と反射角は等しくなります。", "<svg viewBox=\"0 0 220 130\" style=\"width:min(100%,220px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><line x1=\"20\" y1=\"105\" x2=\"200\" y2=\"105\" stroke=\"#345\" stroke-width=\"5\"/><line x1=\"110\" y1=\"105\" x2=\"110\" y2=\"15\" stroke=\"#888\" stroke-dasharray=\"4\"/><line x1=\"58.6\" y1=\"43.7\" x2=\"110\" y2=\"105\" stroke=\"#e80\" stroke-width=\"2.5\"/><line x1=\"110\" y1=\"105\" x2=\"161.4\" y2=\"43.7\" stroke=\"#e80\" stroke-width=\"2.5\"/><text x=\"70\" y=\"75\" font-size=\"13\">40°<\/text><text x=\"40\" y=\"122\" font-size=\"11\">鏡<\/text><\/svg>"],
+  ["光が空気中から水中へ進むとき、境界面で光が曲がる現象は?", "反射", "屈折", "直進", "回折", "B", "異なる物質の境界で光が曲がる現象を屈折といいます。"],
+  ["音の高さは何で決まる?", "振幅", "音源の大きさ", "振動数", "空気の温度", "C", "音の高さは振動数(1秒間の振動の回数)で決まります。"],
+  ["音の大きさは何で決まる?", "振動数", "音の速さ", "音源の重さ", "振幅", "D", "音の大きさは振幅(振動の幅)で決まります。"],
+  ["空気中を伝わる音の速さは約何m/s?", "約340m/s", "約34m/s", "約3400m/s", "約3×10⁸m/s", "A", "音の速さは約340m/s。光は約30万km/sでずっと速いです。"],
+  ["力の単位は?", "g", "N(ニュートン)", "kg", "Pa", "B", "力の単位はN(ニュートン)です。gやkgは質量の単位です。"],
+  ["ばねを引く力が2倍になると、ばねののびは?", "半分", "変わらない", "2倍", "4倍", "C", "フックの法則:ばねののびは、加えた力に比例します。"],
+  ["このばねに150gのおもりをつるすと、何cmのびる?", "5cm", "8cm", "3cm", "6cm", "D", "のびは重さに比例。50gで2cmなので、150gでは2×3=6cmです。", "<svg viewBox=\"0 0 240 150\" style=\"width:min(100%,240px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><line x1=\"40\" y1=\"120\" x2=\"220\" y2=\"120\" stroke=\"#345\"/><line x1=\"40\" y1=\"120\" x2=\"40\" y2=\"20\" stroke=\"#345\"/><polyline points=\"40,120 100,94 160,68\" fill=\"none\" stroke=\"#e33\" stroke-width=\"2.5\"/><circle cx=\"100\" cy=\"94\" r=\"4\" fill=\"#e33\"/><circle cx=\"160\" cy=\"68\" r=\"4\" fill=\"#e33\"/><text x=\"100\" y=\"136\" font-size=\"11\" text-anchor=\"middle\">50<\/text><text x=\"160\" y=\"136\" font-size=\"11\" text-anchor=\"middle\">100<\/text><text x=\"130\" y=\"148\" font-size=\"11\">おもり(g)<\/text><text x=\"34\" y=\"98\" font-size=\"11\" text-anchor=\"end\">2<\/text><text x=\"34\" y=\"72\" font-size=\"11\" text-anchor=\"end\">4<\/text><text x=\"8\" y=\"16\" font-size=\"11\">のび(cm)<\/text><\/svg>"],
+  ["光合成が行われる、葉の緑色の粒は?", "葉緑体", "核", "液胞", "細胞壁", "A", "葉緑体で光合成が行われ、デンプンと酸素ができます。"],
+  ["光合成で取り入れる気体は?", "酸素", "二酸化炭素", "窒素", "水素", "B", "光合成は、二酸化炭素と水を材料に、光のエネルギーでデンプンと酸素をつくります。"],
+  ["胚珠が子房の中にある植物は?", "裸子植物", "シダ植物", "被子植物", "コケ植物", "C", "胚珠が子房に包まれているのが被子植物です。"],
+  ["背骨をもつ動物のなかまを何という?", "無脊椎動物", "節足動物", "軟体動物", "脊椎動物", "D", "魚類・両生類・は虫類・鳥類・ほ乳類は脊椎動物です。"],
+  ["子を母親の体内である程度育ててから産む繁殖のしかたは?", "胎生", "卵生", "変態", "分裂", "A", "ほ乳類の多くは胎生です。"],
+  ["マグマが冷えて固まってできた岩石は?", "堆積岩", "火成岩", "変成岩", "石灰岩", "B", "マグマが冷え固まった岩石を火成岩といいます。"],
+  ["地震のゆれの大きさを表すものは?", "マグニチュード", "震源", "震度", "断層", "C", "震度はゆれの大きさ、マグニチュードは地震の規模を表します。"],
+  ["地震の規模(エネルギーの大きさ)を表すものは?", "震度", "震央", "震源", "マグニチュード", "D", "地震そのものの大きさはマグニチュードで表します。"],
+  ["水が氷になる温度(1気圧)は?", "0℃", "100℃", "-10℃", "4℃", "A", "水は0℃で凍り、100℃で沸とうします。"],
+  ["物質1cm³あたりの質量を何という?", "圧力", "密度", "濃度", "重さ", "B", "密度[g/cm³]=質量[g]÷体積[cm³]です。"],
+  ["質量60g、体積20cm³の物質の密度は?", "0.3g/cm³", "40g/cm³", "3g/cm³", "1200g/cm³", "C", "密度=質量÷体積=60÷20=3g/cm³です。"],
+  ["砂や泥などが海底に積もってできた岩石は?", "火成岩", "変成岩", "花こう岩", "堆積岩", "D", "れき・砂・泥などが固まった岩石を堆積岩といいます。"],
+]);</script>
+<!-- ================ ★2(中1基礎) 社会 ================ -->
+<script>Q(2,'社会',[
+  ["地球上で最も大きい海洋は?", "太平洋", "大西洋", "インド洋", "北極海", "A", "三大洋のうち最大は太平洋です。"],
+  ["六大陸のうち、最も面積が大きいのは?", "アフリカ大陸", "ユーラシア大陸", "北アメリカ大陸", "南極大陸", "B", "ユーラシア大陸が最大の大陸です。"],
+  ["本初子午線(経度0度)が通る国は?", "フランス", "日本", "イギリス", "アメリカ", "C", "旧グリニッジ天文台があるイギリスを通ります。"],
+  ["日本の標準時の基準となる経線は?", "東経120度", "東経150度", "西経135度", "東経135度", "D", "兵庫県明石市を通る東経135度の経線です。"],
+  ["経度15度の差で、時差は何時間?", "1時間", "2時間", "15時間", "24時間", "A", "地球は24時間で360度回るので、15度で1時間の時差が生じます。"],
+  ["面積が日本で最も大きい都道府県は?", "岩手県", "北海道", "長野県", "新潟県", "B", "北海道が最大で、国土の約2割を占めます。"],
+  ["日本で最も長い川は?", "利根川", "石狩川", "信濃川", "木曽川", "C", "信濃川(約367km)が日本一長い川です。"],
+  ["日本で最も高い山は?", "北岳", "奥穂高岳", "槍ヶ岳", "富士山", "D", "富士山(3776m)が日本一高い山です。"],
+  ["図の地図記号が表すものは?", "小・中学校", "高等学校", "病院", "図書館", "A", "「文」は小・中学校の地図記号です。高等学校は「文」を丸で囲んだ記号です。", "<svg viewBox=\"0 0 120 110\" style=\"width:min(100%,120px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><text x=\"60\" y=\"88\" font-size=\"80\" text-anchor=\"middle\">文<\/text><\/svg>"],
+  ["図の地図記号が表すものは?", "神社", "寺院", "墓地", "城跡", "B", "卍は寺院の地図記号です。神社は鳥居の形です。", "<svg viewBox=\"0 0 120 110\" style=\"width:min(100%,120px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><text x=\"60\" y=\"88\" font-size=\"80\" text-anchor=\"middle\">卍<\/text><\/svg>"],
+  ["図の地図記号が表すものは?", "工場", "発電所", "温泉", "消防署", "C", "♨は温泉の地図記号です。", "<svg viewBox=\"0 0 120 110\" style=\"width:min(100%,120px);background:#fff;border:2px solid #e0c98a;border-radius:8px\"><text x=\"60\" y=\"88\" font-size=\"80\" text-anchor=\"middle\">♨<\/text><\/svg>"],
+  ["縄文時代の人々がつくった、縄目の模様のある土器は?", "弥生土器", "土偶", "埴輪", "縄文土器", "D", "縄目の模様がある厚手の土器が縄文土器です。"],
+  ["弥生時代に大陸から伝わったものは?", "稲作", "火の使用", "打製石器", "土偶", "A", "弥生時代には稲作や金属器(青銅器・鉄器)が伝わりました。"],
+  ["邪馬台国の女王は?", "推古天皇", "卑弥呼", "持統天皇", "聖徳太子", "B", "卑弥呼は魏に使いを送り、称号と銅鏡を授けられました。"],
+  ["十七条の憲法を定めたのは?", "中大兄皇子", "天智天皇", "聖徳太子", "聖武天皇", "C", "聖徳太子(厩戸皇子)は推古天皇の摂政として、冠位十二階や十七条の憲法を定めました。"],
+  ["大化の改新を始めたのは?", "聖徳太子と蘇我馬子", "卑弥呼と台与", "桓武天皇と最澄", "中大兄皇子と中臣鎌足", "D", "645年、中大兄皇子と中臣鎌足が蘇我氏を倒して政治改革を始めました。"],
+  ["日本に現存する最古の和歌集は?", "万葉集", "古今和歌集", "源氏物語", "枕草子", "A", "奈良時代にまとめられた万葉集です。"],
+  ["794年、平安京に都を移した天皇は?", "聖武天皇", "桓武天皇", "天智天皇", "推古天皇", "B", "桓武天皇が平安京に都を移しました。"],
+  ["日本の国土の約何割が山地?", "約3割", "約5割", "約7割", "約9割", "C", "日本は国土の約4分の3が山地です。"],
+  ["地球儀で、北極と南極を結ぶ縦の線は?", "緯線", "赤道", "等高線", "経線", "D", "経線は北極と南極を結ぶ線、緯線は赤道に平行な線です。"],
+]);</script>
+<!-- ================ ★3(中2基礎) 数学 ================ -->
+<script>Q(3,'数学',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★3(中2基礎) 国語 ================ -->
+<script>Q(3,'国語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★3(中2基礎) 英語 ================ -->
+<script>Q(3,'英語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★3(中2基礎) 理科 ================ -->
+<script>Q(3,'理科',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★3(中2基礎) 社会 ================ -->
+<script>Q(3,'社会',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★4(中1応用) 数学 ================ -->
+<script>Q(4,'数学',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★4(中1応用) 国語 ================ -->
+<script>Q(4,'国語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★4(中1応用) 英語 ================ -->
+<script>Q(4,'英語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★4(中1応用) 理科 ================ -->
+<script>Q(4,'理科',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★4(中1応用) 社会 ================ -->
+<script>Q(4,'社会',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★5(中2応用) 数学 ================ -->
+<script>Q(5,'数学',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★5(中2応用) 国語 ================ -->
+<script>Q(5,'国語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★5(中2応用) 英語 ================ -->
+<script>Q(5,'英語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★5(中2応用) 理科 ================ -->
+<script>Q(5,'理科',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★5(中2応用) 社会 ================ -->
+<script>Q(5,'社会',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★6(中3基礎) 数学 ================ -->
+<script>Q(6,'数学',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★6(中3基礎) 国語 ================ -->
+<script>Q(6,'国語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★6(中3基礎) 英語 ================ -->
+<script>Q(6,'英語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★6(中3基礎) 理科 ================ -->
+<script>Q(6,'理科',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★6(中3基礎) 社会 ================ -->
+<script>Q(6,'社会',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★7(中3応用) 数学 ================ -->
+<script>Q(7,'数学',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★7(中3応用) 国語 ================ -->
+<script>Q(7,'国語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★7(中3応用) 英語 ================ -->
+<script>Q(7,'英語',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★7(中3応用) 理科 ================ -->
+<script>Q(7,'理科',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ================ ★7(中3応用) 社会 ================ -->
+<script>Q(7,'社会',[
+  // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
+]);</script>
+<!-- ############ ここまで問題データ ############ -->
+<!-- ############ 自習ページ(下の画面「自習」に枠で表示されます) ############ -->
+<script type="text/plain" id="studyhtml"><!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>自習</title>
+<style>
+:root{--bg:#f6f1e6;--card:#fffaf0;--bd:#b8975a;--tx:#3b2f1e}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--tx);font-family:"Hiragino Maru Gothic ProN","Yu Gothic",sans-serif}
+button,input,select{font:inherit;padding:.5em .9em;border-radius:8px;border:2px solid var(--bd);background:#fff;color:var(--tx)}
+button{cursor:pointer;box-shadow:0 2px 0 var(--bd)}button:hover{background:#f6e7c1}button:active{transform:translateY(2px);box-shadow:none}
+#app{position:fixed;inset:0;overflow:auto;display:flex;justify-content:center;align-items:flex-start;padding:3vmin 2vmin;background:linear-gradient(#cfe9ff,#e9f5d6)}
+.card{background:var(--card);border:3px solid var(--bd);padding:16px clamp(12px,5vw,22px);border-radius:14px;width:min(94vw,460px);display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 20px #0003;margin:auto 0}
+.row{display:flex;gap:12px}.row>*{flex:1;min-width:0}.col{display:flex;flex-direction:column;gap:6px}
+.c{border:3px solid;border-radius:10px;padding:6px;text-align:center}.c small{display:block;font-size:11px;font-weight:bold;white-space:nowrap}.c b{display:block;font-size:clamp(11px,3.6vw,15px);white-space:nowrap}.c{min-width:0}.lv small{font-size:clamp(9px,2.6vw,11px)}
+.btns{gap:8px}.btns button{padding:.5em .2em;font-size:clamp(11px,3.4vw,14px);white-space:nowrap}
+.lv{background:#eee3ff;border-color:#8b5cf6;color:#5b34b8;flex:1.5}.dy{background:#dff5df;border-color:#3a9a3a;color:#1f6a1f}.co{background:#fff3c4;border-color:#d4a017;color:#8a6200}
+.tabs{display:flex;gap:10px}.tabs button{flex:1;padding:.5em .3em;font-size:12px;white-space:nowrap}.tabs button.on{background:#f3d27a;border-color:#d4a017}
+.tbox{position:relative;border:3px solid #8a6d3b;border-radius:12px;background:#fff;padding:12px;text-align:center;box-shadow:0 0 0 3px #e8d49a}
+#lb{font-weight:bold;color:#b5651d}#tm{font-size:min(13vw,60px);font-weight:bold;font-family:monospace;color:#3b2f1e;white-space:nowrap}
+#an{width:min(62vw,230px);display:block;margin:4px auto}.tbox.dg #an{display:none}.tbox.an #tm{font-size:22px}
+.mini{position:absolute;top:6px;right:6px;padding:.2em .5em;font-size:15px}
+.bar{height:10px;background:#ddd;border-radius:6px;overflow:hidden;border:1px solid #444;margin-top:6px}.bar i{display:block;height:100%;width:0;background:#8b5cf6;transition:width .4s}
+.sm{font-size:12px;color:#8a7a50}
+.exp{background:#fff6d8;border:2px solid #e0c060;border-radius:10px;padding:8px 10px;font-size:14px;line-height:1.6}
+.rw{cursor:pointer;padding:3px 0;border-bottom:1px dotted #e0c98a}
+#toast{position:fixed;left:50%;bottom:8%;transform:translateX(-50%);background:#3b2f1ee6;color:#fff;padding:.5em 1.2em;border-radius:20px;z-index:90;display:none;max-width:90vw;text-align:center}
+#modal{position:fixed;inset:0;background:#0006;z-index:60;display:none;align-items:center;justify-content:center}
+.pf{width:min(94vw,460px);max-height:92vh;overflow:auto;background:var(--card);border:4px solid #8a6d3b;border-radius:16px;box-shadow:0 0 0 3px #e8d49a,0 8px 24px #0005}
+.ph{padding:12px 14px;background:linear-gradient(135deg,#f3d27a,#e29a4a);border-bottom:4px solid #8a6d3b;color:#fff;font-weight:bold;font-size:18px;text-shadow:0 1px 2px #6a3b0a}
+.pb{padding:14px;display:flex;flex-direction:column;gap:10px}.pf>.row{padding:0 14px 14px}
+#dlg{position:fixed;inset:0;background:#0006;z-index:80;display:none;align-items:center;justify-content:center}#dm{font-size:14px;line-height:1.6}
+#yt{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:0;bottom:0}
+.u{display:flex;gap:10px}.u input{padding:.3em .5em;min-width:0}.u input:first-child{flex:.8}.u input:last-child{flex:1.4}
+</style></head><body>
+<div id="app"><div class="card">
+<div class="c lv"><small id="cd"></small><b id="ck" style="font-size:22px"></b></div>
+<div class="row"><div class="c dy"><small>今日</small><b id="td"></b></div><div class="c co"><small>累計</small><b id="tt"></b></div></div>
+<select id="sub" onchange="cfg.sub=this.value;sc();"></select>
+<div class="tabs" id="mt"><button onclick="setMode(0)">📖 勉強モード</button><button onclick="setMode(1)">⏱ タイマー</button><button onclick="setMode(2)">⏳ 制限</button></div>
+<div id="m0" class="col"><select id="pm" onchange="cfg.pm=this.value;sc();if(!active)rem=full();render()"><option value="s">標準:25分勉強 → 5分休憩</option><option value="c">カスタム</option></select>
+<div id="cus" class="row sm" style="align-items:center">勉強<input id="cw" type="number" min="1" max="180">分 / 休憩<input id="cb" type="number" min="1" max="60">分</div></div>
+<div id="m2" class="row sm" style="align-items:center"><label>制限(分)<input id="lim" type="number" min="1" max="600" style="width:100%"></label><label style="display:flex;gap:6px;align-items:center"><input id="rep" type="checkbox" style="width:auto">繰り返す</label></div>
+<div class="tbox dg" id="tbx"><button class="mini" onclick="cfg.dial=!cfg.dial;sc();render()">🕐</button><div id="lb"></div><svg id="an" viewBox="0 0 200 200"></svg><div id="tm"></div><div class="bar"><i id="pg"></i></div></div>
+<div class="col"><button id="go" onclick="toggle()"></button><button onclick="resetT()">↺ リセット</button><button onclick="skipT()">⏩ タイマーを進める</button><button id="bb" onclick="openBgm()">🎵 BGM</button><button onclick="openHist()">📊 記録</button></div>
+</div></div>
+<div id="dlg"><div class="pf"><div class="ph" id="dh"></div><div class="pb" id="dm"></div><div class="row" id="db"></div></div></div>
+<div id="yt"></div><div id="toast"></div>
+<div id="modal"><div class="pf"><div class="ph" id="mh"></div><div class="pb" id="mb"></div><div class="row"><button onclick="$('modal').style.display='none'">閉じる</button></div></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const SUBJ=['未設定','数学','英語','社会','理科','国語','家庭科','技術','音楽','美術','保体','その他'],COL=['#bbb','#3a7ad9','#2a9a6a','#d99a2a','#8a5ad9','#d95a5a','#e07aa0','#6a8a9a','#e0b030','#c06a3a','#4aa84a','#999'];
+/* ゲーム本体(親ページ)と連携: 記録・設定の保存と連携。単体で開いたときは localStorage に保存 */
+const P=(()=>{try{return window.parent&&window.parent.STUDYAPI}catch(e){return null}})();
+const init=P?P.load():{cfg:JSON.parse(localStorage.getItem('studycfg')||'null'),sess:JSON.parse(localStorage.getItem('studysess')||'[]')};
+let cfg=Object.assign({mode:0,lim:30,rep:false,bgm:0,vol:50,urls:Array(10).fill(''),bn:['雨の音','波の音','小川のせせらぎ','森と鳥の声','焚き火の音','風の音','雷雨','カフェの環境音','作業用ピアノ','Lo-fi'],pm:'s',w:25,b:5,sub:'未設定',dial:false,skip:5},init.cfg||{});
+if(!cfg.v2){cfg.sub='未設定';cfg.v2=1}
+let S=Array.isArray(init.sess)?init.sess:[];
+const sv=f=>{if(P)P.save(cfg,S,f);else localStorage.setItem('studysess',JSON.stringify(S))},sc=()=>{if(P)P.save(cfg,S,1);else localStorage.setItem('studycfg',JSON.stringify(cfg))};
+sc();
+function toast(m){const e=$('toast');e.textContent=m;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2600)}
+const sum=a=>a.reduce((x,y)=>x+y,0),p2=n=>String(n).padStart(2,'0'),dk=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+const hm=s=>{s=Math.round(s);if(s<60)return'1分未満';const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}時間${m}分`:`${m}分`};
+const clk=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return(h?h+':'+p2(m):m)+':'+p2(s%60)};
+const tm=ms=>{const d=new Date(ms);return p2(d.getHours())+':'+p2(d.getMinutes())};
+const D0=k=>new Date(k+'T00:00').getTime();
+function dayArr(k){const a=D0(k),b=a+864e5;return S.map((g,i)=>({s:Math.max(g.s,a),e:Math.min(g.e,b),u:g.u,i})).filter(g=>g.e-g.s>=1000)}
+const dayTot=k=>sum(dayArr(k).map(g=>g.e-g.s))/1000;
+/* ===== タイマー ===== */
+const PM=()=>cfg.pm=='c'?[cfg.w*60,cfg.b*60]:[1500,300];
+let run=false,active=false,last=0,rem=1500,el=0,brk=false,n=0,lr=false;
+const full=()=>cfg.mode==0?PM()[brk?1:0]:cfg.lim*60;
+function beep(){try{const a=new(window.AudioContext||window.webkitAudioContext)();[880,1175,880].forEach((f,i)=>{const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+i*.22;o.type='square';o.frequency.value=f;g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.2);o.connect(g).connect(a.destination);o.start(t);o.stop(t+.22)})}catch(e){}}
+function addLog(dt){const t=Date.now(),g=S[S.length-1];if(g&&g.u==cfg.sub&&t-g.e<3000)g.e=t;else S.push({s:t-dt*1000,e:t,u:cfg.sub});if(P)P.tick(dt)}
+function render(){const m=cfg.mode,v=m==1?el:Math.max(0,rem);
+ [...$('mt').children].forEach((b,i)=>b.classList.toggle('on',i==m));
+ $('m0').style.display=m==0?'flex':'none';$('m2').style.display=m==2?'flex':'none';$('cus').style.display=cfg.pm=='c'?'flex':'none';
+ $('lb').textContent=m==0?(brk?'☕ 休憩中':`📖 勉強中(${PM()[0]/60}分)`):m==1?'⏱ 勉強時間':'⏳ 制限タイマー';
+ $('tm').textContent=clk(m==1?Math.floor(v):Math.ceil(v));
+ $('an').querySelector('#hs').setAttribute('transform',`rotate(${(v%60)*6} 100 100)`);$('an').querySelector('#hn').setAttribute('transform',`rotate(${(v/60%60)*6} 100 100)`);
+ $('pg').style.width=m==1?'0':Math.min(100,(1-rem/full())*100)+'%';$('tbx').className='tbox '+(cfg.dial?'an':'dg');
+ $('go').textContent=run?'⏸ 一時停止':active?'▶ 再開':'▶ スタート';
+ $('td').textContent=hm(dayTot(dk(new Date())));$('tt').textContent=hm(sum(S.map(g=>g.e-g.s))/1000);$('bb').textContent=playing?'🎵 BGM ♪':'🎵 BGM';
+ if(run!==lr){lr=run;if(P&&P.state)P.state(run)}}
+function resetT(){run=false;active=false;brk=false;el=0;rem=full();sv(1);render()}
+function toggle(){if(!run){if(!active){brk=false;el=0;rem=full()}run=true;active=true;last=Date.now()}else{run=false;sv(1)}render()}
+async function setMode(m){if(m==cfg.mode)return;if(active&&!await ask('モードを切り替えますか?','タイマーが動いている途中、または一時停止中です。<br>切り替えると<b>タイマーはリセット</b>されます。','リセットして切り替える'))return;cfg.mode=m;sc();resetT()}
+function step(dt){const m=cfg.mode;
+ if(m==1){el+=dt;addLog(dt);return}
+ if(m==2||!brk)addLog(dt);
+ rem-=dt;chk()}
+function chk(){if(rem>0)return;const m=cfg.mode,lo=Math.min(0,rem);beep();
+ if(m==0){brk=!brk;rem=Math.max(1,PM()[brk?1:0]+lo);toast(brk?`☕ 休憩の時間です(${PM()[1]/60}分)`:`📖 勉強スタート(${PM()[0]/60}分)`)}
+ else if(cfg.rep){rem=Math.max(1,cfg.lim*60+lo);toast('🔁 もう一度はじめます')}
+ else{run=false;active=false;rem=0;sv(1);toast('⏰ 時間になりました!おつかれさま!')}}
+async function skipT(){if(!active)return toast('スタートしてから使えます');
+ if(!await ask('⏩ タイマーを進める',`何分進めますか?<br><span class="sm">進めた分は勉強時間に含まれません。</span><input id="sk" type="number" min="1" max="600" value="${cfg.skip}" style="width:100%;margin-top:8px">`,'進める'))return;
+ const x=Math.max(1,Math.min(600,+$('sk').value||5));cfg.skip=x;sc();
+ if(cfg.mode==1)el+=x*60;else{rem-=x*60;chk()}last=Date.now();render()}
+setInterval(()=>{if(!run)return;const t=Date.now(),dt=Math.min((t-last)/1000,5);last=t;step(dt);if(++n%8==0)sv();render()},250);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)sv(1)});
+setInterval(()=>{const d=new Date(),w='日月火水木金土'[d.getDay()];$('cd').textContent=`${d.getMonth()+1}月${d.getDate()}日(${w})`;$('ck').textContent=tm(d)},1000);
+/* 初期化(アナログ文字盤・入力欄) */
+(()=>{let f='<circle cx="100" cy="100" r="96" fill="#fff" stroke="#8a6d3b" stroke-width="4"/>';
+ for(let i=0;i<60;i++){const a=i*6*Math.PI/180,l=i%5?4:9,s=Math.sin(a),c=-Math.cos(a);f+=`<line x1="${100+s*92}" y1="${100+c*92}" x2="${100+s*(92-l)}" y2="${100+c*(92-l)}" stroke="#3b2f1e" stroke-width="${i%5?1:2.5}"/>`}
+ for(let i=0;i<12;i++){const a=i*30*Math.PI/180;f+=`<text x="${100+Math.sin(a)*72}" y="${100-Math.cos(a)*72}" font-size="13" text-anchor="middle" dominant-baseline="middle" fill="#3b2f1e">${i*5}</text>`}
+ f+='<line id="hn" x1="100" y1="100" x2="100" y2="40" stroke="#3b2f1e" stroke-width="5" stroke-linecap="round"/><line id="hs" x1="100" y1="112" x2="100" y2="18" stroke="#e33" stroke-width="2.5" stroke-linecap="round"/><circle cx="100" cy="100" r="5" fill="#e33"/>';
+ $('an').innerHTML=f;
+ $('sub').innerHTML=SUBJ.map(s=>`<option>${s}</option>`).join('');$('sub').value=cfg.sub;
+ $('pm').value=cfg.pm;$('cw').value=cfg.w;$('cb').value=cfg.b;$('lim').value=cfg.lim;$('rep').checked=cfg.rep;
+ const cl=(e,k,lo,hi,fn)=>$(e).onchange=ev=>{cfg[k]=Math.max(lo,Math.min(hi,+ev.target.value||lo));ev.target.value=cfg[k];sc();if(!active)rem=full();render()};
+ cl('cw','w',1,180);cl('cb','b',1,60);cl('lim','lim',1,600);$('rep').onchange=e=>{cfg.rep=e.target.checked;sc()}})();
+/* ===== 確認ダイアログ(デザイン付き) ===== */
+function ask(t,m,ok='OK',cancel='キャンセル'){return new Promise(r=>{$('dh').textContent=t;$('dm').innerHTML=m;
+ $('db').innerHTML=`<button id="dc">${cancel}</button><button id="dk" style="background:#f3d27a;border-color:#d4a017">${ok}</button>`;$('dlg').style.display='flex';
+ const f=v=>{$('dlg').style.display='none';r(v)};$('dk').onclick=()=>f(true);$('dc').onclick=()=>f(false)})}
+/* ===== モーダル ===== */
+function modal(t,h){$('mh').textContent=t;$('mb').innerHTML=h;$('modal').style.display='flex'}
+/* ===== 記録 ===== */
+let hT='d',hD=dk(new Date()),wO=0;
+const openHist=()=>histR();
+function histR(){modal('📊 勉強の記録',`<div class="tabs"><button class="${hT=='d'?'on':''}" onclick="hT='d';histR()">日別</button><button class="${hT=='w'?'on':''}" onclick="hT='w';histR()">週間</button></div>`+(hT=='d'?dayHTML():weekHTML()))}
+function pie(k,a){const C=150,R=110,pt=(d,r)=>[C+r*Math.sin(d*Math.PI/180),C-r*Math.cos(d*Math.PI/180)],d0=D0(k);
+ let h=`<svg viewBox="0 0 300 300" style="width:100%;max-width:340px;align-self:center;background:#fff;border:2px solid #e0c98a;border-radius:12px"><circle cx="150" cy="150" r="${R}" fill="#f4f1ea" stroke="#b8975a"/>`;
+ a.forEach((g,i)=>{const s=(g.s-d0)/864e5*360,e=Math.max((g.e-d0)/864e5*360,s+1.2),[x1,y1]=pt(s,R),[x2,y2]=pt(e,R);
+  h+=`<path d="M150 150L${x1} ${y1}A${R} ${R} 0 ${e-s>180?1:0} 1 ${x2} ${y2}Z" fill="${COL[SUBJ.indexOf(g.u)]}" style="cursor:pointer" onclick="seg(${i})"/>`});
+ for(let i=0;i<24;i++){const[x,y]=pt(i*15,R);h+=`<line x1="150" y1="150" x2="${x}" y2="${y}" stroke="#0003" stroke-width="${i%6?.5:1.2}" pointer-events="none"/>`;
+  if(i%3==0){const[a1,b1]=pt(i*15,R+14);h+=`<text x="${a1}" y="${b1}" font-size="11" text-anchor="middle" dominant-baseline="middle">${i}</text>`}}
+ return h+'</svg>'}
+function dayHTML(){const ks=[...new Set([dk(new Date()),...S.flatMap(g=>[dk(new Date(g.s)),dk(new Date(g.e))])])].sort().reverse(),wd='日月火水木金土';
+ if(!ks.includes(hD))hD=ks[0];
+ const a=dayArr(hD),by={};a.forEach(g=>by[g.u]=(by[g.u]||0)+(g.e-g.s)/1000);
+ return `<select onchange="hD=this.value;histR()">${ks.map(k=>{const d=new Date(k+'T00:00');return`<option value="${k}" ${k==hD?'selected':''}>${d.getMonth()+1}/${d.getDate()}(${wd[d.getDay()]}) ${hm(dayTot(k))}</option>`}).join('')}</select>`
+ +pie(hD,a)+`<div id="sg" class="exp">円グラフ(上が0時・時計まわり24時間)の色をタップすると、何時から何時までかわかります</div>`
+ +Object.entries(by).sort((x,y)=>y[1]-x[1]).map(([u,s])=>`<div class="sm"><span style="color:${COL[SUBJ.indexOf(u)]}">●</span> ${u} ${hm(s)}</div>`).join('')
+ +(a.length?'<div class="sm">▼ 勉強した時間帯(タップで強調)</div>':'<div class="sm">この日の記録はありません</div>')
+ +a.map((g,i)=>`<div class="rw sm" onclick="seg(${i})" style="display:flex;align-items:center;gap:8px"><span style="flex:1"><span style="color:${COL[SUBJ.indexOf(g.u)]}">●</span> ${tm(g.s)}〜${tm(g.e)} ${g.u}(${hm((g.e-g.s)/1000)})</span><button style="padding:.1em .5em" onclick="event.stopPropagation();delSeg(${i})">🗑</button></div>`).join('')
+ +(a.length?'<button onclick="delDay()">🗑 この日の記録をすべて削除</button>':'')}
+async function delSeg(i){const g=dayArr(hD)[i];if(!await ask('記録を削除',`${tm(g.s)}〜${tm(g.e)} ${g.u}<br>この記録を削除しますか?(元に戻せません)`,'削除'))return;S.splice(g.i,1);sv(1);render();histR()}
+async function delDay(){const a=dayArr(hD);if(!await ask('この日の記録を削除',`${hD} の記録 ${a.length}件(合計 ${hm(dayTot(hD))})をすべて削除しますか?<br>元に戻せません。`,'すべて削除'))return;const t0=D0(hD),t1=t0+864e5;S.splice(0,S.length,...S.filter(g=>!(g.e>t0&&g.s<t1)));sv(1);render();histR()}
+function seg(i){const g=dayArr(hD)[i];$('sg').innerHTML=`<b>${tm(g.s)} 〜 ${tm(g.e)}</b><br>${g.u} ・ ${hm((g.e-g.s)/1000)}`}
+function weekHTML(){const e=new Date();e.setHours(0,0,0,0);e.setDate(e.getDate()+wO*7);
+ const ds=[...Array(7)].map((_,i)=>{const d=new Date(e);d.setDate(e.getDate()-6+i);return d}),vs=ds.map(d=>dayTot(dk(d))),av=sum(vs)/7,mx=Math.max(...vs,3600),wd='日月火水木金土';
+ let s='<svg viewBox="0 0 300 190" style="width:100%;background:#fff;border:2px solid #e0c98a;border-radius:12px"><line x1="8" y1="150" x2="292" y2="150" stroke="#888"/>';
+ vs.forEach((v,i)=>{const x=16+i*39,h=v/mx*115;s+=`<rect x="${x}" y="${150-h}" width="28" height="${h}" rx="3" fill="#8b5cf6"/><text x="${x+14}" y="${145-h}" font-size="9" text-anchor="middle">${v>=60?hm(v):''}</text><text x="${x+14}" y="164" font-size="10" text-anchor="middle">${ds[i].getMonth()+1}/${ds[i].getDate()}</text><text x="${x+14}" y="177" font-size="10" text-anchor="middle" fill="#888">${wd[ds[i].getDay()]}</text>`});
+ const ay=150-av/mx*115;s+=`<line x1="8" y1="${ay}" x2="292" y2="${ay}" stroke="#e33" stroke-dasharray="4"/></svg>`;
+ const f=d=>`${d.getMonth()+1}/${d.getDate()}`;
+ return `<div class="row" style="align-items:center"><button onclick="wO--;histR()">◀</button><div class="sm" style="text-align:center;flex:3">${f(ds[0])} 〜 ${f(ds[6])}</div><button onclick="wO=Math.min(0,wO+1);histR()">▶</button></div>`+s
+ +`<div class="c co"><small>1日の平均(この7日間)</small><b>${hm(av)}</b></div><div class="sm">赤い点線が平均、棒は1日の勉強時間です</div>`}
+/* ===== BGM(YouTube埋め込み・ループ) ===== */
+let yp=null,playing=false;
+const vid=s=>{const m=(s||'').match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:/^[\w-]{11}$/.test(s||'')?s:''};
+function openBgm(){modal('🎵 BGM(ループ再生)',`<select id="bs" onchange="cfg.bgm=+this.value;sc();if(playing)bgmPlay()">${cfg.bn.map((b,i)=>`<option value="${i}" ${i==cfg.bgm?'selected':''}>${b}</option>`).join('')}</select>
+<div class="row" style="align-items:center"><button id="bp" onclick="playing?bgmStop():bgmPlay()">${playing?'⏹ 停止':'▶ 再生'}</button><label class="sm" style="display:flex;align-items:center;gap:6px">音量<input type="range" min="0" max="100" value="${cfg.vol}" style="padding:0" oninput="cfg.vol=+this.value;sc();yp&&yp.setVolume&&yp.setVolume(cfg.vol)"></label></div>
+<div class="sm">▼ メモのように、名前とYouTubeのURLを自由に書き換えられます(雨の音など)。再生許可のあるフリー音源のURLを入れてください。</div>`
++cfg.bn.map((b,i)=>`<div class="u"><input value="${b}" oninput="cfg.bn[${i}]=this.value;sc();$('bs').options[${i}].text=this.value"><input placeholder="https://www.youtube.com/watch?v=..." value="${cfg.urls[i]||''}" oninput="cfg.urls[${i}]=this.value.trim();sc()"></div>`).join(''))}
+function loadYT(cb){if(window.YT&&YT.Player)return cb();window.onYouTubeIframeAPIReady=cb;const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s)}
+function bgmPlay(){const id=vid(cfg.urls[cfg.bgm]);if(!id)return toast('この曲のYouTubeのURLを入れてください');
+ playing=true;if($('bp'))$('bp').textContent='⏹ 停止';render();
+ loadYT(()=>{if(yp&&yp.loadVideoById){yp.loadVideoById(id);yp.setVolume(cfg.vol)}else if(!yp)yp=new YT.Player('yt',{width:1,height:1,videoId:id,playerVars:{playsinline:1},events:{onReady:e=>{e.target.setVolume(cfg.vol);e.target.playVideo()},onStateChange:e=>{if(e.data===0&&playing)e.target.playVideo()}}})})}
+function bgmStop(){playing=false;if($('bp'))$('bp').textContent='▶ 再生';if(yp&&yp.stopVideo)yp.stopVideo();render()}
+resetT();
+<\/script></body></html>
+</script>
 <script>
 const SB_URL='https://wxvodrdrkapoulivmzyr.supabase.co',SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4dm9kcmRya2Fwb3VsaXZtenlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxOTEwODUsImV4cCI6MjEwODc2NzA4NX0.D54gcTMqfdHNYjs29U41zgEQpRC8v4QkBC7m4XkUSXE';
 const sb=(SB_URL&&window.supabase)?supabase.createClient(SB_URL,SB_KEY):null;
@@ -200,13 +634,13 @@ if(typeof module!='undefined')module.exports={genArea,mb};
 
 const T={ja:{title:'勉強RPG',uid:'ID(英数字3〜20字)',pass:'パスワード(6文字以上)',name:'名前',age:'年齢',male:'男性',female:'女性',none:'選択しない',login:'ログイン',signup:'新規登録',guest:'ゲストで始める',logout:'ログアウト',coin:'コイン',lv:'Lv',days:'冒険日数',save:'保存',close:'閉じる',size:'文字サイズ',font:'フォント',auto:'オート',speed:'再生速度(小さいほど速い)',town:'始まりの町',hint:'まず長老の家へ行ってみよう',locked:'この家にはまだ入れないようだ…(今後追加予定)',nosb:'Supabase未設定です。ゲストで始めてください',need:'ID(英数字3〜20字)・パスワード(6文字以上)・名前を入力してください',confirmon:'SupabaseのConfirm emailがONです。OFFにしてください',win:'勝利!',draw:'引き分け',lose:'敗北…',ageL:'年齢を入力してください',next:'次へ',expl:'解説',back:'← 戻る',titles:['見習い勉強者','勉強の冒険者','数式の戦士','計算の騎士','算数の勇者']},
 en:{title:'Study RPG',uid:'ID (3-20 letters/digits)',pass:'Password (6+ chars)',name:'Name',age:'Age',male:'Male',female:'Female',none:'Prefer not to say',login:'Log in',signup:'Sign up',guest:'Play as guest',logout:'Log out',coin:'Coins',lv:'Lv',days:'Days',save:'Save',close:'Close',size:'Text size',font:'Font',auto:'Auto',speed:'Speed (lower = faster)',town:'Starting Town',hint:"Visit the Elder's house first",locked:"You can't enter this house yet... (coming soon)",nosb:'Supabase is not configured. Play as guest.',need:'Enter ID (3-20 letters/digits), password (6+) and name',confirmon:'Supabase Confirm email is ON. Turn it OFF.',win:'Victory!',draw:'Draw',lose:'Defeated...',ageL:'Enter your age',next:'Next',expl:'Explanation',back:'← Back',titles:['Novice','Adventurer','Math Fighter','Calc Knight','Hero']}};
-const DEF=()=>({lang:'ja',name:'',age:'',gender:'n',start:Date.now(),coin:0,exp:0,prologue:false,defeated:[],inv:{heal:0,atk:0},hist:[],pos:null,guest:false,snd:{on:true,bgm:.5,se:.7,voice:true},av:0});
+const DEF=()=>({lang:'ja',name:'',age:'',gender:'n',start:Date.now(),coin:0,exp:0,prologue:false,defeated:[],inv:{heal:0,atk:0},hist:[],pos:null,guest:false,snd:{on:true,bgm:.5,se:.7,voice:true},av:0,jewel:0,jsec:0,study:null});
 let S=Object.assign(DEF(),JSON.parse(localStorage.getItem('rpgstudy')||'{}'));
 let user=null,ts={size:18,font:'sans-serif',auto:false,speed:40};
 const t=k=>(T[S.lang]||T.ja)[k]||k;
 const save=()=>localStorage.setItem('rpgstudy',JSON.stringify(S));
 /* ===== 保存(ローカル+クラウド) ===== */
-let st,lastErr=0;const prog=()=>({prologue:S.prologue,defeated:S.defeated,inv:S.inv,hist:S.hist.slice(-300),pos:{a:cur,x:px,y:py},snd:S.snd,av:S.av,ts:S.ts});
+let st,lastErr=0;const prog=()=>({prologue:S.prologue,defeated:S.defeated,inv:S.inv,hist:S.hist.slice(-300),pos:{a:cur,x:px,y:py},snd:S.snd,av:S.av,jewel:S.jewel||0,jsec:S.jsec||0,study:S.study?{cfg:S.study.cfg,sess:(S.study.sess||[]).slice(-1000)}:null,ts:S.ts});
 function showSaveErr(m){if(Date.now()-lastErr<60000)return;lastErr=Date.now();toast('☁ サーバーへの保存に失敗しました。⚙→🩺保存の診断 を確認してください'+(m?'('+m.slice(0,40)+')':''))}
 function persist(now){S.ts=Date.now();if(S.hist.length>300)S.hist=S.hist.slice(-300);save();if(!sb||!user)return Promise.resolve();clearTimeout(st);
  const go=()=>sb.from('progress').upsert({user_id:user.id,data:prog(),updated_at:new Date().toISOString()}).then(r=>{if(r&&r.error)showSaveErr(r.error.message)},e=>showSaveErr(String(e)));
@@ -239,18 +673,30 @@ function i18n(){document.documentElement.lang=S.lang;
  document.querySelectorAll('[data-p]').forEach(e=>e.placeholder=t(e.dataset.p));
  $('back').textContent=t('back');wm.forEach(o=>o.m.setIcon(mkIcon(o.lk,o.txt)));hud();}
 function setLang(){S.lang=S.lang=='ja'?'en':'ja';persist();i18n();}
-function hud(){$('hud').innerHTML=`⚔ ${S.name||'-'} &nbsp; ${t('lv')}.${lvl()}<br>💰 ${S.coin}`;$('bs').textContent=S.snd.on?'🔊 サウンド ON':'🔇 サウンド OFF';$('bv').textContent=S.snd.voice===false?'🤐 ボイス OFF':'🗣 ボイス ON'}
+function hud(){$('hud').innerHTML=`⚔ ${S.name||'-'} &nbsp; ${t('lv')}.${lvl()}<br>💰 ${S.coin} &nbsp; 💎 ${S.jewel||0}`;$('bs').textContent=S.snd.on?'🔊 サウンド ON':'🔇 サウンド OFF';$('bv').textContent=S.snd.voice===false?'🤐 ボイス OFF':'🗣 ボイス ON'}
 const navOK=()=>!busy&&$('dlg').style.display!='block'&&!modalOpen();
 function navGo(k){if(k=='sub'){const s=$('sub');s.style.display=s.style.display=='flex'?'none':'flex';return}$('sub').style.display='none';
- if(k=='study')return toast('🚧 自習は準備中です(今後追加予定)');
+ if(k=='study'){if(navOK())openStudy();return}
  if(!navOK())return;
  if(k=='cos')openAvatar('nav');else if(k=='map')show('map');else if(k=='fr')openFriends()}
 function subGo(k){$('sub').style.display='none';toast(k=='battle'?'🚧 対戦は準備中です(今後追加予定)':'🚧 問題作成は準備中です(今後追加予定)')}
 addEventListener('pointerdown',e=>{if(!e.target.closest('#sub,#nb'))$('sub').style.display='none'});
+/* ===== 自習(タイマー・記録・BGM): 別ページを枠で表示。記録・設定・ジュエルをアカウント/端末に保存 ===== */
+let stLast=0;
+const STUDYAPI={
+ load(){if(!S.study){let cfg=null,sess=[];try{cfg=JSON.parse(localStorage.getItem('studycfg')||'null');sess=JSON.parse(localStorage.getItem('studysess')||'[]')}catch(e){}S.study={cfg,sess:Array.isArray(sess)?sess:[]};persist()}if(!Array.isArray(S.study.sess))S.study.sess=[];return S.study},
+ save(cfg,sess,force){if(sess.length>2000)sess.splice(0,sess.length-2000);S.study={cfg,sess};if(force||Date.now()-stLast>8000){stLast=Date.now();persist()}},
+ tick(dt){S.jsec=(S.jsec||0)+dt;let g=0;while(S.jsec>=60){S.jsec-=60;g++}if(g){S.jewel=(S.jewel||0)+100*g;hud()}},
+ jewel(){return S.jewel||0},
+ state(r){const b=$('nst');if(b)b.style.background=r?'#bdebc8':''}};
+window.STUDYAPI=STUDYAPI;
+const studyHtml=()=>$('studyhtml').textContent.replace(/<\\\/script>/g,'<\/script>');
+function openStudy(){show('study');const f=$('stf');if(!f.dataset.ready){f.dataset.ready='1';f.srcdoc=studyHtml()}}
+function studyReset(){const f=$('stf');if(f){f.dataset.ready='';f.removeAttribute('srcdoc')}STUDYAPI.state(false)}
 function toggleMenu(f){const m=$('menu');m.style.display=(f===0||m.style.display=='flex')?'none':'flex'}
 addEventListener('pointerdown',e=>{if(!e.target.closest('#menu,#gb'))$('menu').style.display='none'});
-function show(id){$('menu').style.display='none';$('sub').style.display='none';$('nav').style.display=(id=='map'||id=='town')?'flex':'none';if(id!='avatar'&&id!='battle')lastScr=id;document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));
- const a=id=='auth',b=id=='battle',v=id=='avatar';$('hud').style.display=(a||b||v)?'none':'block';$('tb').style.display=(b||v)?'none':'flex';
+function show(id){$('menu').style.display='none';$('sub').style.display='none';$('nav').style.display=(id=='map'||id=='town'||id=='study')?'flex':'none';if(id!='avatar'&&id!='battle')lastScr=id;document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));
+ const a=id=='auth',b=id=='battle',v=id=='avatar'||id=='study';$('hud').style.display=(a||b||v)?'none':'block';$('tb').style.display=(b||v)?'none':'flex';
  document.querySelectorAll('.mb').forEach(e=>e.style.display=(a||b||v)?'none':'inline-block');
  $('back').style.display=id=='town'?'block':'none';$('hint').style.display=id=='town'?'block':'none';
  if(id=='map'){initMap();setTimeout(()=>lm.invalidateSize(),60)}
@@ -317,15 +763,15 @@ async function afterLogin(){const{data:{session}}=await sb.auth.getSession();if(
   if(Object.keys(u).length){const{error}=await sb.from('profiles').update(u).eq('id',user.id);if(error)alert(error.message);else Object.assign(p,u)}
   const{data:pr}=await sb.from('progress').select('data').eq('user_id',user.id).maybeSingle();
   const d=(pr&&pr.data)||{},keep={lang:S.lang,snd:S.snd},lc=(S.uid==user.id||(!S.uid&&!S.guest&&S.name&&S.name===(p.name||'')))?S:null,useLocal=!!lc&&(lc.ts||0)>(d.ts||0);
-  const base=useLocal?{prologue:lc.prologue,defeated:lc.defeated,inv:lc.inv,hist:lc.hist,pos:lc.pos,av:lc.av,snd:lc.snd}:d,pend=lc&&lc.pend?lc.pend:[];
+  const base=useLocal?{prologue:lc.prologue,defeated:lc.defeated,inv:lc.inv,hist:lc.hist,pos:lc.pos,av:lc.av,snd:lc.snd,jewel:lc.jewel,jsec:lc.jsec,study:lc.study}:d,pend=lc&&lc.pend?lc.pend:[];
   S=Object.assign(DEF(),keep,{guest:false,uid:user.id,name:p.name||'',age:p.age||'',gender:p.gender||'n',coin:p.coin+pend.reduce((a,x)=>a+x.gain,0),exp:(p.exp||0)+pend.reduce((a,x)=>a+x.xp,0),start:new Date(p.created_at).getTime(),pend},base,{ts:Math.max(lc?lc.ts||0:0,d.ts||0)});
-  await flushPend();if(useLocal)persist(true);
+  await flushPend();if(useLocal)persist(true);studyReset();
   if(S.pos&&S.pos.a)cur=S.pos.a;
   sb.from('profiles').update({last_login_at:new Date().toISOString()}).eq('id',user.id);}
  save();start();}
 function guest(){const f=form();const keep={lang:S.lang,snd:S.snd};if(!S.guest)S=Object.assign(DEF(),keep);
  S.guest=true;S.name=f.name||S.name||'ゲスト';S.age=f.age||S.age;S.gender=f.gender;if(S.pos&&S.pos.a)cur=S.pos.a;persist();start();}
-async function logout(){if(sb)await sb.auth.signOut();user=null;S.guest=false;save();closeModal();show('auth');}
+async function logout(){if(sb)await sb.auth.signOut();user=null;S.guest=false;save();studyReset();closeModal();show('auth');}
 
 /* ===== 会話 ===== */
 function applyTs(){const d=$('dlg');d.style.setProperty('--f',ts.font);d.style.setProperty('--s',ts.size+'px');}
@@ -356,7 +802,7 @@ function card(o){const L=levelOf(o.exp||0),ex=(o.exp||0)-cum(L),nd=need(L),d=Mat
  <div class="tags"><span class="tg b">${t('age')}: ${o.age||'-'}</span><span class="tg p">${gen(o.gender)||'-'}</span></div>`}
 async function openProf(){const L=lvl();
  const p=openModal(`<div class="ph"><div class="av"><canvas id="pav" width="64" height="64"></canvas></div><div style="flex:1;min-width:0"><div class="row" style="gap:6px"><input id="pn"><button onclick="saveName()" style="flex:none">${t('save')}</button></div><div class="ttl">${t('lv')}.${L}  ${t('titles')[Math.min(L-1,4)]}</div></div></div>`,
- card(S)+`<button onclick="openAvatar()">🎭 アバター変更</button><div class="slot">${S.defeated.length} / 40 勝利(町20・村20)</div>
+ card(S)+`<div class="c" style="background:#dff3ff;border-color:#3a8ad9;color:#1f5fa8"><small>ジュエル(自習の勉強1分=100)</small><b>💎 ${S.jewel||0}</b></div><button onclick="openAvatar()">🎭 アバター変更</button><div class="slot">${S.defeated.length} / 40 勝利(町20・村20)</div>
  <label class="sm">BGM <input type="range" min="0" max="1" step=".05" value="${S.snd.bgm}" oninput="S.snd.bgm=+this.value;persist()"></label>
  <label class="sm">SE・ボイス <input type="range" min="0" max="1" step=".05" value="${S.snd.se}" oninput="S.snd.se=+this.value;persist();SE.click()"></label>
  <button onclick="logout()">${t('logout')}</button>
@@ -382,8 +828,8 @@ async function buy(k){if(S.coin<5000)return toast('コインが足りません')
 
 /* ===== 履歴・復習 ===== */
 const hk=h=>h.k||('2|'+h.s),hid=h=>h.id||('2-'+SKEY[h.s]+'-'+String(h.i+1).padStart(3,'0'));
-const hOK=h=>h&&(h.id||(h.s&&BUILTIN[h.s]&&BUILTIN[h.s][h.i]));
-async function qOf(h){const[star,s]=hk(h).split('|'),p=await loadPool(+star,s),id=hid(h);return p.all.find(x=>x.id==id)||(BUILTIN[s]||[]).find(x=>x.id==id)||null}
+const hOK=h=>h&&h.id;
+async function qOf(h){const[star,s]=hk(h).split('|'),p=await loadPool(+star,s),id=hid(h);return p.all.find(x=>x.id==id)||null}
 function wrongIds(){const m={};S.hist.filter(hOK).forEach(h=>m[hk(h)+'#'+hid(h)]=h.ok);return Object.keys(m).filter(k=>!m[k])}
 async function histHTML(f){const w=wrongIds(),list=S.hist.filter(hOK).slice().reverse().filter(h=>f=='w'?(!h.ok&&w.includes(hk(h)+'#'+hid(h))):true).slice(0,100);
  const qs=await Promise.all(list.map(qOf));const out=list.map((h,i)=>{const q=qs[i];return q?`<details><summary>${h.ok?'⭕':'❌'} [${hk(h).split('|')[1]}] ${esc(q.q).replace(/\n/g,' ')} <span class="sm">${new Date(h.t).toLocaleDateString()}</span></summary>${figHTML(q)}答え: <b>${esc(q.a)}</b><br>💡 ${eh(q.e)}</details>`:''}).join('');
@@ -391,7 +837,7 @@ async function histHTML(f){const w=wrongIds(),list=S.hist.filter(hOK).slice().re
 async function openHist(f='a'){openModal(H('📖','問題の履歴'),'<div class="sm">読み込み中…</div>');const w=wrongIds().length,body=await histHTML(f);
  $('mbody').innerHTML=`<div class="tabs"><button class="${f=='a'?'on':''}" onclick="openHist('a')">すべて</button><button class="${f=='w'?'on':''}" onclick="openHist('w')">間違い (${w})</button></div>`+body+(w?`<button onclick="review()">✏ 間違いを復習する</button>`:'')+`<div class="sm">${S.hist.filter(hOK).length} 問に挑戦(直近300問を保存)</div>`}
 async function review(){const ids=shuf(wrongIds()).slice(0,10);let ok=0,n=0;
- for(const key of ids){n++;const p0=key.indexOf('#'),kk=key.slice(0,p0),id=key.slice(p0+1),[star,s]=kk.split('|'),pl=await loadPool(+star,s),q=pl.all.find(x=>x.id==id)||(BUILTIN[s]||[]).find(x=>x.id==id);if(!q)continue;
+ for(const key of ids){n++;const p0=key.indexOf('#'),kk=key.slice(0,p0),id=key.slice(p0+1),[star,s]=kk.split('|'),pl=await loadPool(+star,s),q=pl.all.find(x=>x.id==id);if(!q)continue;
   const pick=await new Promise(res=>{$('mhead').innerHTML=H('✏',`復習 ${n}/${ids.length} [${s}]`);
    $('mbody').innerHTML=`${figHTML(q)}<div style="font-weight:bold;white-space:pre-line;font-size:18px">${esc(q.q)}</div><div id="rc" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div><div id="rx"></div>`;
    shuf([q.a,...shuf(q.w).slice(0,3)]).forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{[...$('rc').children].forEach(x=>{x.disabled=true;if(x.textContent===q.a)x.classList.add('ok')});if(v!==q.a)b.classList.add('ng');res(v===q.a)};$('rc').appendChild(b)})});
@@ -419,164 +865,44 @@ async function fAns(id,y){if(y)await sb.from('friendships').update({status:'acce
 function fDetail(id){const p=FR[id];openModal(H('🧑',p.name||'-'),card({exp:p.exp,coin:p.coin,start:new Date(p.created_at).getTime(),age:p.age,gender:p.gender})+`<div class="sm">最終ログイン: ${ago(p.last_login_at)}</div><div class="row" style="padding:0"><button onclick="openFriends()">‹ 一覧へ</button><button onclick="fDel(${p.fid})">フレンド削除</button></div>`)}
 async function fDel(fid){if(!confirm('フレンドを削除しますか?'))return;await sb.from('friendships').delete().eq('id',fid);openFriends()}
 
-/* ===== 問題(中1の5教科・教科ごとに解説つき。図つき問題あり) ===== */
-const SV=(w,h,b)=>`<svg viewBox="0 0 ${w} ${h}" style="width:min(100%,${w}px);background:#fff;border:2px solid #e0c98a;border-radius:8px">${b}</svg>`;
-const FG={
- tri:SV(220,130,'<polygon points="20,110 190,110 90,20" fill="#eaf4ff" stroke="#345" stroke-width="2"/><text x="28" y="104" font-size="13">50°</text><text x="146" y="104" font-size="13">60°</text><text x="84" y="46" font-size="15" font-weight="bold">x</text><text x="6" y="124" font-size="12">A</text><text x="194" y="124" font-size="12">B</text><text x="88" y="14" font-size="12">C</text>'),
- num:SV(260,90,'<line x1="10" y1="55" x2="250" y2="55" stroke="#345" stroke-width="2"/>'+[...Array(11)].map((_,i)=>`<line x1="${20+i*22}" y1="49" x2="${20+i*22}" y2="61" stroke="#345"/><text x="${20+i*22}" y="78" font-size="11" text-anchor="middle">${i-5}</text>`).join('')+'<circle cx="64" cy="55" r="6" fill="#e33"/><text x="64" y="38" font-size="14" font-weight="bold" text-anchor="middle" fill="#e33">A</text>'),
- para:SV(260,130,'<polygon points="40,100 190,100 230,40 80,40" fill="#fff3c4" stroke="#345" stroke-width="2"/><line x1="80" y1="40" x2="80" y2="100" stroke="#e33" stroke-dasharray="4"/><rect x="80" y="92" width="8" height="8" fill="none" stroke="#e33"/><text x="115" y="118" font-size="13">8cm</text><text x="86" y="75" font-size="13" fill="#e33">5cm</text>'),
- vang:SV(220,130,'<line x1="30" y1="65" x2="190" y2="65" stroke="#345" stroke-width="2"/><line x1="130.5" y1="8.6" x2="89.5" y2="121.4" stroke="#345" stroke-width="2"/><text x="136" y="52" font-size="14">70°</text><text x="76" y="88" font-size="15" font-weight="bold">x</text>'),
- sec:SV(220,130,'<path d="M50 115 L130 115 A80 80 0 0 0 90 45.7 Z" fill="#dff5df" stroke="#345" stroke-width="2"/><text x="82" y="130" font-size="12">6cm</text><text x="68" y="105" font-size="12">60°</text>'),
- ref:SV(220,130,'<line x1="20" y1="105" x2="200" y2="105" stroke="#345" stroke-width="5"/><line x1="110" y1="105" x2="110" y2="15" stroke="#888" stroke-dasharray="4"/><line x1="58.6" y1="43.7" x2="110" y2="105" stroke="#e80" stroke-width="2.5"/><line x1="110" y1="105" x2="161.4" y2="43.7" stroke="#e80" stroke-width="2.5"/><text x="70" y="75" font-size="13">40°</text><text x="40" y="122" font-size="11">鏡</text>'),
- spr:SV(240,150,'<line x1="40" y1="120" x2="220" y2="120" stroke="#345"/><line x1="40" y1="120" x2="40" y2="20" stroke="#345"/><polyline points="40,120 100,94 160,68" fill="none" stroke="#e33" stroke-width="2.5"/><circle cx="100" cy="94" r="4" fill="#e33"/><circle cx="160" cy="68" r="4" fill="#e33"/><text x="100" y="136" font-size="11" text-anchor="middle">50</text><text x="160" y="136" font-size="11" text-anchor="middle">100</text><text x="130" y="148" font-size="11">おもり(g)</text><text x="34" y="98" font-size="11" text-anchor="end">2</text><text x="34" y="72" font-size="11" text-anchor="end">4</text><text x="8" y="16" font-size="11">のび(cm)</text>'),
- sym:c=>SV(120,110,`<text x="60" y="88" font-size="80" text-anchor="middle">${c}</text>`)};
-const mk=a=>a.map(([q,a,w,e,f])=>({q,a,w,e,f}));
-const JP=mk([
-["次の漢字の読みは?「穀物」","こくもつ",["ごくもつ","こくぶつ","ごくぶつ"],"「穀」は音読みで「こく」と読みます。穀物=こくもつ。"],
-["次の漢字の読みは?「批判」","ひはん",["ひばん","ひぱん","ひわん"],"「批」は「ひ」、「判」は「はん」と読みます。"],
-["次の漢字の読みは?「推測」","すいそく",["ついそく","すいぞく","すいてき"],"「推」は「すい」、「測」は「そく」と読みます。"],
-["次の漢字の読みは?「誤解」","ごかい",["こかい","ごがい","ごげ"],"「誤」は「ご」、「解」は「かい」と読みます。"],
-["次の漢字の読みは?「就職」","しゅうしょく",["じゅうしょく","しゅうじょく","しゅしょく"],"「就」は「しゅう」と読みます。就職=しゅうしょく。"],
-["「町のこうがいに住む」の「こうがい」を漢字で書くと?","郊外",["校外","口外","港外"],"町の中心から離れた地域は「郊外」です。"],
-["「ありがとうのかんしゃ」の「かんしゃ」を漢字で書くと?","感謝",["観謝","間謝","幹謝"],"感じて謝意を表すので「感謝」と書きます。"],
-["「拡大」の対義語(反対の意味の言葉)は?","縮小",["拡張","拡散","縮図"],"大きくすることの反対は、小さくする「縮小」です。"],
-["「原因」の対義語は?","結果",["理由","原料","結末"],"物事を引き起こすもとが「原因」、その結果生じたことが「結果」です。"],
-["「具体」の対義語は?","抽象",["具現","実体","抽出"],"はっきりした形がある「具体」に対し、共通点を取り出した考えを「抽象」といいます。"],
-["「美しい」の品詞は?","形容詞",["形容動詞","動詞","名詞"],"言い切りが「い」で終わり、物事の様子を表すので形容詞です。"],
-["「静かだ」の品詞は?","形容動詞",["形容詞","副詞","名詞"],"言い切りが「だ」で終わり、様子を表すので形容動詞です。"],
-["「ゆっくり歩く」の「ゆっくり」の品詞は?","副詞",["形容詞","名詞","助詞"],"主に用言(動詞など)を修飾する語は副詞です。"],
-["「鳥が空を飛ぶ。」の主語は?","鳥が",["空を","飛ぶ","空を飛ぶ"],"「何が」にあたる部分が主語です。ここでは「鳥が」です。"],
-["「私は本を読む。」を文節に区切ると、いくつになる?","3",["2","4","5"],"「ネ」を入れて区切ります。私は/本を/読む で3つです。"],
-["「先生が来る」を尊敬語にすると?","いらっしゃる",["参る","伺う","申す"],"相手の動作を高めるのが尊敬語。「来る」の尊敬語は「いらっしゃる」です。"],
-["「私が見る」を謙譲語にすると?","拝見する",["ご覧になる","お見えになる","見られる"],"自分の動作をへりくだるのが謙譲語。「見る」の謙譲語は「拝見する」です。"],
-["「木」という漢字の成り立ちは?","象形文字",["指事文字","会意文字","形声文字"],"物の形をかたどってできた文字が象形文字です。"],
-["「明」(日+月)の成り立ちは?","会意文字",["象形文字","指事文字","形声文字"],"意味を持つ字を組み合わせて新しい意味を表すのが会意文字です。"],
-["「上」の成り立ちは?","指事文字",["象形文字","会意文字","形声文字"],"形のないものを印などで示した文字が指事文字です。"]]);
-const EN_=mk([
-["( ) am a student.「私は生徒です。」","I",["You","He","She"],"主語がIのとき、be動詞はamを使います。"],
-["She ( ) my friend.","is",["am","are","be"],"主語がsheのとき、be動詞はisです。"],
-["They ( ) from Japan.","are",["is","am","be"],"主語がtheyのとき、be動詞はareです。"],
-["( ) this a pen?「これはペンですか?」","Is",["Am","Are","Do"],"be動詞の疑問文は、be動詞を文の最初に置きます。thisにはIsです。"],
-["I ( ) not a teacher.「私は先生ではありません。」","am",["is","are","do"],"I am not ~. の形になります。"],
-["He ( ) soccer every day.","plays",["play","playing","is play"],"主語が3人称単数の現在形では、動詞にsをつけます。"],
-["Do you ( ) English?","speak",["speaks","speaking","speaked"],"Do you のあとの動詞は原形です。"],
-["apple の複数形は?","apples",["applees","appleses","apple"],"ふつうの名詞は語尾にsをつけて複数形にします。"],
-["box の複数形は?","boxes",["boxs","boxies","boxen"],"x, s, ch, sh で終わる語にはesをつけます。"],
-["I go to school ( ) bus.「バスで学校へ行く」","by",["in","on","at"],"交通手段は by + 乗り物(冠詞なし)で表します。"],
-["Monday の次の曜日は?","Tuesday",["Sunday","Wednesday","Thursday"],"Monday(月)→Tuesday(火)の順です。"],
-["「赤い」を表す英語は?","red",["blue","green","yellow"],"red=赤、blue=青、green=緑、yellow=黄色です。"],
-["How ( ) are you?「あなたは何歳ですか?」","old",["long","tall","much"],"年齢をたずねるときは How old を使います。"],
-["「私の」を表す語は?","my",["me","I","mine"],"I(私は)-my(私の)-me(私を)-mine(私のもの)です。"],
-["「彼女は」を表す語は?","she",["he","her","they"],"she=彼女は、he=彼は、her=彼女の/彼女を です。"],
-["Can you swim? に「はい、できます」と答える文は? Yes, I ( ).","can",["am","do","is"],"can の疑問文には can を使って答えます。"],
-["I ( ) a dog.「私は犬を飼っています。」","have",["has","am","is"],"主語がIのときは have を使います。"],
-["What ( ) is it?「何時ですか?」","time",["day","color","old"],"時刻をたずねるときは What time is it? です。"],
-["「ネコ」を表す英語は?","cat",["dog","bird","fish"],"cat=ネコ、dog=犬、bird=鳥、fish=魚です。"],
-["Where ( ) you from?「出身はどこですか?」","are",["is","am","do"],"主語がyouのとき、be動詞はareです。"]]);
-const SC=mk([
-["鏡で光が反射するとき、入射角が40°なら反射角は?","40°",["50°","80°","20°"],"反射の法則:入射角と反射角は等しくなります。",FG.ref],
-["光が空気中から水中へ進むとき、境界面で光が曲がる現象は?","屈折",["反射","直進","回折"],"異なる物質の境界で光が曲がる現象を屈折といいます。"],
-["音の高さは何で決まる?","振動数",["振幅","音源の大きさ","空気の温度"],"音の高さは振動数(1秒間の振動の回数)で決まります。"],
-["音の大きさは何で決まる?","振幅",["振動数","音の速さ","音源の重さ"],"音の大きさは振幅(振動の幅)で決まります。"],
-["空気中を伝わる音の速さは約何m/s?","約340m/s",["約34m/s","約3400m/s","約3×10⁸m/s"],"音の速さは約340m/s。光は約30万km/sでずっと速いです。"],
-["力の単位は?","N(ニュートン)",["g","kg","Pa"],"力の単位はN(ニュートン)です。gやkgは質量の単位です。"],
-["ばねを引く力が2倍になると、ばねののびは?","2倍",["半分","変わらない","4倍"],"フックの法則:ばねののびは、加えた力に比例します。"],
-["このばねに150gのおもりをつるすと、何cmのびる?","6cm",["5cm","8cm","3cm"],"のびは重さに比例。50gで2cmなので、150gでは2×3=6cmです。",FG.spr],
-["光合成が行われる、葉の緑色の粒は?","葉緑体",["核","液胞","細胞壁"],"葉緑体で光合成が行われ、デンプンと酸素ができます。"],
-["光合成で取り入れる気体は?","二酸化炭素",["酸素","窒素","水素"],"光合成は、二酸化炭素と水を材料に、光のエネルギーでデンプンと酸素をつくります。"],
-["胚珠が子房の中にある植物は?","被子植物",["裸子植物","シダ植物","コケ植物"],"胚珠が子房に包まれているのが被子植物です。"],
-["背骨をもつ動物のなかまを何という?","脊椎動物",["無脊椎動物","節足動物","軟体動物"],"魚類・両生類・は虫類・鳥類・ほ乳類は脊椎動物です。"],
-["子を母親の体内である程度育ててから産む繁殖のしかたは?","胎生",["卵生","変態","分裂"],"ほ乳類の多くは胎生です。"],
-["マグマが冷えて固まってできた岩石は?","火成岩",["堆積岩","変成岩","石灰岩"],"マグマが冷え固まった岩石を火成岩といいます。"],
-["地震のゆれの大きさを表すものは?","震度",["マグニチュード","震源","断層"],"震度はゆれの大きさ、マグニチュードは地震の規模を表します。"],
-["地震の規模(エネルギーの大きさ)を表すものは?","マグニチュード",["震度","震央","震源"],"地震そのものの大きさはマグニチュードで表します。"],
-["水が氷になる温度(1気圧)は?","0℃",["100℃","-10℃","4℃"],"水は0℃で凍り、100℃で沸とうします。"],
-["物質1cm³あたりの質量を何という?","密度",["圧力","濃度","重さ"],"密度[g/cm³]=質量[g]÷体積[cm³]です。"],
-["質量60g、体積20cm³の物質の密度は?","3g/cm³",["0.3g/cm³","40g/cm³","1200g/cm³"],"密度=質量÷体積=60÷20=3g/cm³です。"],
-["砂や泥などが海底に積もってできた岩石は?","堆積岩",["火成岩","変成岩","花こう岩"],"れき・砂・泥などが固まった岩石を堆積岩といいます。"]]);
-const SO=mk([
-["地球上で最も大きい海洋は?","太平洋",["大西洋","インド洋","北極海"],"三大洋のうち最大は太平洋です。"],
-["六大陸のうち、最も面積が大きいのは?","ユーラシア大陸",["アフリカ大陸","北アメリカ大陸","南極大陸"],"ユーラシア大陸が最大の大陸です。"],
-["本初子午線(経度0度)が通る国は?","イギリス",["フランス","日本","アメリカ"],"旧グリニッジ天文台があるイギリスを通ります。"],
-["日本の標準時の基準となる経線は?","東経135度",["東経120度","東経150度","西経135度"],"兵庫県明石市を通る東経135度の経線です。"],
-["経度15度の差で、時差は何時間?","1時間",["2時間","15時間","24時間"],"地球は24時間で360度回るので、15度で1時間の時差が生じます。"],
-["面積が日本で最も大きい都道府県は?","北海道",["岩手県","長野県","新潟県"],"北海道が最大で、国土の約2割を占めます。"],
-["日本で最も長い川は?","信濃川",["利根川","石狩川","木曽川"],"信濃川(約367km)が日本一長い川です。"],
-["日本で最も高い山は?","富士山",["北岳","奥穂高岳","槍ヶ岳"],"富士山(3776m)が日本一高い山です。"],
-["図の地図記号が表すものは?","小・中学校",["高等学校","病院","図書館"],"「文」は小・中学校の地図記号です。高等学校は「文」を丸で囲んだ記号です。",FG.sym('文')],
-["図の地図記号が表すものは?","寺院",["神社","墓地","城跡"],"卍は寺院の地図記号です。神社は鳥居の形です。",FG.sym('卍')],
-["図の地図記号が表すものは?","温泉",["工場","発電所","消防署"],"♨は温泉の地図記号です。",FG.sym('♨')],
-["縄文時代の人々がつくった、縄目の模様のある土器は?","縄文土器",["弥生土器","土偶","埴輪"],"縄目の模様がある厚手の土器が縄文土器です。"],
-["弥生時代に大陸から伝わったものは?","稲作",["火の使用","打製石器","土偶"],"弥生時代には稲作や金属器(青銅器・鉄器)が伝わりました。"],
-["邪馬台国の女王は?","卑弥呼",["推古天皇","持統天皇","聖徳太子"],"卑弥呼は魏に使いを送り、称号と銅鏡を授けられました。"],
-["十七条の憲法を定めたのは?","聖徳太子",["中大兄皇子","天智天皇","聖武天皇"],"聖徳太子(厩戸皇子)は推古天皇の摂政として、冠位十二階や十七条の憲法を定めました。"],
-["大化の改新を始めたのは?","中大兄皇子と中臣鎌足",["聖徳太子と蘇我馬子","卑弥呼と台与","桓武天皇と最澄"],"645年、中大兄皇子と中臣鎌足が蘇我氏を倒して政治改革を始めました。"],
-["日本に現存する最古の和歌集は?","万葉集",["古今和歌集","源氏物語","枕草子"],"奈良時代にまとめられた万葉集です。"],
-["794年、平安京に都を移した天皇は?","桓武天皇",["聖武天皇","天智天皇","推古天皇"],"桓武天皇が平安京に都を移しました。"],
-["日本の国土の約何割が山地?","約7割",["約3割","約5割","約9割"],"日本は国土の約4分の3が山地です。"],
-["地球儀で、北極と南極を結ぶ縦の線は?","経線",["緯線","赤道","等高線"],"経線は北極と南極を結ぶ線、緯線は赤道に平行な線です。"]]);
-const MATH=(()=>{let s=11;const r=(a,b)=>{s=(s*1103515245+12345)&0x7fffffff;return a+((s>>8)%(b-a+1))};
- const B=[],add=(q,a,c,e,f)=>{a=String(a);const w=[...new Set(c.map(String))].filter(v=>v!==a).slice(0,3);B.push({q,a,w,e,f})};
- for(let i=0;i<10;i++){const a=r(2,15),b=r(2,15);
-  if(i%2==0){const x=b-a;add(`(-${a}) + ${b} = ?`,x,[a+b,-(a+b),a-b,x+1,x-1],`符号がちがう足し算は、絶対値の大きい方から小さい方をひき、大きい方の符号をつけます。${b} - ${a} = ${x}`)}
-  else{const x=-(a+b);add(`(-${a}) - ${b} = ?`,x,[a+b,a-b,b-a,x-1,x+1],`ひき算は、ひく数の符号を変えて足し算にします。(-${a}) - ${b} = (-${a}) + (-${b}) = ${x}`)}}
- for(let i=0;i<6;i++){const a=r(2,9),b=r(2,9);
-  if(i<3)add(`(-${a}) × (-${b}) = ?`,a*b,[-a*b,a+b,-(a+b),a*b+a,a*b-b],`負の数どうしのかけ算は、答えが正の数になります。${a} × ${b} = ${a*b}`);
-  else add(`${a*b} ÷ (-${a}) = ?`,-b,[b,-a,a,-b-1,-b+2],`正の数 ÷ 負の数は、答えが負の数になります。${a*b} ÷ ${a} = ${b} なので、答えは -${b}`)}
- for(let i=0;i<6;i++){const m=r(2,6),k=r(1,5),n=r(1,9),x=-m*k+n;
-  add(`x = -${k} のとき、${m}x + ${n} の値は?`,x,[m*k+n,-m*k-n,x+1,x-1,x+2],`x に -${k} を代入します。${m} × (-${k}) + ${n} = ${-m*k} + ${n} = ${x}`)}
- for(let i=0;i<8;i++){const x=r(-6,8),a=r(2,6),b=r(1,9)*(r(0,1)?1:-1),c=a*x+b,bs=b>0?'+':'-';
-  add(`${a}x ${bs} ${Math.abs(b)} = ${c} のとき、x = ?`,x,[x+1,x-1,-x,c-b,x+2,x-2],`${bs=='+'?'+':'-'}${Math.abs(b)} を移項すると ${a}x = ${c} ${bs=='+'?'-':'+'} ${Math.abs(b)} = ${c-b}。両辺を ${a} でわって x = ${x}`)}
- for(let i=0;i<3;i++){const p=r(2,5),k=r(2,6),n=r(6,12),y=k*n;
-  add(`y は x に比例し、x = ${p} のとき y = ${p*k} です。x = ${n} のとき y = ?`,y,[y+k,y-k,k+n,p*n,y+2],`比例なので y = ax と表せます。${p*k} = a × ${p} より a = ${k}。よって y = ${k}x で、x = ${n} のとき y = ${y}`)}
- for(let i=0;i<3;i++){let p,n,a;do{a=[12,18,24,36][r(0,3)];p=[1,2,3,4,6][r(0,4)];n=[2,3,4,6][r(0,3)]}while(a%p||a%n||p==n);const y=a/n;
-  add(`y は x に反比例し、x = ${p} のとき y = ${a/p} です。x = ${n} のとき y = ?`,y,[y+2,y-1,a/p,y*2,a],`反比例なので y = a/x と表せ、x × y = 一定です。${p} × ${a/p} = ${a} より a = ${a}。y = ${a} ÷ ${n} = ${y}`)}
- for(let i=0;i<2;i++){const R=r(3,9);add(`半径 ${R}cm の円の周の長さは?(円周率はπ)`,`${2*R}π cm`,[`${R}π cm`,`${R*R}π cm`,`${2*R*R}π cm`,`${4*R}π cm`],`円周 = 2 × π × 半径 = 2 × π × ${R} = ${2*R}π (cm)`)}
- for(let i=0;i<2;i++){const R=r(3,9);add(`半径 ${R}cm の円の面積は?(円周率はπ)`,`${R*R}π cm²`,[`${2*R}π cm²`,`${R}π cm²`,`${2*R*R}π cm²`,`${R*R*R}π cm²`],`円の面積 = π × 半径 × 半径 = π × ${R} × ${R} = ${R*R}π (cm²)`)}
- for(let i=0;i<2;i++){const[R,th,l]=[[6,60,2],[6,90,3],[12,90,6],[9,120,6]][r(0,3)];
-  add(`半径 ${R}cm、中心角 ${th}° のおうぎ形の弧の長さは?`,`${l}π cm`,[`${l*2}π cm`,`${l+1}π cm`,`${l*3}π cm`,`${R}π cm`],`弧の長さ = 2π × 半径 × (中心角 ÷ 360) = 2π × ${R} × ${th}/360 = ${l}π (cm)`)}
- {const R=r(2,5),h=r(3,8);add(`底面の半径 ${R}cm、高さ ${h}cm の円柱の体積は?`,`${R*R*h}π cm³`,[`${R*h}π cm³`,`${2*R*R*h}π cm³`,`${R*R+h}π cm³`,`${2*R*h}π cm³`],`円柱の体積 = 底面積 × 高さ = π × ${R}² × ${h} = ${R*R*h}π (cm³)`)}
- {const R=r(2,6);add(`半径 ${R}cm の球の表面積は?`,`${4*R*R}π cm²`,[`${2*R*R}π cm²`,`${R*R}π cm²`,`${4*R}π cm²`,`${4*R*R*R}π cm²`],`球の表面積 = 4π × 半径² = 4π × ${R}² = ${4*R*R}π (cm²)`)}
- {const P=[11,13,17,19,23,29,31,37][r(0,7)],C=[21,27,33,39,49,51,57,63,91];const cs=[0,0,0].map((_,i)=>C[(r(0,8)+i*3)%9]);
-  add('次のうち、素数はどれ?',P,cs,`素数とは、1 とその数自身しか約数をもたない数です。${P} はどの数でもわり切れないので素数です。ほかの数は 3 や 7 でわり切れます。`)}
- const PF=[[12,'2² × 3'],[18,'2 × 3²'],[20,'2² × 5'],[24,'2³ × 3'],[30,'2 × 3 × 5'],[36,'2² × 3²'],[45,'3² × 5'],[60,'2² × 3 × 5']];
- for(let i=0;i<2;i++){const k=r(0,7),[n,a]=PF[k];add(`${n} を素因数分解すると?`,a,PF.filter((_,j)=>j!=k).map(v=>v[1]),`小さい素数から順にわっていきます。${n} = ${a}`)}
- {const[a,b,g]=[[12,18,6],[24,36,12],[20,30,10],[18,27,9]][r(0,3)];add(`${a} と ${b} の最大公約数は?`,g,[g*2,Math.max(1,Math.round(g/3)),a,g+2,a+b],`${a} と ${b} を割り切れる最大の数が最大公約数です。素因数分解して共通部分をかけると ${g} になります。`)}
- {const n4=[0,0,0,0].map(()=>r(50,90)),sm=n4.reduce((x,y)=>x+y,0);let l=r(50,90);l+=(5-(sm+l)%5)%5;const all=[...n4,l],av=(sm+l)/5;
-  add(`5人の点数は ${all.join(', ')} です。平均点は?`,av,[av+1,av-1,av+3,Math.max(...all)],`平均 = 合計 ÷ 人数。合計は ${sm+l} なので ${sm+l} ÷ 5 = ${av}`)}
- {let a=new Set;while(a.size<5)a.add(r(20,95));a=[...a];const so=[...a].sort((x,y)=>x-y),m=so[2];
-  add(`データ ${a.join(', ')} の中央値は?`,m,[a[0]==m?so[0]:a[0],so[1],so[3],so[4],m+1],`値を小さい順に並べると ${so.join(', ')}。真ん中(3番目)の値が中央値で、${m} です。`)}
- add('図の三角形で、∠x の大きさは?','70°',['60°','80°','110°'],'三角形の内角の和は180°です。180 − (50 + 60) = 70°',FG.tri);
- add('数直線上の点Aが表す数は?','-3',['3','-2','-4'],'0より左にあるので負の数です。0から3目盛り左なので -3 です。',FG.num);
- add('図の平行四辺形の面積は?','40cm²',['13cm²','26cm²','80cm²'],'平行四辺形の面積 = 底辺 × 高さ = 8 × 5 = 40 (cm²)',FG.para);
- add('図で、∠x の大きさは?','70°',['110°','20°','290°'],'対頂角は等しいので、∠x = 70° です。',FG.vang);
- add('図のおうぎ形の面積は?(円周率はπ)','6π cm²',['12π cm²','36π cm²','3π cm²'],'面積 = π × 6² × 60/360 = 6π (cm²)',FG.sec);
- return B})();
+/* ===== 問題データ(HTML内の <script> ブロックから読み込み。★×教科ごとに独立) ===== */
+const SUBJ=['数学','国語','英語','理科','社会'],SKEY={'数学':'math','国語':'japanese','英語':'english','理科':'science','社会':'social'},POOL={};
 const SUBJC={'数学':'#3a7ad9','国語':'#d95a5a','英語':'#2a9a6a','理科':'#8a5ad9','社会':'#d99a2a'};
-const BANKS={'数学':MATH,'国語':JP,'英語':EN_,'理科':SC,'社会':SO},SUBJ=['数学','国語','英語','理科','社会'];
 const shuf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
-/* ===== 問題ファイル(別ファイルから読み込み)。questions/star{★}_{math|japanese|english|science|social}.json ===== */
-const SKEY={'数学':'math','国語':'japanese','英語':'english','理科':'science','社会':'social'},QBASE='questions/',POOL={};
 const STAR={1:{lab:'小学生の範囲',xp:1000,coin:1000},2:{lab:'中1基礎',xp:1000,coin:1000},3:{lab:'中2基礎',xp:1500,coin:1500},4:{lab:'中1応用',xp:3000,coin:2000},5:{lab:'中2応用',xp:5000,coin:5000},6:{lab:'中3基礎',xp:7000,coin:5000},7:{lab:'中3応用',xp:10000,coin:10000}};
 const GATE_LV=8;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),eh=s=>esc(s).replace(/\n/g,'<br>');
-const BUILTIN={};Object.keys(BANKS).forEach(s=>BUILTIN[s]=BANKS[s].map((b,i)=>Object.assign({},b,{id:'2-'+SKEY[s]+'-'+String(i+1).padStart(3,'0')})));
-function normQ(it,star,s,i){if(!it||typeof it.q!='string'||it.a==null||!Array.isArray(it.w))return null;const a=String(it.a),w=[...new Set(it.w.map(String))].filter(x=>x!==a);if(!it.q.trim()||w.length<3)return null;
- return{id:String(it.id||`${star}-${SKEY[s]}-${String(i+1).padStart(3,'0')}`),q:it.q,a,w,e:it.e?String(it.e):'この問題の解説は まだありません。',f:it.f||'',img:it.img||''}}
-async function loadPool(star,s,force){const k=star+'|'+s;if(POOL[k]&&!force)return POOL[k];let items=[],raw=0,err='';
- try{const r=await fetch(`${QBASE}star${star}_${SKEY[s]}.json`,{cache:'no-cache'});if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json(),arr=Array.isArray(j)?j:(j.items||[]);raw=arr.length;
-  const seen=new Set();items=arr.map((it,i)=>normQ(it,star,s,i)).filter(x=>x&&!seen.has(x.id)&&seen.add(x.id))}catch(e){err=String(e.message||e)}
- const fbUsed=items.length<10,all=fbUsed?items.concat(BUILTIN[s].filter(b=>!items.some(x=>x.id==b.id))):items;
- return POOL[k]={items,all,fbUsed,raw,err,n:items.length}}
+const qhash=s=>{let h=5381;for(const c of s)h=((h<<5)+h+c.codePointAt(0))>>>0;return h.toString(36)};
+/* 1問 = ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D か 1〜4)","解説", 図(省略可)]
+   旧形式 ["問題文","正解",["誤1","誤2","誤3"],"解説", 図] も読めます */
+function normRow(r,star,s,n){const bad=m=>({err:`${n}番目: ${m}`});
+ if(!Array.isArray(r))return bad('[ ] の配列になっていません');
+ let q=r[0],a,w,e,fig;
+ if(Array.isArray(r[2])){a=String(r[1]),w=[...new Set(r[2].map(String))].filter(x=>x!==a);e=r[3];fig=r[4];if(w.length<3)return bad('誤答が3つ未満です')}
+ else{const ch=[r[1],r[2],r[3],r[4]].map(x=>x==null?'':String(x).trim());if(ch.some(x=>!x))return bad('選択肢が4つそろっていません(「問題,A,B,C,D,正解,解説」の順)');if(new Set(ch).size<4)return bad('同じ選択肢があります');
+  const k=String(r[5]==null?'':r[5]).trim(),idx=k.length==1?('ABCD'.indexOf(k.toUpperCase())>=0?'ABCD'.indexOf(k.toUpperCase()):'1234'.indexOf(k)):-1;
+  if(idx<0)return bad(`正解は "A"〜"D" か 1〜4 で書いてください(今: ${String(r[5]).slice(0,10)})`);a=ch[idx];w=ch.filter((_,j)=>j!=idx);e=r[6];fig=r[7]}
+ if(typeof q!='string'||!q.trim())return bad('問題文が空です');
+ const it={id:`${star}-${SKEY[s]}-${qhash(q+'\u0001'+[a,...w].sort().join('\u0001'))}`,q,a,w,e:e?String(e):'この問題の解説は まだありません。',f:'',img:''};
+ if(fig){fig=String(fig);if(/^<svg/i.test(fig))it.f=fig;else if(/\.(png|jpe?g|gif|webp|svg)$/i.test(fig)||/^https?:/.test(fig))it.img=fig}
+ return{item:it}}
+function readBlock(star,s){const blk=window.QB&&window.QB[star+'|'+s],items=[],errs=[],seen=new Set();
+ if(!blk)return{items,errs:['ブロックが見つからないか、ブロックの中にエラー(カッコ・カンマ・引用符)があります'],missing:true};
+ blk.forEach((r,i)=>{const o=normRow(r,star,s,i+1);if(o.err)return errs.push(o.err);if(seen.has(o.item.id))return errs.push(`${i+1}番目: 同じ問題が重複しています`);seen.add(o.item.id);items.push(o.item)});
+ return{items,errs,missing:false}}
+async function loadPool(star,s){const k=star+'|'+s;if(POOL[k])return POOL[k];
+ const b=readBlock(star,s);let all=b.items.slice();const from=[];
+ for(let d=1;d<7&&all.length<10;d++)for(const st of[star-d,star+d]){if(st<1||st>7||all.length>=10)continue;const o=readBlock(st,s);if(o.items.length){from.push(st);all=all.concat(o.items.filter(x=>!all.some(y=>y.id==x.id)))}}
+ return POOL[k]={items:b.items,all,borrowed:all.length-b.items.length,from,errs:b.errs,n:b.items.length}}
 function san(svg){const d=document.createElement('div');d.innerHTML=svg;d.querySelectorAll('script,foreignObject,iframe,object,embed').forEach(e=>e.remove());d.querySelectorAll('*').forEach(el=>[...el.attributes].forEach(a=>{if(/^on/i.test(a.name)||/javascript:/i.test(a.value))el.removeAttribute(a.name)}));return d.innerHTML}
-function figHTML(q){let h='';if(q.f)h+=san(q.f);if(q.img){const u=/^(https?:|data:image\/)/.test(q.img)?q.img:QBASE+q.img;h+=`<img src="${esc(u)}" alt="図" style="max-width:100%;max-height:220px;border-radius:8px;border:2px solid #e0c98a;background:#fff">`}return h?`<div style="display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:4px 0">${h}</div>`:''}
-async function openQStat(){openModal(H('📂','問題ファイルの状況'),'<div class="sm">確認中…</div>');
- const jobs=[];for(let st=1;st<=7;st++)for(const s of SUBJ)jobs.push(loadPool(st,s,true));await Promise.all(jobs);
- $('mbody').innerHTML=`<div class="sm">questions/ フォルダに star{★の数}_{math|japanese|english|science|social}.json を置きます(1ファイル50問が目安)。</div>
+function figHTML(q){let h='';if(q.f)h+=san(q.f);if(q.img)h+=`<img src="${esc(q.img)}" alt="図" style="max-width:100%;max-height:220px;border-radius:8px;border:2px solid #e0c98a;background:#fff">`;return h?`<div style="display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin:4px 0">${h}</div>`:''}
+function openQStat(){Object.keys(POOL).forEach(k=>delete POOL[k]);const R={},errs=[];
+ for(let st=1;st<=7;st++)for(const s of SUBJ){const o=readBlock(st,s);R[st+'|'+s]=o;o.errs.forEach(x=>errs.push(`★${st} ${s} ${x}`))}
+ openModal(H('📚','問題の数'),`<div class="sm">HTML内の「★ 教科」ブロックに、問題を1行ずつ追加します(50問ずつが目安)。</div>
  <div style="overflow:auto"><table style="border-collapse:collapse;font-size:13px;width:100%"><tr><th></th>${SUBJ.map(s=>`<th>${s}</th>`).join('')}</tr>`+
- [1,2,3,4,5,6,7].map(st=>`<tr><td style="white-space:nowrap">★${st}<br><small>${STAR[st].lab}</small></td>`+SUBJ.map(s=>{const p=POOL[st+'|'+s],c=p.n>=50?'#bdebc8':p.n>0?'#fff3c4':'#f7c4c4';return `<td style="background:${c};text-align:center;padding:4px;border:1px solid #cdb" title="${esc(p.err)}">${p.n}${p.raw>p.n?`<br><small>無効${p.raw-p.n}</small>`:''}</td>`}).join('')+'</tr>').join('')+`</table></div>
- <div class="sm">緑=50問以上 / 黄=不足 / 赤=ファイルなし(10問未満のときは予備問題を使います)。「無効」は形式エラーまたはID重複です。</div>`}
-
+ [1,2,3,4,5,6,7].map(st=>`<tr><td style="white-space:nowrap">★${st}<br><small>${STAR[st].lab}</small></td>`+SUBJ.map(s=>{const p=R[st+'|'+s],n=p.items.length,c=p.missing?'#f2b8b8':n>=50?'#bdebc8':n>0?'#fff3c4':'#eee';return `<td style="background:${c};text-align:center;padding:4px;border:1px solid #cdb">${p.missing?'⚠':n}${p.errs.length&&!p.missing?`<br><small style="color:#c22">エラー${p.errs.length}</small>`:''}</td>`}).join('')+'</tr>').join('')+`</table></div>
+ <div class="sm">緑=50問以上 / 黄=不足 / 灰=0問 / ⚠=ブロックのエラー。10問未満のときは、近い★の問題で補います。</div>`+
+ (errs.length?`<b>⚠ 読み込めなかったところ(${errs.length}件)</b><div class="exp" style="max-height:220px;overflow:auto;font-size:12px">${errs.slice(0,40).map(x=>esc(x)).join('<br>')}${errs.length>40?'<br>…':''}</div>`:'<div class="sm">✅ エラーはありません。</div>'))}
 
 /* ===== 流れ ===== */
 async function start(){hud();show('map');if(!S.prologue){await dlg(PROLOGUE,'');S.prologue=true;persist();}}
@@ -659,8 +985,8 @@ const ELDER=['長老「おお、よく来たのう。わしは長老ざいがす
 const introL=e=>e.id=='town:h0'?ELDER:e.cry?[`${e.cry}${e.cry}`,`${e.n}「${e.cry} ${e.s}の問題で勝負だ!」`]:[`${e.n}「${e.s}の問題で勝負だ!覚悟はいいか?」`];
 const outL=(e,w)=>e.id=='town:h0'?(w=='win'?'長老「見事じゃ……!これが勉強の力か。」':'長老「まだまだじゃな。出直してまいれ。」'):e.cry?(w=='win'?`${e.n}「${e.cry}(まいった!)」`:`${e.n}「${e.cry}(まだまだ!)」`):(w=='win'?`${e.n}「いい勝負だった!また会おう。」`:`${e.n}「ふふ、まだ勉強が足りないな。」`);
 async function houseFight(e){if(isDef(e.id))return dlg([`${e.n}「もう勝負はついた。町を探索してみるがよい。」`],e.n,e.v);
- await dlg(introL(e),e.n,e.v);const r=await battle(e);await dlg([outL(e,r)],e.n,e.v)}
-async function roadFight(e){SE.hit();await dlg([`道端で ${e.n} が 待ちかまえていた!`],'',0);await dlg(introL(e),e.n,e.v);const r=await battle(e);await dlg([outL(e,r)],e.n,e.v)}
+ await dlg(introL(e),e.n,e.v);const r=await battle(e);if(r=='none')return;await dlg([outL(e,r)],e.n,e.v)}
+async function roadFight(e){SE.hit();await dlg([`道端で ${e.n} が 待ちかまえていた!`],'',0);await dlg(introL(e),e.n,e.v);const r=await battle(e);if(r=='none')return;await dlg([outL(e,r)],e.n,e.v)}
 /* ===== バトル ===== */
 const anim=(id,c,ms)=>{const e=$(id);e.classList.remove(c);void e.offsetWidth;e.classList.add(c);return sleep(ms).then(()=>e.classList.remove(c))};
 function flo(id,txt,color){const e=$(id),f=document.createElement('div');f.className='f';f.textContent=txt;if(color)f.style.color=color;f.style.left=e.offsetLeft+e.offsetWidth/5+'px';f.style.top=e.offsetTop+'px';$('field').appendChild(f);setTimeout(()=>f.remove(),950)}
@@ -669,7 +995,9 @@ function choose(q){return new Promise(res=>{pend=res;$('ch').innerHTML='';shuf([
  b.onclick=()=>{pend=null;[...$('ch').children].forEach(x=>{x.disabled=true;if(x.textContent===q.a)x.classList.add('ok')});if(v!==q.a)b.classList.add('ng');setTimeout(()=>res(v===q.a),500)};$('ch').appendChild(b)})})}
 function drawEnemy(e){const c=$('esp').getContext('2d');c.clearRect(0,0,64,64);if(typeof e.sp=='number'){c.imageSmoothingEnabled=false;c.drawImage(EIMG,e.sp*64,0,64,64,0,0,64,64)}else{c.font='50px serif';c.textAlign='center';c.fillText(e.sp,32,52)}}
 let curQ=null;
-async function battle(e){await ready;show('battle');let me=2000,en=2000,boost=false,uh=false,ua=false,can=false,surr=false;const star=e.star||2,ST=STAR[star];
+async function battle(e){await ready;const pool=await loadPool(e.star||2,e.s);
+ if(!pool.all.length){await dlg([`★${e.star||2}の${e.s}の問題が まだありません。`,`HTMLの「★${e.star||2} ${e.s}」ブロックに問題を追加してください。(⚙→📚問題の数 で確認できます)`]);return 'none'}
+ show('battle');let me=2000,en=2000,boost=false,uh=false,ua=false,can=false,surr=false;const star=e.star||2,ST=STAR[star];
  drawEnemy(e);spr($('msp'),AIMG,0,256*S.av);['esp','msp'].forEach(i=>$(i).classList.remove('ko'));
  $('en').innerHTML=`${esc(e.n)} <span style="background:${SUBJC[e.s]};color:#fff;border-radius:8px;padding:0 6px;font-size:.85em">${e.s}</span><br><span style="color:#e8a800;font-weight:bold">${'★'.repeat(star)}</span> <small>${ST.lab}</small>`;$('mn').textContent=`${S.name} ${t('lv')}.${lvl()}`;$('bst').textContent='';
  $('q').style.display=$('ch').style.display=$('items').style.display=$('fig').style.display='';
@@ -680,9 +1008,9 @@ async function battle(e){await ready;show('battle');let me=2000,en=2000,boost=fa
  $('ia').onclick=()=>{if($('ia').disabled)return;ua=true;boost=true;S.inv.atk--;SE.item();$('bst').textContent='⚔ 攻撃UP中!(次の攻撃 +400)';ri();persist()};
  $('sr').onclick=()=>{if(!can)return;if(!confirm('降参しますか?(コインもEXPももらえません)'))return;surr=true;if(pend){const p=pend;pend=null;p(null)}};
  $('q').textContent='問題を読み込み中…';$('ch').innerHTML='';
- const pool=await loadPool(star,e.s),qs=shuf(pool.all).slice(0,10);if(pool.fbUsed)toast(`★${star}の${e.s}の問題ファイルが足りないため 予備問題を使います`);
+ const qs=shuf(pool.all).slice(0,10);if(pool.borrowed)toast(`★${star}の${e.s}は ${pool.n}問しかないため、★${pool.from.join('・')}の問題で補います`);
  for(let i=0;i<qs.length&&me>0&&en>0;i++){const q=qs[i];curQ=q;$('ex').innerHTML='';$('fig').innerHTML=figHTML(q);$('q').textContent=`第${i+1}問 / ${qs.length}\n${q.q}`;
-  can=true;ri();const ok=await choose(q);can=false;ri();if(surr)break;S.hist.push({k:star+'|'+e.s,id:q.id,ok,t:Date.now()});let m;
+  can=true;ri();const ok=await choose(q);can=false;ri();if(surr)break;S.hist.push({k:(parseInt(q.id)||star)+'|'+e.s,id:q.id,ok,t:Date.now()});let m;
   if(ok){SE.ok();const dmg=400+(boost?400:0);await anim('msp','atkP',320);SE.hit();anim('esp','hit',500);flo('esp','-'+dmg);en-=dmg;upd();m=`⭕ 正解!こうげき命中!${esc(e.n)}に ${dmg} ダメージ!`}
   else{SE.ng();await anim('esp','atkE',320);SE.hit();anim('msp','hit',500);flo('msp','-400');$('field').classList.remove('red');void $('field').offsetWidth;$('field').classList.add('red');me-=400;upd();m='❌ 不正解… はんげきをうけた!じぶんに 400 ダメージ!'}
   boost=false;$('bst').textContent='';
