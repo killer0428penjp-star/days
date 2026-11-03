@@ -86,7 +86,7 @@ details{border:2px solid #e0c98a;border-radius:8px;padding:6px 10px;background:#
 #map,#town,#study{bottom:calc(62px + env(safe-area-inset-bottom))}#study{background:#fff}#stf{width:100%;height:100%;border:0;display:block}
 /* オンライン対戦・問題作成 */
 #ol{flex-direction:column;justify-content:flex-start;align-items:stretch;background:var(--bg)}
-#oh{display:flex;align-items:center;gap:10px;padding:calc(4.8em + env(safe-area-inset-top)) 10px 8px;border-bottom:3px solid var(--bd);background:var(--card);flex:none}
+#oh{display:flex;align-items:center;gap:10px;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;border-bottom:3px solid var(--bd);background:var(--card);flex:none}
 #ob{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px;width:min(100%,560px);align-self:center}
 #of{flex:none;display:none;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:var(--card);border-top:3px solid var(--bd);text-align:center;font-weight:bold}
 #ob>*{flex:none}.big{padding:1.1em;font-size:1.15em;font-weight:bold}.go{background:#f3d27a;border-color:#d4a017}
@@ -1784,9 +1784,9 @@ const chk=(v,it)=>String(it.ans).split('/').some(a=>nz(a)&&nz(a)==nz(v));
 const bar=(n,h,m)=>`<div class="ohb"><b>${esc(n)}</b> ${Math.max(h,0)}/${m}<div class="bar"><i style="width:${Math.max(0,h)/m*100}%;background:${h>m/2?'#3c6':h>m/5?'#ec3':'#e44'}"></i></div></div>`;
 const $B=()=>$('ob');
 
-function open(mode){O.prev=lastScr;show('ol');lastScr=O.prev;O.v=mode=='battle'?(O.room?'room':'hub'):'make';if(mode!='battle')O.mt=O.mt||'edit';render()}
+function open(mode){O.prev=lastScr;show('ol');lastScr=O.prev;$('hud').style.display='none';$('tb').style.display='none';O.v=mode=='battle'?(O.room?'room':'hub'):'make';if(mode!='battle')O.mt=O.mt||'edit';render()}
 function leave(){if(O.room){const r=O.room,h=O.role=='h';try{O.ch&&O.ch.unsubscribe()}catch(e){}if(sb)sb.rpc('close_battle',{p_id:r});O.room=null;O.ch=null;O.peer=null}}
-function back(){if(O.v=='play'&&!confirm('対戦中です。降参して戻りますか?'))return;if(O.v=='play'){A.sur(1)}leave();show(O.prev||'map');lastScr=O.prev||'map'}
+function back(){if(O.v=='play'&&!confirm('対戦中です。降参して戻りますか?'))return;if(O.v=='play'){A.sur(1)}leave();$('tb').style.display='';show(O.prev||'map');lastScr=O.prev||'map'}
 window.subGo=k=>{$('sub').style.display='none';if(!need())return;open(k)};
 
 /* ---- 描画 ---- */
