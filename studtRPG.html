@@ -84,11 +84,26 @@ details{border:2px solid #e0c98a;border-radius:8px;padding:6px 10px;background:#
 #nav button span{font-size:22px}#nav button.c{background:#f3d27a;border-color:#d4a017}
 #sub{position:fixed;right:6px;bottom:calc(70px + env(safe-area-inset-bottom));z-index:31;display:none;flex-direction:column;gap:6px;background:var(--card);border:3px solid var(--bd);border-radius:12px;padding:8px;box-shadow:0 4px 14px #0004}
 #map,#town,#study{bottom:calc(62px + env(safe-area-inset-bottom))}#study{background:#fff}#stf{width:100%;height:100%;border:0;display:block}
+/* オンライン対戦・問題作成 */
+#ol{flex-direction:column;justify-content:flex-start;align-items:stretch;background:var(--bg)}
+#oh{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:3px solid var(--bd);background:var(--card);flex:none}
+#ob{flex:1;overflow:auto;padding:10px;display:flex;flex-direction:column;gap:10px;width:min(100%,560px);align-self:center}
+#of{flex:none;display:none;padding:10px 10px calc(10px + env(safe-area-inset-bottom));background:var(--card);border-top:3px solid var(--bd);text-align:center;font-weight:bold}
+#ob>*{flex:none}.big{padding:1.1em;font-size:1.15em;font-weight:bold}.go{background:#f3d27a;border-color:#d4a017}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{flex:1}.seg button.on{background:#f3d27a;border-color:#d4a017}
+.oc{background:var(--card);border:3px solid var(--bd);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.orow{display:flex;gap:8px;align-items:center}.orow>*{min-width:0}.orow>input:not([type=radio]),.orow>select,.orow>button.big{flex:1}
+.og{display:grid;grid-template-columns:1fr 1fr;gap:8px}.og label{display:flex;flex-direction:column;font-size:12px;gap:2px}
+textarea{font:inherit;padding:.5em;border:2px solid var(--bd);border-radius:8px;min-height:3.2em;width:100%;background:#fff;color:var(--tx)}
+.oq{font-size:max(18px,3vmin);font-weight:bold;white-space:pre-line;text-align:center}
+.oim{max-width:100%;max-height:220px;border-radius:8px;border:2px solid #e0c98a;align-self:center}
+.ofg{display:flex;justify-content:center}.otm{text-align:center;font-weight:bold;color:#c60}
+#och{display:grid;grid-template-columns:1fr 1fr;gap:8px}#och input{grid-column:1/-1}.ohb{font-size:14px}.fl{flex:1;font-size:12px}
 </style></head><body>
 
 <button id="hud" onclick="openProf()"></button>
 <div id="tb"><button id="back" onclick="backToMap()">← 戻る</button><button onclick="setLang()">EN/JA</button><button class="mb" id="gb" onclick="toggleMenu()" title="メニュー">⚙</button></div>
-<div id="menu"><button onclick="toggleMenu(0);openItems()">🎒 持ち物</button><button onclick="toggleMenu(0);openHist()">📖 履歴・復習</button><button onclick="toggleMenu(0);openQStat()">📚 問題の数</button><button onclick="toggleMenu(0);diagSave()">🩺 保存の診断</button><button id="bs" onclick="toggleSnd()">🔊 サウンド</button><button id="bv" onclick="toggleVoice()">🗣 ボイス</button></div>
+<div id="menu"><button onclick="toggleMenu(0);openItems()">🎒 持ち物</button><button onclick="toggleMenu(0);openZukan()">📘 図鑑</button><button onclick="toggleMenu(0);openHist()">📖 履歴・復習</button><button onclick="toggleMenu(0);openQStat()">📚 問題の数</button><button onclick="toggleMenu(0);diagSave()">🩺 保存の診断</button><button id="bs" onclick="toggleSnd()">🔊 サウンド</button><button id="bv" onclick="toggleVoice()">🗣 ボイス</button></div>
 <div id="nav"><button id="nst" onclick="navGo('study')"><span>📚</span>自習</button><button onclick="navGo('cos')"><span>👕</span>コスチューム</button><button class="c" onclick="navGo('map')"><span>🗺</span>マップ</button><button onclick="navGo('fr')"><span>👥</span>フレンド</button><button id="nb" onclick="navGo('sub')"><span>⚔</span>対戦・作成</button></div>
 <div id="sub"><button onclick="subGo('battle')">⚔ 対戦</button><button onclick="subGo('make')">✍ 問題作成</button></div>
 <div id="hint"></div><div id="toast"></div>
@@ -133,6 +148,7 @@ details{border:2px solid #e0c98a;border-radius:8px;padding:6px 10px;background:#
  <canvas id="avp" width="64" height="64" style="width:140px;height:140px;image-rendering:pixelated;background:#bfe3ff;border:3px solid #8a6d3b;border-radius:12px;flex:none"></canvas>
  <div id="avg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;width:min(94vw,560px)"></div>
 </div>
+<div id="ol" class="scr"></div>
 <div id="modal"><div class="pf"><div id="mhead"></div><div class="pb" id="mbody"></div><div class="row"><button onclick="closeModal()" data-i="close"></button></div></div></div>
 
 <!-- ############ ここから問題データ(★=難易度 × 教科。ブロックごとに独立。1つ壊れても他は動きます) ############ -->
@@ -695,22 +711,272 @@ details{border:2px solid #e0c98a;border-radius:8px;padding:6px 10px;background:#
 ]);</script>
 <!-- ================ ★4(中2基礎) 数学 ================ -->
 <script>Q(4,'数学',[
+  ["(−x−5y) + (4x+3y) を計算すると?", "3x−2y", "−5x−8y", "4x−2y", "3x−3y", "A", "かっこをはずして同類項をまとめます。x:−1+(4)=3、y:−5+(3)=−2 より 3x−2y。"],
+  ["(−4x+5y) − (−x−y) を計算すると?", "−5x+4y", "−3x+6y", "−3x+4y", "−5x+6y", "B", "ひく式の各項の符号を変えてかっこをはずします。x:−4−(−1)=−3、y:5−(−1)=6 より −3x+6y。"],
+  ["2(4x−4y) − 4(−x+3y) を計算すると?", "4x+4y", "12x+4y", "12x−20y", "9x−11y", "C", "分配法則でかっこをはずし、同類項をまとめます。x:8−(-4)=12、y:-8−(12)=−20 より 12x−20y。"],
+  ["(2x+5y) + (−3x−5y) を計算すると?", "5x+10y", "0", "−x−y", "−x", "D", "かっこをはずして同類項をまとめます。x:2+(−3)=−1、y:5+(−5)=0 より −x。"],
+  ["(−3x−y) − (5x+6y) を計算すると?", "−8x−7y", "2x+5y", "−8x+5y", "2x−7y", "A", "ひく式の各項の符号を変えてかっこをはずします。x:−3−(5)=−8、y:−1−(6)=−7 より −8x−7y。"],
+  ["3(2x−y) − 2(6x+4y) を計算すると?", "18x+5y", "−6x−11y", "−6x+5y", "−7y", "B", "分配法則でかっこをはずし、同類項をまとめます。x:6−(12)=−6、y:-3−(8)=−11 より −6x−11y。"],
+  ["(−4x−y) + (5x−2y) を計算すると?", "−9x+y", "2x−3y", "x−3y", "x−4y", "C", "かっこをはずして同類項をまとめます。x:−4+(5)=1、y:−1+(−2)=−3 より x−3y。"],
+  ["(−4x+6y) − (2x+6y) を計算すると?", "−2x+12y", "−6x+12y", "−2x", "−6x", "D", "ひく式の各項の符号を変えてかっこをはずします。x:−4−(2)=−6、y:6−(6)=0 より −6x。"],
+  ["2(3x+5y) − 4(4x+6y) を計算すると?", "−10x−14y", "22x+34y", "−10x+34y", "2x+4y", "A", "分配法則でかっこをはずし、同類項をまとめます。x:6−(16)=−10、y:10−(24)=−14 より −10x−14y。"],
+  ["(x+4y) + (4x+3y) を計算すると?", "−3x+y", "5x+7y", "6x+7y", "5x+6y", "B", "かっこをはずして同類項をまとめます。x:1+(4)=5、y:4+(3)=7 より 5x+7y。"],
+  ["(6x−4y) − (−2x−4y) を計算すると?", "4x−8y", "8x−8y", "8x", "4x", "C", "ひく式の各項の符号を変えてかっこをはずします。x:6−(−2)=8、y:−4−(−4)=0 より 8x。"],
+  ["連立方程式\n3x+y = −5\n−3x+3y = −3\nの解は?", "x = −2, y = −1", "x = 1, y = −2", "x = −1, y = 2", "x = −1, y = −2", "D", "加減法や代入法で解くと x = −1, y = −2。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\n−2x+y = 5\n2x−2y = −4\nの解は?", "x = −3, y = −1", "x = −1, y = −3", "x = 3, y = −1", "x = −3, y = 1", "A", "加減法や代入法で解くと x = −3, y = −1。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\n−2x+2y = −8\n−x−2y = −7\nの解は?", "x = 1, y = 5", "x = 5, y = 1", "x = −5, y = 1", "x = 5, y = −1", "B", "加減法や代入法で解くと x = 5, y = 1。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\n−x+3y = 15\n−2x+3y = 18\nの解は?", "x = 4, y = −3", "x = 3, y = 4", "x = −3, y = 4", "x = −3, y = −4", "C", "加減法や代入法で解くと x = −3, y = 4。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\nx−2y = −5\n−3x+y = 0\nの解は?", "x = 3, y = 1", "x = −1, y = 3", "x = 1, y = −3", "x = 1, y = 3", "D", "加減法や代入法で解くと x = 1, y = 3。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\n−x+2y = −3\n−x+y = −4\nの解は?", "x = 5, y = 1", "x = 1, y = 5", "x = −5, y = 1", "x = 5, y = −1", "A", "加減法や代入法で解くと x = 5, y = 1。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\n3x−2y = 5\n−x+2y = −3\nの解は?", "x = −1, y = 1", "x = 1, y = −1", "x = −1, y = −1", "x = 1, y = 1", "B", "加減法や代入法で解くと x = 1, y = −1。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\n3x+3y = 0\nx−y = −2\nの解は?", "x = 1, y = −1", "x = 1, y = 1", "x = −1, y = 1", "x = −1, y = −1", "C", "加減法や代入法で解くと x = −1, y = 1。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\n2x+3y = 0\n−3x+y = −11\nの解は?", "x = −2, y = 3", "x = −3, y = −2", "x = 3, y = 2", "x = 3, y = −2", "D", "加減法や代入法で解くと x = 3, y = −2。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\nx−3y = −10\n−x+y = 0\nの解は?", "x = 5, y = 5", "x = −5, y = 5", "x = 5, y = −5", "x = 6, y = 5", "A", "加減法や代入法で解くと x = 5, y = 5。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["連立方程式\nx−2y = 9\n3x+2y = 3\nの解は?", "x = −3, y = 3", "x = 3, y = −3", "x = −3, y = −3", "x = 3, y = 3", "B", "加減法や代入法で解くと x = 3, y = −3。もとの2つの式に代入すると、どちらも成り立ちます。"],
+  ["一次関数 y = 3x−5 のグラフの傾きは?", "−5", "−3", "3", "−2", "C", "y = ax + b の a が傾き(変化の割合)です。"],
+  ["一次関数 y = 4x−2 で、x が 2 増加すると y はいくら増加する?", "6", "−8", "2", "8", "D", "y の増加量 = 傾き × x の増加量 = 4×2 = 8。"],
+  ["2点 (−1, −8), (2, 1) を通る直線の傾きは?", "3", "−3", "4", "2", "A", "傾き = (yの増加量)÷(xの増加量) = (1−(−8))÷(2−(−1)) = 3。"],
+  ["傾きが −1 で、点 (1, 5) を通る直線の式は?", "y = −x−6", "y = −x+6", "y = x+6", "y = −x+5", "B", "y = −x + b に x=1, y=5 を代入すると b = 6。"],
+  ["一次関数 y = −3x+2 のグラフが y 軸と交わる点の座標は?", "(2, 0)", "(0, −2)", "(0, 2)", "(0, −3)", "C", "y 軸との交点は x = 0 のときなので、切片 b を使って (0, b) です。"],
+  ["一次関数 y = 3x+9 のグラフが x 軸と交わる点の座標は?", "(0, −3)", "(3, 0)", "(0, 9)", "(−3, 0)", "D", "x 軸との交点は y = 0 のとき。0 = 3x + (9) より x = −3。"],
+  ["一次関数 y = x+3 のグラフの傾きは?", "1", "3", "−1", "4", "A", "y = ax + b の a が傾き(変化の割合)です。"],
+  ["一次関数 y = 3x+6 で、x が 2 増加すると y はいくら増加する?", "5", "6", "−6", "12", "B", "y の増加量 = 傾き × x の増加量 = 3×2 = 6。"],
+  ["2点 (1, 5), (2, 6) を通る直線の傾きは?", "−1", "2", "1", "0", "C", "傾き = (yの増加量)÷(xの増加量) = (6−(5))÷(2−(1)) = 1。"],
+  ["傾きが −1 で、点 (2, 2) を通る直線の式は?", "y = −x−4", "y = x+4", "y = −x+2", "y = −x+4", "D", "y = −x + b に x=2, y=2 を代入すると b = 4。"],
+  ["一次関数 y = −2x−2 のグラフが y 軸と交わる点の座標は?", "(0, −2)", "(−2, 0)", "(0, 2)", "(−2, −2)", "A", "y 軸との交点は x = 0 のときなので、切片 b を使って (0, b) です。"],
+  ["一次関数 y = x+2 のグラフが x 軸と交わる点の座標は?", "(0, −2)", "(−2, 0)", "(2, 0)", "(0, 2)", "B", "x 軸との交点は y = 0 のとき。0 = 1x + (2) より x = −2。"],
+  ["大小2つのさいころを同時に投げるとき、目の和が7になる確率は?", "1/4", "1/9", "1/6", "1/12", "C", "6通り÷36通り = 1/6。"],
+  ["大小2つのさいころを同時に投げるとき、目の和が4になる確率は?", "1/18", "5/36", "1/36", "1/12", "D", "(1,3)(2,2)(3,1)の3通り÷36通り = 1/12。"],
+  ["大小2つのさいころを同時に投げるとき、目の和が11になる確率は?", "1/18", "2/3", "3/4", "3/8", "A", "(5,6)(6,5)の2通り÷36通り = 1/18。"],
+  ["2枚の硬貨を同時に投げるとき、2枚とも表になる確率は?", "1/3", "1/4", "1/6", "1/9", "B", "全部で4通り、2枚とも表は1通り。"],
+  ["3枚の硬貨を同時に投げるとき、表がちょうど2枚出る確率は?", "1/9", "1/12", "3/8", "1/18", "C", "全部で8通り、表2枚は3通り。"],
+  ["赤玉3個、白玉2個が入った袋から1個取り出すとき、赤玉である確率は?", "5/36", "1/36", "2/3", "3/5", "D", "全部で5個のうち赤玉は3個。"],
+  ["1〜10の数字を書いたカード10枚から1枚引くとき、3の倍数である確率は?", "3/10", "1/2", "1/3", "1/4", "A", "3・6・9の3枚÷10枚 = 3/10。"],
+  ["赤玉3個、白玉2個の袋から同時に2個取り出すとき、2個とも赤玉である確率は?", "1/6", "3/10", "1/9", "1/12", "B", "全部で10通り、2個とも赤は3通り。"],
+  ["5角形の内角の和は?", "900°", "720°", "540°", "360°", "C", "n角形の内角の和は 180°×(n−2)。180°×3 = 540°。"],
+  ["6角形の内角の和は?", "1080°", "900°", "540°", "720°", "D", "n角形の内角の和は 180°×(n−2)。180°×4 = 720°。"],
+  ["8角形の内角の和は?", "1080°", "1440°", "1260°", "900°", "A", "n角形の内角の和は 180°×(n−2)。180°×6 = 1080°。"],
+  ["9角形の内角の和は?", "1620°", "1260°", "1440°", "1080°", "B", "n角形の内角の和は 180°×(n−2)。180°×7 = 1260°。"],
+  ["正6角形の1つの内角の大きさは?", "105°", "135°", "120°", "90°", "C", "内角の和 180°×4 = 720° を 6 でわります。120°。"],
+  ["正8角形の1つの内角の大きさは?", "120°", "150°", "105°", "135°", "D", "内角の和 180°×6 = 1080° を 8 でわります。135°。"],
+  ["正10角形の1つの内角の大きさは?", "144°", "129°", "159°", "114°", "A", "内角の和 180°×8 = 1440° を 10 でわります。144°。"],
+  ["三角形の2つの内角が 50° と 70° のとき、残りの角の大きさは?", "50°", "60°", "70°", "120°", "B", "三角形の内角の和は180°。180°−50°−70° = 60°。"],
   // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
 ]);</script>
 <!-- ================ ★4(中2基礎) 国語 ================ -->
 <script>Q(4,'国語',[
+  ["「貴重」の読みは?", "きちょう", "だんぼう", "ゆうかん", "きみょう", "A", "「貴重」は「きちょう」と読みます。"],
+  ["「宣言」の読みは?", "きみょう", "せんげん", "けいしゃ", "ゆうかん", "B", "「宣言」は「せんげん」と読みます。"],
+  ["「遺跡」の読みは?", "しんろ", "ようち", "いせき", "ほうい", "C", "「遺跡」は「いせき」と読みます。"],
+  ["「縦横」の読みは?", "ちゅうこく", "せんたく", "ようち", "じゅうおう", "D", "「縦横」は「じゅうおう」と読みます。"],
+  ["「傾斜」の読みは?", "けいしゃ", "きみょう", "せんたく", "きちょう", "A", "「傾斜」は「けいしゃ」と読みます。"],
+  ["「忠告」の読みは?", "じゅうおう", "ちゅうこく", "ちょうじょう", "ゆうかん", "B", "「忠告」は「ちゅうこく」と読みます。"],
+  ["「洗濯」の読みは?", "ろうどく", "けいしゃ", "せんたく", "きみょう", "C", "「洗濯」は「せんたく」と読みます。"],
+  ["「磁石」の読みは?", "だんぼう", "けいしゃ", "きちょう", "じしゃく", "D", "「磁石」は「じしゃく」と読みます。"],
+  ["「奇妙」の読みは?", "きみょう", "ゆうかん", "うらぎる", "だんぼう", "A", "「奇妙」は「きみょう」と読みます。"],
+  ["「暖房」の読みは?", "かんじん", "だんぼう", "せんたく", "きみょう", "B", "「暖房」は「だんぼう」と読みます。"],
+  ["「勇敢」の読みは?", "きちょう", "せんたく", "ゆうかん", "ろうどく", "C", "「勇敢」は「ゆうかん」と読みます。"],
+  ["「包囲」の読みは?", "いせき", "しんろ", "ようち", "ほうい", "D", "「包囲」は「ほうい」と読みます。"],
+  ["「裏切る」の読みは?", "うらぎる", "けいしゃ", "きちょう", "えんがん", "A", "「裏切る」は「うらぎる」と読みます。"],
+  ["「幼稚」の読みは?", "しんろ", "ようち", "いせき", "ほうい", "B", "「幼稚」は「ようち」と読みます。"],
+  ["「朗読」の読みは?", "じしゃく", "けいかい", "ろうどく", "せんたく", "C", "「朗読」は「ろうどく」と読みます。"],
+  ["「警戒」の読みは?", "きちょう", "けいしゃ", "ゆうかん", "けいかい", "D", "「警戒」は「けいかい」と読みます。"],
+  ["「肝心」の読みは?", "かんじん", "ゆうかん", "せんたく", "じしゃく", "A", "「肝心」は「かんじん」と読みます。"],
+  ["「頂上」の読みは?", "だんぼう", "ちょうじょう", "ほうい", "えんがん", "B", "「頂上」は「ちょうじょう」と読みます。"],
+  ["「沿岸」の読みは?", "ゆうかん", "けいかい", "えんがん", "きみょう", "C", "「沿岸」は「えんがん」と読みます。"],
+  ["「針路」の読みは?", "いせき", "ほうい", "ようち", "しんろ", "D", "「針路」は「しんろ」と読みます。"],
+  ["四字熟語「以心伝心」の意味は?", "言葉に出さなくても気持ちが通じ合うこと", "人によって考え方や好みがちがうこと", "状況に合わせて適切に対応すること", "一つの行いで二つの利益を得ること", "A", "「以心伝心」は、言葉に出さなくても気持ちが通じ合うことという意味です。"],
+  ["四字熟語「一石二鳥」の意味は?", "まわりが敵ばかりで孤立していること", "一つの行いで二つの利益を得ること", "小さなことを大げさに言うこと", "昔のことを学び、そこから新しい知識を得ること", "B", "「一石二鳥」は、一つの行いで二つの利益を得ることという意味です。"],
+  ["四字熟語「四面楚歌」の意味は?", "油断は失敗のもとで、最大の敵であるということ", "人によって考え方や好みがちがうこと", "まわりが敵ばかりで孤立していること", "一つの行いで二つの利益を得ること", "C", "「四面楚歌」は、まわりが敵ばかりで孤立していることという意味です。"],
+  ["四字熟語「試行錯誤」の意味は?", "人によって考え方や好みがちがうこと", "一つの行いで二つの利益を得ること", "油断は失敗のもとで、最大の敵であるということ", "失敗をくり返しながら解決策を探ること", "D", "「試行錯誤」は、失敗をくり返しながら解決策を探ることという意味です。"],
+  ["四字熟語「臨機応変」の意味は?", "状況に合わせて適切に対応すること", "多くの人が口をそろえて同じことを言うこと", "大人物は遅れて成功するということ", "自分で自分のことをほめること", "A", "「臨機応変」は、状況に合わせて適切に対応することという意味です。"],
+  ["四字熟語「自画自賛」の意味は?", "油断は失敗のもとで、最大の敵であるということ", "自分で自分のことをほめること", "人によって考え方や好みがちがうこと", "状況に合わせて適切に対応すること", "B", "「自画自賛」は、自分で自分のことをほめることという意味です。"],
+  ["四字熟語「大器晩成」の意味は?", "昔のことを学び、そこから新しい知識を得ること", "油断は失敗のもとで、最大の敵であるということ", "大人物は遅れて成功するということ", "人によって考え方や好みがちがうこと", "C", "「大器晩成」は、大人物は遅れて成功するということという意味です。"],
+  ["四字熟語「十人十色」の意味は?", "大人物は遅れて成功するということ", "小さなことを大げさに言うこと", "自分で自分のことをほめること", "人によって考え方や好みがちがうこと", "D", "「十人十色」は、人によって考え方や好みがちがうことという意味です。"],
+  ["四字熟語「起死回生」の意味は?", "絶望的な状況を立て直すこと", "状況に合わせて適切に対応すること", "まわりが敵ばかりで孤立していること", "一つの行いで二つの利益を得ること", "A", "「起死回生」は、絶望的な状況を立て直すことという意味です。"],
+  ["四字熟語「温故知新」の意味は?", "大人物は遅れて成功するということ", "昔のことを学び、そこから新しい知識を得ること", "失敗をくり返しながら解決策を探ること", "状況に合わせて適切に対応すること", "B", "「温故知新」は、昔のことを学び、そこから新しい知識を得ることという意味です。"],
+  ["四字熟語「異口同音」の意味は?", "私心がなく、堂々として正しいこと", "昔のことを学び、そこから新しい知識を得ること", "多くの人が口をそろえて同じことを言うこと", "人によって考え方や好みがちがうこと", "C", "「異口同音」は、多くの人が口をそろえて同じことを言うことという意味です。"],
+  ["四字熟語「公明正大」の意味は?", "大人物は遅れて成功するということ", "自分で自分のことをほめること", "絶望的な状況を立て直すこと", "私心がなく、堂々として正しいこと", "D", "「公明正大」は、私心がなく、堂々として正しいことという意味です。"],
+  ["四字熟語「油断大敵」の意味は?", "油断は失敗のもとで、最大の敵であるということ", "まわりが敵ばかりで孤立していること", "昔のことを学び、そこから新しい知識を得ること", "人によって考え方や好みがちがうこと", "A", "「油断大敵」は、油断は失敗のもとで、最大の敵であるということという意味です。"],
+  ["四字熟語「針小棒大」の意味は?", "絶望的な状況を立て直すこと", "小さなことを大げさに言うこと", "昔のことを学び、そこから新しい知識を得ること", "私心がなく、堂々として正しいこと", "B", "「針小棒大」は、小さなことを大げさに言うことという意味です。"],
+  ["「召し上がる」は何という敬語?", "謙譲語", "丁寧語", "尊敬語", "美化語", "C", "「食べる」の尊敬語で、相手の動作を高めます。"],
+  ["「いただく」(食べる・もらう)は何という敬語?", "尊敬語", "丁寧語", "美化語", "謙譲語", "D", "自分の動作をへりくだって言う謙譲語です。"],
+  ["「おっしゃる」は何という敬語?", "尊敬語", "謙譲語", "丁寧語", "美化語", "A", "「言う」の尊敬語です。"],
+  ["「申す」は何という敬語?", "尊敬語", "謙譲語", "丁寧語", "美化語", "B", "「言う」の謙譲語です。"],
+  ["「いらっしゃる」は何という敬語?", "謙譲語", "丁寧語", "尊敬語", "美化語", "C", "「行く・来る・いる」の尊敬語です。"],
+  ["「拝見する」は何という敬語?", "尊敬語", "丁寧語", "美化語", "謙譲語", "D", "「見る」の謙譲語です。"],
+  ["「ございます」は何という敬語?", "丁寧語", "尊敬語", "謙譲語", "美化語", "A", "「あります」の丁寧な言い方で、聞き手に対する敬意を表します。"],
+  ["「お茶」の「お」のように、物事を上品に言う敬語は?", "尊敬語", "美化語", "謙譲語", "丁寧語", "B", "上品に言い表す言い方を美化語といいます。"],
+  ["「走る」の活用の種類は?", "上一段活用", "下一段活用", "五段活用", "サ行変格活用", "C", "「走らない」と未然形がア段になるので五段活用です。"],
+  ["「食べる」の活用の種類は?", "五段活用", "上一段活用", "カ行変格活用", "下一段活用", "D", "「食べない」と未然形がエ段になるので下一段活用です。"],
+  ["「見る」の活用の種類は?", "上一段活用", "五段活用", "下一段活用", "サ行変格活用", "A", "「見ない」と未然形がイ段になるので上一段活用です。"],
+  ["「来る」の活用の種類は?", "五段活用", "カ行変格活用", "上一段活用", "サ行変格活用", "B", "「来る」は不規則に変化するカ行変格活用です。"],
+  ["「静かだ」の品詞は?", "形容詞", "名詞", "形容動詞", "副詞", "C", "言い切りの形が「〜だ」で終わる、状態を表す語は形容動詞です。"],
+  ["「美しい」の品詞は?", "形容動詞", "名詞", "副詞", "形容詞", "D", "言い切りの形が「い」で終わる、状態を表す語は形容詞です。"],
+  ["「ゆっくり歩く」の「ゆっくり」の品詞は?", "副詞", "形容詞", "形容動詞", "連体詞", "A", "主に用言を修飾する自立語で活用しないので副詞です。"],
+  ["「しかし」の品詞は?", "副詞", "接続詞", "感動詞", "連体詞", "B", "文と文をつなぐ働きをもつので接続詞です。"],
   // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
 ]);</script>
 <!-- ================ ★4(中2基礎) 英語 ================ -->
 <script>Q(4,'英語',[
+  ["「go」の過去形は?", "went", "goed", "gone", "brought", "A", "go の過去形は不規則に変化して went です。"],
+  ["「see」の過去形は?", "seed", "saw", "seen", "went", "B", "see の過去形は不規則に変化して saw です。"],
+  ["「buy」の過去形は?", "buyed", "took", "bought", "made", "C", "buy の過去形は不規則に変化して bought です。"],
+  ["「eat」の過去形は?", "eated", "eaten", "knew", "ate", "D", "eat の過去形は不規則に変化して ate です。"],
+  ["「make」の過去形は?", "made", "maked", "knew", "drank", "A", "make の過去形は不規則に変化して made です。"],
+  ["「take」の過去形は?", "taked", "took", "taken", "drank", "B", "take の過去形は不規則に変化して took です。"],
+  ["「give」の過去形は?", "gived", "given", "gave", "took", "C", "give の過去形は不規則に変化して gave です。"],
+  ["「write」の過去形は?", "writed", "written", "went", "wrote", "D", "write の過去形は不規則に変化して wrote です。"],
+  ["「run」の過去形は?", "ran", "runed", "run", "took", "A", "run の過去形は不規則に変化して ran です。"],
+  ["「come」の過去形は?", "comed", "came", "come", "saw", "B", "come の過去形は不規則に変化して came です。"],
+  ["「know」の過去形は?", "knowed", "known", "knew", "wore", "C", "know の過去形は不規則に変化して knew です。"],
+  ["「think」の過去形は?", "thinked", "gave", "drank", "thought", "D", "think の過去形は不規則に変化して thought です。"],
+  ["「bring」の過去形は?", "brought", "bringed", "drank", "came", "A", "bring の過去形は不規則に変化して brought です。"],
+  ["「teach」の過去形は?", "teached", "taught", "saw", "took", "B", "teach の過去形は不規則に変化して taught です。"],
+  ["「catch」の過去形は?", "catched", "saw", "caught", "came", "C", "catch の過去形は不規則に変化して caught です。"],
+  ["「sing」の過去形は?", "singed", "sung", "brought", "sang", "D", "sing の過去形は不規則に変化して sang です。"],
+  ["「swim」の過去形は?", "swam", "swimed", "swum", "wrote", "A", "swim の過去形は不規則に変化して swam です。"],
+  ["「drink」の過去形は?", "drinked", "drank", "drunk", "ran", "B", "drink の過去形は不規則に変化して drank です。"],
+  ["「speak」の過去形は?", "speaked", "spoken", "spoke", "knew", "C", "speak の過去形は不規則に変化して spoke です。"],
+  ["「wear」の過去形は?", "weared", "worn", "took", "wore", "D", "wear の過去形は不規則に変化して wore です。"],
+  ["「good」の比較級は?", "better", "gooder", "more good", "best", "A", "good の比較級は better、最上級は best です。"],
+  ["「many」の最上級は?", "manyest", "most", "most many", "more", "B", "many の比較級は more、最上級は most です。"],
+  ["「big」の比較級は?", "biger", "more big", "bigger", "biggest", "C", "big の比較級は bigger、最上級は biggest です。"],
+  ["「easy」の最上級は?", "easyest", "most easy", "easier", "easiest", "D", "easy の比較級は easier、最上級は easiest です。"],
+  ["「beautiful」の比較級は?", "more beautiful", "beautifuler", "most beautiful", "more", "A", "beautiful の比較級は more beautiful、最上級は most beautiful です。"],
+  ["「hot」の最上級は?", "hotest", "hottest", "most hot", "hotter", "B", "hot の比較級は hotter、最上級は hottest です。"],
+  ["「famous」の比較級は?", "famouser", "most famous", "more famous", "easier", "C", "famous の比較級は more famous、最上級は most famous です。"],
+  ["「large」の最上級は?", "largeest", "most large", "larger", "largest", "D", "large の比較級は larger、最上級は largest です。"],
+  ["「bad」の比較級は?", "worse", "bader", "more bad", "worst", "A", "bad の比較級は worse、最上級は worst です。"],
+  ["「happy」の最上級は?", "happyest", "happiest", "most happy", "happier", "B", "happy の比較級は happier、最上級は happiest です。"],
+  ["I want ( ) a doctor.「私は医者になりたい。」", "be", "being", "to be", "been", "C", "want to + 動詞の原形。"],
+  ["He is good at ( ) tennis.", "play", "to play", "played", "playing", "D", "前置詞のあとは動名詞(-ing)。"],
+  ["I ( ) a book when you called me.", "was reading", "read", "am reading", "reads", "A", "「〜していた」は過去進行形 was/were + -ing。"],
+  ["It will ( ) rainy tomorrow.", "is", "be", "are", "being", "B", "will のあとは動詞の原形。"],
+  ["I am going ( ) visit my uncle next week.", "for", "at", "to", "in", "C", "be going to + 動詞の原形で「〜するつもり」。"],
+  ["I ( ) go to the dentist tomorrow.「私は明日、歯医者に行かなければならない。」", "must to", "has to", "having to", "have to", "D", "主語が I なので have to。"],
+  ["This book is ( ) than that one.", "more interesting", "interestinger", "most interesting", "interesting", "A", "長い形容詞は more を使って比較級にします。"],
+  ["Tokyo is the ( ) city in Japan.", "larger", "largest", "large", "more large", "B", "the があるので最上級 largest。"],
+  ["( ) there any milk in the bottle?", "Are", "Do", "Is", "Does", "C", "milk は数えられない名詞なので Is there ~?。"],
+  ["I was tired, ( ) I went to bed early.", "because", "if", "but", "so", "D", "「疲れていた、だから早く寝た」は so。"],
+  ["I will stay home ( ) it rains tomorrow.", "if", "because", "so", "but", "A", "「もし〜なら」は if。"],
+  ["My mother ( ) me to clean my room.", "said", "told", "spoke", "talked", "B", "tell + 人 + to ~ で「人に〜するよう言う」。"],
+  ["I don't know what ( ) do.", "do", "doing", "to", "done", "C", "what to do =「何をすべきか」。"],
+  ["Would you like something ( ) drink?", "for", "of", "at", "to", "D", "something to drink =「飲み物」。"],
+  ["He ( ) breakfast when I got home.", "was having", "has", "have", "having", "A", "過去のある時点で「〜していた」は過去進行形。"],
+  ["( ) is your favorite subject?", "Who", "What", "Where", "When", "B", "「何」をたずねるときは What。"],
+  ["Please ( ) me your pen.「ペンを貸して。」", "borrow", "take", "lend", "make", "C", "lend は「貸す」、borrow は「借りる」。"],
+  ["He is ( ) young to drive a car.", "so", "very", "much", "too", "D", "too ~ to ... =「〜すぎて…できない」。"],
+  ["I enjoyed ( ) with my friends.", "talking", "to talk", "talk", "talked", "A", "enjoy のあとは動名詞(-ing)。"],
+  ["I ( ) a new bike yesterday, so I'm happy.", "get", "got", "gets", "getting", "B", "yesterday があるので過去形。get の過去形は got。"],
   // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
 ]);</script>
 <!-- ================ ★4(中2基礎) 理科 ================ -->
 <script>Q(4,'理科',[
+  ["鉄の元素記号は?", "Fe", "Cu", "Ag", "Au", "A", "鉄は Fe(ラテン語 ferrum)。"],
+  ["銅の元素記号は?", "Ag", "Cu", "Au", "Na", "B", "銅は Cu。"],
+  ["銀の元素記号は?", "Au", "Na", "Ag", "Ca", "C", "銀は Ag。"],
+  ["金の元素記号は?", "Fe", "Cu", "Ag", "Au", "D", "金は Au。"],
+  ["ナトリウムの元素記号は?", "Na", "Cu", "Ag", "Au", "A", "ナトリウムは Na。"],
+  ["カルシウムの元素記号は?", "Ag", "Ca", "Au", "Na", "B", "カルシウムは Ca。"],
+  ["マグネシウムの元素記号は?", "Fe", "Cu", "Mg", "Ag", "C", "マグネシウムは Mg。"],
+  ["亜鉛の元素記号は?", "Cu", "Ag", "Au", "Zn", "D", "亜鉛は Zn。"],
+  ["水の化学式は?", "H₂O", "CO₂", "NaCl", "O₂", "A", "水素原子2個と酸素原子1個。"],
+  ["二酸化炭素の化学式は?", "NaCl", "CO₂", "O₂", "H₂", "B", "炭素原子1個と酸素原子2個。"],
+  ["塩化ナトリウムの化学式は?", "O₂", "H₂", "NaCl", "NH₃", "C", "ナトリウムと塩素が1個ずつ。"],
+  ["酸素の化学式は?", "H₂O", "CO₂", "NaCl", "O₂", "D", "酸素は原子2個で分子をつくります。"],
+  ["水素の化学式は?", "H₂", "CO₂", "NaCl", "O₂", "A", "水素は原子2個で分子をつくります。"],
+  ["アンモニアの化学式は?", "NaCl", "NH₃", "O₂", "H₂", "B", "窒素原子1個と水素原子3個。"],
+  ["酸化銅の化学式は?", "H₂O", "CO₂", "CuO", "NaCl", "C", "銅原子1個と酸素原子1個。"],
+  ["酸化マグネシウムの化学式は?", "CO₂", "NaCl", "O₂", "MgO", "D", "マグネシウム原子1個と酸素原子1個。"],
+  ["抵抗 10Ω の電熱線に 5V の電圧を加えると、流れる電流は?", "0.5A", "5A", "0.05A", "15A", "A", "電流 = 電圧÷抵抗 = 5÷10 = 0.5A。"],
+  ["抵抗 8Ω の電熱線に 1A の電流が流れた。加わっている電圧は?", "4V", "8V", "16V", "9V", "B", "電圧 = 抵抗×電流 = 8×1 = 8V。"],
+  ["3V の電圧で 3A の電流が流れるとき、電力は?", "6W", "1W", "9W", "18W", "C", "電力(W) = 電圧(V)×電流(A) = 3×3 = 9W。"],
+  ["30Ω と 40Ω の抵抗を直列につないだときの全体の抵抗は?", "10Ω", "1200Ω", "35Ω", "70Ω", "D", "直列つなぎの全体の抵抗は、各抵抗の和。30+40 = 70Ω。"],
+  ["18V の電源に 2Ω の抵抗をつないだとき、電流は?", "9A", "36A", "20A", "18A", "A", "電流 = 電圧÷抵抗 = 18÷2 = 9A。"],
+  ["抵抗 30Ω の電熱線に 6V の電圧を加えると、流れる電流は?", "2A", "0.2A", "0.02A", "36A", "B", "電流 = 電圧÷抵抗 = 6÷30 = 0.2A。"],
+  ["抵抗 12Ω の電熱線に 1A の電流が流れた。加わっている電圧は?", "6V", "24V", "12V", "13V", "C", "電圧 = 抵抗×電流 = 12×1 = 12V。"],
+  ["9V の電圧で 4A の電流が流れるとき、電力は?", "13W", "72W", "46W", "36W", "D", "電力(W) = 電圧(V)×電流(A) = 9×4 = 36W。"],
+  ["20Ω と 30Ω の抵抗を直列につないだときの全体の抵抗は?", "50Ω", "10Ω", "600Ω", "25Ω", "A", "直列つなぎの全体の抵抗は、各抵抗の和。20+30 = 50Ω。"],
+  ["18V の電源に 6Ω の抵抗をつないだとき、電流は?", "108A", "3A", "24A", "6A", "B", "電流 = 電圧÷抵抗 = 18÷6 = 3A。"],
+  ["炭酸水素ナトリウムを加熱すると発生する気体は?", "酸素", "水素", "二酸化炭素", "アンモニア", "C", "炭酸ナトリウム・水・二酸化炭素に分解します。"],
+  ["酸化銀を加熱すると発生する気体は?", "水素", "二酸化炭素", "窒素", "酸素", "D", "酸化銀は銀と酸素に分解します。"],
+  ["水を電気分解したとき、陰極に発生する気体は?", "水素", "酸素", "塩素", "二酸化炭素", "A", "陰極から水素、陽極から酸素が出て、体積比は 水素:酸素 = 2:1。"],
+  ["鉄と硫黄の混合物を加熱してできる物質は?", "酸化鉄", "硫化鉄", "硫酸鉄", "塩化鉄", "B", "鉄と硫黄が結びついて硫化鉄になります。"],
+  ["次のうち、単体はどれ?", "水", "二酸化炭素", "酸素", "塩化ナトリウム", "C", "1種類の元素だけでできた物質を単体といいます。"],
+  ["物質が酸素と結びつく化学変化を何という?", "還元", "分解", "中和", "酸化", "D", "酸素と結びつくのが酸化、酸素をうばわれるのが還元です。"],
+  ["酸化銅を炭素で還元したときに発生する気体は?", "二酸化炭素", "酸素", "水素", "水蒸気", "A", "酸化銅は銅に、炭素は二酸化炭素になります。"],
+  ["化学変化の前後で、物質全体の質量は?", "増える", "変わらない", "減る", "2倍になる", "B", "これを質量保存の法則といいます。"],
+  ["電流の大きさを表す単位は?", "ボルト(V)", "オーム(Ω)", "アンペア(A)", "ワット(W)", "C", "電流の単位はアンペアです。"],
+  ["電気抵抗の大きさを表す単位は?", "アンペア(A)", "ボルト(V)", "ジュール(J)", "オーム(Ω)", "D", "電気抵抗の単位はオームです。"],
+  ["物体どうしをこすると移動して静電気を生じるのは、何という粒子?", "電子", "陽子", "中性子", "原子核", "A", "−の電気をもつ電子が移動して、静電気が生じます。"],
+  ["寒冷前線が通過すると、気温はどうなる?", "急に上がる", "急に下がる", "変わらない", "ゆっくり上がる", "B", "寒気が暖気の下にもぐりこむので、気温が急に下がります。"],
+  ["寒冷前線付近で発達する雲は?", "乱層雲", "高層雲", "積乱雲", "巻雲", "C", "強い上昇気流で発達し、にわか雨や雷をもたらします。"],
+  ["日本の冬に吹く季節風の向きは?", "南東", "北東", "南西", "北西", "D", "大陸から北西の冷たい季節風が吹きます。"],
+  ["空気中の水蒸気が水滴に変わり始める温度を何という?", "露点", "沸点", "融点", "気温", "A", "露点に達すると、水蒸気が凝結して水滴になります。"],
+  ["気圧を表す単位は?", "アンペア", "ヘクトパスカル", "ジュール", "ルクス", "B", "天気図では hPa(ヘクトパスカル)を使います。"],
+  ["血液の成分のうち、酸素を運ぶのは?", "白血球", "血小板", "赤血球", "血しょう", "C", "赤血球のヘモグロビンが酸素を運びます。"],
+  ["出血したとき、血液を固める働きをする成分は?", "赤血球", "白血球", "血しょう", "血小板", "D", "血小板が血液を固めて出血を止めます。"],
+  ["口の中でデンプンを分解する消化液は?", "だ液", "胃液", "胆汁", "すい液", "A", "だ液にふくまれるアミラーゼがデンプンを分解します。"],
+  ["胆汁がつくられる臓器は?", "胃", "肝臓", "すい臓", "小腸", "B", "胆汁は肝臓でつくられ、胆のうにたくわえられます。"],
+  ["小腸の壁にある、栄養分を吸収する小さな突起は?", "肺胞", "繊毛", "柔毛", "神経", "C", "柔毛により表面積が大きくなり、効率よく吸収できます。"],
+  ["肺で酸素を取り入れる小さな袋は?", "柔毛", "気管", "横隔膜", "肺胞", "D", "肺胞のまわりの毛細血管で、酸素と二酸化炭素を交換します。"],
+  ["背骨をもたない動物は?", "イカ", "フナ", "カエル", "ハト", "A", "イカは軟体動物で、背骨をもたない無セキツイ動物です。"],
+  ["熱いものにふれて、意識とは無関係に思わず手を引く反応を何という?", "感覚", "反射", "判断", "記憶", "B", "脳を通さず、せきずいなどが命令を出す反応を反射といいます。"],
   // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
 ]);</script>
 <!-- ================ ★4(中2基礎) 社会 ================ -->
 <script>Q(4,'社会',[
+  ["北海道の道庁所在地は?", "札幌市", "水戸市", "宇都宮市", "名古屋市", "A", "北海道の道庁所在地は札幌市です。"],
+  ["岩手県の県庁所在地は?", "松山市", "盛岡市", "札幌市", "仙台市", "B", "岩手県の県庁所在地は盛岡市です。"],
+  ["宮城県の県庁所在地は?", "水戸市", "大津市", "仙台市", "神戸市", "C", "宮城県の県庁所在地は仙台市です。"],
+  ["茨城県の県庁所在地は?", "さいたま市", "札幌市", "盛岡市", "水戸市", "D", "茨城県の県庁所在地は水戸市です。"],
+  ["栃木県の県庁所在地は?", "宇都宮市", "金沢市", "大津市", "盛岡市", "A", "栃木県の県庁所在地は宇都宮市です。"],
+  ["群馬県の県庁所在地は?", "水戸市", "前橋市", "神戸市", "さいたま市", "B", "群馬県の県庁所在地は前橋市です。"],
+  ["埼玉県の県庁所在地は?", "盛岡市", "松山市", "さいたま市", "前橋市", "C", "埼玉県の県庁所在地はさいたま市です。"],
+  ["神奈川県の県庁所在地は?", "高松市", "前橋市", "大津市", "横浜市", "D", "神奈川県の県庁所在地は横浜市です。"],
+  ["石川県の県庁所在地は?", "金沢市", "松山市", "松江市", "神戸市", "A", "石川県の県庁所在地は金沢市です。"],
+  ["愛知県の県庁所在地は?", "札幌市", "名古屋市", "盛岡市", "水戸市", "B", "愛知県の県庁所在地は名古屋市です。"],
+  ["三重県の県庁所在地は?", "横浜市", "宇都宮市", "津市", "さいたま市", "C", "三重県の県庁所在地は津市です。"],
+  ["滋賀県の県庁所在地は?", "水戸市", "名古屋市", "前橋市", "大津市", "D", "滋賀県の県庁所在地は大津市です。"],
+  ["兵庫県の県庁所在地は?", "神戸市", "札幌市", "松山市", "松江市", "A", "兵庫県の県庁所在地は神戸市です。"],
+  ["島根県の県庁所在地は?", "大津市", "松江市", "前橋市", "名古屋市", "B", "島根県の県庁所在地は松江市です。"],
+  ["香川県の県庁所在地は?", "松山市", "津市", "高松市", "前橋市", "C", "香川県の県庁所在地は高松市です。"],
+  ["愛媛県の県庁所在地は?", "横浜市", "さいたま市", "高松市", "松山市", "D", "愛媛県の県庁所在地は松山市です。"],
+  ["鎌倉幕府を開いた人物は?", "源頼朝", "水野忠邦", "豊臣秀吉", "足利尊氏", "A", "1192年ごろ、征夷大将軍に任命されました。"],
+  ["承久の乱のあと、御成敗式目(貞永式目)を定めた執権は?", "徳川吉宗", "北条泰時", "徳川家光", "徳川慶喜", "B", "武士の裁判の基準となる法律です。"],
+  ["元寇(元の襲来)のときの鎌倉幕府の執権は?", "足利尊氏", "源頼朝", "北条時宗", "北条泰時", "C", "文永・弘安の役に対応しました。"],
+  ["室町幕府を開いた初代将軍は?", "徳川家康", "徳川慶喜", "源頼朝", "足利尊氏", "D", "1338年に征夷大将軍となりました。"],
+  ["金閣を建てた室町幕府の将軍は?", "足利義満", "徳川慶喜", "松平定信", "徳川吉宗", "A", "日明貿易(勘合貿易)も始めました。"],
+  ["長篠の戦いで鉄砲を使い、楽市・楽座を行った武将は?", "徳川家光", "織田信長", "徳川吉宗", "北条泰時", "B", "商工業をさかんにするため、市場の税や座を廃止しました。"],
+  ["太閤検地や刀狩を行った人物は?", "織田信長", "足利尊氏", "豊臣秀吉", "松平定信", "C", "兵農分離を進めました。"],
+  ["江戸幕府を開いた初代将軍は?", "水野忠邦", "徳川吉宗", "織田信長", "徳川家康", "D", "1603年に征夷大将軍となりました。"],
+  ["武家諸法度に参勤交代の制度を加えた将軍は?", "徳川家光", "源頼朝", "水野忠邦", "織田信長", "A", "大名に江戸と領地を行き来させました。"],
+  ["享保の改革を行った将軍は?", "北条時宗", "徳川吉宗", "足利義満", "足利尊氏", "B", "公事方御定書や目安箱が有名です。"],
+  ["寛政の改革を行った老中は?", "北条時宗", "織田信長", "松平定信", "徳川慶喜", "C", "倹約や、江戸に出てきた農民を村に帰す政策を行いました。"],
+  ["天保の改革を行った老中は?", "徳川吉宗", "足利尊氏", "松平定信", "水野忠邦", "D", "株仲間の解散などを行いました。"],
+  ["日米修好通商条約を結んだ大老は?", "井伊直弼", "水野忠邦", "織田信長", "北条時宗", "A", "1858年に結ばれ、のちに安政の大獄を行いました。"],
+  ["大政奉還を行った15代将軍は?", "織田信長", "徳川慶喜", "豊臣秀吉", "松平定信", "B", "1867年、政権を朝廷に返しました。"],
+  ["応仁の乱が始まった年は?", "1192年", "1333年", "1467年", "1868年", "C", "京都を中心に11年続き、戦国時代の始まりとされます。"],
+  ["鉄砲が種子島に伝わった年は?", "1192年", "1333年", "1868年", "1543年", "D", "ポルトガル人が種子島に漂着して伝えました。"],
+  ["江戸幕府が開かれた年は?", "1603年", "1192年", "1333年", "1868年", "A", "徳川家康が征夷大将軍となりました。"],
+  ["ペリーが浦賀に来航した年は?", "1192年", "1853年", "1333年", "1868年", "B", "翌年、日米和親条約が結ばれました。"],
+  ["日本でいちばん長い川は?", "利根川", "石狩川", "信濃川", "北上川", "C", "信濃川は長野県では千曲川とよばれ、新潟県で日本海に注ぎます。"],
+  ["日本でいちばん広い湖は?", "霞ヶ浦", "浜名湖", "猪苗代湖", "琵琶湖", "D", "滋賀県にあり、近畿地方の水がめです。"],
+  ["東北地方の太平洋側にある、出入りの多い海岸は?", "三陸海岸", "九十九里浜", "房総半島", "能登半島", "A", "リアス海岸で、天然の良港やカキ・ワカメの養殖で知られます。"],
+  ["冬に雪が多く降る地域は?", "太平洋側", "日本海側", "瀬戸内", "南西諸島", "B", "北西の季節風が日本海の水蒸気をふくみ、山地にぶつかって雪を降らせます。"],
+  ["九州南部に広がる火山灰が積もった台地は?", "関東平野", "筑紫平野", "シラス台地", "讃岐平野", "C", "水もちが悪く、畑作や畜産がさかんです。"],
+  ["高知平野や宮崎平野で行われる、出荷時期を早める栽培方法は?", "抑制栽培", "輪作", "二毛作", "促成栽培", "D", "冬でも暖かい気候を利用し、ピーマンやなすなどを早く出荷します。"],
+  ["夏でもすずしい気候を利用し、出荷時期を遅らせる栽培方法は?", "抑制栽培", "促成栽培", "二期作", "混合農業", "A", "長野県や群馬県の高原でのレタス・キャベツなどが例です。"],
+  ["東京・神奈川を中心に広がる工業地帯は?", "阪神工業地帯", "京浜工業地帯", "中京工業地帯", "北九州工業地帯", "B", "東京と横浜を中心とした工業地帯です。"],
+  ["製造品出荷額が日本一の工業地帯は?", "京浜工業地帯", "阪神工業地帯", "中京工業地帯", "北九州工業地帯", "C", "愛知県の豊田市を中心に、自動車工業がさかんです。"],
+  ["関東地方に広がる、日本最大の平野は?", "石狩平野", "越後平野", "濃尾平野", "関東平野", "D", "利根川が流れ、火山灰の関東ロームにおおわれています。"],
+  ["北海道で稲作の中心となっている平野は?", "石狩平野", "十勝平野", "根釧台地", "濃尾平野", "A", "客土などの土地改良により稲作が発展しました。"],
+  ["日本の最西端にある島は?", "択捉島", "与那国島", "南鳥島", "沖ノ鳥島", "B", "沖縄県にあります。"],
+  ["日本の最南端にある島は?", "与那国島", "南鳥島", "沖ノ鳥島", "択捉島", "C", "東京都に属する島で、護岸工事で水没を防いでいます。"],
+  ["年間降水量が少なく、温暖な気候の地域は?", "日本海側の気候", "太平洋側の気候", "中央高地の気候", "瀬戸内の気候", "D", "中国山地と四国山地にはさまれ、季節風がさえぎられます。"],
+  ["日本の標準時の基準となる経線は?", "東経135度", "東経140度", "東経120度", "東経130度", "A", "兵庫県明石市を通っています。"],
+  ["北海道東部で酪農がさかんな台地は?", "筑紫平野", "根釧台地", "濃尾平野", "越後平野", "B", "すずしく農業に不向きな土地で、酪農が発達しました。"],
   // ["問題文","選択肢A","選択肢B","選択肢C","選択肢D","正解(A〜D)","解説"],   ← この形で、ここに追加
 ]);</script>
 <!-- ================ ★5(中2応用) 数学 ================ -->
@@ -952,7 +1218,7 @@ let cur='town',px=24,py=19,G=null,busy=false;
 const hash=(x,y)=>{let h=Math.imul(x|0,374761393)^Math.imul(y|0,668265263);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967296};
 const vn=(x,y)=>{const xi=Math.floor(x),yi=Math.floor(y),xf=x-xi,yf=y-yi,u=xf*xf*(3-2*xf),v=yf*yf*(3-2*yf);return(hash(xi,yi)*(1-u)+hash(xi+1,yi)*u)*(1-v)+(hash(xi,yi+1)*(1-u)+hash(xi+1,yi+1)*u)*v};
 const fbm=(x,y,o=6)=>{let s=0,a=.5,f=1;for(let i=0;i<o;i++){s+=a*vn(x*f,y*f);f*=2;a/=2}return s};
-const WS=1024;
+const WS=2048;
 function elev(wx,wy){const nx=wx/WS-.5,ny=wy/WS-.5,d=Math.sqrt(nx*nx+ny*ny);return fbm(wx/200+3,wy/200+7)*1.3-d*.9+.07}
 function tcol(e,wx,wy){const n=vn(wx/6,wy/6)*8-4;
  if(e<.30)return[40+n,90+n,170+n];if(e<.38)return[70+n,130+n,200+n];if(e<.41)return[225+n,210+n,150+n];
@@ -1014,13 +1280,13 @@ if(typeof module!='undefined')module.exports={genArea,mb};
 
 const T={ja:{title:'勉強RPG',uid:'ID(英数字3〜20字)',pass:'パスワード(6文字以上)',name:'名前',age:'年齢',male:'男性',female:'女性',none:'選択しない',login:'ログイン',signup:'新規登録',guest:'ゲストで始める',logout:'ログアウト',coin:'コイン',lv:'Lv',days:'冒険日数',save:'保存',close:'閉じる',size:'文字サイズ',font:'フォント',auto:'オート',speed:'再生速度(小さいほど速い)',town:'始まりの町',hint:'まず長老の家へ行ってみよう',locked:'この家にはまだ入れないようだ…(今後追加予定)',nosb:'Supabase未設定です。ゲストで始めてください',need:'ID(英数字3〜20字)・パスワード(6文字以上)・名前を入力してください',confirmon:'SupabaseのConfirm emailがONです。OFFにしてください',win:'勝利!',draw:'引き分け',lose:'敗北…',ageL:'年齢を入力してください',next:'次へ',expl:'解説',back:'← 戻る',titles:['見習い勉強者','勉強の冒険者','数式の戦士','計算の騎士','算数の勇者']},
 en:{title:'Study RPG',uid:'ID (3-20 letters/digits)',pass:'Password (6+ chars)',name:'Name',age:'Age',male:'Male',female:'Female',none:'Prefer not to say',login:'Log in',signup:'Sign up',guest:'Play as guest',logout:'Log out',coin:'Coins',lv:'Lv',days:'Days',save:'Save',close:'Close',size:'Text size',font:'Font',auto:'Auto',speed:'Speed (lower = faster)',town:'Starting Town',hint:"Visit the Elder's house first",locked:"You can't enter this house yet... (coming soon)",nosb:'Supabase is not configured. Play as guest.',need:'Enter ID (3-20 letters/digits), password (6+) and name',confirmon:'Supabase Confirm email is ON. Turn it OFF.',win:'Victory!',draw:'Draw',lose:'Defeated...',ageL:'Enter your age',next:'Next',expl:'Explanation',back:'← Back',titles:['Novice','Adventurer','Math Fighter','Calc Knight','Hero']}};
-const DEF=()=>({lang:'ja',name:'',age:'',gender:'n',start:Date.now(),coin:0,exp:0,prologue:false,defeated:[],inv:{heal:0,atk:0},hist:[],pos:null,guest:false,snd:{on:true,bgm:.5,se:.7,voice:true},av:0,own:[0,1,2],jewel:0,jsec:0,study:null});
+const DEF=()=>({lang:'ja',name:'',age:'',gender:'n',start:Date.now(),coin:0,exp:0,prologue:false,defeated:[],inv:{heal:0,atk:0},hist:[],pos:null,guest:false,snd:{on:true,bgm:.5,se:.7,voice:true},av:0,own:[0,1,2],jewel:0,jsec:0,zk:[],study:null});
 let S=Object.assign(DEF(),JSON.parse(localStorage.getItem('rpgstudy')||'{}'));
 let user=null,ts={size:18,font:'sans-serif',auto:false,speed:40};
 const t=k=>(T[S.lang]||T.ja)[k]||k;
 const save=()=>localStorage.setItem('rpgstudy',JSON.stringify(S));
 /* ===== 保存(ローカル+クラウド) ===== */
-let st,lastErr=0;const prog=()=>({prologue:S.prologue,defeated:S.defeated,inv:S.inv,hist:S.hist.slice(-300),pos:{a:cur,x:px,y:py},snd:S.snd,av:S.av,own:ownSet(),jewel:S.jewel||0,jsec:S.jsec||0,study:S.study?{cfg:S.study.cfg,sess:(S.study.sess||[]).slice(-1000)}:null,ts:S.ts});
+let st,lastErr=0;const prog=()=>({prologue:S.prologue,defeated:S.defeated,inv:S.inv,hist:S.hist.slice(-300),pos:{a:cur,x:px,y:py},snd:S.snd,av:S.av,own:ownSet(),jewel:S.jewel||0,jsec:S.jsec||0,zk:S.zk||[],study:S.study?{cfg:S.study.cfg,sess:(S.study.sess||[]).slice(-1000)}:null,ts:S.ts});
 function showSaveErr(m){if(Date.now()-lastErr<60000)return;lastErr=Date.now();toast('☁ サーバーへの保存に失敗しました。⚙→🩺保存の診断 を確認してください'+(m?'('+m.slice(0,40)+')':''))}
 function persist(now){S.ts=Date.now();if(S.hist.length>300)S.hist=S.hist.slice(-300);save();if(!sb||!user)return Promise.resolve();clearTimeout(st);
  const go=()=>sb.from('progress').upsert({user_id:user.id,data:prog(),updated_at:new Date().toISOString()}).then(r=>{if(r&&r.error)showSaveErr(r.error.message)},e=>showSaveErr(String(e)));
@@ -1075,7 +1341,7 @@ function openStudy(){show('study');const f=$('stf');if(!f.dataset.ready){f.datas
 function studyReset(){const f=$('stf');if(f){f.dataset.ready='';f.removeAttribute('srcdoc')}STUDYAPI.state(false)}
 function toggleMenu(f){const m=$('menu');m.style.display=(f===0||m.style.display=='flex')?'none':'flex'}
 addEventListener('pointerdown',e=>{if(!e.target.closest('#menu,#gb'))$('menu').style.display='none'});
-function show(id){$('menu').style.display='none';$('sub').style.display='none';$('nav').style.display=(id=='map'||id=='town'||id=='study')?'flex':'none';if(id!='avatar'&&id!='battle')lastScr=id;document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));
+function show(id){try{if(id=='map'&&lm)refreshPins()}catch(e){}$('menu').style.display='none';$('sub').style.display='none';$('nav').style.display=(id=='map'||id=='town'||id=='study')?'flex':'none';if(id!='avatar'&&id!='battle')lastScr=id;document.querySelectorAll('.scr').forEach(e=>e.classList.toggle('on',e.id==id));
  const a=id=='auth',b=id=='battle',v=id=='avatar'||id=='study';$('hud').style.display=(a||b||v)?'none':'block';$('tb').style.display=(b||v)?'none':'flex';
  document.querySelectorAll('.mb').forEach(e=>e.style.display=(a||b||v)?'none':'inline-block');
  $('back').style.display=id=='town'?'block':'none';$('hint').style.display=id=='town'?'block':'none';
@@ -1110,16 +1376,20 @@ const mkIcon=(lk,txt)=>L.divIcon({className:'tm',html:`<div class="pin ${lk?'lk'
 const WL=L.GridLayer.extend({createTile(c){const t=document.createElement('canvas');t.width=t.height=256;const g=t.getContext('2d'),N=c.z>=5?128:64,st=256/N,z=Math.pow(2,c.z),im=g.createImageData(N,N);
  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const wx=(c.x*256+i*st+st/2)/z,wy=(c.y*256+j*st+st/2)/z,k=tcol(elev(wx,wy),wx,wy),o=(j*N+i)*4;im.data[o]=k[0];im.data[o+1]=k[1];im.data[o+2]=k[2];im.data[o+3]=255}
  const tm=document.createElement('canvas');tm.width=tm.height=N;tm.getContext('2d').putImageData(im,0,0);g.imageSmoothingEnabled=true;g.drawImage(tm,0,0,256,256);return t}});
-const TP=findLand(512,512),HP=findLand(TP[0]+260,TP[1]-120);
+const PIN_N=['始まりの町','勇者の村','レベルの街','ガチャの村'],PIN_K=['town','hero','lvtown','gacha'],PIN_LV=()=>[1,GATE_LV,LV_TOWN,LV_GACHA];
+const PINS=(()=>{const c=WS/2,R=[];for(let i=0;i<20;i++){let p=null;for(let t=0;t<16&&!p;t++){const a=i*2.4+.5+t*.8,rd=(i?90+i*27:0)+t*12,q=findLand(c+Math.cos(a)*rd,c+Math.sin(a)*rd);if(R.every(o=>Math.hypot(o[0]-q[0],o[1]-q[1])>=110))p=q}R.push(p||findLand(c+i*37,c-i*29))}return R})();
+const TP=PINS[0];
+function refreshPins(){wm.forEach(o=>{const l=o.lock();if(l!==o.st){o.st=l;o.m.setIcon(mkIcon(l,o.txt()))}})}
 function initMap(){if(lm)return;
- lm=L.map('lmap',{crs:L.CRS.Simple,zoomControl:false,minZoom:-2,maxZoom:7,zoomSnap:.5,maxBounds:[[-WS-120,-120],[120,WS+120]],maxBoundsViscosity:.9,attributionControl:true}).setView([-TP[1],TP[0]],1);
+ lm=L.map('lmap',{crs:L.CRS.Simple,zoomControl:false,minZoom:-2,maxZoom:7,zoomSnap:.5,maxBounds:[[-WS-120,-120],[120,WS+120]],maxBoundsViscosity:.9,attributionControl:true}).setView([-TP[1],TP[0]],.5);
  L.control.zoom({position:'bottomright'}).addTo(lm);
  lm.attributionControl.addAttribution('世界マップ: ゲーム内で自動生成');
  new WL({tileSize:256,noWrap:true,minZoom:-2,maxZoom:7}).addTo(lm);
- const mk=(p,lk,txt,fn)=>{const m=L.marker([-p[1],p[0]],{icon:mkIcon(lk,txt)}).addTo(lm).on('click',fn);wm.push({m,lk,txt,fn});return m};
- mk(TP,0,AREAS.town.name,()=>goTown('town'));
- mk(HP,0,AREAS.hero.name,()=>{if(lvl()>=GATE_LV)goTown(S.pos&&['hero','lvtown','gacha'].includes(S.pos.a)?S.pos.a:'hero');else dlg(['勇者の村への道は まだ閉ざされている…',`レベル${GATE_LV}になると 道が開くようだ。(いまLv.${lvl()})`])});
- [[200,300],[850,700],[300,820],[700,120]].forEach(a=>{const p=findLand(a[0],a[1]);mk(p,1,'???',()=>dlg(['まだ入れないようだ…(今後追加予定のステージ)']))});}
+ for(let i=0;i<20;i++){const real=i<4,lv=real?PIN_LV()[i]:99,lock=()=>!real||lvl()<lv,txt=()=>`${i+1}. ${real?PIN_N[i]:'???'}`;
+  const m=L.marker([-PINS[i][1],PINS[i][0]],{icon:mkIcon(lock(),txt())}).addTo(lm).on('click',()=>{if(dlgOn)return;
+   if(!real)return dlg([`${i+1}番目の場所…まだ入れないようだ。`,'(今後追加予定のステージ)']);
+   if(lvl()<lv)return dlg([`${PIN_N[i]}への道は まだ閉ざされている…`,`レベル${lv}になると 行けるようになる。(いまLv.${lvl()})`]);
+   goTown(PIN_K[i])});wm.push({m,lock,txt,st:lock()})}}
 function backToMap(){if(busy)return;show('map')}
 
 /* ===== 認証 ===== */
@@ -1131,11 +1401,11 @@ async function signup(){if(!sb)return msg(t('nosb'));const id=$('em').value.trim
  const{data,error}=await sb.auth.signUp({email:mail(id),password:p,options:{data:f}});
  if(error)return msg(error.message);if(!data.session)return msg(t('confirmon'));
  await sb.from('profiles').update({name:f.name,age:f.age||null,gender:f.gender}).eq('id',data.session.user.id);
- afterLogin();}
+ afterLogin(true);}
 async function login(){if(!sb)return msg(t('nosb'));
  const{error}=await sb.auth.signInWithPassword({email:mail($('em').value.trim()),password:$('pw').value});
  if(error)return msg(error.message);afterLogin();}
-async function afterLogin(){const{data:{session}}=await sb.auth.getSession();if(!session)return;user=session.user;
+async function afterLogin(fresh){const{data:{session}}=await sb.auth.getSession();if(!session)return;user=session.user;
  const{data:p}=await sb.from('profiles').select('*').eq('id',user.id).single();
  if(p){const u={};
   if(!p.name){const n=prompt(t('name'));if(n&&n.trim())u.name=n.trim()}
@@ -1143,9 +1413,9 @@ async function afterLogin(){const{data:{session}}=await sb.auth.getSession();if(
   if(Object.keys(u).length){const{error}=await sb.from('profiles').update(u).eq('id',user.id);if(error)alert(error.message);else Object.assign(p,u)}
   const{data:pr}=await sb.from('progress').select('data').eq('user_id',user.id).maybeSingle();
   const d=(pr&&pr.data)||{},keep={lang:S.lang,snd:S.snd},lc=(S.uid==user.id||(!S.uid&&!S.guest&&S.name&&S.name===(p.name||'')))?S:null,useLocal=!!lc&&(lc.ts||0)>(d.ts||0);
-  const base=useLocal?{prologue:lc.prologue,defeated:lc.defeated,inv:lc.inv,hist:lc.hist,pos:lc.pos,av:lc.av,own:lc.own,snd:lc.snd,jewel:lc.jewel,jsec:lc.jsec,study:lc.study}:d,pend=lc&&lc.pend?lc.pend:[];
+  const base=useLocal?{prologue:lc.prologue,defeated:lc.defeated,inv:lc.inv,hist:lc.hist,pos:lc.pos,av:lc.av,own:lc.own,snd:lc.snd,jewel:lc.jewel,jsec:lc.jsec,zk:lc.zk,study:lc.study}:d,pend=lc&&lc.pend?lc.pend:[];
   S=Object.assign(DEF(),keep,{guest:false,uid:user.id,name:p.name||'',age:p.age||'',gender:p.gender||'n',coin:p.coin+pend.reduce((a,x)=>a+x.gain,0),exp:(p.exp||0)+pend.reduce((a,x)=>a+x.xp,0),start:new Date(p.created_at).getTime(),pend},base,{ts:Math.max(lc?lc.ts||0:0,d.ts||0)});
-  await flushPend();if(useLocal)persist(true);studyReset();
+  if(!fresh&&!S.prologue)S.prologue=true;await flushPend();if(useLocal||(!fresh))persist(true);studyReset();
   if(S.pos&&S.pos.a)cur=S.pos.a;
   sb.from('profiles').update({last_login_at:new Date().toISOString()}).eq('id',user.id);}
  save();start();}
@@ -1159,10 +1429,11 @@ $('gear').onclick=e=>{e.stopPropagation();$('set').style.display=$('set').style.
 $('set').onclick=e=>e.stopPropagation();
 $('s1').oninput=e=>{ts.size=+e.target.value;applyTs()};$('s2').onchange=e=>{ts.font=e.target.value;applyTs()};
 $('s3').onchange=e=>ts.auto=e.target.checked;$('s4').oninput=e=>ts.speed=+e.target.value;
-function dlg(lines,who='',v=0){return new Promise(res=>{const box=$('dlg'),tx=$('dtx');let i=0,full='',n=0,typing=false,timer,tok=0;
+let dlgOn=false;
+function dlg(lines,who='',v=0){if(dlgOn)return Promise.resolve();dlgOn=true;return new Promise(res=>{const box=$('dlg'),tx=$('dtx');let i=0,full='',n=0,typing=false,timer,tok=0;
  box.style.display='block';$('dnm').textContent=who;
  const end=()=>{clearInterval(timer);typing=false;const k=tok;if(ts.auto)setTimeout(()=>{if(k==tok&&box.style.display=='block')next()},1500);};
- const next=()=>{if(i>=lines.length){box.style.display='none';$('set').style.display='none';box.onclick=null;try{speechSynthesis.cancel()}catch(e){}res();return}
+ const next=()=>{if(i>=lines.length){box.style.display='none';$('set').style.display='none';box.onclick=null;dlgOn=false;try{speechSynthesis.cancel()}catch(e){}res();return}
   tok++;full=lines[i++];n=0;typing=true;tx.textContent='';clearInterval(timer);say(full,v);
   timer=setInterval(()=>{tx.textContent=full.slice(0,++n);if(n>=full.length)end()},ts.speed)};
  box.onclick=()=>{if(typing){tx.textContent=full;end()}else next()};next();});}
@@ -1226,6 +1497,20 @@ function openShop(){const p=openModal(H('🛡','武器屋'),`<div class="c co"><
 async function buy(k){if(S.coin<5000)return toast('コインが足りません');
  if(sb&&user){const{data,error}=await sb.rpc('spend_coin',{n:5000});if(error)return toast(error.message);S.coin=data}else S.coin-=5000;
  S.inv[k]++;persist(true);hud();SE.buy();openShop()}
+
+/* ===== 図鑑(初めて出会った問題を登録・解き直し。登録1問ごとに💎100) ===== */
+const zkAll=()=>{const R=[];for(let st=1;st<=7;st++)for(const s of SUBJ)readBlock(st,s).items.forEach(x=>R.push({st,s,id:x.id}));return R};
+function zkAdd(id){if(!Array.isArray(S.zk))S.zk=[];if(S.zk.includes(id))return;S.zk.push(id);S.jewel=(S.jewel||0)+100;hud();persist();toast('📘 図鑑に登録! 💎+100')}
+async function openZukan(f='全部'){const all=zkAll(),have=new Set(S.zk||[]),mine=all.filter(x=>have.has(x.id));
+ const tabs=['全部',...SUBJ].map(s=>{const n=s=='全部'?mine.length:mine.filter(x=>x.s==s).length,tt=s=='全部'?all.length:all.filter(x=>x.s==s).length;return `<button class="${f==s?'on':''}" onclick="openZukan('${s}')">${s} ${n}/${tt}</button>`}).join('');
+ const list=mine.filter(x=>f=='全部'||x.s==f),pools={};
+ for(const x of list){const k=x.st+'|'+x.s;if(!pools[k])pools[k]=await loadPool(x.st,x.s)}
+ openModal(H('📘','図鑑'),`<div class="sm">初めて出会った問題が登録され、1問ごとに💎100もらえます。タップで解き直せます。</div><div class="tabs" style="flex-wrap:wrap">${tabs}</div>`+(list.length?list.map(x=>{const q=pools[x.st+'|'+x.s].all.find(y=>y.id==x.id);return q?`<div class="li" onclick="zkPlay('${x.id}','${f}')"><b>★${x.st} ${x.s}<br><small>${esc(q.q).replace(/\n/g,' ').slice(0,40)}</small></b><span>›</span></div>`:''}).join(''):'<div class="slot">まだ登録がありません。バトルで問題に出会うと登録されます</div>'))}
+async function zkPlay(id,f){const[st,k]=id.split('-'),s=SUBJ.find(x=>SKEY[x]==k),q=(await loadPool(+st,s)).all.find(x=>x.id==id);if(!q)return;
+ const pick=await new Promise(res=>{$('mhead').innerHTML=H('📘',`★${st} ${s}`);$('mbody').innerHTML=`${figHTML(q)}<div style="font-weight:bold;white-space:pre-line;font-size:18px">${esc(q.q)}</div><div id="rc" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>`;
+  shuf([q.a,...shuf(q.w).slice(0,3)]).forEach(v=>{const b=document.createElement('button');b.textContent=v;b.onclick=()=>{[...$('rc').children].forEach(x=>{x.disabled=true;if(x.textContent===q.a)x.classList.add('ok')});if(v!==q.a)b.classList.add('ng');res(v===q.a)};$('rc').appendChild(b)})});
+ pick?SE.ok():SE.ng();S.hist.push({k:st+'|'+s,id,ok:pick,t:Date.now()});persist();
+ $('mbody').insertAdjacentHTML('beforeend',`<div class="exp">${pick?'⭕ 正解!':'❌ 答え: <b>'+esc(q.a)+'</b>'}<br>💡 ${eh(q.e)}</div><button onclick="zkPlay('${id}','${f}')">もう一度</button><button onclick="openZukan('${f}')">図鑑へもどる</button>`)}
 
 /* ===== 履歴・復習 ===== */
 const hk=h=>h.k||('2|'+h.s),hid=h=>h.id||('2-'+SKEY[h.s]+'-'+String(h.i+1).padStart(3,'0'));
@@ -1306,7 +1591,7 @@ function openQStat(){Object.keys(POOL).forEach(k=>delete POOL[k]);const R={},err
  (errs.length?`<b>⚠ 読み込めなかったところ(${errs.length}件)</b><div class="exp" style="max-height:220px;overflow:auto;font-size:12px">${errs.slice(0,40).map(x=>esc(x)).join('<br>')}${errs.length>40?'<br>…':''}</div>`:'<div class="sm">✅ エラーはありません。</div>'))}
 
 /* ===== 流れ ===== */
-async function start(){hud();show('map');if(!S.prologue){await dlg(PROLOGUE,'');S.prologue=true;persist();}}
+async function start(){hud();show('map');if(!S.prologue){S.prologue=true;persist();await dlg(PROLOGUE,'')}}
 /* ===== エリア(始まりの町・勇者の村) ===== */
 const R_TOWN=[
 ['長老ざいがす','数学',1,0,1,'h'],['商人ゴルド','英語',2,1,3,'h'],['先生ミャウ','国語',2,2,2,'h'],['戦士ガルド','社会',2,3,5,'h'],['オーク族長ドド','理科',2,4,5,'h'],
@@ -1431,7 +1716,7 @@ async function battle(e){await ready;const pool=await loadPool(e.star||2,e.s);
  $('sr').onclick=()=>{if(!can)return;if(!confirm('降参しますか?(コインもEXPももらえません)'))return;surr=true;if(pend){const p=pend;pend=null;p(null)}};
  $('q').textContent='問題を読み込み中…';$('ch').innerHTML='';
  const qs=shuf(pool.all).slice(0,10);if(pool.borrowed)toast(`★${star}の${e.s}は ${pool.n}問しかないため、★${pool.from.join('・')}の問題で補います`);
- for(let i=0;i<qs.length&&me>0&&en>0;i++){const q=qs[i];curQ=q;$('ex').innerHTML='';$('fig').innerHTML=figHTML(q);$('q').textContent=`第${i+1}問 / ${qs.length}\n${q.q}`;
+ for(let i=0;i<qs.length&&me>0&&en>0;i++){const q=qs[i];curQ=q;zkAdd(q.id);$('ex').innerHTML='';$('fig').innerHTML=figHTML(q);$('q').textContent=`第${i+1}問 / ${qs.length}\n${q.q}`;
   can=true;ri();const ok=await choose(q);can=false;ri();if(surr)break;S.hist.push({k:(parseInt(q.id)||star)+'|'+e.s,id:q.id,ok,t:Date.now()});let m;
   if(ok){SE.ok();const dmg=400+(boost?400:0);await anim('msp','atkP',320);SE.hit();anim('esp','hit',500);flo('esp','-'+dmg);en-=dmg;upd();m=`⭕ 正解!こうげき命中!${esc(e.n)}に ${dmg} ダメージ!`}
   else{SE.ng();await anim('esp','atkE',320);SE.hit();anim('msp','hit',500);flo('msp','-400');$('field').classList.remove('red');void $('field').offsetWidth;$('field').classList.add('red');me-=400;upd();m='❌ 不正解… はんげきをうけた!じぶんに 400 ダメージ!'}
@@ -1478,4 +1763,137 @@ let offlineStart=false;
 addEventListener('online',()=>{if(offlineStart&&sb&&!user){offlineStart=false;afterLogin()}});
 if(sb)sb.auth.onAuthStateChange((ev,session)=>{if(ev=='SIGNED_OUT'&&user&&!S.guest&&document.visibilityState=='visible'&&!offlineStart){/* 他タブでのログアウトなど */user=null;show('auth')}});
 
+</script>
+<script>
+/* ===== オンライン対戦・問題作成(supabase_online.sql が必要) ===== */
+(()=>{
+const O={v:'hub',s:null,room:null,ch:null,msg:{},w:[],role:'',peer:null,cancel:null,prev:'map',nm:'',hn:'',qs:[],lk:new Set(),sets:[],mt:'edit'};
+const dd=()=>({name:'',mode:'free',pw:'',stars:[2],subs:[...SUBJ],hh:2000,gh:2000,hd:400,gd:400,n:10,time:0,tab:'b'});
+const mkq=()=>({t:'c4',q:'',c:['','','',''],k:0,ans:'',dmg:400,time:0,img:'',aud:'',e:'',eimg:''});
+O.d=dd();O.m={title:'',subject:'数学',vis:'public',qs:[mkq()]};O.f={src:'all',sort:'new',q:''};
+const okI=s=>/^data:image\/(jpeg|png|webp);base64,/.test(s||'')||/^https:/.test(s||''),okA=s=>/^data:audio\//.test(s||'');
+const need=()=>{if(!sb||!user){toast('ログインが必要です(ゲストでは使えません)');return false}return true};
+const setP=(o,p,v)=>{const k=p.split('.');let c=o;for(let i=0;i<k.length-1;i++)c=c[k[i]];c[k[k.length-1]]=v};
+const ch=(f,l,on)=>`<button class="${on?'on':''}" data-a="tg" data-f="${f}" data-v="${l}">${l}</button>`;
+const seg=(a,list,cur)=>`<div class="seg">${list.map(([v,l])=>`<button class="${cur==v?'on':''}" data-a="${a}" data-v="${v}">${l}</button>`).join('')}</div>`;
+const media=it=>(it.f?`<div class="ofg">${san(it.f)}</div>`:'')+(okI(it.img)?`<img class="oim" src="${esc(it.img)}">`:'')+(okA(it.aud)?`<audio controls src="${esc(it.aud)}"></audio>`:'');
+const ansOf=it=>it.t=='w'?String(it.ans).split('/')[0].trim():(it.ans&&it.ans.trim()?it.ans:it.c[it.k]);
+const exp=it=>`<div class="exp">答え: <b>${esc(ansOf(it))}</b>${it.e?'<br>'+eh(it.e):''}${okI(it.eimg)?`<br><img class="oim" src="${esc(it.eimg)}">`:''}</div>`;
+const nz=s=>String(s).normalize('NFKC').toLowerCase().replace(/\s+/g,'');
+const chk=(v,it)=>String(it.ans).split('/').some(a=>nz(a)&&nz(a)==nz(v));
+const bar=(n,h,m)=>`<div class="ohb"><b>${esc(n)}</b> ${Math.max(h,0)}/${m}<div class="bar"><i style="width:${Math.max(0,h)/m*100}%;background:${h>m/2?'#3c6':h>m/5?'#ec3':'#e44'}"></i></div></div>`;
+const $B=()=>$('ob');
+
+function open(mode){O.prev=lastScr;show('ol');lastScr=O.prev;O.v=mode=='battle'?(O.room?'room':'hub'):'make';if(mode!='battle')O.mt=O.mt||'edit';render()}
+function leave(){if(O.room){const r=O.room,h=O.role=='h';try{O.ch&&O.ch.unsubscribe()}catch(e){}if(sb)sb.rpc('close_battle',{p_id:r});O.room=null;O.ch=null;O.peer=null}}
+function back(){if(O.v=='play'&&!confirm('対戦中です。降参して戻りますか?'))return;if(O.v=='play'){A.sur(1)}leave();show(O.prev||'map');lastScr=O.prev||'map'}
+window.subGo=k=>{$('sub').style.display='none';if(!need())return;open(k)};
+
+/* ---- 描画 ---- */
+function render(){const v=O.v;$('ott').textContent=['hub','create','list','room','play','result'].includes(v)?'⚔ オンライン対戦':'✍ 問題作成・観覧';
+ const f={hub:hub,create:create,list:list,room:room,make:make,play:()=>'',result:()=>'',solo:()=>'',sres:()=>''}[v];if(f&&v!='play'&&v!='result'&&v!='solo'&&v!='sres'){const h=f();$B().innerHTML=h;if(v=='list')loadList();if(v=='make'&&O.mt=='view')loadSets()}ft()}
+function ft(){const e=$('of');if(!O.room){e.style.display='none';return}e.style.display='block';
+ const o=O.peer;e.innerHTML=o?`🟢 ${esc(O.role=='h'?o.name:O.hn)}${O.role=='h'?' が参加しました':'(ホスト) と対戦準備OK'}`:(O.role=='h'?'⏳ 相手の参加を待っています…':`⚠ ホスト ${esc(O.hn)} と接続中…`)}
+const hub=()=>`<button class="big" data-a="nav" data-v="create">🏟 部屋を作る</button><button class="big" data-a="nav" data-v="list">🚪 部屋に参加する</button><div class="sm">自由参加の部屋と、6桁パスワードの部屋があります。</div>`;
+function create(){const d=O.d,num=(f,l)=>`<label>${l}<input type="number" data-p="d.${f}" data-n="1" value="${d[f]}" min="0"></label>`;
+ return `<input data-p="d.name" placeholder="対戦の名前" maxlength="30" value="${esc(d.name)}">`+seg('mode',[['free','🔓 自由参加'],['pw','🔒 パスワード参加']],d.mode)+
+ (d.mode=='pw'?`<div class="orow"><input data-p="d.pw" inputmode="numeric" maxlength="6" placeholder="6桁の数字" value="${esc(d.pw)}"><button data-a="rnd" style="flex:none">🎲</button></div>`:'')+
+ `<div class="sm">難易度(複数OK)</div><div class="seg">${LS_().map(l=>ch('stars','★'+l,d.stars.includes(l))).join('')}</div><div class="sm">教科(複数OK)</div><div class="seg">${SUBJ.map(s=>ch('subs',s,d.subs.includes(s))).join('')}</div>`+
+ seg('ctab',[['b','基本'],['h','体力・ダメージ'],['q','問題数・時間']],d.tab).replace('class="seg"','class="seg sm2"')+
+ (d.tab=='h'?`<div class="og">${num('hh','自分の体力')}${num('gh','相手の体力')}${num('hd','自分のダメージ')}${num('gd','相手のダメージ')}</div>`:d.tab=='q'?`<div class="og">${num('n','問題の数')}${num('time','1問の制限時間(秒・0=なし)')}</div>`:'<div class="sm">体力2000・ダメージ400・10問・時間なし で始まります(他タブで変更)。</div>')+
+ `<button class="big go" data-a="mk">この設定で部屋を作る</button><button data-a="nav" data-v="hub">← 戻る</button>`}
+const LS_=()=>[1,2,3,4,5,6,7];
+function list(){return `<div class="orow"><b style="flex:1">参加できる部屋</b><button data-a="nav" data-v="list" style="flex:none">🔄</button></div><div id="rl"><div class="sm">読み込み中…</div></div><button data-a="nav" data-v="hub">← 戻る</button>`}
+async function loadList(){const{data,error}=await sb.from('battle_list').select('*').order('created_at',{ascending:false}).limit(30);const e=$('rl');if(!e)return;
+ e.innerHTML=error?`<div class="sm" style="color:#c22">${esc(error.message)}(supabase_online.sql を実行しましたか?)</div>`:(data&&data.length?data.map(r=>`<div class="li" data-a="join" data-v="${r.id}" data-l="${r.locked?1:''}" data-n="${esc(r.name)}"><span>${r.locked?'🔒':'🔓'}</span><b>${esc(r.name)}</b><small>作成者: ${esc(r.host_name)}</small></div>`).join(''):'<div class="slot">いま参加できる部屋はありません</div>')}
+function room(){const s=O.s,h=O.role=='h';return `<div class="oc"><b>${esc(O.nm)}</b><br><span class="sm">${h?'あなたが作成':'作成者: '+esc(O.hn)}</span><br>難易度 ${s.stars.map(x=>'★'+x).join(' ')} / ${s.subs.join('・')}<br>${s.n}問 / ${s.time?s.time+'秒':'時間なし'}<br>体力: ホスト ${s.hh} / ゲスト ${s.gh}<br>ダメージ: ホスト ${s.hd} / ゲスト ${s.gd}<br><span class="sm">アイテム使用不可・降参はOK・結果は履歴/図鑑に残りません</span></div>`+
+ (h?`<button class="big go" data-a="start" ${O.peer?'':'disabled'}>⚔ 対戦開始</button><button data-a="toset">対戦前設定に戻る</button>`:`<div class="slot">ホストが開始するのを待っています…</div><button data-a="toset">部屋を出る</button>`)}
+async function mkRoom(){const d=O.d;if(!d.name.trim())return toast('対戦の名前を入れてください');if(d.mode=='pw'&&!/^\d{6}$/.test(d.pw))return toast('パスワードは6桁の数字です');if(!d.stars.length||!d.subs.length)return toast('難易度と教科を選んでください');
+ const s={stars:d.stars.map(x=>+String(x).replace('★','')),subs:d.subs,hh:Math.max(1,d.hh|0),gh:Math.max(1,d.gh|0),hd:Math.max(1,d.hd|0),gd:Math.max(1,d.gd|0),n:Math.min(50,Math.max(1,d.n|0)),time:Math.max(0,d.time|0)};
+ const{data,error}=await sb.rpc('create_battle',{p_name:d.name.trim(),p_host_name:S.name||'名無し',p_pw:d.mode=='pw'?d.pw:null,p_settings:s});if(error)return toast(error.message);
+ Object.assign(O,{s,room:data,role:'h',nm:d.name.trim(),hn:S.name,v:'room'});connect();render()}
+async function joinRoom(id,locked,nm){let pw=null;if(locked){pw=prompt('パスワード(6桁)');if(pw==null)return}
+ const{data,error}=await sb.rpc('join_battle',{p_id:id,p_pw:pw,p_name:S.name||'名無し'});if(error)return toast(error.message);
+ Object.assign(O,{s:data.settings,room:id,role:'g',nm:data.name,hn:data.host_name,v:'room'});connect();render()}
+function connect(){O.msg={};O.w=[];O.peer=null;O.opSur=O.mySur=false;const c=sb.channel('ob-'+O.room,{config:{broadcast:{self:false},presence:{key:user.id}}});O.ch=c;
+ c.on('broadcast',{event:'m'},({payload:p})=>onMsg(p)).on('presence',{event:'sync'},()=>{const st=c.presenceState(),ks=Object.keys(st).filter(k=>k!=user.id),was=O.peer;O.peer=ks.length?{name:(st[ks[0]][0]||{}).name||'相手'}:null;ft();if(O.v=='room'){const b=document.querySelector('[data-a=start]');if(b)b.disabled=!O.peer}
+  if(was&&!O.peer&&O.v=='play')setTimeout(()=>{if(!O.peer&&O.v=='play'){O.opSur=true;flush();O.cancel&&O.cancel()}},6000)}).subscribe(s=>{if(s=='SUBSCRIBED')c.track({name:S.name||'名無し'})})}
+const send=(k,v)=>O.ch&&O.ch.send({type:'broadcast',event:'m',payload:{k,v}}),flush=()=>{const w=O.w;O.w=[];w.forEach(f=>f())};
+const got=k=>new Promise(r=>{const c=()=>{if(O.mySur||O.opSur)r(null);else if(k in O.msg)r(O.msg[k]);else O.w.push(c)};c()});
+function onMsg(p){if(p.k=='start'){O.s=p.v.s;O.qs=p.v.qs;return play()}if(p.k=='sur'){O.opSur=true;flush();O.cancel&&O.cancel();return}O.msg[p.k]=p.v;flush()}
+async function mkQs(s){const all=[],seen=new Set();for(const st of s.stars)for(const sj of s.subs){const p=await loadPool(st,sj);p.items.forEach(x=>{if(!seen.has(x.id)){seen.add(x.id);all.push(x)}})}
+ return shuf(all).slice(0,s.n).map(x=>{const c=shuf([x.a,...shuf(x.w).slice(0,3)]);return{t:'c4',q:x.q,c,k:c.indexOf(x.a),e:x.e,f:x.f,img:x.img}})}
+async function start(){if(!O.peer)return toast('相手が参加していません');const qs=await mkQs(O.s);if(!qs.length)return toast('選んだ難易度・教科に問題がありません');O.qs=qs;send('start',{s:O.s,qs});play()}
+/* ---- 問題を出す共通処理 ---- */
+function ask(box,it,time){return new Promise(res=>{let done=false,tm;const fin=v=>{if(done)return;done=true;clearInterval(tm);O.cancel=null;res(v)};O.cancel=()=>fin(null);
+ box.innerHTML=`<div class="oq">${eh(it.q)}</div>${media(it)}<div class="otm" id="otm"></div><div id="och"></div>`;const c=$('och');
+ if(it.t=='w'){c.innerHTML='<input id="owi" placeholder="答えを入力"><button id="owb">こたえる</button>';const go=()=>{if($('owi').value.trim())fin(chk($('owi').value,it))};$('owb').onclick=go;$('owi').onkeydown=e=>{if(e.key=='Enter')go()}}
+ else it.c.forEach((x,i)=>{const b=document.createElement('button');b.textContent=x;b.onclick=()=>{[...c.children].forEach((y,j)=>{y.disabled=true;if(j==it.k)y.classList.add('ok')});if(i!=it.k)b.classList.add('ng');setTimeout(()=>fin(i==it.k),450)};c.appendChild(b)});
+ if(time>0){let r=time;const u=()=>{const e=$('otm');if(e)e.textContent='⏱ '+r+'秒'};u();tm=setInterval(()=>{r--;u();if(r<=0)fin(false)},1000)}})}
+const wait=b=>new Promise(r=>{b.onclick=r});
+/* ---- 対戦本編 ---- */
+async function play(){const s=O.s,qs=O.qs,h=O.role=='h',me=h?'h':'g',op=h?'g':'h',mx={h:s.hh,g:s.gh},hp={...mx},dm={h:s.hd,g:s.gd};O.msg={};O.opSur=O.mySur=false;O.v='play';render();
+ const nm={[me]:S.name||'あなた',[op]:(O.peer&&O.peer.name)||(h?'相手':O.hn)};
+ $B().innerHTML='<div id="phd"></div><div id="opq" class="oc"></div><button data-a="sur" style="background:#f5d0d0">🏳 降参</button>';
+ const hd=i=>$('phd').innerHTML=`<div class="sm">第${i+1}問 / ${qs.length}</div>`+bar(nm[me]+'(あなた)',hp[me],mx[me])+bar(nm[op],hp[op],mx[op]);
+ for(let i=0;i<qs.length;i++){hd(i);const it=qs[i],box=$('opq'),r=await ask(box,it,s.time);if(r===null)break;
+  send('a'+i,r?1:0);box.insertAdjacentHTML('beforeend','<div class="sm">相手の回答を待っています…</div>');const o=await got('a'+i);if(o===null)break;
+  if(r)hp[op]-=dm[me];if(o)hp[me]-=dm[op];hd(i);r?SE.ok():SE.ng();if(r||o)SE.hit();
+  box.innerHTML=`<div class="res ${r?'g':'r'}">あなた: ${r?'⭕ 正解':'❌ 不正解'} / 相手: ${o?'⭕ 正解':'❌ 不正解'}</div>${exp(it)}<button id="onx">次へ ▶</button>`;
+  const nb=$('onx');await wait(nb);nb.disabled=true;nb.textContent='相手を待っています…';send('n'+i,1);if(await got('n'+i)===null)break;if(hp.h<=0||hp.g<=0)break}
+ const res=O.mySur?'lose':O.opSur?'win':(hp.h<=0&&hp.g<=0)||hp[me]==hp[op]?'draw':hp[me]>hp[op]?'win':'lose';
+ O.cancel=null;O.v='result';res=='win'?SE.win():res=='lose'?SE.lose():SE.item();
+ $B().innerHTML=`<div class="rc ${res=='lose'?'lose':''}"><h2>${res=='win'?'🏆 勝ち!':res=='lose'?'💧 負け…':'🤝 引き分け'}</h2>${O.mySur?'(降参)':O.opSur?'(相手が降参または退出)':''}<div>${esc(nm[me])}: ${Math.max(hp[me],0)} / ${esc(nm[op])}: ${Math.max(hp[op],0)}</div><div class="sm">この試合は履歴・図鑑・コイン・EXPには反映されません</div></div><button class="big go" data-a="again">🔁 もう一度</button><button class="big" data-a="toset">対戦前設定に戻る(終わる)</button>`;ft()}
+/* ---- 問題作成 ---- */
+const make=()=>seg('mtab',[['edit','✍ 作成'],['view','👀 観覧']],O.mt)+(O.mt=='edit'?editor():`<div id="vw"></div>`);
+function editor(){const m=O.m;return `<input data-p="m.title" placeholder="タイトル" maxlength="40" value="${esc(m.title)}"><div class="orow"><select data-p="m.subject">${[...SUBJ,'その他'].map(s=>`<option ${m.subject==s?'selected':''}>${s}</option>`).join('')}</select><select data-p="m.vis"><option value="public" ${m.vis=='public'?'selected':''}>🌐 公開</option><option value="friends" ${m.vis=='friends'?'selected':''}>👥 フレンドのみ</option></select></div>
+ <div class="orow"><input id="gdm" type="number" value="400" style="flex:1"><button data-a="qall" data-v="dmg">全問のダメージ</button></div><div class="orow"><input id="gtm" type="number" value="0" style="flex:1"><button data-a="qall" data-v="time">全問の制限時間(秒)</button></div>`+
+ m.qs.map(qcard).join('')+`<button data-a="qadd">➕ 問題を追加(${m.qs.length}/30)</button><div class="orow"><button class="big" data-a="qtry">▶ 試しに遊ぶ</button><button class="big go" data-a="qpub">📤 投稿</button></div>`}
+function qcard(x,i){const P=`m.qs.${i}.`,fl=(k,l)=>`<div class="orow"><label class="fl">${l}<input type="file" accept="${k=='aud'?'audio/*':'image/*'}" data-file="${P+k}"></label>${x[k]?`<span>✅</span><button data-a="qclr" data-v="${P+k}" style="flex:none">✖</button>`:''}</div>`;
+ return `<div class="oc"><div class="orow"><b>第${i+1}問</b><select data-p="${P}t" data-r="1">${[['c4','4択'],['c2','2択'],['w','筆記']].map(([v,l])=>`<option value="${v}" ${x.t==v?'selected':''}>${l}</option>`).join('')}</select><button data-a="qdel" data-v="${i}" style="flex:none">🗑</button></div><textarea data-p="${P}q" placeholder="問題文">${esc(x.q)}</textarea>`+
+ (x.t=='w'?`<input data-p="${P}ans" placeholder="正解(複数の正解は / で区切る)" value="${esc(x.ans)}">`:x.c.map((c,j)=>`<div class="orow"><input type="radio" name="k${i}" style="flex:none" data-p="${P}k" data-n="1" value="${j}" ${x.k==j?'checked':''}><input data-p="${P}c.${j}" placeholder="選択肢${'ABCD'[j]}(○=正解)" value="${esc(c)}"></div>`).join('')+`<input data-p="${P}ans" placeholder="答えの文章(任意・解説に表示)" value="${esc(x.ans)}">`)+
+ `<div class="og"><label>ダメージ<input type="number" data-p="${P}dmg" data-n="1" value="${x.dmg}"></label><label>制限時間(秒・0=なし)<input type="number" data-p="${P}time" data-n="1" value="${x.time}"></label></div>${fl('img','🖼 問題の画像')}${fl('aud','🔊 問題の音声')}<textarea data-p="${P}e" placeholder="解説">${esc(x.e)}</textarea>${fl('eimg','🖼 解説の画像')}</div>`}
+function chkSet(){const m=O.m;if(!m.title.trim())return'タイトルを入れてください';if(!m.qs.length)return'問題がありません';
+ for(let i=0;i<m.qs.length;i++){const x=m.qs[i],n=`第${i+1}問: `;if(!x.q.trim())return n+'問題文が空です';if(x.t=='w'){if(!x.ans.trim())return n+'正解を入れてください'}else{const c=x.c.map(s=>s.trim());if(c.some(s=>!s))return n+'選択肢が空です';if(new Set(c).size<c.length)return n+'同じ選択肢があります'}}return''}
+const clean=()=>O.m.qs.map(x=>({...x,c:x.t=='w'?[]:x.c.map(s=>s.trim()),dmg:Math.max(1,x.dmg|0),time:Math.max(0,x.time|0)}));
+function shrink(f,max){return new Promise((res,rej)=>{const im=new Image,u=URL.createObjectURL(f);im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',.7))};im.onerror=rej;im.src=u})}
+async function onFile(inp){const f=inp.files[0];if(!f)return;const p=inp.dataset.file;try{let d;if(p.endsWith('aud')){if(f.size>400*1024)return toast('音声は400KBまでです');d=await new Promise((r,j)=>{const x=new FileReader;x.onload=()=>r(x.result);x.onerror=j;x.readAsDataURL(f)})}else d=await shrink(f,640);setP(O,p,d);render()}catch(e){toast('読み込めませんでした')}}
+async function pub(){const e=chkSet();if(e)return toast(e);const m=O.m;const{error}=await sb.from('qsets').insert({author_name:S.name||'名無し',title:m.title.trim(),subject:m.subject,vis:m.vis,items:clean()});if(error)return toast(error.message);toast('投稿しました!');O.m={title:'',subject:'数学',vis:'public',qs:[mkq()]};O.mt='view';O.f.src='mine';render()}
+/* ---- 観覧 ---- */
+async function loadSets(){const f=O.f;let fr=null;
+ const bar2=`<div class="sm">${''}</div>`;const draw=()=>{const e=$('vw');if(!e)return;e.innerHTML=seg('bsrc',[['all','全て'],['friend','フレンド'],['public','公開'],['mine','自分の投稿']],f.src)+seg('bsort',[['new','新規順'],['pop','人気順']],f.sort)+`<div class="orow"><input id="bq" placeholder="タイトル・作者で検索" value="${esc(f.q)}"><button data-a="bs" style="flex:none">🔍</button></div><div id="sl"></div>`;
+  $('sl').innerHTML=O.sets.length?O.sets.map(r=>`<div class="oc"><b>${esc(r.title)}</b> <span class="tg b">${esc(r.subject)}</span>${r.vis=='friends'?' 👥':''}<br><span class="sm">${esc(r.author_name)} ・ ${String(r.created_at).slice(0,10)} ・ ❤ ${r.likes}</span><div class="orow"><button data-a="bplay" data-v="${r.id}">▶ 遊ぶ</button><button data-a="blike" data-v="${r.id}">${O.lk.has(r.id)?'❤':'🤍'} いいね</button>${r.author_id==user.id?`<button data-a="bdel" data-v="${r.id}" style="flex:none">🗑</button>`:''}</div></div>`).join(''):'<div class="slot">投稿がありません</div>'};
+ $('vw').innerHTML='<div class="sm">読み込み中…</div>';
+ let q=sb.from('qsets').select('id,author_id,author_name,title,subject,vis,likes,created_at').order(f.sort=='pop'?'likes':'created_at',{ascending:false}).limit(50);
+ if(f.src=='mine')q=q.eq('author_id',user.id);else if(f.src=='public')q=q.eq('vis','public');
+ else if(f.src=='friend'){const{data:fs}=await sb.from('friendships').select('*').eq('status','accepted');const ids=(fs||[]).map(x=>x.requester_id==user.id?x.addressee_id:x.requester_id);if(!ids.length){O.sets=[];return draw()}q=q.in('author_id',ids)}
+ const s=f.q.replace(/[,()%*\\]/g,'').trim();if(s)q=q.or(`title.ilike.%${s}%,author_name.ilike.%${s}%`);
+ const[{data,error},{data:lk}]=await Promise.all([q,sb.from('qlikes').select('set_id')]);if(error){$('vw').innerHTML=`<div class="sm" style="color:#c22">${esc(error.message)}</div>`;return}
+ O.sets=data||[];O.lk=new Set((lk||[]).map(x=>x.set_id));draw()}
+/* ---- 1人で遊ぶ(履歴・図鑑なし) ---- */
+async function solo(items,title,back){O.v='solo';let me=2000,en=2000,sur=false;$B().innerHTML='<div id="phd"></div><div id="opq" class="oc"></div><button data-a="sur" style="background:#f5d0d0">🏳 降参</button>';
+ const hd=i=>$('phd').innerHTML=`<div class="sm">${esc(title)} 第${i+1}問 / ${items.length}</div>`+bar(S.name||'あなた',me,2000)+bar('相手',en,2000);
+ for(let i=0;i<items.length&&me>0&&en>0;i++){hd(i);const it=items[i],box=$('opq'),r=await ask(box,it,it.time|0);if(r===null){sur=true;break}
+  const d=it.dmg||400;if(r){en-=d;SE.ok();SE.hit()}else{me-=d;SE.ng()}hd(i);box.innerHTML=`<div class="res ${r?'g':'r'}">${r?'⭕ 正解! '+d+'ダメージ':'❌ 不正解… '+d+'ダメージをうけた'}</div>${exp(it)}<button id="onx">次へ ▶</button>`;await wait($('onx'))}
+ const res=sur?'lose':me>en?'win':me<en?'lose':'draw';O.v='sres';res=='win'?SE.win():SE.lose();
+ $B().innerHTML=`<div class="rc ${res=='lose'?'lose':''}"><h2>${res=='win'?'🏆 勝ち!':res=='lose'?'💧 負け…':'🤝 引き分け'}</h2><div class="sm">履歴・図鑑には記録されません</div></div><button class="big go" data-a="sagain">🔁 もう一度</button><button class="big" data-a="sback">もどる</button>`;O.again=()=>solo(items,title,back);O.sback=back}
+/* ---- 操作 ---- */
+const A={nav:d=>{O.v=d.dataset.v;render()},tab:0,ctab:d=>{O.d.tab=d.dataset.v;render()},mode:d=>{O.d.mode=d.dataset.v;render()},rnd:()=>{O.d.pw=String(Math.random()*1e6|0).padStart(6,'0');render()},
+ tg:d=>{const f=d.dataset.f,v=f=='stars'?+d.dataset.v.slice(1):d.dataset.v,a=O.d[f],i=a.indexOf(v);i<0?a.push(v):a.splice(i,1);render()},
+ mk:mkRoom,join:d=>joinRoom(d.dataset.v,d.dataset.l,d.dataset.n),start,toset:()=>{const h=O.role=='h';leave();O.v=h?'create':'hub';render()},again:()=>{O.v='room';render()},
+ sur:q=>{if(q!==1&&!confirm('降参しますか?'))return;if(O.v=='play'){O.mySur=true;send('sur',1);flush()}O.cancel&&O.cancel()},
+ mtab:d=>{O.mt=d.dataset.v;render()},qadd:()=>{if(O.m.qs.length<30){O.m.qs.push(mkq());render()}},qdel:d=>{if(O.m.qs.length>1&&confirm('この問題を削除しますか?')){O.m.qs.splice(+d.dataset.v,1);render()}},
+ qall:d=>{const v=Math.max(0,+$(d.dataset.v=='dmg'?'gdm':'gtm').value|0);O.m.qs.forEach(x=>x[d.dataset.v]=v);render();toast('全問に反映しました')},qclr:d=>{setP(O,d.dataset.v,'');render()},
+ qtry:()=>{const e=chkSet();if(e)return toast(e);solo(clean(),O.m.title,()=>{O.v='make';render()})},qpub:pub,
+ bsrc:d=>{O.f.src=d.dataset.v;loadSets()},bsort:d=>{O.f.sort=d.dataset.v;loadSets()},bs:()=>{O.f.q=$('bq').value;loadSets()},
+ bplay:async d=>{const{data,error}=await sb.from('qsets').select('items,title').eq('id',d.dataset.v).single();if(error)return toast(error.message);solo(data.items,data.title,()=>{O.v='make';O.mt='view';render()})},
+ blike:async d=>{const{data,error}=await sb.rpc('toggle_like',{p_id:d.dataset.v});if(error)return toast(error.message);const r=O.sets.find(x=>x.id==d.dataset.v);if(r)r.likes=data.likes;data.liked?O.lk.add(d.dataset.v):O.lk.delete(d.dataset.v);loadSets()},
+ bdel:async d=>{if(!confirm('この投稿を削除しますか?'))return;const{error}=await sb.from('qsets').delete().eq('id',d.dataset.v);if(error)return toast(error.message);loadSets()},
+ sagain:()=>O.again(),sback:()=>O.sback()};
+const L=$('ol');L.innerHTML='<div id="oh"><button id="obk">← 閉じる</button><b id="ott"></b></div><div id="ob"></div><div id="of"></div>';
+$('obk').onclick=back;
+L.addEventListener('click',e=>{const d=e.target.closest('[data-a]');if(d&&A[d.dataset.a]){SE.click&&SE.click();A[d.dataset.a](d)}});
+L.addEventListener('input',e=>{const t=e.target,p=t.dataset.p;if(!p)return;if(t.type=='radio'&&!t.checked)return;let v=t.value;if(t.dataset.n)v=+v;setP(O,p,v);if(t.dataset.r){const q=O.m.qs[+p.split('.')[2]];if(q.t=='c2')q.c.length=2;else if(q.t=='c4')while(q.c.length<4)q.c.push('');if(q.k>=q.c.length)q.k=0;render()}});
+L.addEventListener('change',e=>{if(e.target.dataset.file)onFile(e.target)});
+})();
 </script></body></html>
