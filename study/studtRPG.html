@@ -548,13 +548,13 @@ if(typeof module!='undefined')module.exports={genArea,mb};
 
 const T={ja:{title:'勉強RPG',uid:'ID(英数字3〜20字)',pass:'パスワード(6文字以上)',name:'名前',age:'年齢',male:'男性',female:'女性',none:'選択しない',login:'ログイン',signup:'新規登録',guest:'ゲストで始める',logout:'ログアウト',coin:'コイン',lv:'Lv',days:'冒険日数',save:'保存',close:'閉じる',size:'文字サイズ',font:'フォント',auto:'オート',speed:'再生速度(小さいほど速い)',town:'始まりの町',hint:'まず長老の家へ行ってみよう',locked:'この家にはまだ入れないようだ…(今後追加予定)',nosb:'Supabase未設定です。ゲストで始めてください',need:'ID(英数字3〜20字)・パスワード(6文字以上)・名前を入力してください',confirmon:'SupabaseのConfirm emailがONです。OFFにしてください',win:'勝利!',draw:'引き分け',lose:'敗北…',ageL:'年齢を入力してください',next:'次へ',expl:'解説',back:'← 戻る',titles:['見習い勉強者','勉強の冒険者','数式の戦士','計算の騎士','算数の勇者']},
 en:{title:'Study RPG',uid:'ID (3-20 letters/digits)',pass:'Password (6+ chars)',name:'Name',age:'Age',male:'Male',female:'Female',none:'Prefer not to say',login:'Log in',signup:'Sign up',guest:'Play as guest',logout:'Log out',coin:'Coins',lv:'Lv',days:'Days',save:'Save',close:'Close',size:'Text size',font:'Font',auto:'Auto',speed:'Speed (lower = faster)',town:'Starting Town',hint:"Visit the Elder's house first",locked:"You can't enter this house yet... (coming soon)",nosb:'Supabase is not configured. Play as guest.',need:'Enter ID (3-20 letters/digits), password (6+) and name',confirmon:'Supabase Confirm email is ON. Turn it OFF.',win:'Victory!',draw:'Draw',lose:'Defeated...',ageL:'Enter your age',next:'Next',expl:'Explanation',back:'← Back',titles:['Novice','Adventurer','Math Fighter','Calc Knight','Hero']}};
-const DEF=()=>({lang:'ja',name:'',age:'',gender:'n',start:Date.now(),coin:0,exp:0,prologue:false,defeated:[],inv:{heal:0,atk:0},hist:[],pos:null,guest:false,snd:{on:true,bgm:.5,se:.7,voice:true},av:0,own:[0,1,2],jewel:0,jsec:0,zk:[],study:null,cap:7,pets:[],pet:-1,gp:{s:0,p:0}});
+const DEF=()=>({lang:'ja',name:'',age:'',gender:'n',start:Date.now(),coin:0,exp:0,prologue:false,defeated:[],inv:{heal:0,atk:0},hist:[],pos:null,guest:false,snd:{on:true,bgm:.5,se:.7,voice:true},av:0,own:[0,1,2],jewel:0,jsec:0,zk:[],study:null,cap:7,pets:[],pet:-1,gp:{s:0,p:0},keys:[]});
 let S=Object.assign(DEF(),JSON.parse(localStorage.getItem('rpgstudy')||'{}'));
 let user=null,ts={size:18,font:'sans-serif',auto:false,speed:40};
 const t=k=>(T[S.lang]||T.ja)[k]||k;
 const save=()=>localStorage.setItem('rpgstudy',JSON.stringify(S));
 /* ===== 保存(ローカル+クラウド) ===== */
-let st,lastErr=0;const prog=()=>({prologue:S.prologue,defeated:S.defeated,inv:S.inv,hist:S.hist.slice(-300),pos:{a:cur,x:px,y:py},snd:S.snd,av:S.av,own:ownSet(),jewel:S.jewel||0,jsec:S.jsec||0,zk:S.zk||[],cap:S.cap||7,pets:S.pets||[],pet:S.pet==null?-1:S.pet,gp:S.gp||{s:0,p:0},lr:S.lr||[],study:S.study?{cfg:S.study.cfg,sess:(S.study.sess||[]).slice(-1000)}:null,ts:S.ts});
+let st,lastErr=0;const prog=()=>({prologue:S.prologue,defeated:S.defeated,inv:S.inv,hist:S.hist.slice(-300),pos:{a:cur,x:px,y:py},snd:S.snd,av:S.av,own:ownSet(),jewel:S.jewel||0,jsec:S.jsec||0,zk:S.zk||[],cap:S.cap||7,pets:S.pets||[],pet:S.pet==null?-1:S.pet,gp:S.gp||{s:0,p:0},keys:S.keys||[],lr:S.lr||[],study:S.study?{cfg:S.study.cfg,sess:(S.study.sess||[]).slice(-1000)}:null,ts:S.ts});
 function showSaveErr(m){if(Date.now()-lastErr<60000)return;lastErr=Date.now();toast('☁ サーバーへの保存に失敗しました。⚙→🩺保存の診断 を確認してください'+(m?'('+m.slice(0,40)+')':''))}
 function persist(now){S.ts=Date.now();if(S.hist.length>300)S.hist=S.hist.slice(-300);save();if(!sb||!user)return Promise.resolve();clearTimeout(st);
  const go=()=>sb.from('progress').upsert({user_id:user.id,data:prog(),updated_at:new Date().toISOString()}).then(r=>{if(r&&r.error)showSaveErr(r.error.message)},e=>showSaveErr(String(e)));
@@ -644,8 +644,8 @@ const mkIcon=(lk,txt)=>L.divIcon({className:'tm',html:`<div class="pin ${lk?'lk'
 const WL=L.GridLayer.extend({createTile(c){const t=document.createElement('canvas');t.width=t.height=256;const g=t.getContext('2d'),N=c.z>=5?128:64,st=256/N,z=Math.pow(2,c.z),im=g.createImageData(N,N);
  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const wx=(c.x*256+i*st+st/2)/z,wy=(c.y*256+j*st+st/2)/z,k=tcol(elev(wx,wy),wx,wy),o=(j*N+i)*4;im.data[o]=k[0];im.data[o+1]=k[1];im.data[o+2]=k[2];im.data[o+3]=255}
  const tm=document.createElement('canvas');tm.width=tm.height=N;tm.getContext('2d').putImageData(im,0,0);g.imageSmoothingEnabled=true;g.drawImage(tm,0,0,256,256);return t}});
-const PIN_N=['始まりの町','勇者の村','レベルの街','ガチャの村','近代都市','洞窟の街','カジノの町'],PIN_K=['town','hero','lvtown','gacha','modern','cave','casino'],PIN_LV=()=>[1,GATE_LV,LV_TOWN,LV_GACHA,MOD_LV,CAVE_LV,CASINO_LV];
-const PINS=(()=>{const c=WS/2,R=[];for(let i=0;i<20;i++){let p=null;for(let t=0;t<16&&!p;t++){const a=i*2.4+.5+t*.8,rd=(i?90+i*27:0)+t*12,q=findLand(c+Math.cos(a)*rd,c+Math.sin(a)*rd);if(R.every(o=>Math.hypot(o[0]-q[0],o[1]-q[1])>=110))p=q}R.push(p||findLand(c+i*37,c-i*29))}return R})();
+const PIN_N=['始まりの町','勇者の村','レベルの街','ガチャの村','近代都市','洞窟の街','カジノの町','通行の都市','動物の森'],PIN_K=['town','hero','lvtown','gacha','modern','cave','casino','passage','forest'],PIN_LV=()=>[1,GATE_LV,LV_TOWN,LV_GACHA,MOD_LV,CAVE_LV,CASINO_LV,PASS_LV,0];
+const PINS=(()=>{const c=WS/2,R=[];for(let i=0;i<25;i++){let p=null;for(let t=0;t<16&&!p;t++){const a=i*2.4+.5+t*.8,rd=(i?90+i*27:0)+t*12,q=findLand(c+Math.cos(a)*rd,c+Math.sin(a)*rd);if(R.every(o=>Math.hypot(o[0]-q[0],o[1]-q[1])>=110))p=q}R.push(p||findLand(c+i*37,c-i*29))}return R})();
 const TP=PINS[0];
 function refreshPins(){wm.forEach(o=>{const l=o.lock();if(l!==o.st){o.st=l;o.m.setIcon(mkIcon(l,o.txt()))}});window.fitLbl&&fitLbl()}
 function initMap(){if(lm)return;
@@ -653,11 +653,14 @@ function initMap(){if(lm)return;
  L.control.zoom({position:'bottomright'}).addTo(lm);
  lm.attributionControl.addAttribution('世界マップ: ゲーム内で自動生成');
  new WL({tileSize:256,noWrap:true,minZoom:-2,maxZoom:7}).addTo(lm);
- for(let i=0;i<20;i++){const real=i<PIN_K.length,lv=real?PIN_LV()[i]:99,lock=()=>!real||lvl()<lv,txt=()=>`${i+1}. ${real?PIN_N[i]:'???'}`;
+ for(let i=0;i<20;i++){const real=i<PIN_K.length,lv=real?PIN_LV()[i]:99,lock=()=>!real||lvl()<lv||(PIN_K[i]=='forest'&&!forestOpen()),txt=()=>`${i+1}. ${real?PIN_N[i]:'???'}`;
   const m=L.marker([-PINS[i][1],PINS[i][0]],{icon:mkIcon(lock(),txt())}).addTo(lm).on('click',()=>{if(dlgOn)return;
    if(!real)return dlg([`${i+1}番目の場所…まだ入れないようだ。`,'(今後追加予定のステージ)']);
+   if(PIN_K[i]=='forest'){if(!forestOpen())return dlg(['動物の森への道は まだ閉ざされている…',`5つの教科の町で「動物の森の鍵」を 1つずつ集めると 行けるようになる。(いま ${forestN()} / 5)`]);return goTown('forest')}
    if(lvl()<lv)return dlg([`${PIN_N[i]}への道は まだ閉ざされている…`,`レベル${lv}になると 行けるようになる。(いまLv.${lvl()})`]);
    goTown(PIN_K[i])});wm.push({m,lock,txt,st:lock()})}
+ for(let j=0;j<5;j++){const i=20+j,lock=()=>!keyArr().includes('u'+j),txt=()=>`A${j+1}. ${AREAS[SJ_AREA[j]].name}`;
+  const m=L.marker([-PINS[i][1],PINS[i][0]],{icon:mkIcon(lock(),txt())}).addTo(lm).on('click',()=>{if(dlgOn)return;dlg([`${AREAS[SJ_AREA[j]].name}には 全体マップからは 行けない。`,'通行の都市の「移動の家」から 行こう。'+(lock()?`(「${SJ_K[j]}の鍵」が必要)`:'')])});wm.push({m,lock,txt,st:lock()})}
  /* 文字どうしが重なるほど縮小されたら、ピンの名前を消す(拡大すると再表示) */
  window.fitLbl=()=>{const el=lm.getContainer();el.classList.remove('nolbl');const cr=el.getBoundingClientRect(),P=[];el.querySelectorAll('.pl').forEach(p=>{const r=p.getBoundingClientRect();if(r.width&&r.right>cr.left&&r.left<cr.right&&r.bottom>cr.top&&r.top<cr.bottom)P.push(r)});let hit=false;for(let i=0;i<P.length&&!hit;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j];if(a.left<b.right&&b.left<a.right&&a.top<b.bottom&&b.top<a.bottom){hit=true;break}}el.classList.toggle('nolbl',hit)};
  lm.on('zoomend moveend resize',window.fitLbl);setTimeout(window.fitLbl,300)}
@@ -684,7 +687,7 @@ async function afterLogin(fresh){const{data:{session}}=await sb.auth.getSession(
   if(Object.keys(u).length){const{error}=await sb.from('profiles').update(u).eq('id',user.id);if(error)alert(error.message);else Object.assign(p,u)}
   const{data:pr}=await sb.from('progress').select('data').eq('user_id',user.id).maybeSingle();
   const d=(pr&&pr.data)||{},keep={lang:S.lang,snd:S.snd,cap:S.cap||7},lc=(S.uid==user.id||(!S.uid&&!S.guest&&S.name&&S.name===(p.name||'')))?S:null,useLocal=!!lc&&(lc.ts||0)>(d.ts||0);
-  const base=useLocal?{prologue:lc.prologue,defeated:lc.defeated,inv:lc.inv,hist:lc.hist,pos:lc.pos,av:lc.av,own:lc.own,snd:lc.snd,jewel:lc.jewel,jsec:lc.jsec,zk:lc.zk,lr:lc.lr,cap:lc.cap||7,pets:lc.pets||[],pet:lc.pet==null?-1:lc.pet,gp:lc.gp||{s:0,p:0},study:lc.study}:d,pend=lc&&lc.pend?lc.pend:[];
+  const base=useLocal?{prologue:lc.prologue,defeated:lc.defeated,inv:lc.inv,hist:lc.hist,pos:lc.pos,av:lc.av,own:lc.own,snd:lc.snd,jewel:lc.jewel,jsec:lc.jsec,zk:lc.zk,lr:lc.lr,cap:lc.cap||7,pets:lc.pets||[],pet:lc.pet==null?-1:lc.pet,gp:lc.gp||{s:0,p:0},keys:lc.keys||[],study:lc.study}:d,pend=lc&&lc.pend?lc.pend:[];
   S=Object.assign(DEF(),keep,{guest:false,uid:user.id,name:p.name||'',age:p.age||'',gender:p.gender||'n',coin:p.coin+pend.reduce((a,x)=>a+x.gain,0),exp:(p.exp||0)+pend.reduce((a,x)=>a+x.xp,0),start:new Date(p.created_at).getTime(),pend},base,{ts:Math.max(lc?lc.ts||0:0,d.ts||0)});
   if(!fresh&&!S.prologue)S.prologue=true;await flushPend();if(useLocal||(!fresh))persist(true);studyReset();
   if(S.pos&&S.pos.a)cur=S.pos.a;
@@ -803,7 +806,7 @@ function gxBack(again){const f=document.querySelector('#gx .gx-fx');f&&f.remove(
 
 /* ===== カジノの町(CASINO_LV から行ける)===== */
 const CASINO_T=[{k:'slot',n:'スロット',ic:'🎰'},{k:'roul',n:'ルーレット',ic:'🎡'},{k:'chin',n:'ちんちろ',ic:'🎲'}];
-const EX_C2J=50,EX_J2C=10,CZ_MIN=1000;/* 両替: 50コイン=1ジュエル / 1ジュエル=10コイン */
+const EX_C2J=1,EX_J2C=1,CZ_MIN=1000;/* 両替: 1コイン=1ジュエル(どちらの向きも) */
 const CZ={bet:1000,busy:false,chip:1000,bets:{},stack:[],last:null};
 const czfm=n=>Math.round(+n||0).toLocaleString();
 const czq=id=>document.getElementById(id);
@@ -840,7 +843,7 @@ function openCasinoGame(t){if(!t)return;CZ.busy=window.CZB=false;CZ.bets={};CZ.s
 let EXB=false;
 function openExchange(){return openModal(H('💱','両替所'),czTop()+`<div class="c" style="background:#dff3ff;border-color:#3a8ad9;color:#1f5fa8"><small>所持ジュエル</small><b id="exj">💎 ${czfm(S.jewel||0)}</b></div>
  <div class="cz-rule">📖 レート<table class="cz-tb"><tr><td>💰 → 💎</td><td>${EX_C2J}コイン = 1ジュエル</td></tr><tr><td>💎 → 💰</td><td>1ジュエル = ${EX_J2C}コイン</td></tr></table>
- <small>※ コ→ジュエルは ${EX_C2J}コイン単位です。行ったり来たりすると 少し損します。</small></div>
+ <small>※ どちらの向きも 同じレート(1コイン=1ジュエル)です。</small></div>
  <div class="cz-ex"><b>💰 → 💎 コインをジュエルに</b><input id="exc" type="number" inputmode="numeric" min="${EX_C2J}" step="${EX_C2J}" value="1000" oninput="exPrev()">
   <div class="cz-pre">${[1000,10000,100000].map(v=>`<button onclick="exSet('exc',${v})">${czfm(v)}</button>`).join('')}<button onclick="exSet('exc',-1)">ぜんぶ</button></div>
   <div>→ 受け取り <b id="exc2">💎 20</b></div><button class="cz-go" style="font-size:16px;padding:.6em" onclick="exGo('cj')">両替する</button></div>
@@ -972,7 +975,7 @@ function openCap(){const c=Math.min(7,Math.max(1,S.cap||7));
 function setCap(n){S.cap=n;persist(true);closeModal();toast(n>=7?'難易度の上限: 制限なし':'難易度の上限を ★'+n+' にしました')}
 
 /* ===== マップ別XP ===== */
-function xpRows(){return PIN_K.map((k,i)=>({k,i})).filter(o=>o.k!='casino').map(({k,i})=>{const A=AREAS[k],ids=S.defeated.filter(x=>x.startsWith(k+':')),tot=A.E.reduce((a,r)=>a+STAR[r[2]].xp,0),got=A.E.reduce((a,r,j)=>a+(isDef(`${k}:${r[5]}${A.E.slice(0,j).filter(q=>q[5]==r[5]).length}`)?STAR[r[2]].xp:0),0);
+function xpRows(){return PIN_K.map((k,i)=>({k,i})).filter(o=>o.k!='casino'&&o.k!='forest').map(({k,i})=>{const A=AREAS[k],ids=S.defeated.filter(x=>x.startsWith(k+':')),tot=A.E.reduce((a,r)=>a+STAR[r[2]].xp,0),got=A.E.reduce((a,r,j)=>a+(isDef(`${k}:${r[5]}${A.E.slice(0,j).filter(q=>q[5]==r[5]).length}`)?STAR[r[2]].xp:0),0);
  return{k,n:A.name,lv:PIN_LV()[i],cnt:A.E.length,done:ids.length,tot,got,rem:tot-got,lvA:levelOf(S.exp+tot-got),lvT:levelOf(tot),re:!!A.rematch,win:A.E.reduce((a,r)=>a+STAR[r[2]].xp,0)}})}
 function xpSum(){const R=xpRows(),sel=[...document.querySelectorAll('.xpck')].filter(c=>c.checked).map(c=>+c.value),f=n=>n.toLocaleString();
  const s=R.filter((r,i)=>sel.includes(i)).reduce((a,r)=>({cnt:a.cnt+r.cnt,done:a.done+r.done,tot:a.tot+r.tot,got:a.got+r.got,rem:a.rem+r.rem}),{cnt:0,done:0,tot:0,got:0,rem:0});
@@ -1111,7 +1114,7 @@ const LV_TOWN=10,LV_GACHA=12,SUB5=['数学','英語','国語','社会','理科']
 const LVH=['門番ガイア','剣士レイン','魔女ミルカ','弓兵ヴァン','盗賊ネロ','聖騎士アルス','錬金術師フラン','吟遊詩人リュート','鍛冶屋ドワン','忍者カゲ','海賊バルボ','僧侶セシル','竜騎士ドレイク','拳闘士ゴウ','占い師ルーナ','賢者オルド','将軍バルド','踊り子フィオ','猟師ハンク','学園長ソフィア','探検家ノア','死霊術師ヘル','氷の魔導士ユキ','炎の剣士ホムラ','雷の戦士ライカ'];
 const LVR=[['ライオンのレオ','🦁','ガオー!'],['とらのタイガ','🐯','ガルル!'],['ぞうのパオ','🐘','パオー!'],['きりんのリン','🦒','…!'],['パンダのシャオ','🐼','クゥ!'],['コアラのアラ','🐨','クワッ!'],['かえるのケロ','🐸','ケロケロ!'],['かめのゲン','🐢','…ノソ。'],['さめのジョー','🦈','ガブッ!'],['たこのタコ','🐙','ブクブク!'],['かにのカニ','🦀','チョキ!'],['わしのイーグ','🦅','ピィー!'],['あひるのガー','🦆','ガー!'],['ペンギンのペン','🐧','ペン!'],['うまのヒヒン','🐎','ヒヒーン!'],['うしのモー','🐄','モー!'],['ぶたのブー','🐖','ブー!'],['ひつじのメー','🐑','メェー!'],['やぎのヤギ','🐐','メェ!'],['しかのバンビ','🦌','ピィ!'],['りすのチップ','🐿','キュッ!'],['はりねずみのトゲ','🦔','チクッ!'],['カンガルーのルー','🦘','ピョン!'],['おうむのポリー','🦜','ポリー!'],['ふくろうのウル','🦉','ホーホー!']];
 /* --- 近代都市(Lv15・★4が10体/★5が10体)/ 洞窟の街(Lv16・★4が10体) --- */
-const MOD_LV=15,CAVE_LV=16,CASINO_LV=20;/* カジノの町に行けるレベル */
+const MOD_LV=15,CAVE_LV=16,CASINO_LV=2;/* カジノの町に行けるレベル */
 const MODH=['警備員タクミ','会社員ユウキ','エンジニアのレン','駅員サトシ','カフェ店員ミサキ','デザイナーアヤ','警察官ゴウ','記者ナオ','建築家ダイ','市長エリカ'];
 const MODR=[['ロボのアルファ','🤖','ピピッ!'],['ドローンのブン','🚁','ブーン!'],['ハトのクルル','🕊','クルッポー!'],['タクシーのタク','🚕','ブッブー!'],['AIのコア','💻','ピー!'],['でんしゃのデン','🚃','ガタンゴトン!'],['スケボー少年ジン','🛹','イェイ!'],['カラスのカー','🐦','カァ!'],['ロケットのロク','🚀','ゴォー!'],['しんごうきのシン','🚦','ピカッ!']];
 const R_MOD=MODH.map((n,i)=>[n,SUB5[i%5],4,(i*11+2)%30,(i+2)%6,'h']).concat(MODR.map((r,i)=>[r[0],SUB5[(i+3)%5],5,r[1],(i+4)%6,'r',r[2]]));
@@ -1123,23 +1126,66 @@ const R_LV=LVH.map((n,i)=>[n,SUB5[i%5],lvStar(i),(i*7)%30,i%6,'h']).concat(LVR.m
 const GH=['ガチャ番人ルーレ','くじ引き職人ガラ','カプセル博士ポン','運命の占い師ラック','福引き王コロン'],GR=[['招き猫ミケ','🐈','ニャン!'],['ひよこのピヨ','🐤','ピヨ!'],['ぶたの貯金箱ブー','🐖','ブー!'],['かえるのクロ','🐸','ゲコ!'],['きつねのコンタ','🦊','コン!']];
 const R_GACHA=GH.map((n,i)=>[n,SUB5[i%5],4,(i*5+3)%30,(i+1)%6,'h']).concat(GR.map((r,i)=>[r[0],SUB5[(i+1)%5],4,r[1],(i+2)%6,'r',r[2]]));
 const GACHA_T=[{n:'スキン',ic:'🎭',ok:1,k:'skin'},{n:'ペット',ic:'🐾',ok:1,k:'pet'},{n:'アクセサリー',ic:'👑'},{n:'デザイン',ic:'🎨'},{n:'エフェクト',ic:'✨'},{n:'称号',ic:'🏷'}];
+/* ===== 通行の都市(Lv17)・5教科の町(A1〜A5)・動物の森 ===== */
+const PASS_LV=17,PASS_T=[{k:'house',n:'移動の家',ic:'🏠'}];
+const SJ_K=['数学','理科','社会','国語','英語'],SJ_IC=['➗','🧪','🌏','📖','🔤'],SJ_AREA=['sub0','sub1','sub2','sub3','sub4'];
+const SJ_NM=['アベル','カイ','ミナ','ソラ','リク','ナギ','ユイ','ハル','レオ','ノア','ミオ','ルカ','シン','アオイ','ケン','サラ','トム','リン','ダイ','マヤ','ジン','エマ','タク','ニナ','ロイ'];
+const SJ_TT=[['計算士','図形博士','方程式使い','確率師','関数の賢者'],['実験助手','天文博士','化学者','生物学者','地学の達人'],['歴史家','地理博士','公民の先生','探検家','古文書の番人'],['作家','詩人','漢字博士','書道家','朗読家'],['通訳','英会話の先生','旅行ガイド','文法博士','語学留学生']];
+const SJ_RM=['🔢|すうじ,➕|プラス,➖|マイナス,✖️|かけざん,➗|わりざん,📐|じょうぎ,📏|ものさし,🧮|そろばん,🔺|さんかく,🔷|ひしがた,⭕|えん,🟦|しかく,💯|ひゃくてん,🎲|さいころ,♾️|むげん,🔟|じゅう,📊|ぼうグラフ,📈|ひれい,🧊|りっぽうたい,🔶|だいや,🔻|ぎゃくさんかく,🟥|せいほうけい,🟢|まる,🔵|あおいえん,📉|さがるくん',
+ '🧪|しけんかん,🔬|けんびきょう,🧲|じしゃく,🌋|かざん,🌍|ちきゅう,🌙|つき,☀️|たいよう,⭐|ほし,🌈|にじ,⚡|いなずま,💧|みず,🔥|ひ,🌱|なえ,🌻|ひまわり,🦠|さいきん,🧬|いでんし,⚗️|フラスコ,🔭|ぼうえんきょう,🪐|わくせい,☄️|すいせい,🌡️|おんどけい,🪨|いわ,🦋|ちょう,🐝|みつばち,🌊|なみ',
+ '🗾|にほん,🏯|おしろ,⛩️|じんじゃ,🗻|ふじさん,🏛️|しんでん,🗽|じゆうのめがみ,👑|おうかん,📜|まきもの,🏺|つぼ,⚔️|かたな,🚢|ふね,🚂|きしゃ,🏭|こうじょう,🌾|こめ,🗿|モアイ,🧭|ほういじしん,🗺️|ちず,📰|しんぶん,💴|おかね,🏦|ぎんこう,🌐|ちきゅうぎ,🏙️|まち,🏘️|むら,🛕|おてら,🕌|モスク',
+ '📖|ほん,✒️|ふで,🖋️|ペン,📝|メモ,📚|としょ,🈶|かんじ,🔤|ひらがな,💬|ことば,🎋|たんざく,🌸|さくら,🍃|はいく,🎴|かるた,🔖|しおり,🗒️|ノート,✏️|えんぴつ,📕|じてん,🪶|はね,📣|おんどく,🎤|ろうどく,🧧|ふうとう,🪭|おうぎ,📄|かみ,🖌️|しゅうじ,🏮|ちょうちん,🎑|おつきみ',
+ '🔠|エービーシー,🗽|リバティ,🍎|アップル,🌎|ワールド,✈️|エアプレーン,☕|ティー,🍔|バーガー,🎸|ギター,📞|コール,🚌|バス,🏈|ラグビー,🎬|ムービー,💌|レター,🎂|ケーキ,🧢|キャップ,👟|シューズ,🥛|ミルク,🍞|ブレッド,🎹|ピアノ,⚽|サッカー,🚗|カー,🛫|テイクオフ,🏖️|ビーチ,🪁|カイト,🎧|ミュージック'];
+const SJ_SF=['ポコ','モコ','ピコ','ココ','ロロ','ミミ','ララ','ププ','チチ','ノノ','ルル','レレ','ニニ','ヨヨ','ユユ','ワワ','パパ','ピピ','ペペ','ボボ','ベベ','ブブ','ガガ','ゴゴ','ギギ'];
+const SJ_CRY=[['ピッ!','カチッ!','ポン!'],['ボッ!','ピカッ!','ブクブク!'],['ホォー!','ゴゴゴ…','ドン!'],['ほほう!','ふむふむ!','ペラッ!'],['Hello!','Yeah!','OK!']];
+/* 各教科の町: 家25+道端25 = 50体。★1〜★5が10体ずつ。★5の10体が「動物の森の鍵」を持っている */
+const R_SUB=SJ_K.map((s,j)=>{
+ const hs=Array.from({length:25},(_,i)=>[SJ_TT[j][i%5]+SJ_NM[(i*3+j*7)%25],s,1+Math.floor(i/5),(i*7+j*3)%30,(i+j)%6,'h',undefined,i>=20?'f'+j:undefined]);
+ const rs=SJ_RM[j].split(',').map((x,i)=>{const[e,n]=x.split('|');return[n+'の'+SJ_SF[i],s,1+Math.floor(i/5),e,(i+j+2)%6,'r',SJ_CRY[j][i%3],i>=20?'f'+j:undefined]});
+ return hs.concat(rs)});
+/* 通行の都市: ★4が20体・★5が10体。★5の家の5人(鍵守)が「通行の鍵」を1つずつ持っている */
+const PH=['門番ツウ','旅人ミチ','関所のセキ','荷運びニモ','道案内ロク','手形師テガタ','駅長エキ','橋守ハシ','見張りカゼ','宿屋のヤド'],PKH=['鍵守スウ','鍵守リカ','鍵守シャ','鍵守コク','鍵守エイ'];
+const PRM='🚶|たびびと,🧳|にもつ,🚃|れっしゃ,🚏|バスてい,🛣️|かいどう,🚦|しんごう,🚧|こうじ,🧭|コンパス,🗺️|ちず,🎫|きっぷ,🚲|じてんしゃ,🛵|スクーター,🚁|ヘリ,🛬|ひこうき,🚉|えき'.split(',');
+const R_PASS=PH.map((n,i)=>[n,SUB5[i%5],4,(i*5+1)%30,(i+1)%6,'h']).concat(PKH.map((n,j)=>[n+'('+SJ_K[j]+')',SJ_K[j],5,(j*9+4)%30,(j+2)%6,'h',undefined,'p'+j])).concat(PRM.map((x,i)=>{const[e,n]=x.split('|');return[n+'の'+SJ_SF[i],SUB5[(i+2)%5],i<10?4:5,e,(i+3)%6,'r','ゴー!']}));
+/* 鍵: p0〜p4=通行の鍵(使う前) / u0〜u4=移動の家で使った(町が開いた) / f0〜f4=動物の森の鍵 */
+const keyArr=()=>Array.isArray(S.keys)?S.keys:(S.keys=[]);
+const forestN=()=>[0,1,2,3,4].filter(j=>keyArr().includes('f'+j)).length,forestOpen=()=>forestN()==5;
+function giveKey(e){if(!e||!e.key)return;const K=keyArr();if(K.includes(e.key))return;K.push(e.key);const j=+e.key.slice(1),sj=SJ_K[j];
+ if(e.key[0]=='p')window.KEYMSG=`🔑 「${sj}の鍵」を手に入れた!<br>通行の都市の「移動の家」で使うと ${AREAS[SJ_AREA[j]].name}へ行けるよ`;
+ else window.KEYMSG=`🗝 「動物の森の鍵(${sj})」を手に入れた! (${forestN()}/5)`+(forestOpen()?'<br>🌳 5つそろった! 全体マップから 動物の森へ行けるようになった!':'')}
+let PASS_GO=null;
+function openHouse(){const K=keyArr();
+ const rows=SJ_K.map((s,j)=>{const has=K.includes('p'+j),used=K.includes('u'+j);
+  return `<div class="li"><b>${SJ_IC[j]} A${j+1} ${AREAS[SJ_AREA[j]].name}<br><small>${used?'扉がひらいている':has?'🔑 鍵を持っている!':'🔒 「'+s+'の鍵」が必要'}</small></b>${used?`<button onclick="houseGo(${j})">行く</button>`:has?`<button onclick="houseUse(${j})">鍵をつかう</button>`:'<span>🔒</span>'}</div>`}).join('');
+ return openModal(H('🏠','移動の家'),`<div class="sm">各教科の町へ 移動できる家です。通行の都市にいる「鍵守」(名前に鍵守がつく人)に勝つと その教科の鍵をもらえます。鍵を使うと その町へ行けるようになります。(全体マップからは 入れません)</div>`+rows+`<div class="sm">🗝 動物の森の鍵: ${forestN()} / 5 (各教科の町で1つずつ。そろうと全体マップから動物の森へ)</div>`)}
+function houseUse(j){const K=keyArr();if(!K.includes('p'+j)||K.includes('u'+j))return;K.push('u'+j);persist(true);SE.ok();toast(`🔑 ${AREAS[SJ_AREA[j]].name}への扉が ひらいた!`);openHouse()}
+function houseGo(j){if(!keyArr().includes('u'+j))return;PASS_GO=SJ_AREA[j];closeModal()}
+
 const AREAS={town:{name:'始まりの町',seed:7,W:64,H:44,gW:false,next:'hero',th:0,E:R_TOWN},
  hero:{name:'勇者の村',seed:21,W:64,H:44,gW:true,prev:'town',next:null,th:1,E:R_HERO,gS:true,exits:[{c:'X',to:'lvtown',lv:LV_TOWN},{c:'Y',to:'gacha',lv:LV_GACHA}]},
  lvtown:{name:'レベルの街',seed:33,cols:8,rows:5,W:84,H:54,gW:true,prev:'hero',next:null,th:2,E:R_LV,nR:25,sortNpc:1,rematch:1,ponds:3,kinds:['S',...Array(25).fill('E'),...Array(4).fill('d')]},
  modern:{name:'近代都市',seed:55,cols:7,rows:4,W:74,H:44,gW:true,prev:'hero',next:null,th:4,E:R_MOD,nR:10,sortNpc:1,ponds:2,kinds:['S',...Array(10).fill('E'),...Array(4).fill('d')]},
  cave:{name:'洞窟の街',seed:66,cols:5,rows:3,W:54,H:34,gW:true,prev:'hero',next:null,th:5,E:R_CAVE,nR:5,sortNpc:1,ponds:2,kinds:['S',...Array(5).fill('E'),...Array(3).fill('d')]},
  gacha:{name:'ガチャの村',seed:44,cols:5,rows:3,W:54,H:34,gW:true,prev:'hero',backSide:'S',next:null,th:3,E:R_GACHA,nR:5,sortNpc:1,ponds:1,kinds:['S',...Array(6).fill('C'),...Array(5).fill('E'),...Array(2).fill('d')]},
- casino:{name:'カジノの町',seed:88,cols:5,rows:3,W:54,H:34,gW:true,prev:'hero',next:null,th:6,E:[],nR:0,ponds:2,kinds:['S',...Array(3).fill('C'),...Array(5).fill('d')]}};
+ casino:{name:'カジノの町',seed:88,cols:5,rows:3,W:54,H:34,gW:true,prev:'hero',next:null,th:6,E:[],nR:0,ponds:2,kinds:['S',...Array(3).fill('C'),...Array(5).fill('d')]},
+ passage:{name:'通行の都市',seed:101,cols:7,rows:4,W:74,H:44,gW:true,prev:'hero',next:null,th:4,E:R_PASS,nR:15,sortNpc:1,ponds:2,showCnt:1,kinds:['C',...Array(15).fill('E'),...Array(4).fill('d')]},
+ forest:{name:'動物の森',seed:111,cols:5,rows:3,W:54,H:34,gW:true,prev:'hero',next:null,th:0,E:[],nR:0,ponds:2,kinds:[...Array(4).fill('d')]},
+ sub0:{name:'数学の町',seed:121,cols:8,rows:5,W:84,H:54,gW:true,prev:'passage',backHouse:1,next:null,th:2,E:R_SUB[0],nR:25,sortNpc:1,ponds:3,showCnt:1,kinds:[...Array(25).fill('E'),...Array(4).fill('d')]},
+ sub1:{name:'理科の町',seed:131,cols:8,rows:5,W:84,H:54,gW:true,prev:'passage',backHouse:1,next:null,th:3,E:R_SUB[1],nR:25,sortNpc:1,ponds:3,showCnt:1,kinds:[...Array(25).fill('E'),...Array(4).fill('d')]},
+ sub2:{name:'社会の町',seed:141,cols:8,rows:5,W:84,H:54,gW:true,prev:'passage',backHouse:1,next:null,th:1,E:R_SUB[2],nR:25,sortNpc:1,ponds:3,showCnt:1,kinds:[...Array(25).fill('E'),...Array(4).fill('d')]},
+ sub3:{name:'国語の町',seed:151,cols:8,rows:5,W:84,H:54,gW:true,prev:'passage',backHouse:1,next:null,th:0,E:R_SUB[3],nR:25,sortNpc:1,ponds:3,showCnt:1,kinds:[...Array(25).fill('E'),...Array(4).fill('d')]},
+ sub4:{name:'英語の町',seed:161,cols:8,rows:5,W:84,H:54,gW:true,prev:'passage',backHouse:1,next:null,th:4,E:R_SUB[4],nR:25,sortNpc:1,ponds:3,showCnt:1,kinds:[...Array(25).fill('E'),...Array(4).fill('d')]},
+};
 const TH=[{g:['#6fbf5a','#68b753','#74c45f','#6cba57'],r:['#d9c58f','#d2bd84'],leaf:['#3d8a3d','#4aa04a'],f:'#f0a0d0'},{g:['#b5b85a','#aeb152','#bcbf63','#b2b55a'],r:['#d8b27a','#cfa86e'],leaf:['#c0702a','#d98a3a'],f:'#f5d860'},{g:['#7fb8a4','#78b09c','#86c0ac','#7cb6a2'],r:['#c9c9d4','#bfbfcb'],leaf:['#2f7a68','#3f9a84'],f:'#ffffff'},{g:['#b79ad6','#b092d0','#bfa2de','#b496d4'],r:['#f0dca0','#e8d194'],leaf:['#7a4aa0','#9a5ac0'],f:'#ffd0f0'},{g:['#9aa5ad','#939ea6','#a1acb4','#97a2aa'],r:['#c8c8c8','#bdbdbd'],leaf:['#4a7a5a','#5a8f6a'],f:'#e8e8f0'},{g:['#6b6258','#645b52','#71685d','#675e54'],r:['#9a8f84','#8f8479'],leaf:['#4a4036','#5a4e42'],f:'#c9b79a'},{g:['#4f9a6e','#489366','#55a176','#4f9a6e'],r:['#e3c46a','#d9ba5e'],leaf:['#2a6a4a','#3a8a5a'],f:'#ffd35a'}];
 const ROOF=[['#b5503a','#8a3a2a'],['#3a6ab5','#2a4a8a'],['#6a9a3a','#4a7a2a'],['#8a5ab5','#6a3a8a'],['#d9a03a','#b07a1a'],['#555e6a','#3a424d'],['#2a7ab5','#1a5a8a']],WALL=['#f0dfb8','#e8e4d8','#f4d8c8','#d8e8d0','#e0d0e8','#f0e8b0','#dfe8f4'];
-const mkE=(a,r,i)=>({id:`${a}:${r[5]}${i}`,n:r[0],s:r[1],star:r[2],xp:STAR[r[2]].xp,coin:STAR[r[2]].coin,sp:r[3],v:r[4],k:r[5],cry:r[6]});
+const mkE=(a,r,i)=>({id:`${a}:${r[5]}${i}`,n:r[0],s:r[1],star:r[2],xp:STAR[r[2]].xp,coin:STAR[r[2]].coin,sp:r[3],v:r[4],k:r[5],cry:r[6],key:r[7]});
 const AR={};
 function getArea(a){if(!AR[a]){const D=AREAS[a],g=genArea(D),d0=d=>Math.abs(d.fx-g.sW[0])+Math.abs(d.fy-g.sW[1]);
  const houses=g.doors.filter(d=>d.k=='E').sort((p,q)=>d0(p)-d0(q)),hs=D.E.filter(e=>e[5]=='h'),rs=D.E.filter(e=>e[5]=='r');
  g.byDoor={};houses.forEach((d,i)=>g.byDoor[d.x+','+d.y]=mkE(a,hs[i],i));
  const dn=p=>Math.abs(p.x-g.sW[0])+Math.abs(p.y-g.sW[1]),np=D.sortNpc?g.npc.slice().sort((p,q)=>dn(p)-dn(q)):g.npc;
  g.npcs=np.map((p,i)=>({x:p.x,y:p.y,e:mkE(a,rs[i],i)}));g.first=houses[0];
- g.gachaAt={};g.doors.filter(d=>d.k=='C').sort((p,q)=>d0(p)-d0(q)).forEach((d,i)=>g.gachaAt[d.x+','+d.y]=(a=='casino'?CASINO_T:GACHA_T)[i]);AR[a]=g}return AR[a]}
+ g.gachaAt={};g.doors.filter(d=>d.k=='C').sort((p,q)=>d0(p)-d0(q)).forEach((d,i)=>g.gachaAt[d.x+','+d.y]=(a=='casino'?CASINO_T:a=='passage'?PASS_T:GACHA_T)[i]);AR[a]=g}return AR[a]}
 const isDef=id=>S.defeated.includes(id);
 let ptrail=[],pw=null;/* 保存位置が建物の中・行き止まりなど、いまのマップで歩けない場所なら、入口にもどす */
 function okPos(g,x,y){if(!g.reach){const M=g.M,seen=new Set([g.sW.join()]),q=[g.sW.slice()];while(q.length){const[a,b]=q.shift();for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=a+dx,ny=b+dy,c=(M[ny]||[])[nx];if(!c||'THWdKBA'.includes(c))continue;const k=nx+','+ny;if(seen.has(k))continue;seen.add(k);if('ECSXP'.includes(c))continue;q.push([nx,ny])}}g.reach=seen}return g.reach.has(x+','+y)&&!'ECSXP'.includes((g.M[y]||[])[x]||'T')}
@@ -1162,13 +1208,13 @@ function tile(c,x,y,gx,gy,sv){const X=x*TS,Y=y*TS,v=(gx*7+gy*13)%4,T=TH[AREAS[cu
   if(dc==2&&gx%4==0){cx.fillStyle='#e33';cx.fillRect(X+22,Y+2,14,9);cx.fillStyle='#432';cx.fillRect(X+21,Y+2,2,22)}}
  if('WESdC'.includes(c)){cx.fillStyle=WALL[st];cx.fillRect(X,Y,TS,TS);cx.fillStyle=ROOF[st][1];cx.fillRect(X,Y,TS,5);
   if(c=='W'){cx.fillStyle='#8cc4e8';cx.fillRect(X+12,Y+12,24,18);cx.fillStyle='#fff';cx.fillRect(X+23,Y+12,2,18);if(dc==4){cx.fillStyle='#e55';cx.fillRect(X+14,Y+34,8,6);cx.fillStyle='#5a5';cx.fillRect(X+28,Y+34,8,6)}}
-  else{cx.fillStyle=c=='E'?'#ffd65a':c=='S'?'#3a7ad9':c=='C'?'#b05ae0':'#8a6a5a';cx.fillRect(X+8,Y+8,32,40);cx.fillStyle='#0003';cx.fillRect(X+8,Y+8,32,5);cx.fillStyle='#fff';cx.font='bold 18px sans-serif';if(c=='S')cx.fillText(cur=='casino'?'換':'武',X+15,Y+34);if(c=='C')cx.fillText(cur=='casino'?'遊':'ガ',X+15,Y+34);if(c=='E')cx.fillText('★',X+15,Y+34);if(c=='d'){cx.fillStyle='#432';cx.fillRect(X+30,Y+28,4,4)}}}
+  else{cx.fillStyle=c=='E'?'#ffd65a':c=='S'?'#3a7ad9':c=='C'?'#b05ae0':'#8a6a5a';cx.fillRect(X+8,Y+8,32,40);cx.fillStyle='#0003';cx.fillRect(X+8,Y+8,32,5);cx.fillStyle='#fff';cx.font='bold 18px sans-serif';if(c=='S')cx.fillText(cur=='casino'?'換':'武',X+15,Y+34);if(c=='C')cx.fillText(cur=='casino'?'遊':cur=='passage'?'移':'ガ',X+15,Y+34);if(c=='E')cx.fillText('★',X+15,Y+34);if(c=='d'){cx.fillStyle='#432';cx.fillRect(X+30,Y+28,4,4)}}}
  if(c=='X'||c=='P'||c=='Y'){cx.fillStyle='#7a5a3a';cx.fillRect(X+2,Y,10,TS);cx.fillRect(X+TS-12,Y,10,TS);cx.fillRect(X,Y,TS,10);cx.fillStyle='#fff';cx.font='bold 16px sans-serif';cx.fillText(c=='X'?'▶':c=='Y'?'▼':'◀',X+17,Y+34)}}
 function draw(){if(!G)return;const ox=Math.max(0,Math.min(G.M[0].length-15,px-7)),oy=Math.max(0,Math.min(G.M.length-10,py-5));cx.imageSmoothingEnabled=false;
  for(let y=0;y<10;y++)for(let x=0;x<15;x++)tile(G.M[oy+y][ox+x],x,y,ox+x,oy+y,G.ST[oy+y][ox+x]);
  const RM=!!AREAS[cur].rematch;
  G.doors.forEach(d=>{if(d.k!='E'&&d.k!='C'&&!(d.k=='S'&&cur=='casino'))return;const sx=(d.x-ox)*TS+8,sy=(d.oy-oy)*TS+2+Math.sin(bob+d.x)*3;if(!(sx>-40&&sx<720&&sy>-40&&sy<480))return;
-  if(d.k=='S'){cx.font='30px serif';cx.fillText('💱',sx-2,sy+28);return}if(d.k=='C'){const gt=G.gachaAt[d.x+','+d.y];cx.font='30px serif';cx.fillText(cur=='casino'?(gt?gt.ic:'🎰'):(gt&&gt.k=='pet'?'🐾':'🎰'),sx-2,sy+28);return}
+  if(d.k=='S'){cx.font='30px serif';cx.fillText('💱',sx-2,sy+28);return}if(d.k=='C'){const gt=G.gachaAt[d.x+','+d.y];cx.font='30px serif';cx.fillText(cur=='casino'?(gt?gt.ic:'🎰'):cur=='passage'?'🏠':(gt&&gt.k=='pet'?'🐾':'🎰'),sx-2,sy+28);return}
   const e=G.byDoor[d.x+','+d.y],df=isDef(e.id);if(df&&!RM)return;
   if(df){cx.font='28px serif';cx.fillText('🔁',sx-1,sy+28)}else{cx.fillStyle='#fff';cx.font='bold 34px sans-serif';cx.fillText('★',sx-1,sy+1);cx.fillStyle='#f5b400';cx.fillText('★',sx,sy)}});
  G.npcs.forEach(n=>{const df=isDef(n.e.id);if(df&&!RM)return;const sx=(n.x-ox)*TS,sy=(n.y-oy)*TS;if(sx<-64||sx>720||sy<-64||sy>480)return;
@@ -1177,7 +1223,7 @@ function draw(){if(!G)return;const ox=Math.max(0,Math.min(G.M[0].length-15,px-7)
  const X=(px-ox)*TS,Y=(py-oy)*TS,row={u:0,l:1,d:2,r:3}[dir],f=(Date.now()-lmv<260)?1+(wf%8):0;
  drawPet(ox,oy);if(AIMG.complete)cx.drawImage(AIMG,f*64,256*S.av+row*64,64,64,X-8,Y-14,64,64);
  if(cur=='town'&&!isDef('town:h0')&&G.first){const ax=(G.first.fx-ox)*TS+14,ay=(G.first.fy-oy)*TS+30+Math.sin(bob)*4;if(ax>0&&ax<720&&ay>0&&ay<480){cx.fillStyle='#e33';cx.font='26px sans-serif';cx.fillText('▲',ax,ay)}}
- const hn=$('hint');const AA=AREAS[cur],tot=AA.E.length;hn.textContent=(cur=='town'&&!isDef('town:h0'))?t('hint'):AA.name+((AA.rematch||cur=='gacha')?` 勝利 ${S.defeated.filter(x=>x.startsWith(cur+':')).length} / ${tot}`:'');hn.style.display=on('town')?'block':'none'}
+ const hn=$('hint');const AA=AREAS[cur],tot=AA.E.length;hn.textContent=(cur=='town'&&!isDef('town:h0'))?t('hint'):AA.name+((AA.rematch||cur=='gacha'||AA.showCnt)?` 勝利 ${S.defeated.filter(x=>x.startsWith(cur+':')).length} / ${tot}`:'');hn.style.display=on('town')?'block':'none'}
 setInterval(()=>{bob+=.3;if(on('town'))draw()},80);
 const modalOpen=()=>$('modal').style.display=='flex';
 async function mv(dx,dy,d){if(busy||!on('town')||modalOpen()||!G)return;dir=d;const nx=px+dx,ny=py+dy,c=(G.M[ny]||[])[nx];
@@ -1188,10 +1234,10 @@ async function mv(dx,dy,d){if(busy||!on('town')||modalOpen()||!G)return;dir=d;co
  ptrail.unshift([px,py]);ptrail.length=Math.min(ptrail.length,2);px=nx;py=ny;wf++;lmv=Date.now();draw();setTimeout(draw,280);persist();
  if(c=='E'){busy=true;await houseFight(G.byDoor[nx+','+ny]);py=ny+1;draw();persist();busy=false;return}
  if(c=='S'){busy=true;await (cur=='casino'?openExchange():openShop());py=ny+1;draw();persist();busy=false;return}
- if(c=='C'){busy=true;await (cur=='casino'?openCasinoGame(G.gachaAt[nx+','+ny]):openGacha(G.gachaAt[nx+','+ny]));py=ny+1;draw();persist();busy=false;return}
+ if(c=='C'){busy=true;if(cur=='passage'){PASS_GO=null;await openHouse();if(PASS_GO){const k=PASS_GO;PASS_GO=null;travel(k,'W');busy=false;return}}else await (cur=='casino'?openCasinoGame(G.gachaAt[nx+','+ny]):openGacha(G.gachaAt[nx+','+ny]));py=ny+1;draw();persist();busy=false;return}
  if(c=='X'||c=='P'||c=='Y'){busy=true;await gate(c);busy=false}}
 async function gate(c){const A=AREAS[cur],back=()=>{if(c=='Y')py--;else px--;draw()};
- if(c=='P'){await dlg([`${AREAS[A.prev].name}へ もどります。`]);return travel(A.prev,A.backSide||'E')}
+ if(c=='P'){await dlg([`${AREAS[A.prev].name}へ もどります。`]);if(A.backHouse){travel(A.prev,'E');const dd=G.doors.find(d=>d.k=='C');if(dd){px=dd.fx;py=dd.fy;persist();draw()}return}return travel(A.prev,A.backSide||'E')}
  const ex=A.exits?A.exits.find(e=>e.c==c):(A.next?{to:A.next,lv:GATE_LV}:null);
  if(!ex){await dlg(['この先は 工事中のようだ…(今後追加予定)']);back();return}
  if(lvl()>=ex.lv){await dlg([`レベル${ex.lv}の力で 門が開いた!${AREAS[ex.to].name}へ つづく道が 現れた。`]);return travel(ex.to,'W')}
@@ -1203,7 +1249,7 @@ cv.addEventListener('touchmove',e=>{e.preventDefault();const x=e.touches[0].clie
  if(Math.max(Math.abs(dx),Math.abs(dy))<26)return;
  if(Math.abs(dx)>Math.abs(dy))mv(Math.sign(dx),0,dx>0?'r':'l');else mv(0,Math.sign(dy),dy>0?'d':'u');tx0=x;ty0=y},{passive:false});
 /* ===== 対戦のはじまり ===== */
-const gateMsg=(a,b)=>[[GATE_LV,'🚪 勇者の村への道が 開いた!'],[LV_TOWN,'🚪 勇者の村から レベルの街へ行けるようになった!'],[LV_GACHA,'🚪 勇者の村から ガチャの村へ行けるようになった!'],[MOD_LV,'🗺 全体マップから 近代都市へ行けるようになった!'],[CAVE_LV,'🗺 全体マップから 洞窟の街へ行けるようになった!'],[CASINO_LV,'🎰 全体マップから カジノの町へ行けるようになった!']].filter(([l])=>b>=l&&a<l).map(([,m])=>'<br>'+m).join('');
+const gateMsg=(a,b)=>[[GATE_LV,'🚪 勇者の村への道が 開いた!'],[LV_TOWN,'🚪 勇者の村から レベルの街へ行けるようになった!'],[LV_GACHA,'🚪 勇者の村から ガチャの村へ行けるようになった!'],[MOD_LV,'🗺 全体マップから 近代都市へ行けるようになった!'],[CAVE_LV,'🗺 全体マップから 洞窟の街へ行けるようになった!'],[CASINO_LV,'🎰 全体マップから カジノの町へ行けるようになった!'],[PASS_LV,'🏙 全体マップから 通行の都市へ行けるようになった!']].filter(([l])=>b>=l&&a<l).map(([,m])=>'<br>'+m).join('');
 const ELDER=['長老「おお、よく来たのう。わしは長老ざいがす。」','長老「大魔神に挑むなら、まず わしの試練を受けるのじゃ。」','長老「勉強の力で、わしを倒してみせよ!」'];
 const introL=e=>e.id=='town:h0'?ELDER:e.cry?[`${e.cry}${e.cry}`,`${e.n}「${e.cry} ${e.s}の問題で勝負だ!」`]:[`${e.n}「${e.s}の問題で勝負だ!覚悟はいいか?」`];
 const outL=(e,w)=>e.id=='town:h0'?(w=='win'?'長老「見事じゃ……!これが勉強の力か。」':'長老「まだまだじゃな。出直してまいれ。」'):e.cry?(w=='win'?`${e.n}「${e.cry}(まいった!)」`:`${e.n}「${e.cry}(まだまだ!)」`):(w=='win'?`${e.n}「いい勝負だった!また会おう。」`:`${e.n}「ふふ、まだ勉強が足りないな。」`);
@@ -1245,7 +1291,7 @@ async function battle(e){await ready;const star0=e.star||2,cap=Math.min(7,Math.m
  let okSv=false;
  if(sb&&user){const{data,error}=await sb.rpc('finish_battle',{result:r,xp,lv:levelOf(S.exp+xp),gain});if(!error&&data&&data[0]){S.coin=data[0].coin;S.exp=data[0].exp;okSv=true}else showSaveErr(error&&error.message)}
  if(!okSv){S.coin+=gain;S.exp+=xp;if(sb&&user)S.pend=(S.pend||[]).concat({result:r,xp,gain})}
- if(r=='win'&&!isDef(e.id))S.defeated.push(e.id);
+ window.KEYMSG='';if(r=='win'&&!isDef(e.id)){S.defeated.push(e.id);giveKey(e)}
  const L1=lvl();await persist(true);hud();
  r=='win'?SE.win():r=='lose'?SE.lose():SE.item();if(L1>L0)setTimeout(SE.lvup,900);
  $('q').style.display=$('ch').style.display=$('items').style.display=$('fig').style.display='none';
@@ -1253,6 +1299,7 @@ async function battle(e){await ready;const star0=e.star||2,cap=Math.min(7,Math.m
   <div class="sm">難易度 ${'★'.repeat(star)} ${ST.lab}${over?` (上限★${cap}・出題★${qs0})`:''}</div>
   <div>💰 コイン <b>+${gain}</b>${r=='win'?'':' (勝利でもらえます)'}</div><div>⭐ EXP <b>+${xp}</b>${r=='win'?'':' (勝利でもらえます)'}</div>
   ${L1>L0?`<div class="lvup">🎉 レベルアップ! Lv.${L0} → Lv.${L1}${gateMsg(L0,L1)}</div>`:''}
+  ${(()=>{const m=window.KEYMSG;window.KEYMSG='';return m?`<div class="lvup">${m}</div>`:''})()}
   <div class="sm">次のLvまで あと ${cum(L1+1)-S.exp} EXP</div>
   <button id="nx2">${t('next')} ▶</button></div>`;
  await new Promise(r=>$('nx2').onclick=r);
