@@ -1,0 +1,50 @@
+<!--
+  AIアプリ(Gemini Nano / 外部AI)
+  ─ このファイル1つで「情報・見た目(CSS)・画面(HTML)・動き(JS)」が全部そろっています。
+  ─ index.html(スマホ本体)の <link rel="phone-app" href="apps/ai.html"> で読み込まれます。
+  ─ このファイルだけを開いた場合は、スマホ本体の中でこのアプリが開きます。
+-->
+<script type="application/json" data-app>
+{
+ "id": 3,
+ "name": "AI",
+ "cat": "生産性",
+ "rating": 4.7,
+ "count": "9,600",
+ "ver": "1.1",
+ "size": "0.2 MB",
+ "age": "4+",
+ "bg": "linear-gradient(145deg,#2b2d33,#6b7280)",
+ "icon": "<path d=\"M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z\"/>",
+ "desc": "わからないことをAIに質問",
+ "long": "端末内蔵のGemini Nano、またはサーバー経由の外部AIに質問できます。",
+ "features": [
+  "Gemini Nano(内蔵)対応",
+  "外部AI(ログイン必要)",
+  "履歴の保存と消去"
+ ]
+}
+</script>
+<script data-standalone>if(!window.PHONE_HOST)location.replace('../index.html?app=ai')</script>
+<style>
+#log{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.m{max-width:85%;padding:9px 14px;border-radius:18px;border:1px solid var(--bd);animation:tin .4s var(--e)}.m.u{align-self:flex-end;background:var(--fg);color:var(--bg);border-color:var(--fg)}
+</style>
+<section>
+<h2>AIモード</h2>
+<div class="row"><select id="am" style="flex:1"><option value="nano">Gemini Nano(内蔵)</option><option value="api">外部AI(サーバー経由・要ログイン)</option></select></div>
+
+<div id="log"></div>
+<div class="row"><textarea id="q" rows="2" placeholder="質問を入力" style="flex:1"></textarea><button id="go">送信</button></div>
+<button id="clr" style="margin-top:8px">履歴を消す</button>
+</section>
+<script>
+let ns;function chat(){$('#log').innerHTML='';S.chat.forEach(c=>{const d=document.createElement('div');d.className='m '+c.r;d.textContent=c.t;$('#log').append(d)})}
+$('#am').value=S.am||'nano';$('#am').onchange=()=>{S.am=$('#am').value;save()};
+async function ask(q){if($('#am').value=='nano'){if(!('LanguageModel' in self))throw'このブラウザはGemini Nano非対応です。外部AIに切り替えてください';ns??=await LanguageModel.create();return ns.prompt(q)}
+if(!sb||!S.uid)throw'外部AIはログインが必要です';const{data,error}=await sb.functions.invoke('ai',{body:{messages:S.chat.slice(-10).map(c=>({role:c.r=='u'?'user':'model',text:c.t}))}});if(error)throw error.message;if(data.error)throw data.error;return data.text}
+$('#go').onclick=async()=>{const q=$('#q').value.trim();if(!q)return;$('#q').value='';S.chat.push({r:'u',t:q});chat();$('#go').disabled=1;let a;try{a=await ask(q)}catch(e){a='⚠ '+(e.message||e)}S.chat.push({r:'a',t:a});save();chat();$('#go').disabled=0};
+$('#clr').onclick=()=>{S.chat=[];ns=null;save();chat()};
+    onH('account',chat);
+    chat();
+</script>

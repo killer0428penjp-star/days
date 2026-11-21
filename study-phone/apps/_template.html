@@ -1,0 +1,44 @@
+<!--
+  新しいアプリのひな形(このファイル1つでアプリが完成します)
+  1. このファイルをコピーして apps/memo.html のような名前にする
+  2. index.html に <link rel="phone-app" href="apps/memo.html"> を1行足す
+  3. App Store に出るので、入手するとホーム画面にアイコンが追加される
+  ※ ファイル名の「memo」は、このファイルだけを開いたときの飛び先(index.html?app=memo)にも使われます
+-->
+<script type="application/json" data-app>
+{
+ "id": 6,
+ "name": "メモ",
+ "cat": "生産性",
+ "rating": 4.3,
+ "count": "120",
+ "ver": "1.0",
+ "size": "0.1 MB",
+ "age": "4+",
+ "bg": "linear-gradient(145deg,#f6d365,#fda085)",
+ "icon": "<path d=\"M6 4h9l3 3v13H6z\"/><path d=\"M9 11h6M9 15h6\"/>",
+ "desc": "ひとこと説明(App Storeの一覧と検索に出る)",
+ "long": "App Storeの詳細画面に出る長い説明",
+ "features": ["機能1", "機能2"]
+}
+</script>
+<script data-standalone>if(!window.PHONE_HOST)location.replace('../index.html?app=memo')</script>
+
+<style>
+/* このアプリだけで使う見た目 */
+#memo{min-height:40vh}
+</style>
+
+<section>
+  <h2>メモ</h2>
+  <textarea id="memo" rows="8" placeholder="ここに書く"></textarea>
+</section>
+
+<script>
+// このアプリの動き。スマホ本体の S(保存データ)、save()、$()、$$()、onH()、emit() が使えます
+const memo=$('#memo');
+memo.value=S.memo||'';
+memo.oninput=()=>{S.memo=memo.value;save()};
+OPEN[6]=()=>{memo.focus()};          // アプリを開くたびに呼ばれる(要らなければ消す)
+onH('account',()=>{});               // ログイン/ログアウトのときに呼ばれる(要らなければ消す)
+</script>

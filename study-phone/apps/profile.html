@@ -1,0 +1,99 @@
+<!--
+  プロフィールアプリ(プロフィール・ログイン・共有)
+  ─ このファイル1つで「情報・見た目(CSS)・画面(HTML)・動き(JS)」が全部そろっています。
+  ─ index.html(スマホ本体)の <link rel="phone-app" href="apps/profile.html"> で読み込まれます。
+  ─ このファイルだけを開いた場合は、スマホ本体の中でこのアプリが開きます。
+-->
+<script type="application/json" data-app>
+{
+ "id": 1,
+ "name": "プロフィール",
+ "cat": "ソーシャル",
+ "rating": 4.6,
+ "count": "8,300",
+ "ver": "1.2",
+ "size": "0.3 MB",
+ "age": "4+",
+ "bg": "#1d9bf0",
+ "icon": "<path d=\"M3.5 17c0-5 4-9 9-9h2l3-3 .5 3 2.500 1-2.500 1c0 5-4.500 9-10 9-2 0-4-.5-4.500-2z\" fill=\"#fff\" stroke=\"none\"/><circle cx=\"16.500\" cy=\"9.500\" r=\".9\" fill=\"#1d9bf0\" stroke=\"none\"/>",
+ "desc": "プロフィール作成・共有・勉強リザルト",
+ "long": "アイコンや自己紹介を設定して、勉強時間のリザルトを画像でシェアできます。",
+ "features": [
+  "プロフィールの作成と編集",
+  "今週の勉強時間グラフ",
+  "画像で共有"
+ ]
+}
+</script>
+<script data-standalone>if(!window.PHONE_HOST)location.replace('../index.html?app=profile')</script>
+<section>
+ 
+</section>
+<dialog id="dlg"><h2 id="dt">プロフィール作成</h2>
+<label>名前</label><input id="fn" maxlength="30">
+<label>アイコン(未選択は初期マーク)</label><div class="row" id="pre"></div><input type="file" id="ff" accept="image/*">
+<label>自己紹介(任意)</label><textarea id="fb" rows="2" maxlength="160"></textarea>
+<label>住所(任意)</label><input id="fa">
+<label>年齢</label><input id="fg" type="number" min="1" max="120">
+<label>性別</label><select id="fs"><option>未回答</option><option>男性</option><option>女性</option><option>その他</option></select>
+<div class="row sp" style="margin-top:14px"><button id="fx">閉じる</button><button id="fo" class="on">作成完了</button></div></dialog>
+<script>
+async function share(){await document.fonts.ready;const p=S.p,W=1080,H=1400,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),cs=getComputedStyle(document.documentElement),g=v=>cs.getPropertyValue(v).trim(),mi='"Shippori Mincho","Hiragino Mincho ProN",serif';
+x.fillStyle=g('--bg');x.fillRect(0,0,W,H);x.fillStyle=g('--sf');x.fillRect(0,0,W,250);x.strokeStyle=g('--hl');x.lineWidth=2;for(let i=-250;i<W;i+=28){x.beginPath();x.moveTo(i,250);x.lineTo(i+250,0);x.stroke()}
+x.strokeStyle=g('--bd');x.lineWidth=3;x.strokeRect(1.5,1.5,W-3,H-3);
+const cx=170,cy=250,R=104;x.fillStyle=g('--bg');x.beginPath();x.arc(cx,cy,R+10,0,7);x.fill();x.save();x.beginPath();x.arc(cx,cy,R,0,7);x.clip();x.fillStyle=g('--sf');x.fillRect(cx-R,cy-R,2*R,2*R);
+const i=p.ic;if(i&&i.startsWith('data:')){const im=new Image();im.src=i;await im.decode();x.drawImage(im,cx-R,cy-R,2*R,2*R)}else if(i){x.font='110px serif';x.textAlign='center';x.textBaseline='middle';x.fillStyle=g('--fg');x.fillText(i,cx,cy+8)}else{x.fillStyle=g('--mu');x.beginPath();x.arc(cx,cy-24,32,0,7);x.fill();x.beginPath();x.ellipse(cx,cy+70,60,48,0,0,7);x.fill()}x.restore();
+x.textAlign='left';x.textBaseline='alphabetic';x.fillStyle=g('--fg');x.font='600 62px '+mi;x.fillText(p.name,60,440);x.fillStyle=g('--mu');x.font='32px sans-serif';x.fillText('@'+p.id,60,488);
+x.fillStyle=g('--fg');x.font='34px sans-serif';let y=548,ln='';for(const ch of(p.bio||'')){if(x.measureText(ln+ch).width>W-120){if(y>640)break;x.fillText(ln,60,y);y+=48;ln=''}ln+=ch}if(ln)x.fillText(ln,60,y);
+const tot=S.logs.reduce((a,l)=>a+l.sec,0);[['勉強時間',hm(tot)],['ポイント','--'],['レベル','--']].forEach(([a,b],k)=>{const X=60+k*320;x.strokeStyle=g('--bd');x.lineWidth=2;x.beginPath();x.roundRect(X,740,300,170,24);x.stroke();x.textAlign='center';x.fillStyle=g('--mu');x.font='28px sans-serif';x.fillText(a,X+150,792);x.fillStyle=g('--fg');x.font='44px '+mi;x.fillText(b,X+150,860)});
+const w=week(0),mx=Math.max(1,Math.ceil(Math.max(...w.map(a=>a[1]))/3600)),X0=130,X1=1020,Y0=1290,Y1=1000;x.textAlign='left';x.fillStyle=g('--fg');x.font='600 38px '+mi;x.fillText('今週の勉強時間',60,960);
+x.strokeStyle=g('--bd');x.setLineDash([8,8]);x.lineWidth=2;x.fillStyle=g('--mu');x.font='24px sans-serif';for(let k=1;k<=mx;k++){const yy=Y0-(Y0-Y1)*k/mx;x.beginPath();x.moveTo(X0,yy);x.lineTo(X1,yy);x.stroke();x.fillText(k+'h',70,yy+8)}x.setLineDash([]);
+const bw=(X1-X0)/7;w.forEach(([d,s],k)=>{const h=(Y0-Y1)*s/3600/mx;x.fillStyle=g('--fg');x.beginPath();x.roundRect(X0+k*bw+14,Y0-h,bw-28,Math.max(h,2),[8,8,0,0]);x.fill();x.fillStyle=g('--mu');x.textAlign='center';x.fillText(`${d.getMonth()+1}/${d.getDate()}`,X0+k*bw+bw/2,Y0+38)});
+x.fillStyle=g('--fg');x.fillRect(X0,Y0,X1-X0,2);x.textAlign='right';x.font='30px '+mi;x.fillText('Study',W-60,1370);
+const bl=await new Promise(r=>c.toBlob(r,'image/png')),fl=new File([bl],'study-profile.png',{type:'image/png'});
+if(navigator.canShare?.({files:[fl]}))await navigator.share({files:[fl],title:p.name});else{const a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=fl.name;a.click()}}
+const LOGIN=`<div class="card"><h2 style="margin-top:0">ログイン</h2><input id="le" type="email" placeholder="メールアドレス" style="width:100%;margin-bottom:8px;border-radius:12px"><input id="lp" type="password" placeholder="パスワード(6文字以上)" style="width:100%;margin-bottom:8px;border-radius:12px"><div class="row"><button id="li" class="on" style="flex:1">ログイン</button><button id="su" style="flex:1">新規登録</button></div><button id="gg" style="width:100%;margin-top:8px">Googleでログイン</button></div>`;
+const AL=()=>[...(S.cacc||[]).map(a=>({c:1,n:a.name,ic:a.ic,a})),...(S.accs||[]).map((a,i)=>({c:0,n:a.p.name,ic:a.p.ic,i}))];
+const accs=()=>AL().length?'<p class="mu" style="margin-top:14px">最近のアカウント(タップでログイン)</p><div class="row" style="justify-content:center;gap:14px;margin-top:8px">'+AL().map(x=>`<button class="acc"><div class="av">${avatar({ic:x.ic})}</div><span class="mu"></span></button>`).join('')+'</div>':'';
+function bindAuth(){const l=AL();$$('.acc').forEach((b,i)=>{b.querySelector('span').textContent=l[i].n||'';b.onclick=()=>l[i].c?cLogin(l[i].a):login(l[i].i)});$('#mk').onclick=()=>dlg(0);if(!sb||S.uid)return;
+$('#li').onclick=()=>auth(0);$('#su').onclick=()=>auth(1);$('#gg').onclick=()=>sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.href.split('#')[0]}})}
+async function auth(n){const email=$('#le').value.trim(),password=$('#lp').value;if(!email||password.length<6)return alert('メールアドレスと6文字以上のパスワードを入力してください');const{data,error}=await(n?sb.auth.signUp({email,password}):sb.auth.signInWithPassword({email,password}));if(error)return alert(error.message);if(n&&!data.session)alert('確認メールを送信しました。SupabaseのAuthentication設定で「Confirm email」をOFFにすると、メール認証なしで使えます')}
+async function cLogin(a){const{error}=await sb.auth.setSession({access_token:a.ac,refresh_token:a.rt});if(error){S.cacc=S.cacc.filter(x=>x.uid!=a.uid);save();prof();alert('ログインの有効期限が切れました。もう一度メールかGoogleでログインしてください')}}
+async function cloudIn(u){S.uid=u.id;const{data:pr}=await sb.from('profiles').select('data').eq('id',u.id).maybeSingle();S.p=pr?pr.data:null;
+const{data:lg}=await sb.from('logs').select('d,s,sec').eq('user_id',u.id).order('d').limit(5000);
+if(pr)S.logs=lg||[];else if(S.logs.length)await sb.from('logs').insert(S.logs.map(l=>({...l,sec:Math.round(l.sec),user_id:u.id})));
+save();prof();stats();emit('account');if(!pr)dlg(0)}
+async function logout(){if(!confirm('ログアウトしますか?'))return;
+if(S.uid&&sb){const{data:{session}}=await sb.auth.getSession();if(session)S.cacc=[{uid:S.uid,name:S.p?.name,ic:S.p?.ic,ac:session.access_token,rt:session.refresh_token},...(S.cacc||[]).filter(a=>a.uid!=S.uid)].slice(0,3);await sb.auth.signOut({scope:'local'});S.uid=null}
+else S.accs=[{p:S.p,logs:S.logs,chat:S.chat},...(S.accs||[]).filter(a=>a.p.id!=S.p.id)].slice(0,3);
+lockNow();S.p=null;S.logs=[];S.chat=[];save();prof();stats();emit('account')}
+function login(i){const a=S.accs[i];S.accs=S.accs.filter((_,k)=>k!=i);S.p=a.p;S.logs=a.logs||[];S.chat=a.chat||[];save();prof();stats();emit('account')}
+function up(e,t){const t0=performance.now();(function f(n){const k=Math.min(1,(n-t0)/800);e.textContent=hm(t*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(f)})(t0)}
+const PRE=['🐱','🐶','🦊','🐼','🐸','🌱'];
+const person='<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21c1-6 15-6 16 0" fill="currentColor"/></svg>';
+function avatar(q=S.p){const i=q?.ic;return i?(i.startsWith('data:')?`<img src="${i}" alt="">`:i):person}
+function prof(){const p=S.p,e=p?$('#t1'):$('#lgc');(p?$('#lgc'):$('#t1')).innerHTML='';if(p)$('#login').classList.remove('on');if(!p){e.innerHTML=(sb&&!S.uid?LOGIN:'')+'<div class="card" style="text-align:center"><p>'+(S.uid?'プロフィールを作成してください':'ログインせず、この端末だけで使う')+'</p>'+accs()+'<br><button id="mk" class="on">作成する</button><p class="mu" style="margin-top:10px">未ログインではこの端末にのみ保存されます</p></div>';bindAuth();return}
+const tot=S.logs.reduce((a,l)=>a+l.sec,0);
+e.innerHTML=`<div style="border:1px solid var(--bd);border-radius:14px;padding-bottom:4%"><div class="ban"></div><div style="padding:0 4%"><div class="av">${avatar()}</div>
+<div class="row sp"><div><b style="font-size:1.3em"></b><div class="mu">@${p.id}</div></div></div>
+<p id="pb" style="margin:8px 0"></p><p class="mu" id="pa"></p><p class="mu">${new Date(p.at).getFullYear()}年${new Date(p.at).getMonth()+1}月から利用 ・ ${p.age}歳 ・ ${p.sex}</p>
+<p style="margin:8px 0"><b>0</b> <span class="mu">フォロー中</span> &nbsp; <b>0</b> <span class="mu">フォロワー</span></p>
+<div class="row"><button id="sh" style="flex:1">プロフィールを共有</button><button id="ed" style="flex:1">プロフィールを編集</button><button id="lo" style="flex-basis:100%">ログアウト</button></div><h2>リザルト</h2><div class="res"><div><span class="mu">勉強時間</span><b data-s="${tot}">${hm(tot)}</b></div><div><span class="mu">ポイント</span><b>--</b></div><div><span class="mu">レベル</span><b>--</b></div></div>
+<h2>今週の勉強時間</h2><div class="ch" id="wb1"></div></div></div>`;
+e.querySelector('b').textContent=p.name;$('#pb').textContent=p.bio||'';$('#pa').textContent=p.addr||'';bars($('#wb1'),0);$$('[data-s]').forEach(e=>up(e,+e.dataset.s));
+$('#ed').onclick=()=>dlg(1);$('#lo').onclick=logout;$('#sh').onclick=()=>share().catch(e=>e.name!='AbortError'&&alert('共有に失敗しました'))}
+let ico='';
+function dlg(ed){const p=ed?S.p:{};$('#dt').textContent=ed?'プロフィールを編集':'プロフィール作成';$('#fo').textContent=ed?'保存':'作成完了';
+$('#fn').value=p.name||'';$('#fb').value=p.bio||'';$('#fa').value=p.addr||'';$('#fg').value=p.age||'';$('#fs').value=p.sex||'未回答';ico=p.ic||'';
+$('#pre').innerHTML=PRE.map(x=>`<button class="ib" data-x="${x}">${x}</button>`).join('')+'<button class="ib" data-x="">∅</button>';
+$$('#pre button').forEach(b=>b.onclick=()=>{ico=b.dataset.x;$$('#pre button').forEach(c=>c.classList.toggle('on',c==b))});
+$('#dlg').showModal()}
+const CFGC='<div class="card"><p class="mu">Supabaseに接続すると、アカウントとデータがクラウドに保存されます。</p><input class="sbu" placeholder="Project URL (https://xxxx.supabase.co)" style="width:100%;margin-top:8px;border-radius:12px"><input class="sbk" placeholder="anon public key" style="width:100%;margin-top:8px;border-radius:12px"><div class="row" style="margin-top:8px"><button class="sbs on" style="flex:1">保存して再読み込み</button></div></div>';
+{const ob=bindAuth;bindAuth=function(){ob();if(!sb){const m=$('#mk');if(m){m.closest('.card').parentNode.insertAdjacentHTML('afterbegin',CFGC);bindCfg()}}}}
+OPEN[1]=prof;
+$('#ff').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=160;const x=c.getContext('2d'),s=Math.min(im.width,im.height);x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,160,160);ico=c.toDataURL('image/jpeg',.8)};im.src=r.result};r.readAsDataURL(f)};
+$('#fx').onclick=()=>$('#dlg').close();
+$('#fo').onclick=()=>{const n=$('#fn').value.trim(),a=+$('#fg').value;if(!n||!a){alert('名前と年齢を入力してください');return}
+S.p={...S.p,id:S.p?.id||Math.random().toString(36).slice(2,12),at:S.p?.at||Date.now(),name:n,ic:ico,bio:$('#fb').value,addr:$('#fa').value,age:a,sex:$('#fs').value};save();if(S.uid&&sb)sb.from('profiles').upsert({id:S.uid,data:S.p}).then(x=>x.error&&alert(x.error.message));$('#dlg').close();prof()};
+onH('prof',prof);
+</script>

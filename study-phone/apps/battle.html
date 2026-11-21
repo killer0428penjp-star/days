@@ -1,0 +1,56 @@
+<!--
+  対戦アプリ(問題の投稿・解答)
+  ─ このファイル1つで「情報・見た目(CSS)・画面(HTML)・動き(JS)」が全部そろっています。
+  ─ index.html(スマホ本体)の <link rel="phone-app" href="apps/battle.html"> で読み込まれます。
+  ─ このファイルだけを開いた場合は、スマホ本体の中でこのアプリが開きます。
+-->
+<script type="application/json" data-app>
+{
+ "id": 2,
+ "name": "対戦",
+ "cat": "教育",
+ "rating": 4.4,
+ "count": "5,100",
+ "ver": "1.0",
+ "size": "0.3 MB",
+ "age": "9+",
+ "bg": "#26282d",
+ "icon": "<path d=\"M5 19L17 7M17 7l2-3 1 1-3 2M19 19L7 7M7 7L5 4 4 5l3 2M5 19l-1 1M19 19l1 1\"/>",
+ "desc": "問題を投稿して解き合う・対戦する",
+ "long": "自作の問題を投稿して、みんなの問題に答えられます。解説付きで復習にも使えます。",
+ "features": [
+  "問題の投稿と削除",
+  "答え合わせと解説",
+  "観覧/観戦モード"
+ ]
+}
+</script>
+<script data-standalone>if(!window.PHONE_HOST)location.replace('../index.html?app=battle')</script>
+<style>
+.post{display:flex;gap:10px}.post .av{width:42px;margin:0;border:1px solid var(--bd);font-size:1.2em;box-shadow:none;animation:none}
+</style>
+<section>
+<h2>問題</h2>
+<div class="seg" id="pseg"><button class="on" data-v="0">観覧</button><button data-v="1">観戦</button></div>
+<p class="mu" id="pmsg" style="margin:8px 0"></p>
+<div class="card"><textarea id="pq" rows="2" placeholder="問題を書く"></textarea><input id="pa" placeholder="答え" style="width:100%;margin-top:8px;border-radius:12px"><input id="pe" placeholder="解説(任意)" style="width:100%;margin-top:8px;border-radius:12px"><div class="row sp" style="margin-top:8px"><select id="ps"></select><button id="pgo">投稿</button></div></div>
+<div id="posts"></div>
+</section>
+<script>
+const MOCK=[['数学','因数分解','x²+5x+6 を因数分解せよ','(x+2)(x+3)'],['英語','文法','I ( ) lunch at noon. 空欄に入る語は?','have'],['理科','光合成','光合成で使われる気体は?','二酸化炭素']];
+const P={},esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+async function posts(v=0){const ok=!!(sb&&S.uid);['pq','pa','pe','ps','pgo'].forEach(i=>$('#'+i).disabled=!ok);$('#pmsg').textContent=!sb?'Supabase未設定のため投稿できません':ok?'':'ログインすると投稿できます(閲覧は誰でも可)';
+const box=$('#posts');
+if(v||!sb){box.innerHTML=MOCK.map(([s,t,q])=>`<div class="card post"><div class="av">${person}</div><div style="flex:1"><div><b>ユーザー</b> <span class="mu">${s}</span></div><div><b>${v?'対戦中: ':''}${t}</b></div><p>${q}</p><div class="row" style="margin-top:6px"><button>${v?'観戦する':'解答する'}</button></div></div></div>`).join('');return}
+box.innerHTML='<p class="mu">読み込み中…</p>';const{data,error}=await sb.from('posts').select('*').order('created_at',{ascending:false}).limit(30);
+if(error){box.textContent=error.message;return}
+box.innerHTML=data.map(p=>(P[p.id]=p,`<div class="card post" data-id="${p.id}"><div class="av">${person}</div><div style="flex:1;min-width:0"><div><b>${esc(p.author)}</b> <span class="mu">${esc(p.subject)} ・ ${new Date(p.created_at).toLocaleDateString()}</span></div><p>${esc(p.q)}</p><div class="row" style="margin-top:6px"><input class="ans" placeholder="答え" style="flex:1;min-width:0"><button class="chk">確認</button>${p.user_id==S.uid?'<button class="del">削除</button>':''}</div><p class="rs mu"></p></div></div>`)).join('')||'<p class="mu">まだ投稿がありません</p>'}
+$('#posts').onclick=async e=>{const c=e.target.closest('.post');if(!c||!c.dataset.id)return;const p=P[c.dataset.id];
+if(e.target.classList.contains('chk')){const v=c.querySelector('.ans').value.trim().toLowerCase();c.querySelector('.rs').textContent=(v&&v==String(p.a).trim().toLowerCase()?'正解!':'不正解')+(p.expl?' 解説: '+p.expl:'')}
+if(e.target.classList.contains('del')&&confirm('削除しますか?')){const{error}=await sb.from('posts').delete().eq('id',p.id);error?alert(error.message):c.remove()}};
+$('#pgo').onclick=async()=>{const q=$('#pq').value.trim(),a=$('#pa').value.trim();if(!q||!a)return alert('問題と答えを入力してください');const{error}=await sb.from('posts').insert({user_id:S.uid,author:S.p?.name||'名無し',subject:$('#ps').value,q,a,expl:$('#pe').value.trim()});if(error)return alert(error.message);$('#pq').value=$('#pa').value=$('#pe').value='';posts(0)};
+$('#pseg').onclick=e=>{if(e.target.dataset.v!=null){$$('#pseg button').forEach(b=>b.classList.toggle('on',b==e.target));$('#pseg').dataset.i=e.target.dataset.v;posts(+e.target.dataset.v)}};
+    $('#ps').innerHTML=Object.entries(SUBJ).map(([g,a])=>`<optgroup label="${g}">`+a.map(x=>`<option>${x}</option>`).join('')+'</optgroup>').join('');
+    onH('account',()=>posts(+($('#pseg').dataset.i||0)));
+    posts(0);
+</script>

@@ -1,0 +1,126 @@
+<!--
+  時計アプリ(ストップウォッチ・タイマー・勉強記録)
+  ─ このファイル1つで「情報・見た目(CSS)・画面(HTML)・動き(JS)」が全部そろっています。
+  ─ index.html(スマホ本体)の <link rel="phone-app" href="apps/clock.html"> で読み込まれます。
+  ─ このファイルだけを開いた場合は、スマホ本体の中でこのアプリが開きます。
+-->
+<script type="application/json" data-app>
+{
+ "id": 0,
+ "name": "時計",
+ "cat": "ユーティリティ",
+ "rating": 4.8,
+ "count": "1.2万",
+ "ver": "1.4",
+ "size": "0.4 MB",
+ "age": "4+",
+ "iconHtml": "<i style=\"background:#fff\"><svg viewBox=\"0 0 48 48\"><circle cx=\"24\" cy=\"24\" r=\"21\" fill=\"#fff\" stroke=\"#222\" stroke-width=\"1.5\"/><path d=\"M24 6v4M24 38v4M6 24h4M38 24h4\" stroke=\"#222\" stroke-width=\"2\"/><path class=\"hand\" id=\"hh\" d=\"M24 24V14\" stroke=\"#111\" stroke-width=\"3\"/><path class=\"hand\" id=\"hm\" d=\"M24 24V9\" stroke=\"#111\" stroke-width=\"2\"/><circle cx=\"24\" cy=\"24\" r=\"2\" fill=\"#f60\" stroke=\"none\"/></svg></i>",
+ "desc": "ストップウォッチとタイマーで勉強時間を記録",
+ "long": "科目ごとに勉強時間を計測し、週間グラフや1日の内訳円グラフで振り返れます。アナログ/デジタル表示の切り替え、ラップ、iOS風ホイールのタイマーに対応。",
+ "features": [
+  "ストップウォッチ(ラップ付き)",
+  "カウントダウンタイマーと通知音10種",
+  "週間グラフと1日の内訳"
+ ]
+}
+</script>
+<script data-standalone>if(!window.PHONE_HOST)location.replace('../index.html?app=clock')</script>
+<style>
+@property --p{syntax:'<percentage>';inherits:false;initial-value:100%}
+.dial{transition:transform .6s var(--sp),opacity .3s;position:relative;width:min(76vw,290px);aspect-ratio:1;margin:8px auto 14px;touch-action:pan-y;user-select:none;cursor:grab}
+.dial svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.tr{stroke:var(--bd);stroke-width:1.2}.rg{stroke:var(--fg);stroke-width:2.4;stroke-dasharray:282.74;transform-box:view-box;transform-origin:50% 50%;transform:rotate(-90deg)}
+.tk{stroke:var(--mu);stroke-width:3;stroke-dasharray:.5 4.317;opacity:0;transition:opacity .6s}.hd{stroke:var(--fg);stroke-width:1.6;opacity:0;transition:opacity .6s;transform-box:view-box;transform-origin:50% 50%}
+.ana .tk,.ana .hd{opacity:1}
+#disp{position:absolute;inset:0;display:flex;justify-content:center;align-items:center;font:400 clamp(30px,10.5vw,46px) var(--mi);transition:transform .7s var(--sp)}
+.ana #disp{transform:translateY(34%) scale(.5)}
+#disp i{display:inline-block;width:.62em;text-align:center;font-style:normal}#disp i.p{width:.3em}
+#pick{padding:14px 0}#pick select{font:400 1.4em var(--mi);border-radius:14px}
+.bt{width:clamp(72px,22vw,92px);aspect-ratio:1;border-radius:50%;padding:0}#b2.run{background-size:100% 100%;color:var(--bg);border-color:var(--fg)}
+#dots{cursor:pointer;letter-spacing:.3em}
+.pie{width:min(52vw,200px);aspect-ratio:1;border-radius:50%;margin:10px auto;background:var(--fg);-webkit-mask:conic-gradient(#000 var(--p),transparent 0);mask:conic-gradient(#000 var(--p),transparent 0)}
+.pie.sw{animation:sweep 1.1s var(--e)}@keyframes sweep{from{--p:0%}}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.wheels{position:relative;display:flex;height:180px}
+.wheels::before{content:"";position:absolute;left:0;right:0;top:72px;height:36px;border-radius:12px;background:var(--sf);transition:background-color .4s}
+.wh{position:relative;flex:1;height:180px;z-index:1}
+.wh ul{position:relative;height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;list-style:none;padding:72px 0;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y}
+.wh ul::-webkit-scrollbar{display:none}
+.wh li{height:36px;scroll-snap-align:center;text-align:right;padding-right:52%;font:400 1.35em/36px var(--mi);will-change:transform}
+.wh em{position:absolute;left:52%;top:72px;line-height:36px;font-style:normal;font-size:.85em;pointer-events:none;padding-left:8px}
+.trow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}
+.big{font:400 clamp(34px,11vw,52px)/1.15 var(--mi)}.bt.sm{width:58px}
+.pbar{height:3px;background:var(--hl);border-radius:3px;overflow:hidden;margin-top:6px}.pbar u{display:block;height:100%;background:var(--fg);width:0}
+</style>
+<section>
+<h2>勉強タイマー</h2>
+<div class="seg" id="mseg"><button data-k="sw" class="on">ストップウォッチ</button><button data-k="tm">タイマー</button></div>
+<div class="card" id="swc" style="margin-top:10px"><div class="dial" id="dial"><svg viewBox="0 0 100 100"><circle class="tr" cx="50" cy="50" r="46" fill="none"/><circle class="tk" cx="50" cy="50" r="44" fill="none"/><circle class="rg" id="rg" cx="50" cy="50" r="45" fill="none" stroke-linecap="round"/><path class="hd" id="hand" d="M50 50V14"/></svg><div id="disp"></div></div>
+<div class="row sp" style="margin-top:12px"><button class="bt" id="b1">リセット</button><span class="mu" id="dots">● ○</span><button class="bt" id="b2">開始</button></div><ol id="laps" class="mu" style="padding-left:1.4em;margin-top:8px"></ol></div>
+<div class="card" id="tmc" style="margin-top:10px;display:none"><div id="tset"><div class="wheels"><div class="wh" data-n="24"><em>時間</em></div><div class="wh" data-n="60"><em>分</em></div><div class="wh" data-n="60"><em>秒</em></div></div>
+<div class="row sp" style="margin-top:12px"><button class="bt" id="c1">キャンセル</button><button class="bt" id="c2">開始</button></div></div>
+<div id="tmr" style="display:none"><div class="trow"><div><div class="big" id="tbig"></div><div class="mu" id="tcap"></div></div><button class="bt sm" id="tp">❚❚</button></div><div class="pbar"><u id="tpb"></u></div><button id="tx" style="margin-top:12px">キャンセル</button></div>
+<h2>最近の項目</h2><div id="rec"></div></div>
+<div class="row" style="margin-top:2px"><select id="subj" style="flex:1"></select><select id="snd" style="flex:1"></select><button class="ib" id="tsn" title="試聴">♪</button></div>
+<h2>記録</h2><div class="res"><div><span class="mu">合計</span><b id="s1"></b></div><div><span class="mu">1日平均</span><b id="s2"></b></div><div><span class="mu">日数</span><b id="s3"></b></div></div>
+<div class="row sp" style="margin-top:12px"><button class="ib" onclick="wk(-1)">‹</button><span id="wl" class="mu"></span><button class="ib" onclick="wk(1)">›</button></div>
+<div class="ch" id="wb2" style="touch-action:pan-y"></div>
+<h2>1日の内訳</h2><input type="date" id="pd"><div class="pie" id="pie"></div><div id="leg"></div>
+</section>
+<script>
+const el=k=>{const o=S.T[k];return o.acc+(o.run?Date.now()-o.t0:0)};
+function addLog(sec){if(sec>.5){const l={d:dk(new Date()),s:$('#subj').value,sec:Math.round(sec)};S.logs.push(l);if(S.uid&&sb)sb.from('logs').insert({...l,user_id:S.uid}).then(x=>x.error&&console.warn(x.error.message))}}
+function go(k){const o=S.T[k];o.run=1;o.t0=Date.now();S.hide=0}
+function stop(k){const o=S.T[k],d=Date.now()-o.t0;addLog(d/1000);o.acc+=d;o.run=0}
+function f2(ms,cs){const s=ms/1000;return(s>=3600?pad(Math.floor(s/3600))+':':'')+pad(Math.floor(s%3600/60))+':'+pad(Math.floor(s%60))+(cs?'.'+pad(Math.floor(ms%1000/10)):'')}
+const jp=s=>{s=Math.round(s);const h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return(h?h+'時間 ':'')+(m?m+'分 ':'')+(r||!(h||m)?r+'秒':'')};
+const big=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60),r=s%60;return h?`${h}:${pad(m)}:${pad(r)}`:m?`${m}:${pad(r)}`:''+r};
+function startTm(sec){const o=S.T.tm;if(!sec)return;if(o.run)stop('tm');o.acc=0;o.target=sec*1000;S.rec=[sec,...S.rec.filter(x=>x!=sec)].slice(0,6);go('tm');save();draw();stats()}
+function endTm(){const o=S.T.tm;if(o.run)stop('tm');o.acc=0;o.target=0;save();draw();stats()}
+function fx(u){const c=u.scrollTop+90;[...u.children].forEach(l=>{const o=(l.offsetTop+18-c)/36,a=Math.min(Math.abs(o),3);l.style.transform=`perspective(260px) rotateX(${-o*26}deg) scale(${1-a*.07})`;l.style.opacity=Math.max(.12,1-a*.3)})}
+function wset(){$$('.wh ul').forEach((u,i)=>{u.scrollTop=S.pk[i]*36;fx(u)})}
+function draw(){const tm=S.mode=='tm',o=S.T.tm,w=S.T.sw;$('#mseg').dataset.i=tm?1:0;$$('#mseg button').forEach(b=>b.classList.toggle('on',b.dataset.k==S.mode));
+$('#swc').style.display=tm?'none':'block';$('#tmc').style.display=tm?'block':'none';
+$('#b2').textContent=w.run?'停止':(w.acc?'再開':'開始');$('#b2').classList.toggle('run',!!w.run);$('#b1').textContent=w.run?'ラップ':'リセット';
+$('#dots').textContent=S.ana?'○ ●':'● ○';$('#dial').classList.toggle('ana',!!S.ana);$('#laps').innerHTML=S.laps.map(l=>'<li>'+f2(l,1)+'</li>').join('');
+const act=!!o.target;$('#tset').style.display=act?'none':'block';$('#tmr').style.display=act?'block':'none';
+$('#tp').textContent=o.run?'❚❚':'▶';$('#tcap').textContent=jp(o.target/1000);
+$('#rec').innerHTML=S.rec.map(x=>`<div class="trow"><div><div class="big">${big(x)}</div><div class="mu">${jp(x)}</div></div><button class="bt sm" data-s="${x}">▶</button></div>`).join('')||'<p class="mu">まだありません</p>';
+if(tm&&!act)wset();tick()}
+function tick(){const ms=el('sw');$('#disp').innerHTML=[...f2(ms,1)].map(c=>`<i${/\d/.test(c)?'':' class="p"'}>${c}</i>`).join('');const p=(ms%60000)/60000;$('#rg').style.strokeDashoffset=282.74*(1-p);$('#hand').style.transform=`rotate(${p*360}deg)`;
+const o=S.T.tm;if(o.target){const r=Math.max(0,o.target-el('tm'));$('#tbig').textContent=big(Math.ceil(r/1000));$('#tpb').style.width=(100-r/o.target*100)+'%'}mini()}
+function mini(){const m=$('#mini'),a=[];['sw','tm'].forEach(k=>{if(S.T[k].run){let ms=el(k);if(k=='tm')ms=Math.max(0,S.T.tm.target-ms);a.push((k=='sw'?'⏱ ':'⏳ ')+f2(ms,0))}});if(!a.length||S.hide||(S.view=='app'&&S.tab==0)){m.style.display='none';return}$('#mt').innerHTML=a.join('<br>');m.style.display='flex'}
+let x0;const sw=(el,fn)=>{el.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:1});el.addEventListener('touchend',e=>{const d=e.changedTouches[0].clientX-x0;if(Math.abs(d)>50)fn(d)})};
+const COL=['#3b3f46','#6b7280','#9aa0aa','#c4c9d2','#52606d','#7b8794','#a5adb8','#2f343b','#8a93a0','#d3d7de','#5a6270'];
+function stats(){const m=dayTotals(),ds=Object.keys(m),tot=ds.reduce((a,d)=>a+m[d],0);$('#s1').textContent=hm(tot);$('#s2').textContent=ds.length?hm(tot/ds.length):'0時間00分';$('#s3').textContent=ds.length+'日';
+const w=week(S.wk);$('#wl').textContent=`${w[0][0].getMonth()+1}/${w[0][0].getDate()} – ${w[6][0].getMonth()+1}/${w[6][0].getDate()}`;bars($('#wb2'),S.wk);
+$('#pd').value||($('#pd').value=dk(new Date()));const d=$('#pd').value,by={};S.logs.filter(l=>l.d==d).forEach(l=>by[l.s]=(by[l.s]||0)+l.sec);
+const en=Object.entries(by),sum=en.reduce((a,x)=>a+x[1],0);let a=0;
+$('#pie').style.background=sum?'conic-gradient('+en.map(([s,v],i)=>{const g=`${COL[i%COL.length]} ${a/sum*100}% ${(a+v)/sum*100}%`;a+=v;return g}).join(',')+')':'var(--sf)';
+const pe=$('#pie');pe.classList.remove('sw');void pe.offsetWidth;pe.classList.add('sw');$('#leg').innerHTML=en.map(([s,v],i)=>`<div class="row sp"><span><span class="dot" style="background:${COL[i%COL.length]}"></span>${s}</span><span class="mu">${hm(v)}</span></div>`).join('')||'<p class="mu" style="text-align:center">この日の記録はありません</p>'}
+function wk(d){S.wk=Math.min(0,S.wk+d);stats()}
+OPEN[0]=stats;
+S.pk??=[0,25,0];S.rec??=[];
+$('#b2').onclick=()=>{const o=S.T.sw;o.run?stop('sw'):go('sw');save();draw();stats()};
+$('#b1').onclick=()=>{const o=S.T.sw;if(o.run)S.laps.push(el('sw'));else{o.acc=0;S.laps=[]}save();draw()};
+$('#c2').onclick=()=>startTm(S.pk[0]*3600+S.pk[1]*60+S.pk[2]);
+$('#c1').onclick=()=>{S.pk=[0,0,0];wset()};
+$('#tp').onclick=()=>{const o=S.T.tm;o.run?stop('tm'):go('tm');save();draw();stats()};
+$('#tx').onclick=endTm;
+$('#rec').onclick=e=>{const b=e.target.closest('[data-s]');if(b)startTm(+b.dataset.s)};
+$$('.wh').forEach((w,i)=>{const u=document.createElement('ul');for(let j=0;j<+w.dataset.n;j++)u.insertAdjacentHTML('beforeend',`<li>${j}</li>`);w.prepend(u);let q=0;u.onscroll=()=>{S.pk[i]=Math.round(u.scrollTop/36);if(!q){q=1;requestAnimationFrame(()=>{q=0;fx(u)})}}});
+setInterval(()=>{const o=S.T.tm;if(o.run&&el('tm')>=o.target){addLog((o.target-o.acc)/1000);o.acc=0;o.target=0;o.run=0;save();beep(S.snd);draw();stats()}if(S.tab==0||S.T.sw.run||o.run)tick()},200);
+$('#mseg').onclick=e=>{if(e.target.dataset.k){S.mode=e.target.dataset.k;save();draw()}};
+sw($('#mseg'),d=>{S.mode=d<0?'tm':'sw';save();draw()});
+(()=>{const d=$('#dial');let x=0,dx=0,on=0;
+d.addEventListener('pointerdown',e=>{x=e.clientX;dx=0;on=1;d.setPointerCapture(e.pointerId);d.style.transition='none'});
+d.addEventListener('pointermove',e=>{if(!on)return;dx=e.clientX-x;const r=Math.sign(dx)*Math.min(Math.abs(dx),160);d.style.transform=`translateX(${r*.5}px) rotate(${r*.05}deg)`;d.style.opacity=1-Math.min(Math.abs(dx)/320,.45)});
+const end=()=>{if(!on)return;on=0;d.style.transition='';d.style.transform='';d.style.opacity='';if(Math.abs(dx)>50){S.ana=dx<0?1:0;save();draw()}};
+d.addEventListener('pointerup',end);d.addEventListener('pointercancel',end)})();
+$('#dots').onclick=()=>{S.ana=!S.ana;save();draw()};
+$('#subj').innerHTML=Object.entries(SUBJ).map(([g,a])=>`<optgroup label="${g}">`+a.map(x=>`<option>${x}</option>`).join('')+'</optgroup>').join('');$('#subj').value=S.subj||'数学';$('#subj').onchange=()=>{S.subj=$('#subj').value;save()};
+$('#snd').innerHTML=SN.map((n,i)=>`<option value="${i}">音${i+1} ${n}</option>`).join('');$('#snd').value=S.snd;$('#snd').onchange=()=>{S.snd=+$('#snd').value;save();beep(S.snd)};$('#tsn').onclick=()=>beep(S.snd);
+$('#pd').onchange=stats;sw($('#wb2'),d=>wk(d>0?-1:1));
+(function L(){if(S.tab==0&&(S.T.sw.run||S.T.tm.run))tick();requestAnimationFrame(L)})();
+draw();
+</script>
