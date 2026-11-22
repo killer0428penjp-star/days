@@ -515,6 +515,10 @@ async function syncOff(){if(!sb||!list||lerr||!offOK)return;
 const nw={};list.forEach(r=>{if(r.official)nw[r.id]=1});
 if(JSON.stringify(nw)!=JSON.stringify(S.off||{})){S.off=nw;save();renderHome()}
 for(const r of list.filter(x=>x.official&&!has(x.id))){try{const{data,error}=await sb.from('phone_apps').select('html').eq('id',r.id).eq('status','approved').single();if(!error&&data)fin(r.id,data.html)}catch(e){}}}
+async function setOff(id,nv){if(!sb)return false;if(!confirm(nv?'公式アプリにしますか?全員の端末に最初から入り、削除できなくなります':'公式アプリを解除しますか?(端末には残り、削除できるようになります)'))return false;
+const{data,error}=await sb.from('phone_apps').update({official:nv}).eq('id',id).select('id');
+if(error){alert('失敗しました: '+(/official/i.test(error.message)?'supabase_official.sql を実行してください':error.message));return false}
+if(!data||!data.length){alert('このアカウントには権限がありません');return false}return true}
 function pickRec(){const a=[...(list||[])];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}rec=a.slice(0,3).map(r=>r.id)}
 const date=s=>{const d=new Date(s);return isNaN(d)?'-':d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()};
 const kb=n=>n==null?'-':n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';
@@ -622,10 +626,7 @@ $('#simf').srcdoc=frameDoc(r.html||'',{},0);
 $('#xbk').onclick=()=>{if(mode=='rv'||mode=='ap'){rv=null;rvView()}else{pv=null;view()}};
 $('#simfs').onclick=()=>$('#sim').classList.add('full');$('#simx').onclick=()=>$('#sim').classList.remove('full');
 if(mode=='rv'){$('#rof').onclick=()=>decide(true,true);$('#rok').onclick=()=>decide(true);$('#rng').onclick=()=>decide(false)}
-if(mode=='ap')$('#rof2').onclick=async()=>{const nv=!r.official;if(!confirm(nv?'公式アプリにしますか?全員の端末に最初から入り、削除できなくなります':'公式アプリを解除しますか?'))return;
-const{data,error}=await sb.from('phone_apps').update({official:nv}).eq('id',r.id).select('id');
-if(error)return alert('失敗しました: '+(/official/i.test(error.message)?'supabase_official.sql を実行してください':error.message));if(!data||!data.length)return alert('このアカウントには権限がありません');
-rv=null;list=undefined;rvView();loadList().then(()=>{baseline();syncOff();refresh()})};
+if(mode=='ap')$('#rof2').onclick=async()=>{if(await setOff(r.id,!r.official)){rv=null;list=undefined;rvView();loadList().then(()=>{baseline();syncOff();refresh()})}};
 if(mode=='ap')$('#rst').onclick=async()=>{if(await takeDown(r.id,$('#rvm').value)){rv=null;rvView()}}}
 // ---------- 審査(管理者)----------
 async function loadPend(){if(!sb||!adm)return;const{data,error}=await sb.from('phone_apps').select(COLS).eq('status','pending').order('created_at');
@@ -633,9 +634,10 @@ if(!error){pend=data;badge();if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()}}
 function rvView(){const v=$('#srv');if(rv)return simShow(v,rv,rv.status=='approved'?'ap':'rv');
 const ap=list||[],sub=r=>E(r.category)+' ・ '+date(r.created_at)+(r.official?' ・ 公式':'');
 v.innerHTML=`<p class="mu" style="margin:12px 0 0">審査待ち ${pend.length}件</p>`+(pend.length?pend.map(r=>row(r,'<button class="gt on">確認</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">審査待ちはありません</p>')
-+`<h2>公開中 ${list===undefined?'':ap.length+'件'}</h2>`+(list===undefined?'<p class="mu">読み込み中…</p>':ap.length?ap.map(r=>row(r,'<button class="gt">管理</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">公開中のアプリはありません</p>');
++`<h2>公開中 ${list===undefined?'':ap.length+'件'}</h2>`+(list===undefined?'<p class="mu">読み込み中…</p>':ap.length?ap.map(r=>row(r,`<span style="display:flex;gap:6px;align-items:center"><button class="gt" data-of="${r.id}" data-v="${r.official?0:1}">${r.official?'公式を解除':'公式にする'}</button><button class="gt">管理</button></span>`,sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">公開中のアプリはありません</p>');
 if(list===undefined)loadList().then(()=>{if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()})}
-$('#srv').onclick=async e=>{const r=e.target.closest('.sr[data-t]');if(!r||rv)return;
+$('#srv').onclick=async e=>{const of=e.target.closest('[data-of]');if(of){if(await setOff(+of.dataset.of,of.dataset.v=='1')){list=undefined;rvView();loadList().then(()=>{baseline();syncOff();refresh();if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()})}return}
+const r=e.target.closest('.sr[data-t]');if(!r||rv)return;
 const{data,error}=await sb.from('phone_apps').select('*').eq('id',+r.dataset.t).single();if(error)return alert(error.message);rv=data;rvView();$('main').scrollTo(0,0)};
 async function decide(ok,off){const msg=($('#rvm')?$('#rvm').value:'').trim();if(!rv)return;if(!ok&&!msg)return alert('拒否の理由をメッセージ欄に書いてください');if(!confirm(ok?(off?'公式アプリとして許可しますか?全員の端末に最初から入り、削除できなくなります':'このアプリを許可して公開しますか?'):'このアプリを拒否しますか?'))return;
 const{data,error}=await sb.from('phone_apps').update({status:ok?'approved':'rejected',reject_reason:ok?null:msg,reviewed_at:new Date().toISOString(),...(ok&&off?{official:true}:{})}).eq('id',rv.id).select('id');
