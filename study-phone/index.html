@@ -166,19 +166,17 @@ i svg.lt{width:100%;height:100%}
 <div class="seg" id="sseg" style="--n:2;--i:0"><button data-s="dl" class="on">ダウンロード</button><button data-s="dv">アプリ開発</button><button data-s="rv" id="srvb" hidden>審査</button></div>
 <div id="sdl"></div>
 <div id="sdv" hidden>
-<p class="mu" style="margin-top:12px">ファイル(HTMLのほか、CSS・JS・画像も複数)を選び、アイコンと情報を入れて審査に出します。許可されるとApp Storeに並びます。</p>
+<p class="mu" style="margin-top:12px">HTMLファイルを選び、アイコンと情報を入れて審査に出します。許可されるとApp Storeに並びます。</p>
 <div class="card" style="margin-top:10px">
-<label class="fld" style="margin-top:0">ファイル(HTML・CSS・JS・画像などを複数選べます)</label>
-<div class="row"><button type="button" onclick="$('#dvf').click()">ファイルを選ぶ</button><button type="button" id="dvfc">消す</button><span class="mu" id="dvfn">未選択</span></div><input type="file" id="dvf" multiple accept=".html,.htm,.css,.js,.json,.png,.jpg,.jpeg,.gif,.svg,.webp,.ico,.mp3,.wav,.ogg,.mp4,.woff,.woff2,.ttf,.otf,.txt,text/html" hidden>
+<label class="fld" style="margin-top:0">HTMLファイル</label>
+<div class="row"><button type="button" onclick="$('#dvf').click()">ファイルを選ぶ</button><span class="mu" id="dvfn">未選択</span></div><input type="file" id="dvf" accept=".html,.htm,text/html" hidden>
 <label class="fld">アイコン</label>
 <div class="fi"><div class="sa" id="dvip"></div><button type="button" onclick="$('#dvic').click()">画像を選ぶ</button></div><input type="file" id="dvic" accept="image/*" hidden>
 <label class="fld">名前</label><input id="dvn" maxlength="30" placeholder="アプリの名前">
 <label class="fld">サブタイトル</label><input id="dvt" maxlength="40" placeholder="ひとことで説明">
 <label class="fld">説明</label><textarea id="dvd" rows="4" maxlength="400" placeholder="アプリの説明"></textarea>
 <label class="fld">カテゴリー</label><select id="dvc"></select>
-<label class="fld">対象年齢</label><select id="dva"></select>
-<div id="dvup" hidden><label class="fld">バージョンの上げ幅</label><select id="dvb"></select><label class="fld">今回の改良点(任意)</label><textarea id="dvu" rows="3" maxlength="300" placeholder="例: 操作が軽くなりました"></textarea><p class="mu" id="dvhint"></p></div>
-<div class="row" style="margin-top:14px"><button type="button" id="dvp" style="flex:1">プレビュー</button><button type="button" id="dvs" class="on" style="flex:1">審査に出す</button></div><button type="button" id="dvx" hidden style="width:100%;margin-top:8px">編集をやめる</button></div>
+<div class="row" style="margin-top:14px"><button type="button" id="dvp" style="flex:1">プレビュー</button><button type="button" id="dvs" class="on" style="flex:1">審査に出す</button></div></div>
 <h2>自分の申請</h2><div id="dvm"></div></div>
 <div id="srv" hidden></div>
 <div id="spv" hidden></div>
@@ -207,6 +205,7 @@ const APPS={},NM={};
 // ===== ダウンロードしたアプリ(ext)=====
 // Supabaseから取得したHTMLは、安全のためサンドボックスiframeの中で動かします。
 // localStorageは中継して、アプリごとにこの端末へ保存します。
+const ALW='geolocation *';  // 位置情報を使うアプリ用(サンドボックス内は * が必要)
 const XID=id=>1000+id,SBX='allow-scripts allow-forms allow-modals allow-popups allow-downloads allow-pointer-lock';
 const okIcon=s=>typeof s=='string'&&/^data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+\/=]+$/.test(s);
 const tint=n=>{let h=0;for(const c of String(n))h=(h*31+c.charCodeAt(0))%360;return h};
@@ -229,7 +228,7 @@ const m=/<head(\s[^>]*)?>/i.exec(html)||/<html(\s[^>]*)?>/i.exec(html)||/^\s*<!d
 return m?html.slice(0,m.index+m[0].length)+sc+html.slice(m.index+m[0].length):sc+html}
 function mkExt(t){if($('#t'+t))return;const id=t-1000,r=loadX(id);if(!r)return;
 const s=document.createElement('section');s.className='tab ext';s.id='t'+t;
-const f=document.createElement('iframe');f.dataset.xid=id;f.setAttribute('sandbox',SBX);f.srcdoc=frameDoc(r.html,loadD(id),1);s.append(f);$('main').append(s)}
+const f=document.createElement('iframe');f.dataset.xid=id;f.setAttribute('sandbox',SBX);f.setAttribute('allow',ALW);f.srcdoc=frameDoc(r.html,loadD(id),1);s.append(f);$('main').append(s)}
 function syncExt(){$$('section.ext').forEach(s=>{if(!S.open.includes(+s.id.slice(1)))s.remove()})}
 addEventListener('message',e=>{const d=e.data;if(!d||typeof d!='object'||!d.xapp)return;
 const f=$$('iframe[data-xid]').find(x=>x.contentWindow===e.source);if(!f)return;
@@ -363,8 +362,8 @@ theme();
 // ===== App Store(ダウンロード / アプリ開発 / 審査)=====
 (()=>{
 const CATS=['ゲーム','ツール','勉強','エンタメ','ソーシャル','ライフスタイル','ユーティリティ','その他'];
-const COLS='id,name,subtitle,description,category,icon,size,created_at,age,version,update_note,updated_at';
-let tabS='dl',q='',det=null,rv=null,pv=null,list,lerr='',pend=[],ups=[],adm=false,lt=0,pt2;
+const COLS='id,name,subtitle,description,category,icon,size,created_at';
+let tabS='dl',q='',det=null,rv=null,pv=null,list,lerr='',pend=[],adm=false,lt=0,pt2;
 const bz=new Map(),has=id=>(S.inst||[]).includes(XID(id));
 const date=s=>{const d=new Date(s);return isNaN(d)?'-':d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()};
 const kb=n=>n==null?'-':n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';
@@ -379,28 +378,8 @@ function gbtn(){$$('#sdl .gt[data-g]').forEach(b=>{const id=+b.dataset.g;if(bz.h
 function slist(){const o=$('#sl');if(!o)return;
 if(list===undefined){o.innerHTML='<p class="mu" style="text-align:center;margin-top:24px">読み込み中…</p>';return}
 const k=q.trim().toLowerCase(),a=list.filter(r=>!k||(r.name+(r.subtitle||'')+(r.description||'')+r.category).toLowerCase().includes(k));
-o.innerHTML=a.map(r=>row(r,`<button class="gt" data-g="${r.id}"></button>`,E(r.category)+' ・ +'+(r.age||3))).join('')||`<p class="mu" style="text-align:center;margin-top:24px">${E(lerr)||(k?'見つかりませんでした':'まだアプリがありません。「アプリ開発」から追加できます')}</p>`;gbtn()}
-function ddet(v,r){v.innerHTML=`<button class="ib" id="sbk2">‹</button><div class="row" style="gap:16px;margin-top:10px;flex-wrap:nowrap"><div class="sa lgi">${iconOf(r)}</div><div style="flex:1;min-width:0"><b style="font-size:1.3em">${E(r.name)}</b><div class="mu">${E(r.subtitle)}</div><button class="gt" style="margin-top:8px" data-g="${r.id}"></button></div></div><div class="dgrid"><div><b>${E(r.category)}</b><span class="mu">カテゴリー</span></div><div><b>${kb(r.size)}</b><span class="mu">サイズ</span></div><div><b>${date(r.created_at)}</b><span class="mu">公開日</span></div></div><div class="dgrid" style="margin-top:0"><div><b>+${r.age||3}</b><span class="mu">年齢</span></div><div><b>${r.version||1}</b><span class="mu">バージョン</span></div><div><b>${r.updated_at?date(r.updated_at):'-'}</b><span class="mu">最終更新</span></div></div>${r.updated_at?`<h2>新機能</h2><p class="mu">バージョン ${r.version} ・ ${date(r.updated_at)}</p><p style="white-space:pre-wrap">${E(r.update_note)||'<span class="mu">改良点の記載はありません</span>'}</p>`:''}<h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p><div id="rvw"></div>${adm?'<h2>管理者メニュー</h2><div class="card"><label class="fld" style="margin-top:0">申請者へのメッセージ(任意)</label><textarea id="rmm" rows="3" maxlength="300" placeholder="除外する理由など"></textarea><button id="rmv" style="width:100%;margin-top:12px">App Storeから除外する</button></div>':''}`;gbtn();loadRev(r.id)}
-let rvs=[],rsel=0;
-const stars=n=>'★'.repeat(n)+'☆'.repeat(5-n),myKey=id=>(S.mine.find(m=>m.id==id&&m.key)||{}).key,myNm=()=>me&&S.prof&&S.prof.uid==me.id&&S.prof.name;
-async function loadRev(id){if(!$('#rvw')||!sb)return;const{data,error}=await sb.from('phone_reviews').select('*').eq('app_id',id).order('created_at',{ascending:false});
-const o=$('#rvw');if(!o||det!=id)return;if(error){o.innerHTML='<p class="mu">'+(noTbl(error)?'レビュー機能の準備ができていません(SQLを実行してください)':E(error.message))+'</p>';return}
-rvs=data;const n=rvs.length,avg=n?rvs.reduce((a,x)=>a+x.rating,0)/n:0,mine=me&&rvs.find(x=>x.user_id==me.id),dev=myKey(id)||(me&&(await sb.rpc('phone_is_owner',{p_id:id})).data);if(mine&&!rsel)rsel=mine.rating;
-o.innerHTML=`<h2>評価とレビュー</h2><div class="row" style="gap:18px;flex-wrap:nowrap;align-items:center"><div style="font:300 3.4em var(--mi);line-height:1">${n?avg.toFixed(1):'-'}</div><div style="flex:1">${[5,4,3,2,1].map(k=>{const c=rvs.filter(x=>x.rating==k).length;return `<div class="row" style="gap:6px;flex-wrap:nowrap"><span class="mu" style="width:1.8em">${k}★</span><div style="flex:1;height:5px;border-radius:3px;background:var(--bd)"><div style="height:100%;border-radius:3px;background:var(--fg);width:${n?c/n*100:0}%"></div></div></div>`}).join('')}</div></div><p class="mu">5段階評価中 ・ ${n}件の評価</p>
-<p class="mu" style="margin-top:14px">タップして評価:</p><div id="rst2" style="font-size:2em;letter-spacing:.1em;cursor:pointer">${[1,2,3,4,5].map(k=>`<span data-k="${k}">${k<=rsel?'★':'☆'}</span>`).join('')}</div>
-<textarea id="rbd" rows="3" maxlength="300" placeholder="レビューを書く(任意)" style="margin-top:8px"></textarea><button id="rsb" class="on" style="width:100%;margin-top:8px">${mine?'レビューを更新':'レビューを投稿'}</button>
-<div style="margin-top:14px">${rvs.map(x=>`<div class="card" style="margin-top:10px"><div class="row sp"><b>${E(x.nickname)}</b><span class="mu">${date(x.created_at)}</span></div><div>${stars(x.rating)}</div><p style="white-space:pre-wrap;margin:6px 0 0">${E(x.body)}</p>${x.reply?`<div class="msgb" style="margin-top:8px"><b>開発者(${E(x.reply_name||'開発者')})からの返信</b><br>${E(x.reply)}</div>`:''}${dev?`<button class="rpb" data-r="${x.id}" style="margin-top:8px;font-size:.85em">${x.reply?'返信を編集':'返信する'}</button>`:''}</div>`).join('')}</div>`;
-if(mine)$('#rbd').value=mine.body||''}
-$('#sdl').addEventListener('click',async e=>{
-const s=e.target.closest('#rst2 [data-k]');if(s){rsel=+s.dataset.k;$$('#rst2 span').forEach(x=>x.textContent=+x.dataset.k<=rsel?'★':'☆');return}
-if(e.target.closest('#rsb')){if(!me)return alert('レビューを書くには、設定アプリでログインしてください');if(!rsel)return alert('星をタップして評価してください');
-const nm=myNm();if(!nm)return alert('先に設定アプリのプロフィールでニックネームを登録してください');
-const mine=rvs.find(x=>x.user_id==me.id),f={rating:rsel,body:$('#rbd').value.trim()||null,nickname:nm};
-const{error}=mine?await sb.from('phone_reviews').update(f).eq('id',mine.id):await sb.from('phone_reviews').insert({...f,app_id:det,user_id:me.id});
-if(error)return alert('投稿できませんでした: '+error.message);loadRev(det);return}
-const p=e.target.closest('.rpb');if(p){const x=rvs.find(k=>k.id==+p.dataset.r),t=prompt('返信を入力してください(空にすると削除)',x.reply||'');if(t==null)return;
-const{data,error}=await sb.rpc('phone_reply_review',{p_review:x.id,p_key:myKey(det)||'',p_text:t.trim(),p_name:myNm()||'開発者'});
-if(error||!data)return alert('返信できませんでした'+(error?': '+error.message:''));loadRev(det)}});
+o.innerHTML=a.map(r=>row(r,`<button class="gt" data-g="${r.id}"></button>`,E(r.category))).join('')||`<p class="mu" style="text-align:center;margin-top:24px">${E(lerr)||(k?'見つかりませんでした':'まだアプリがありません。「アプリ開発」から追加できます')}</p>`;gbtn()}
+function ddet(v,r){v.innerHTML=`<button class="ib" id="sbk2">‹</button><div class="row" style="gap:16px;margin-top:10px;flex-wrap:nowrap"><div class="sa lgi">${iconOf(r)}</div><div style="flex:1;min-width:0"><b style="font-size:1.3em">${E(r.name)}</b><div class="mu">${E(r.subtitle)}</div><button class="gt" style="margin-top:8px" data-g="${r.id}"></button></div></div><div class="dgrid"><div><b>${E(r.category)}</b><span class="mu">カテゴリー</span></div><div><b>${kb(r.size)}</b><span class="mu">サイズ</span></div><div><b>${date(r.created_at)}</b><span class="mu">公開日</span></div></div><h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p>${has(r.id)?'<h2>位置情報が使えないとき</h2><button id="otab" style="width:100%">通常のタブで開く</button><p class="mu" style="margin-top:8px;line-height:1.6">アプリ内で位置情報が使えない場合は、通常のタブで開くと許可の確認が出ます。それでも動かないときは、ブラウザのアドレスバー横かサイト設定で、このサイトの位置情報が「ブロック」ではなく「許可(または確認)」になっているか確認してください。</p>':''}${adm?'<h2>管理者メニュー</h2><div class="card"><label class="fld" style="margin-top:0">申請者へのメッセージ(任意)</label><textarea id="rmm" rows="3" maxlength="300" placeholder="除外する理由など"></textarea><button id="rmv" style="width:100%;margin-top:12px">App Storeから除外する</button></div>':''}`;gbtn()}
 function dlView(){const v=$('#sdl');if(det!=null){const r=(list||[]).find(x=>x.id==det);if(r)return ddet(v,r);det=null}
 v.innerHTML='<input id="sq" type="search" placeholder="アプリ名・説明で検索" style="width:100%;margin:10px 0 4px"><div id="sl"></div>';
 $('#sq').value=q;$('#sq').oninput=()=>{q=$('#sq').value;slist()};slist()}
@@ -412,81 +391,35 @@ if(p>=100&&ok!=null){clearInterval(iv);bz.delete(id);fin(id,ok)}},110)}
 function fin(id,html){const r=(list||[]).find(x=>x.id==id);if(!r)return gbtn();
 try{localStorage.setItem('xa:'+id,JSON.stringify({...r,html}))}catch(e){gbtn();return alert('この端末の保存容量が足りません')}
 const t=regExt(r);if(!S.inst.includes(t))S.inst.push(t);const l=S.hm.p[S.hm.p.length-1];l.length<20?l.push(t):S.hm.p.push([t]);save();renderHome();if(tabS=='dl')dlView()}
+function openTab(id){const r=loadX(id);if(!r)return alert('このアプリはこの端末に保存されていません');
+if(!confirm('このアプリを通常のタブで開きます。\nこの方法ではスマホの枠の保護(サンドボックス)が外れ、アプリがこのサイトのデータに触れられます。信頼できるアプリだけ開いてください。'))return;
+const u=URL.createObjectURL(new Blob([r.html],{type:'text/html'}));window.open(u,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(u),60000)}
 async function takeDown(id,msg){msg=(msg||'').trim();if(!confirm('このアプリをApp Storeから除外しますか?(すでにダウンロードした人の端末には残ります)'))return false;
 const{data,error}=await sb.from('phone_apps').update({status:'removed',reject_reason:msg||null,reviewed_at:new Date().toISOString()}).eq('id',id).select('id');
 if(error){alert('失敗しました: '+error.message);return false}if(!data||!data.length){alert('このアカウントには権限がありません');return false}
 list=undefined;await loadList();return true}
 $('#sdl').onclick=e=>{if(e.target.closest('#sbk2')){det=null;dlView();return}
+if(e.target.closest('#otab')){openTab(det);return}
 if(e.target.closest('#rmv')){takeDown(det,$('#rmm').value).then(ok=>{if(ok){det=null;dlView()}});return}
 const g=e.target.closest('.gt[data-g]'),r=e.target.closest('.sr[data-t]');
 if(g){const id=+g.dataset.g;if(has(id)){const t=XID(id),ic=$(`#home .ic[data-t="${t}"]`);if(ic)openApp(t,ic)}else install(id);return}
-if(r){det=+r.dataset.t;rsel=0;rvs=[];dlView();$('main').scrollTo(0,0)}};
+if(r){det=+r.dataset.t;dlView();$('main').scrollTo(0,0)}};
 // ---------- アプリ開発 ----------
 const dvs={html:'',icon:'',size:0};
 $('#dvc').innerHTML=CATS.map(c=>`<option>${c}</option>`).join('');
-$('#dva').innerHTML=[3,7,12,15,18].map(a=>`<option value="${a}">+${a}</option>`).join('');
-$('#dvb').innerHTML=[['0.1','+0.1(小さな修正)'],['0.5','+0.5'],['1','+1(大きな更新)'],['2','+2']].map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
-let ed=null;
-function dvReset(){dvf.clear();dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd','#dvu'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';$('#dva').value=3;dvIcon()}
-function edMode(m,r){ed=m?m.id:null;$('#dvup').hidden=!m||m.st!='approved';$('#dvx').hidden=!m;$('#dvs').textContent=m?(m.st=='approved'?'保存(HTML変更は申請)':'変更を保存'):'審査に出す';
-if(r){$('#dvn').value=r.name;$('#dvt').value=r.subtitle||'';$('#dvd').value=r.description||'';$('#dvc').value=r.category;$('#dva').value=r.age||3;dvs.icon=r.icon||'';dvs.html='';dvs.size=0;$('#dvfn').textContent='(変えないなら選ばなくてOK)';$('#dvu').value='';$('#dvhint').textContent='現在のバージョン: '+(r.version||1);dvIcon()}}
-async function saveEdit(){const m=S.mine.find(k=>k.id==ed);if(!m||!sb)return;const d=draft();if(!d.name)return alert('名前を入力してください');
-const p={name:d.name,subtitle:d.subtitle,description:d.description,category:d.category,icon:d.icon||null,age:d.age};
-if(d.html){p.html=d.html;p.size=d.size}if(m.st=='approved'){p.note=$('#dvu').value.trim();p.bump=+$('#dvb').value}
-const{data,error}=await sb.rpc('phone_edit_app',{p_id:m.id,p_key:m.key,p_data:p});
-if(error)return alert('失敗しました: '+error.message);if(!data)return alert('保存できませんでした。持ち主の確認に失敗しました(別の端末・別のブラウザで申請した場合や、SQLが未実行の場合に起きます)');
-if(data=='requested')m.up=1;save();alert(data=='requested'?'HTMLの変更を管理者に申請しました。許可されると反映されます':'変更を保存しました');
-edMode(null);dvReset();list=undefined;mineRender()}
-$('#dvx').onclick=()=>{edMode(null);dvReset()};
 const dvIcon=()=>{$('#dvip').innerHTML=iconOf({icon:dvs.icon,name:$('#dvn').value||'A'})};dvIcon();
 $('#dvn').oninput=()=>{if(!dvs.icon)dvIcon()};
-const dvf=new Map();
-const rdU=f=>new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f)});
-const bn=h=>decodeURIComponent(String(h||'').split(/[?#]/)[0]).split('/').pop().toLowerCase();
-const ext=h=>/^(https?:|data:|blob:|#|\/\/|mailto:|javascript:|tel:)/i.test(h||'');
-const isCode=k=>/\.(html?|css|js)$/.test(k);
-// 複数ファイルを1つのHTMLにまとめる(CSS・JSは中に埋め込み、画像などはデータURLにする)
-async function bundle(){const hs=[...dvf].filter(([k])=>/\.html?$/.test(k));if(!hs.length)return'';
-let t=await(hs.find(([k])=>k=='index.html')||hs[0])[1].text();
-const sub=async(re,fn)=>{for(const m of[...t.matchAll(re)]){const r=await fn(m);if(r!=null)t=t.replace(m[0],()=>r)}};
-const cssU=async c=>{for(const m of[...c.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g)]){const f=!ext(m[2])&&!isCode(bn(m[2]))&&dvf.get(bn(m[2]));if(f)c=c.split(m[0]).join('url('+await rdU(f)+')')}return c};
-await sub(/<link\b[^>]*>/gi,async m=>{const h=(m[0].match(/href=["']([^"']+)["']/i)||[])[1],f=h&&!ext(h)&&/stylesheet/i.test(m[0])&&dvf.get(bn(h));return f?'<style>'+await cssU(await f.text())+'</style>':null});
-await sub(/<script\b([^>]*?)\ssrc=["']([^"']+)["']([^>]*)>\s*<\/script>/gi,async m=>{const f=!ext(m[2])&&dvf.get(bn(m[2]));return f?'<script'+m[1]+m[3]+'>'+(await f.text()).replace(/<\/script/gi,'<\\/script')+'<\/script>':null});
-t=await cssU(t);
-await sub(/\b(src|href|poster)=["']([^"']+)["']/gi,async m=>{const f=!ext(m[2])&&!isCode(bn(m[2]))&&dvf.get(bn(m[2]));return f?m[1]+'="'+await rdU(f)+'"':null});
-for(const[k,f]of dvf){if(isCode(k)||!t.toLowerCase().includes(k))continue;const u=await rdU(f),re=new RegExp('(["\'`])(?:[^"\'`\\n]*/)?'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\1','gi');t=t.replace(re,(m0,q)=>q+u+q)}
-return t}
-$('#dvfc').onclick=()=>{dvf.clear();dvs.html='';dvs.size=0;$('#dvfn').textContent='未選択'};
-$('#dvf').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;
-fs.forEach(f=>dvf.set(f.name.toLowerCase(),f));let tot=0;dvf.forEach(f=>tot+=f.size);
-if(tot>2e6){fs.forEach(f=>dvf.delete(f.name.toLowerCase()));return alert('ファイルの合計が大きすぎます(2MBまで)')}
-const names=[...dvf.keys()],lab=names.length+'個: '+names.join(', ')+'('+kb(tot)+')';
-const t=await bundle();if(!t){dvs.html='';dvs.size=0;$('#dvfn').textContent=lab+' ※HTMLファイルも選んでください';return}
-if(t.length>3e6){dvs.html='';dvs.size=0;$('#dvfn').textContent=lab;return alert('まとめたあとのサイズが大きすぎます(3MBまで)。画像を小さくしてください')}
-if(!/<[a-z!]/i.test(t)){dvs.html='';return alert('HTMLファイルではないようです')}
-dvs.html=t;dvs.size=t.length;$('#dvfn').textContent=lab;
-const mn=names.find(k=>k=='index.html')||names.find(k=>/\.html?$/.test(k));
-if(!$('#dvn').value&&mn){$('#dvn').value=mn.replace(/\.html?$/,'').slice(0,30);if(!dvs.icon)dvIcon()}};
-function cropIcon(im,done){const W=240,iw=im.naturalWidth||im.width,ih=im.naturalHeight||im.height,base=W/(Math.min(iw,ih)||1);let z=1,ox=0,oy=0,dr=null;
-const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center';
-o.innerHTML=`<div style="background:var(--bg);color:var(--fg);border-radius:20px;padding:18px;width:min(92vw,320px);text-align:center"><b>アイコンを調整</b><p class="mu" style="margin:6px 0 10px">ドラッグで移動 ・ スライダーで拡大縮小</p><canvas width="${W}" height="${W}" style="width:${W}px;height:${W}px;max-width:100%;border-radius:22%;border:1px solid var(--bd);touch-action:none;cursor:grab"></canvas><input type="range" min="0.3" max="4" step="0.01" value="1" style="width:100%;margin-top:12px;padding:0"><div class="row" style="margin-top:12px;flex-wrap:nowrap"><button data-c style="flex:1">キャンセル</button><button data-o class="on" style="flex:1">決定</button></div></div>`;
-document.body.append(o);const cv=o.querySelector('canvas'),rg=o.querySelector('input');
-const lim=()=>{const a=Math.abs(iw*base*z-W)/2,b=Math.abs(ih*base*z-W)/2;ox=Math.max(-a,Math.min(a,ox));oy=Math.max(-b,Math.min(b,oy))};
-const draw=(c,n)=>{const k=n/W,x=c.getContext('2d'),w=iw*base*z*k,h=ih*base*z*k;x.fillStyle='#fff';x.fillRect(0,0,n,n);x.drawImage(im,n/2+ox*k-w/2,n/2+oy*k-h/2,w,h)};
-const rd=()=>{lim();draw(cv,W)};rd();
-rg.oninput=()=>{z=+rg.value;rd()};
-cv.onpointerdown=e=>{dr=[e.clientX,e.clientY,ox,oy];cv.setPointerCapture(e.pointerId)};
-cv.onpointermove=e=>{if(!dr)return;ox=dr[2]+e.clientX-dr[0];oy=dr[3]+e.clientY-dr[1];rd()};
-cv.onpointerup=cv.onpointercancel=()=>{dr=null};
-o.onclick=e=>{if(e.target.closest('[data-c]')||e.target==o)o.remove();else if(e.target.closest('[data-o]')){const c=document.createElement('canvas');c.width=c.height=192;draw(c,192);o.remove();done(c.toDataURL('image/png'))}}}
-$('#dvip').style.cursor='pointer';$('#dvip').onclick=()=>{if(!dvs.icon)return;const im=new Image();im.onload=()=>cropIcon(im,u=>{dvs.icon=u;dvIcon()});im.src=dvs.icon};
+$('#dvf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+if(f.size>1.5e6)return alert('ファイルが大きすぎます(1.5MBまで)');
+const t=await f.text();if(!/<[a-z!]/i.test(t))return alert('HTMLファイルではないようです');
+dvs.html=t;dvs.size=f.size;$('#dvfn').textContent=f.name+'('+kb(f.size)+')';
+if(!$('#dvn').value){$('#dvn').value=f.name.replace(/\.html?$/i,'').slice(0,30);if(!dvs.icon)dvIcon()}};
 $('#dvic').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
-rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>cropIcon(im,u=>{dvs.icon=u;dvIcon()});im.src=rd.result};rd.readAsDataURL(f)};
+rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;const x=c.getContext('2d'),s=Math.min(im.width,im.height)||1;x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,192,192);dvs.icon=c.toDataURL('image/png');dvIcon()};im.src=rd.result};rd.readAsDataURL(f)};
 const ST={pending:['審査中',''],approved:['公開中','ok'],rejected:['拒否','ng'],removed:['公開停止','ng'],withdrawn:['公開中止','ng']};
 function mineRender(){$('#dvm').innerHTML=S.mine.length?S.mine.map(m=>{const s=ST[m.st]||ST.pending,bad=m.st=='rejected'||m.st=='removed'||m.st=='withdrawn',wb=m.key&&(m.st=='approved'||m.st=='pending');
-return `<div class="trow" style="flex-wrap:wrap"><span>${E(m.name)}</span><span class="chip ${s[1]}">${s[0]}</span>${wb?`<button class="me" data-e="${m.id}" style="font-size:.85em">編集</button>`:''}${m.up&&m.st=='approved'?'<span class="chip">アップデート審査中</span>':''}${wb?`<button class="mw" data-w="${m.id}" style="font-size:.85em">${m.st=='approved'?'公開を中止する':'申請を取り下げる'}</button>`:''}${bad&&m.st!='withdrawn'?`<div class="msgb"><b>管理者からのメッセージ</b><br>${m.msg?E(m.msg):'<span class="mu">メッセージはありません</span>'}</div>`:''}${bad?`<button class="mx" data-x="${m.id}" style="font-size:.85em">消す</button>`:''}</div>`}).join(''):'<p class="mu">まだ申請はありません</p>'}
-$('#dvm').onclick=async e=>{const ee=e.target.closest('.me');if(ee){const m=S.mine.find(k=>k.id==+ee.dataset.e);if(!m||!sb)return;const{data,error}=await sb.from('phone_apps').select(COLS).eq('id',m.id).single();if(error||!data)return alert('読み込めませんでした');edMode(m,data);$('main').scrollTo(0,0);return}
-const x=e.target.closest('.mx'),w=e.target.closest('.mw');
+return `<div class="trow" style="flex-wrap:wrap"><span>${E(m.name)}</span><span class="chip ${s[1]}">${s[0]}</span>${wb?`<button class="mw" data-w="${m.id}" style="font-size:.85em">${m.st=='approved'?'公開を中止する':'申請を取り下げる'}</button>`:''}${bad&&m.st!='withdrawn'?`<div class="msgb"><b>管理者からのメッセージ</b><br>${m.msg?E(m.msg):'<span class="mu">メッセージはありません</span>'}</div>`:''}${bad?`<button class="mx" data-x="${m.id}" style="font-size:.85em">消す</button>`:''}</div>`}).join(''):'<p class="mu">まだ申請はありません</p>'}
+$('#dvm').onclick=async e=>{const x=e.target.closest('.mx'),w=e.target.closest('.mw');
 if(x){S.mine=S.mine.filter(m=>m.id!=+x.dataset.x);save();mineRender();return}
 if(!w)return;const m=S.mine.find(k=>k.id==+w.dataset.w);if(!m||!sb)return;
 if(!confirm(m.st=='approved'?'このアプリの公開を中止しますか?(App Storeから消えます。すでにダウンロードした人の端末には残ります)':'この申請を取り下げますか?'))return;
@@ -495,57 +428,47 @@ if(error){w.disabled=false;return alert('失敗しました: '+error.message)}
 if(!data){alert('できませんでした。すでに状態が変わっています');return mineSync()}
 m.st='withdrawn';m.msg='';save();list=undefined;mineRender()};
 async function mineSync(){mineRender();if(!sb||!S.mine.length)return;const{data}=await sb.rpc('phone_app_status',{ids:S.mine.map(m=>m.id)});if(!data)return;let ch=0;
-data.forEach(d=>{const m=S.mine.find(x=>x.id==d.id);if(m&&(m.st!=d.status||(m.msg||'')!=(d.reason||''))){m.st=d.status;m.msg=d.reason||'';ch=1}});const mt=await sb.rpc('phone_app_meta',{ids:S.mine.map(m=>m.id)});(mt.data||[]).forEach(d=>{const m=S.mine.find(x=>x.id==d.id);if(m&&!!m.up!=!!d.up){m.up=d.up?1:0;ch=1}});
-if(ch){save();mineRender();list=undefined}}
-const draft=()=>({name:$('#dvn').value.trim(),subtitle:$('#dvt').value.trim(),description:$('#dvd').value.trim(),category:$('#dvc').value,icon:dvs.icon,html:dvs.html,size:dvs.size,age:+$('#dva').value,created_at:new Date().toISOString()});
+data.forEach(d=>{const m=S.mine.find(x=>x.id==d.id);if(m&&(m.st!=d.status||(m.msg||'')!=(d.reason||''))){m.st=d.status;m.msg=d.reason||'';ch=1}});if(ch){save();mineRender();list=undefined}}
+const draft=()=>({name:$('#dvn').value.trim(),subtitle:$('#dvt').value.trim(),description:$('#dvd').value.trim(),category:$('#dvc').value,icon:dvs.icon,html:dvs.html,size:dvs.size,created_at:new Date().toISOString()});
 $('#dvp').onclick=()=>{const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');d.name||='(名前なし)';pv=d;view()};
-$('#dvs').onclick=async()=>{if(ed)return saveEdit();const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');if(!d.name)return alert('名前を入力してください');if(!sb)return noSb();
+$('#dvs').onclick=async()=>{const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');if(!d.name)return alert('名前を入力してください');if(!sb)return noSb();
 const b=$('#dvs');b.disabled=true;b.textContent='送信中…';
 const key=(crypto.randomUUID?crypto.randomUUID()+crypto.randomUUID():String(Math.random()).slice(2)+String(Math.random()).slice(2)),{data,error}=await sb.rpc('phone_submit_app',{p_key:key,p_name:d.name,p_subtitle:d.subtitle,p_desc:d.description,p_cat:d.category,p_icon:d.icon||null,p_html:d.html});
 b.disabled=false;b.textContent='審査に出す';
 if(error)return alert('送信できませんでした: '+(noTbl(error)?'データベースの準備ができていません(supabase.sqlを実行してください)':error.message));
-if(d.age!=3)await sb.rpc('phone_edit_app',{p_id:data,p_key:key,p_data:{age:d.age}});S.mine=[{id:data,name:d.name,st:'pending',key},...S.mine].slice(0,30);save();
-dvf.clear();dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';dvIcon();mineRender();
+S.mine=[{id:data,name:d.name,st:'pending',key},...S.mine].slice(0,30);save();
+dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';dvIcon();mineRender();
 alert('審査に出しました。許可されるとApp Storeに並びます')};
 // ---------- シミュレーター(プレビュー / 審査)----------
-function simShow(v,r,mode){v.innerHTML=`<button class="ib" id="xbk">‹</button><h2 style="margin-top:6px">${mode=='rv'?'審査':mode=='ap'?'公開中のアプリ':mode=='up'?'アップデート申請':'プレビュー'}</h2>
-<div class="sr" style="cursor:default"><div class="sa">${iconOf(r)}</div><div class="tx"><b>${E(r.name)}</b><span class="mu">${E(r.subtitle)}</span><span class="mu">${E(r.category)} ・ +${r.age||3}</span></div><button class="gt on" disabled>入手</button></div>
+function simShow(v,r,mode){v.innerHTML=`<button class="ib" id="xbk">‹</button><h2 style="margin-top:6px">${mode=='rv'?'審査':mode=='ap'?'公開中のアプリ':'プレビュー'}</h2>
+<div class="sr" style="cursor:default"><div class="sa">${iconOf(r)}</div><div class="tx"><b>${E(r.name)}</b><span class="mu">${E(r.subtitle)}</span><span class="mu">${E(r.category)}</span></div><button class="gt on" disabled>入手</button></div>
 <p class="mu" style="margin-top:12px">上: App Storeでの見え方 ／ 下: ダウンロード後の動き</p>
-<div class="simw"><div class="sim" id="sim"><iframe id="simf" sandbox="${SBX}"></iframe><button class="simx" id="simx">閉じる</button></div></div>
+<div class="simw"><div class="sim" id="sim"><iframe id="simf" sandbox="${SBX}" allow="${ALW}"></iframe><button class="simx" id="simx">閉じる</button></div></div>
 <div class="row"><button id="simfs" style="flex:1">全画面で試す</button></div>
-${mode=='up'?`<h2>アップデート内容</h2><p class="mu">v${r.version} → v${Math.round((+r.version+(+r.bump||1))*100)/100}</p><p style="white-space:pre-wrap">${E(r.note)||'<span class="mu">改良点の記載なし</span>'}</p>`:''}<h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p><p class="mu" style="margin-top:8px">${kb(r.size)} ・ ${date(r.created_at)}</p>
+<h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p><p class="mu" style="margin-top:8px">${kb(r.size)} ・ ${date(r.created_at)}</p>
 ${mode=='rv'||mode=='ap'?'<label class="fld">申請者へのメッセージ('+(mode=='rv'?'拒否するときは理由を書きます':'公開停止の理由など・任意')+')</label><textarea id="rvm" rows="3" maxlength="300" placeholder="例: 起動しないので直して、もう一度出してください"></textarea>':''}
-${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div>':mode=='ap'?'<div class="act"><button id="rdel" style="flex:1">完全に削除</button><button id="rst" class="on" style="flex:1">公開停止</button></div>':mode=='up'?'<div class="act"><button id="uno" style="flex:1">却下</button><button id="uok" class="on" style="flex:1">承認</button></div>':''}`;
+${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div>':mode=='ap'?'<div class="act"><button id="rst" class="on" style="flex:1">公開停止</button></div>':''}`;
 $('#simf').srcdoc=frameDoc(r.html||'',{},0);
-$('#xbk').onclick=()=>{if(mode=='rv'||mode=='ap'||mode=='up'){rv=null;rvView()}else{pv=null;view()}};
+$('#xbk').onclick=()=>{if(mode=='rv'||mode=='ap'){rv=null;rvView()}else{pv=null;view()}};
 $('#simfs').onclick=()=>$('#sim').classList.add('full');$('#simx').onclick=()=>$('#sim').classList.remove('full');
 if(mode=='rv'){$('#rok').onclick=()=>decide(true);$('#rng').onclick=()=>decide(false)}
-if(mode=='up'){$('#uok').onclick=()=>decideUp(true);$('#uno').onclick=()=>decideUp(false)}
-if(mode=='ap')$('#rst').onclick=async()=>{if(await takeDown(r.id,$('#rvm').value)){rv=null;rvView()}};
-if(mode=='ap')$('#rdel').onclick=async()=>{if(!confirm('このアプリをデータベースから完全に削除しますか?(元に戻せません。すでにダウンロードした人の端末には残ります)'))return;
-const{data,error}=await sb.from('phone_apps').delete().eq('id',r.id).select('id');
-if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('削除できませんでした(権限がありません。Supabaseで削除用SQLを実行してください)');
-rv=null;list=undefined;rvView()}}
+if(mode=='ap')$('#rst').onclick=async()=>{if(await takeDown(r.id,$('#rvm').value)){rv=null;rvView()}}}
 // ---------- 審査(管理者)----------
 async function loadPend(){if(!sb||!adm)return;const{data,error}=await sb.from('phone_apps').select(COLS).eq('status','pending').order('created_at');
-if(!error){pend=data;const u=await sb.from('phone_apps').select(COLS+',pending').not('pending','is',null);ups=u.data||[];badge();if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()}}
-function rvView(){const v=$('#srv');if(rv)return simShow(v,rv,rv.status=='approved'?'ap':rv.status=='up'?'up':'rv');
+if(!error){pend=data;badge();if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()}}
+function rvView(){const v=$('#srv');if(rv)return simShow(v,rv,rv.status=='approved'?'ap':'rv');
 const ap=list||[],sub=r=>E(r.category)+' ・ '+date(r.created_at);
 v.innerHTML=`<p class="mu" style="margin:12px 0 0">審査待ち ${pend.length}件</p>`+(pend.length?pend.map(r=>row(r,'<button class="gt on">確認</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">審査待ちはありません</p>')
-+`<h2>アップデート申請 ${ups.length}件</h2>`+(ups.length?ups.map(r=>row(r,'<button class="gt on">確認</button>',sub(r)).replace('class="sr"','class="sr" data-u="1"')).join(''):'<p class="mu" style="text-align:center;margin:16px 0">申請はありません</p>')+`<h2>公開中 ${list===undefined?'':ap.length+'件'}</h2>`+(list===undefined?'<p class="mu">読み込み中…</p>':ap.length?ap.map(r=>row(r,'<button class="gt">管理</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">公開中のアプリはありません</p>');
++`<h2>公開中 ${list===undefined?'':ap.length+'件'}</h2>`+(list===undefined?'<p class="mu">読み込み中…</p>':ap.length?ap.map(r=>row(r,'<button class="gt">管理</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">公開中のアプリはありません</p>');
 if(list===undefined)loadList().then(()=>{if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()})}
 $('#srv').onclick=async e=>{const r=e.target.closest('.sr[data-t]');if(!r||rv)return;
-const{data,error}=await sb.from('phone_apps').select('*').eq('id',+r.dataset.t).single();if(error)return alert(error.message);rv=data;if(r.dataset.u&&data.pending)rv={...data,...data.pending,status:'up'};rvView();$('main').scrollTo(0,0)};
+const{data,error}=await sb.from('phone_apps').select('*').eq('id',+r.dataset.t).single();if(error)return alert(error.message);rv=data;rvView();$('main').scrollTo(0,0)};
 async function decide(ok){const msg=($('#rvm')?$('#rvm').value:'').trim();if(!rv)return;if(!ok&&!msg)return alert('拒否の理由をメッセージ欄に書いてください');if(!confirm(ok?'このアプリを許可して公開しますか?':'このアプリを拒否しますか?'))return;
 const{data,error}=await sb.from('phone_apps').update({status:ok?'approved':'rejected',reject_reason:ok?null:msg,reviewed_at:new Date().toISOString()}).eq('id',rv.id).select('id');
 if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('このアカウントには審査の権限がありません');
 rv=null;list=undefined;await loadPend();rvView()}
-async function decideUp(ok){if(!rv||!confirm(ok?'このアップデートを許可しますか?':'このアップデートを却下しますか?'))return;
-const nv=Math.round((+rv.version+(+rv.bump||1))*100)/100,u=ok?{name:rv.name,subtitle:rv.subtitle,description:rv.description,category:rv.category,icon:rv.icon,html:rv.html,size:rv.size,age:rv.age||3,version:nv,update_note:rv.note||null,updated_at:new Date().toISOString(),pending:null}:{pending:null};
-const{data,error}=await sb.from('phone_apps').update(u).eq('id',rv.id).select('id');if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('このアカウントには審査の権限がありません');
-rv=null;list=undefined;await loadPend();rvView()}
-function badge(){const pn=pend.length+ups.length;$('#srvb').textContent='審査'+(pn?'('+pn+')':'');$$('#home .ic[data-t="5"] .bdg').forEach(x=>x.remove());
-if(adm&&pn){const ic=$('#home .ic[data-t="5"]');if(ic)ic.insertAdjacentHTML('beforeend',`<b class="bdg">${pn}</b>`)}}
+function badge(){$('#srvb').textContent='審査'+(pend.length?'('+pend.length+')':'');$$('#home .ic[data-t="5"] .bdg').forEach(x=>x.remove());
+if(adm&&pend.length){const ic=$('#home .ic[data-t="5"]');if(ic)ic.insertAdjacentHTML('beforeend',`<b class="bdg">${pend.length}</b>`)}}
 window.badge=badge;
 // ---------- アカウント(設定の一番上)----------
 let me=null;
@@ -594,7 +517,7 @@ $$('#sseg button').forEach(b=>b.classList.toggle('on',b.dataset.s==tabS));$('#sr
 function enter(keep){view();if(pv)return;
 if(tabS=='dl')dlView();else if(tabS=='dv')mineSync();else if(tabS=='rv'){if(!keep||!rv)rvView();if(!keep)loadPend()}}
 $('#sseg').onclick=e=>{const b=e.target.closest('button[data-s]');if(!b)return;tabS=b.dataset.s;det=null;rv=null;enter()};
-OPEN[5]=()=>{pv=null;enter();if(S.mine.some(m=>m.st=='pending'||m.up)&&tabS!='dv')mineSync();if(list===undefined||Date.now()-lt>20000)loadList().then(()=>{if(tabS=='dl'&&S.tab==5&&!pv)dlView()})};
+OPEN[5]=()=>{pv=null;enter();if(S.mine.some(m=>m.st=='pending')&&tabS!='dv')mineSync();if(list===undefined||Date.now()-lt>20000)loadList().then(()=>{if(tabS=='dl'&&S.tab==5&&!pv)dlView()})};
 mineRender();chkAdmin();
 if(sb)sb.auth.onAuthStateChange(()=>setTimeout(chkAdmin,0));
 })();
