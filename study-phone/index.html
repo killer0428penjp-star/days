@@ -445,8 +445,21 @@ if(f.size>1.5e6)return alert('ファイルが大きすぎます(1.5MBまで)');
 const t=await f.text();if(!/<[a-z!]/i.test(t))return alert('HTMLファイルではないようです');
 dvs.html=t;dvs.size=f.size;$('#dvfn').textContent=f.name+'('+kb(f.size)+')';
 if(!$('#dvn').value){$('#dvn').value=f.name.replace(/\.html?$/i,'').slice(0,30);if(!dvs.icon)dvIcon()}};
+function cropIcon(im,done){const W=240,iw=im.naturalWidth||im.width,ih=im.naturalHeight||im.height,base=W/(Math.min(iw,ih)||1);let z=1,ox=0,oy=0,dr=null;
+const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center';
+o.innerHTML=`<div style="background:var(--bg);color:var(--fg);border-radius:20px;padding:18px;width:min(92vw,320px);text-align:center"><b>アイコンを調整</b><p class="mu" style="margin:6px 0 10px">ドラッグで移動 ・ スライダーで拡大縮小</p><canvas width="${W}" height="${W}" style="width:${W}px;height:${W}px;max-width:100%;border-radius:22%;border:1px solid var(--bd);touch-action:none;cursor:grab"></canvas><input type="range" min="0.3" max="4" step="0.01" value="1" style="width:100%;margin-top:12px;padding:0"><div class="row" style="margin-top:12px;flex-wrap:nowrap"><button data-c style="flex:1">キャンセル</button><button data-o class="on" style="flex:1">決定</button></div></div>`;
+document.body.append(o);const cv=o.querySelector('canvas'),rg=o.querySelector('input');
+const lim=()=>{const a=Math.abs(iw*base*z-W)/2,b=Math.abs(ih*base*z-W)/2;ox=Math.max(-a,Math.min(a,ox));oy=Math.max(-b,Math.min(b,oy))};
+const draw=(c,n)=>{const k=n/W,x=c.getContext('2d'),w=iw*base*z*k,h=ih*base*z*k;x.fillStyle='#fff';x.fillRect(0,0,n,n);x.drawImage(im,n/2+ox*k-w/2,n/2+oy*k-h/2,w,h)};
+const rd=()=>{lim();draw(cv,W)};rd();
+rg.oninput=()=>{z=+rg.value;rd()};
+cv.onpointerdown=e=>{dr=[e.clientX,e.clientY,ox,oy];cv.setPointerCapture(e.pointerId)};
+cv.onpointermove=e=>{if(!dr)return;ox=dr[2]+e.clientX-dr[0];oy=dr[3]+e.clientY-dr[1];rd()};
+cv.onpointerup=cv.onpointercancel=()=>{dr=null};
+o.onclick=e=>{if(e.target.closest('[data-c]')||e.target==o)o.remove();else if(e.target.closest('[data-o]')){const c=document.createElement('canvas');c.width=c.height=192;draw(c,192);o.remove();done(c.toDataURL('image/png'))}}}
+$('#dvip').style.cursor='pointer';$('#dvip').onclick=()=>{if(!dvs.icon)return;const im=new Image();im.onload=()=>cropIcon(im,u=>{dvs.icon=u;dvIcon()});im.src=dvs.icon};
 $('#dvic').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
-rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;const x=c.getContext('2d'),s=Math.min(im.width,im.height)||1;x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,192,192);dvs.icon=c.toDataURL('image/png');dvIcon()};im.src=rd.result};rd.readAsDataURL(f)};
+rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>cropIcon(im,u=>{dvs.icon=u;dvIcon()});im.src=rd.result};rd.readAsDataURL(f)};
 const ST={pending:['審査中',''],approved:['公開中','ok'],rejected:['拒否','ng'],removed:['公開停止','ng'],withdrawn:['公開中止','ng']};
 function mineRender(){$('#dvm').innerHTML=S.mine.length?S.mine.map(m=>{const s=ST[m.st]||ST.pending,bad=m.st=='rejected'||m.st=='removed'||m.st=='withdrawn',wb=m.key&&(m.st=='approved'||m.st=='pending');
 return `<div class="trow" style="flex-wrap:wrap"><span>${E(m.name)}</span><span class="chip ${s[1]}">${s[0]}</span>${wb?`<button class="me" data-e="${m.id}" style="font-size:.85em">編集</button>`:''}${m.up&&m.st=='approved'?'<span class="chip">アップデート審査中</span>':''}${wb?`<button class="mw" data-w="${m.id}" style="font-size:.85em">${m.st=='approved'?'公開を中止する':'申請を取り下げる'}</button>`:''}${bad&&m.st!='withdrawn'?`<div class="msgb"><b>管理者からのメッセージ</b><br>${m.msg?E(m.msg):'<span class="mu">メッセージはありません</span>'}</div>`:''}${bad?`<button class="mx" data-x="${m.id}" style="font-size:.85em">消す</button>`:''}</div>`}).join(''):'<p class="mu">まだ申請はありません</p>'}
