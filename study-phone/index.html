@@ -442,12 +442,16 @@ function simShow(v,r,mode){v.innerHTML=`<button class="ib" id="xbk">‹</button>
 <div class="row"><button id="simfs" style="flex:1">全画面で試す</button></div>
 <h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p><p class="mu" style="margin-top:8px">${kb(r.size)} ・ ${date(r.created_at)}</p>
 ${mode=='rv'||mode=='ap'?'<label class="fld">申請者へのメッセージ('+(mode=='rv'?'拒否するときは理由を書きます':'公開停止の理由など・任意')+')</label><textarea id="rvm" rows="3" maxlength="300" placeholder="例: 起動しないので直して、もう一度出してください"></textarea>':''}
-${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div>':mode=='ap'?'<div class="act"><button id="rst" class="on" style="flex:1">公開停止</button></div>':''}`;
+${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div>':mode=='ap'?'<div class="act"><button id="rdel" style="flex:1">完全に削除</button><button id="rst" class="on" style="flex:1">公開停止</button></div>':''}`;
 $('#simf').srcdoc=frameDoc(r.html||'',{},0);
 $('#xbk').onclick=()=>{if(mode=='rv'||mode=='ap'){rv=null;rvView()}else{pv=null;view()}};
 $('#simfs').onclick=()=>$('#sim').classList.add('full');$('#simx').onclick=()=>$('#sim').classList.remove('full');
 if(mode=='rv'){$('#rok').onclick=()=>decide(true);$('#rng').onclick=()=>decide(false)}
-if(mode=='ap')$('#rst').onclick=async()=>{if(await takeDown(r.id,$('#rvm').value)){rv=null;rvView()}}}
+if(mode=='ap')$('#rst').onclick=async()=>{if(await takeDown(r.id,$('#rvm').value)){rv=null;rvView()}};
+if(mode=='ap')$('#rdel').onclick=async()=>{if(!confirm('このアプリをデータベースから完全に削除しますか?(元に戻せません。すでにダウンロードした人の端末には残ります)'))return;
+const{data,error}=await sb.from('phone_apps').delete().eq('id',r.id).select('id');
+if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('削除できませんでした(権限がありません。Supabaseで削除用SQLを実行してください)');
+rv=null;list=undefined;rvView()}}
 // ---------- 審査(管理者)----------
 async function loadPend(){if(!sb||!adm)return;const{data,error}=await sb.from('phone_apps').select(COLS).eq('status','pending').order('created_at');
 if(!error){pend=data;badge();if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()}}
