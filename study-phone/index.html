@@ -166,10 +166,10 @@ i svg.lt{width:100%;height:100%}
 <div class="seg" id="sseg" style="--n:2;--i:0"><button data-s="dl" class="on">ダウンロード</button><button data-s="dv">アプリ開発</button><button data-s="rv" id="srvb" hidden>審査</button></div>
 <div id="sdl"></div>
 <div id="sdv" hidden>
-<p class="mu" style="margin-top:12px">HTMLファイルを選び、アイコンと情報を入れて審査に出します。許可されるとApp Storeに並びます。</p>
+<p class="mu" style="margin-top:12px">ファイル(HTMLのほか、CSS・JS・画像も複数)を選び、アイコンと情報を入れて審査に出します。許可されるとApp Storeに並びます。</p>
 <div class="card" style="margin-top:10px">
-<label class="fld" style="margin-top:0">HTMLファイル</label>
-<div class="row"><button type="button" onclick="$('#dvf').click()">ファイルを選ぶ</button><span class="mu" id="dvfn">未選択</span></div><input type="file" id="dvf" accept=".html,.htm,text/html" hidden>
+<label class="fld" style="margin-top:0">ファイル(HTML・CSS・JS・画像などを複数選べます)</label>
+<div class="row"><button type="button" onclick="$('#dvf').click()">ファイルを選ぶ</button><button type="button" id="dvfc">消す</button><span class="mu" id="dvfn">未選択</span></div><input type="file" id="dvf" multiple accept=".html,.htm,.css,.js,.json,.png,.jpg,.jpeg,.gif,.svg,.webp,.ico,.mp3,.wav,.ogg,.mp4,.woff,.woff2,.ttf,.otf,.txt,text/html" hidden>
 <label class="fld">アイコン</label>
 <div class="fi"><div class="sa" id="dvip"></div><button type="button" onclick="$('#dvic').click()">画像を選ぶ</button></div><input type="file" id="dvic" accept="image/*" hidden>
 <label class="fld">名前</label><input id="dvn" maxlength="30" placeholder="アプリの名前">
@@ -385,7 +385,7 @@ let rvs=[],rsel=0;
 const stars=n=>'★'.repeat(n)+'☆'.repeat(5-n),myKey=id=>(S.mine.find(m=>m.id==id&&m.key)||{}).key,myNm=()=>me&&S.prof&&S.prof.uid==me.id&&S.prof.name;
 async function loadRev(id){if(!$('#rvw')||!sb)return;const{data,error}=await sb.from('phone_reviews').select('*').eq('app_id',id).order('created_at',{ascending:false});
 const o=$('#rvw');if(!o||det!=id)return;if(error){o.innerHTML='<p class="mu">'+(noTbl(error)?'レビュー機能の準備ができていません(SQLを実行してください)':E(error.message))+'</p>';return}
-rvs=data;const n=rvs.length,avg=n?rvs.reduce((a,x)=>a+x.rating,0)/n:0,mine=me&&rvs.find(x=>x.user_id==me.id),dev=myKey(id);if(mine&&!rsel)rsel=mine.rating;
+rvs=data;const n=rvs.length,avg=n?rvs.reduce((a,x)=>a+x.rating,0)/n:0,mine=me&&rvs.find(x=>x.user_id==me.id),dev=myKey(id)||(me&&(await sb.rpc('phone_is_owner',{p_id:id})).data);if(mine&&!rsel)rsel=mine.rating;
 o.innerHTML=`<h2>評価とレビュー</h2><div class="row" style="gap:18px;flex-wrap:nowrap;align-items:center"><div style="font:300 3.4em var(--mi);line-height:1">${n?avg.toFixed(1):'-'}</div><div style="flex:1">${[5,4,3,2,1].map(k=>{const c=rvs.filter(x=>x.rating==k).length;return `<div class="row" style="gap:6px;flex-wrap:nowrap"><span class="mu" style="width:1.8em">${k}★</span><div style="flex:1;height:5px;border-radius:3px;background:var(--bd)"><div style="height:100%;border-radius:3px;background:var(--fg);width:${n?c/n*100:0}%"></div></div></div>`}).join('')}</div></div><p class="mu">5段階評価中 ・ ${n}件の評価</p>
 <p class="mu" style="margin-top:14px">タップして評価:</p><div id="rst2" style="font-size:2em;letter-spacing:.1em;cursor:pointer">${[1,2,3,4,5].map(k=>`<span data-k="${k}">${k<=rsel?'★':'☆'}</span>`).join('')}</div>
 <textarea id="rbd" rows="3" maxlength="300" placeholder="レビューを書く(任意)" style="margin-top:8px"></textarea><button id="rsb" class="on" style="width:100%;margin-top:8px">${mine?'レビューを更新':'レビューを投稿'}</button>
@@ -399,7 +399,7 @@ const mine=rvs.find(x=>x.user_id==me.id),f={rating:rsel,body:$('#rbd').value.tri
 const{error}=mine?await sb.from('phone_reviews').update(f).eq('id',mine.id):await sb.from('phone_reviews').insert({...f,app_id:det,user_id:me.id});
 if(error)return alert('投稿できませんでした: '+error.message);loadRev(det);return}
 const p=e.target.closest('.rpb');if(p){const x=rvs.find(k=>k.id==+p.dataset.r),t=prompt('返信を入力してください(空にすると削除)',x.reply||'');if(t==null)return;
-const{data,error}=await sb.rpc('phone_reply_review',{p_review:x.id,p_key:myKey(det),p_text:t.trim(),p_name:myNm()||'開発者'});
+const{data,error}=await sb.rpc('phone_reply_review',{p_review:x.id,p_key:myKey(det)||'',p_text:t.trim(),p_name:myNm()||'開発者'});
 if(error||!data)return alert('返信できませんでした'+(error?': '+error.message:''));loadRev(det)}});
 function dlView(){const v=$('#sdl');if(det!=null){const r=(list||[]).find(x=>x.id==det);if(r)return ddet(v,r);det=null}
 v.innerHTML='<input id="sq" type="search" placeholder="アプリ名・説明で検索" style="width:100%;margin:10px 0 4px"><div id="sl"></div>';
@@ -427,7 +427,7 @@ $('#dvc').innerHTML=CATS.map(c=>`<option>${c}</option>`).join('');
 $('#dva').innerHTML=[3,7,12,15,18].map(a=>`<option value="${a}">+${a}</option>`).join('');
 $('#dvb').innerHTML=[['0.1','+0.1(小さな修正)'],['0.5','+0.5'],['1','+1(大きな更新)'],['2','+2']].map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
 let ed=null;
-function dvReset(){dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd','#dvu'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';$('#dva').value=3;dvIcon()}
+function dvReset(){dvf.clear();dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd','#dvu'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';$('#dva').value=3;dvIcon()}
 function edMode(m,r){ed=m?m.id:null;$('#dvup').hidden=!m||m.st!='approved';$('#dvx').hidden=!m;$('#dvs').textContent=m?(m.st=='approved'?'保存(HTML変更は申請)':'変更を保存'):'審査に出す';
 if(r){$('#dvn').value=r.name;$('#dvt').value=r.subtitle||'';$('#dvd').value=r.description||'';$('#dvc').value=r.category;$('#dva').value=r.age||3;dvs.icon=r.icon||'';dvs.html='';dvs.size=0;$('#dvfn').textContent='(変えないなら選ばなくてOK)';$('#dvu').value='';$('#dvhint').textContent='現在のバージョン: '+(r.version||1);dvIcon()}}
 async function saveEdit(){const m=S.mine.find(k=>k.id==ed);if(!m||!sb)return;const d=draft();if(!d.name)return alert('名前を入力してください');
@@ -440,11 +440,33 @@ edMode(null);dvReset();list=undefined;mineRender()}
 $('#dvx').onclick=()=>{edMode(null);dvReset()};
 const dvIcon=()=>{$('#dvip').innerHTML=iconOf({icon:dvs.icon,name:$('#dvn').value||'A'})};dvIcon();
 $('#dvn').oninput=()=>{if(!dvs.icon)dvIcon()};
-$('#dvf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
-if(f.size>1.5e6)return alert('ファイルが大きすぎます(1.5MBまで)');
-const t=await f.text();if(!/<[a-z!]/i.test(t))return alert('HTMLファイルではないようです');
-dvs.html=t;dvs.size=f.size;$('#dvfn').textContent=f.name+'('+kb(f.size)+')';
-if(!$('#dvn').value){$('#dvn').value=f.name.replace(/\.html?$/i,'').slice(0,30);if(!dvs.icon)dvIcon()}};
+const dvf=new Map();
+const rdU=f=>new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.readAsDataURL(f)});
+const bn=h=>decodeURIComponent(String(h||'').split(/[?#]/)[0]).split('/').pop().toLowerCase();
+const ext=h=>/^(https?:|data:|blob:|#|\/\/|mailto:|javascript:|tel:)/i.test(h||'');
+const isCode=k=>/\.(html?|css|js)$/.test(k);
+// 複数ファイルを1つのHTMLにまとめる(CSS・JSは中に埋め込み、画像などはデータURLにする)
+async function bundle(){const hs=[...dvf].filter(([k])=>/\.html?$/.test(k));if(!hs.length)return'';
+let t=await(hs.find(([k])=>k=='index.html')||hs[0])[1].text();
+const sub=async(re,fn)=>{for(const m of[...t.matchAll(re)]){const r=await fn(m);if(r!=null)t=t.replace(m[0],()=>r)}};
+const cssU=async c=>{for(const m of[...c.matchAll(/url\(\s*(['"]?)([^'")]+)\1\s*\)/g)]){const f=!ext(m[2])&&!isCode(bn(m[2]))&&dvf.get(bn(m[2]));if(f)c=c.split(m[0]).join('url('+await rdU(f)+')')}return c};
+await sub(/<link\b[^>]*>/gi,async m=>{const h=(m[0].match(/href=["']([^"']+)["']/i)||[])[1],f=h&&!ext(h)&&/stylesheet/i.test(m[0])&&dvf.get(bn(h));return f?'<style>'+await cssU(await f.text())+'</style>':null});
+await sub(/<script\b([^>]*?)\ssrc=["']([^"']+)["']([^>]*)>\s*<\/script>/gi,async m=>{const f=!ext(m[2])&&dvf.get(bn(m[2]));return f?'<script'+m[1]+m[3]+'>'+(await f.text()).replace(/<\/script/gi,'<\\/script')+'<\/script>':null});
+t=await cssU(t);
+await sub(/\b(src|href|poster)=["']([^"']+)["']/gi,async m=>{const f=!ext(m[2])&&!isCode(bn(m[2]))&&dvf.get(bn(m[2]));return f?m[1]+'="'+await rdU(f)+'"':null});
+for(const[k,f]of dvf){if(isCode(k)||!t.toLowerCase().includes(k))continue;const u=await rdU(f),re=new RegExp('(["\'`])(?:[^"\'`\\n]*/)?'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\1','gi');t=t.replace(re,(m0,q)=>q+u+q)}
+return t}
+$('#dvfc').onclick=()=>{dvf.clear();dvs.html='';dvs.size=0;$('#dvfn').textContent='未選択'};
+$('#dvf').onchange=async e=>{const fs=[...e.target.files];e.target.value='';if(!fs.length)return;
+fs.forEach(f=>dvf.set(f.name.toLowerCase(),f));let tot=0;dvf.forEach(f=>tot+=f.size);
+if(tot>2e6){fs.forEach(f=>dvf.delete(f.name.toLowerCase()));return alert('ファイルの合計が大きすぎます(2MBまで)')}
+const names=[...dvf.keys()],lab=names.length+'個: '+names.join(', ')+'('+kb(tot)+')';
+const t=await bundle();if(!t){dvs.html='';dvs.size=0;$('#dvfn').textContent=lab+' ※HTMLファイルも選んでください';return}
+if(t.length>3e6){dvs.html='';dvs.size=0;$('#dvfn').textContent=lab;return alert('まとめたあとのサイズが大きすぎます(3MBまで)。画像を小さくしてください')}
+if(!/<[a-z!]/i.test(t)){dvs.html='';return alert('HTMLファイルではないようです')}
+dvs.html=t;dvs.size=t.length;$('#dvfn').textContent=lab;
+const mn=names.find(k=>k=='index.html')||names.find(k=>/\.html?$/.test(k));
+if(!$('#dvn').value&&mn){$('#dvn').value=mn.replace(/\.html?$/,'').slice(0,30);if(!dvs.icon)dvIcon()}};
 function cropIcon(im,done){const W=240,iw=im.naturalWidth||im.width,ih=im.naturalHeight||im.height,base=W/(Math.min(iw,ih)||1);let z=1,ox=0,oy=0,dr=null;
 const o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center';
 o.innerHTML=`<div style="background:var(--bg);color:var(--fg);border-radius:20px;padding:18px;width:min(92vw,320px);text-align:center"><b>アイコンを調整</b><p class="mu" style="margin:6px 0 10px">ドラッグで移動 ・ スライダーで拡大縮小</p><canvas width="${W}" height="${W}" style="width:${W}px;height:${W}px;max-width:100%;border-radius:22%;border:1px solid var(--bd);touch-action:none;cursor:grab"></canvas><input type="range" min="0.3" max="4" step="0.01" value="1" style="width:100%;margin-top:12px;padding:0"><div class="row" style="margin-top:12px;flex-wrap:nowrap"><button data-c style="flex:1">キャンセル</button><button data-o class="on" style="flex:1">決定</button></div></div>`;
@@ -483,7 +505,7 @@ const key=(crypto.randomUUID?crypto.randomUUID()+crypto.randomUUID():String(Math
 b.disabled=false;b.textContent='審査に出す';
 if(error)return alert('送信できませんでした: '+(noTbl(error)?'データベースの準備ができていません(supabase.sqlを実行してください)':error.message));
 if(d.age!=3)await sb.rpc('phone_edit_app',{p_id:data,p_key:key,p_data:{age:d.age}});S.mine=[{id:data,name:d.name,st:'pending',key},...S.mine].slice(0,30);save();
-dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';dvIcon();mineRender();
+dvf.clear();dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';dvIcon();mineRender();
 alert('審査に出しました。許可されるとApp Storeに並びます')};
 // ---------- シミュレーター(プレビュー / 審査)----------
 function simShow(v,r,mode){v.innerHTML=`<button class="ib" id="xbk">‹</button><h2 style="margin-top:6px">${mode=='rv'?'審査':mode=='ap'?'公開中のアプリ':mode=='up'?'アップデート申請':'プレビュー'}</h2>
