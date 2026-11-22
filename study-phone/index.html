@@ -465,8 +465,10 @@ $('#acc').onclick=()=>accShow(true);$('#accbk').onclick=()=>accShow(false);
 $('#adl').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||!password)return alert('メールアドレスとパスワードを入力してください');
 const{error}=await sb.auth.signInWithPassword({email,password});if(error)return alert('ログインできません: '+error.message);$('#adp').value='';await chkAdmin()};
 $('#adr').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||password.length<6)return alert('メールアドレスと6文字以上のパスワードを入力してください');
-const{data,error}=await sb.auth.signUp({email,password});if(error)return alert('登録できません: '+error.message);
-if(!data.session)return alert('確認メールを送りました。メールのリンクを開いてからログインしてください');$('#adp').value='';await chkAdmin()};
+const{data,error}=await sb.auth.signUp({email,password});if(error&&!/rate limit/i.test(error.message))return alert('登録できません: '+error.message);
+if(!(data&&data.session)){const r=await sb.auth.signInWithPassword({email,password});
+if(r.error)return alert(/confirm/i.test(r.error.message)?'メール認証がまだオンのままです。supabase.sql の「メール認証なし」(8番)を実行してください':'登録できません: '+r.error.message)}
+$('#adp').value='';await chkAdmin()};
 async function saveProf(icon){if(!me)return false;const P=S.prof&&S.prof.uid==me.id?S.prof:{},name=$('#pfn').value.trim().slice(0,20);if(!name){alert('名前を入力してください');return false}
 const n={uid:me.id,name,icon:icon!==undefined?icon:(P.icon||'')};
 const{error}=await sb.from('phone_profiles').upsert({user_id:me.id,name:n.name,icon:n.icon||null,updated_at:new Date().toISOString()});
