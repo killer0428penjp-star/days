@@ -428,14 +428,14 @@ $('#dva').innerHTML=[3,7,12,15,18].map(a=>`<option value="${a}">+${a}</option>`)
 $('#dvb').innerHTML=[['0.1','+0.1(小さな修正)'],['0.5','+0.5'],['1','+1(大きな更新)'],['2','+2']].map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');
 let ed=null;
 function dvReset(){dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd','#dvu'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';$('#dva').value=3;dvIcon()}
-function edMode(m,r){ed=m?m.id:null;$('#dvup').hidden=!m||m.st!='approved';$('#dvx').hidden=!m;$('#dvs').textContent=m?(m.st=='approved'?'アップデートを申請':'変更を保存'):'審査に出す';
+function edMode(m,r){ed=m?m.id:null;$('#dvup').hidden=!m||m.st!='approved';$('#dvx').hidden=!m;$('#dvs').textContent=m?(m.st=='approved'?'保存(HTML変更は申請)':'変更を保存'):'審査に出す';
 if(r){$('#dvn').value=r.name;$('#dvt').value=r.subtitle||'';$('#dvd').value=r.description||'';$('#dvc').value=r.category;$('#dva').value=r.age||3;dvs.icon=r.icon||'';dvs.html='';dvs.size=0;$('#dvfn').textContent='(変えないなら選ばなくてOK)';$('#dvu').value='';$('#dvhint').textContent='現在のバージョン: '+(r.version||1);dvIcon()}}
 async function saveEdit(){const m=S.mine.find(k=>k.id==ed);if(!m||!sb)return;const d=draft();if(!d.name)return alert('名前を入力してください');
 const p={name:d.name,subtitle:d.subtitle,description:d.description,category:d.category,icon:d.icon||null,age:d.age};
 if(d.html){p.html=d.html;p.size=d.size}if(m.st=='approved'){p.note=$('#dvu').value.trim();p.bump=+$('#dvb').value}
 const{data,error}=await sb.rpc('phone_edit_app',{p_id:m.id,p_key:m.key,p_data:p});
-if(error)return alert('失敗しました: '+error.message);if(!data)return alert('できませんでした。すでに状態が変わっています');
-if(data=='requested')m.up=1;save();alert(data=='requested'?'アップデートを管理者に申請しました。許可されると反映されます':'変更を保存しました');
+if(error)return alert('失敗しました: '+error.message);if(!data)return alert('保存できませんでした。持ち主の確認に失敗しました(別の端末・別のブラウザで申請した場合や、SQLが未実行の場合に起きます)');
+if(data=='requested')m.up=1;save();alert(data=='requested'?'HTMLの変更を管理者に申請しました。許可されると反映されます':'変更を保存しました');
 edMode(null);dvReset();list=undefined;mineRender()}
 $('#dvx').onclick=()=>{edMode(null);dvReset()};
 const dvIcon=()=>{$('#dvip').innerHTML=iconOf({icon:dvs.icon,name:$('#dvn').value||'A'})};dvIcon();
