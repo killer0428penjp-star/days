@@ -146,6 +146,7 @@ i svg.lt{width:100%;height:100%}
 .tab.ext iframe{display:block;width:100%;height:100%;border:0;background:#fff}
 .accb{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px 14px;margin:6px 0 4px;border-radius:18px;background:var(--bg);border:1px solid var(--bd);cursor:pointer}
 .accb .sa{width:56px;flex:none}.accb .tx{flex:1;min-width:0;display:flex;flex-direction:column}.accb .tx b{font-size:1.1em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.accb .tx span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msgb{width:100%;padding:8px 12px;border-radius:12px;border:1px solid var(--bd);font-size:.9em;white-space:pre-wrap;line-height:1.5}
 
 </style></head><body>
 <div class="phone" data-v="lock"><div id="wp"><svg viewBox="0 0 100 200" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a8ca0"/><stop offset=".35" stop-color="#4f8ba5"/><stop offset=".75" stop-color="#1c4a70"/><stop offset="1" stop-color="#0a2236"/></linearGradient></defs><path d="M100 18C70 24 58 50 58 90 58 140 32 160 0 196V200H100Z" fill="url(#wg)" stroke="none"/></svg></div>
@@ -377,7 +378,7 @@ function slist(){const o=$('#sl');if(!o)return;
 if(list===undefined){o.innerHTML='<p class="mu" style="text-align:center;margin-top:24px">読み込み中…</p>';return}
 const k=q.trim().toLowerCase(),a=list.filter(r=>!k||(r.name+(r.subtitle||'')+(r.description||'')+r.category).toLowerCase().includes(k));
 o.innerHTML=a.map(r=>row(r,`<button class="gt" data-g="${r.id}"></button>`,E(r.category))).join('')||`<p class="mu" style="text-align:center;margin-top:24px">${E(lerr)||(k?'見つかりませんでした':'まだアプリがありません。「アプリ開発」から追加できます')}</p>`;gbtn()}
-function ddet(v,r){v.innerHTML=`<button class="ib" id="sbk2">‹</button><div class="row" style="gap:16px;margin-top:10px;flex-wrap:nowrap"><div class="sa lgi">${iconOf(r)}</div><div style="flex:1;min-width:0"><b style="font-size:1.3em">${E(r.name)}</b><div class="mu">${E(r.subtitle)}</div><button class="gt" style="margin-top:8px" data-g="${r.id}"></button></div></div><div class="dgrid"><div><b>${E(r.category)}</b><span class="mu">カテゴリー</span></div><div><b>${kb(r.size)}</b><span class="mu">サイズ</span></div><div><b>${date(r.created_at)}</b><span class="mu">公開日</span></div></div><h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p>`;gbtn()}
+function ddet(v,r){v.innerHTML=`<button class="ib" id="sbk2">‹</button><div class="row" style="gap:16px;margin-top:10px;flex-wrap:nowrap"><div class="sa lgi">${iconOf(r)}</div><div style="flex:1;min-width:0"><b style="font-size:1.3em">${E(r.name)}</b><div class="mu">${E(r.subtitle)}</div><button class="gt" style="margin-top:8px" data-g="${r.id}"></button></div></div><div class="dgrid"><div><b>${E(r.category)}</b><span class="mu">カテゴリー</span></div><div><b>${kb(r.size)}</b><span class="mu">サイズ</span></div><div><b>${date(r.created_at)}</b><span class="mu">公開日</span></div></div><h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p>${adm?'<h2>管理者メニュー</h2><div class="card"><label class="fld" style="margin-top:0">申請者へのメッセージ(任意)</label><textarea id="rmm" rows="3" maxlength="300" placeholder="除外する理由など"></textarea><button id="rmv" style="width:100%;margin-top:12px">App Storeから除外する</button></div>':''}`;gbtn()}
 function dlView(){const v=$('#sdl');if(det!=null){const r=(list||[]).find(x=>x.id==det);if(r)return ddet(v,r);det=null}
 v.innerHTML='<input id="sq" type="search" placeholder="アプリ名・説明で検索" style="width:100%;margin:10px 0 4px"><div id="sl"></div>';
 $('#sq').value=q;$('#sq').oninput=()=>{q=$('#sq').value;slist()};slist()}
@@ -389,7 +390,11 @@ if(p>=100&&ok!=null){clearInterval(iv);bz.delete(id);fin(id,ok)}},110)}
 function fin(id,html){const r=(list||[]).find(x=>x.id==id);if(!r)return gbtn();
 try{localStorage.setItem('xa:'+id,JSON.stringify({...r,html}))}catch(e){gbtn();return alert('この端末の保存容量が足りません')}
 const t=regExt(r);if(!S.inst.includes(t))S.inst.push(t);const l=S.hm.p[S.hm.p.length-1];l.length<20?l.push(t):S.hm.p.push([t]);save();renderHome();if(tabS=='dl')dlView()}
+async function takeDown(id){const msg=($('#rmm')?$('#rmm').value:'').trim();if(!confirm('このアプリをApp Storeから除外しますか?(すでにダウンロードした人の端末には残ります)'))return;
+const{data,error}=await sb.from('phone_apps').update({status:'removed',reject_reason:msg||null,reviewed_at:new Date().toISOString()}).eq('id',id).select('id');
+if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('このアカウントには権限がありません');det=null;list=undefined;await loadList();dlView()}
 $('#sdl').onclick=e=>{if(e.target.closest('#sbk2')){det=null;dlView();return}
+if(e.target.closest('#rmv')){takeDown(det);return}
 const g=e.target.closest('.gt[data-g]'),r=e.target.closest('.sr[data-t]');
 if(g){const id=+g.dataset.g;if(has(id)){const t=XID(id),ic=$(`#home .ic[data-t="${t}"]`);if(ic)openApp(t,ic)}else install(id);return}
 if(r){det=+r.dataset.t;dlView();$('main').scrollTo(0,0)}};
@@ -405,10 +410,12 @@ dvs.html=t;dvs.size=f.size;$('#dvfn').textContent=f.name+'('+kb(f.size)+')';
 if(!$('#dvn').value){$('#dvn').value=f.name.replace(/\.html?$/i,'').slice(0,30);if(!dvs.icon)dvIcon()}};
 $('#dvic').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
 rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;const x=c.getContext('2d'),s=Math.min(im.width,im.height)||1;x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,192,192);dvs.icon=c.toDataURL('image/png');dvIcon()};im.src=rd.result};rd.readAsDataURL(f)};
-const ST={pending:['審査中',''],approved:['公開中','ok'],rejected:['拒否','ng']};
-function mineRender(){$('#dvm').innerHTML=S.mine.length?S.mine.map(m=>{const s=ST[m.st]||ST.pending;return `<div class="trow"><span>${E(m.name)}</span><span class="chip ${s[1]}">${s[0]}</span></div>`}).join(''):'<p class="mu">まだ申請はありません</p>'}
+const ST={pending:['審査中',''],approved:['公開中','ok'],rejected:['拒否','ng'],removed:['公開停止','ng']};
+function mineRender(){$('#dvm').innerHTML=S.mine.length?S.mine.map(m=>{const s=ST[m.st]||ST.pending,bad=m.st=='rejected'||m.st=='removed';
+return `<div class="trow" style="flex-wrap:wrap"><span>${E(m.name)}</span><span class="chip ${s[1]}">${s[0]}</span>${bad?`<div class="msgb"><b>管理者からのメッセージ</b><br>${m.msg?E(m.msg):'<span class="mu">メッセージはありません</span>'}</div><button class="mx" data-x="${m.id}" style="font-size:.85em">消す</button>`:''}</div>`}).join(''):'<p class="mu">まだ申請はありません</p>'}
+$('#dvm').onclick=e=>{const b=e.target.closest('.mx');if(!b)return;S.mine=S.mine.filter(m=>m.id!=+b.dataset.x);save();mineRender()};
 async function mineSync(){mineRender();if(!sb||!S.mine.length)return;const{data}=await sb.rpc('phone_app_status',{ids:S.mine.map(m=>m.id)});if(!data)return;let ch=0;
-data.forEach(d=>{const m=S.mine.find(x=>x.id==d.id);if(m&&m.st!=d.status){m.st=d.status;ch=1}});if(ch){save();mineRender();list=undefined}}
+data.forEach(d=>{const m=S.mine.find(x=>x.id==d.id);if(m&&(m.st!=d.status||(m.msg||'')!=(d.reason||''))){m.st=d.status;m.msg=d.reason||'';ch=1}});if(ch){save();mineRender();list=undefined}}
 const draft=()=>({name:$('#dvn').value.trim(),subtitle:$('#dvt').value.trim(),description:$('#dvd').value.trim(),category:$('#dvc').value,icon:dvs.icon,html:dvs.html,size:dvs.size,created_at:new Date().toISOString()});
 $('#dvp').onclick=()=>{const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');d.name||='(名前なし)';pv=d;view()};
 $('#dvs').onclick=async()=>{const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');if(!d.name)return alert('名前を入力してください');if(!sb)return noSb();
@@ -426,6 +433,7 @@ function simShow(v,r,mode){v.innerHTML=`<button class="ib" id="xbk">‹</button>
 <div class="simw"><div class="sim" id="sim"><iframe id="simf" sandbox="${SBX}"></iframe><button class="simx" id="simx">閉じる</button></div></div>
 <div class="row"><button id="simfs" style="flex:1">全画面で試す</button></div>
 <h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p><p class="mu" style="margin-top:8px">${kb(r.size)} ・ ${date(r.created_at)}</p>
+${mode=='rv'?'<label class="fld">申請者へのメッセージ(拒否するときは理由を書きます)</label><textarea id="rvm" rows="3" maxlength="300" placeholder="例: 起動しないので直して、もう一度出してください"></textarea>':''}
 ${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div>':''}`;
 $('#simf').srcdoc=frameDoc(r.html||'',{},0);
 $('#xbk').onclick=()=>{if(mode=='rv'){rv=null;rvView()}else{pv=null;view()}};
@@ -438,8 +446,8 @@ function rvView(){const v=$('#srv');if(rv)return simShow(v,rv,'rv');
 v.innerHTML=pend.length?`<p class="mu" style="margin:12px 0 0">審査待ち ${pend.length}件</p>`+pend.map(r=>row(r,'<button class="gt on">確認</button>',E(r.category)+' ・ '+date(r.created_at))).join(''):'<p class="mu" style="text-align:center;margin-top:24px">審査待ちはありません</p>'}
 $('#srv').onclick=async e=>{const r=e.target.closest('.sr[data-t]');if(!r||rv)return;
 const{data,error}=await sb.from('phone_apps').select('*').eq('id',+r.dataset.t).single();if(error)return alert(error.message);rv=data;rvView();$('main').scrollTo(0,0)};
-async function decide(ok){if(!rv||!confirm(ok?'このアプリを許可して公開しますか?':'このアプリを拒否しますか?'))return;
-const{data,error}=await sb.from('phone_apps').update({status:ok?'approved':'rejected',reviewed_at:new Date().toISOString()}).eq('id',rv.id).select('id');
+async function decide(ok){const msg=($('#rvm')?$('#rvm').value:'').trim();if(!rv)return;if(!ok&&!msg)return alert('拒否の理由をメッセージ欄に書いてください');if(!confirm(ok?'このアプリを許可して公開しますか?':'このアプリを拒否しますか?'))return;
+const{data,error}=await sb.from('phone_apps').update({status:ok?'approved':'rejected',reject_reason:ok?null:msg,reviewed_at:new Date().toISOString()}).eq('id',rv.id).select('id');
 if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('このアカウントには審査の権限がありません');
 rv=null;list=undefined;await loadPend();rvView()}
 function badge(){$('#srvb').textContent='審査'+(pend.length?'('+pend.length+')':'');$$('#home .ic[data-t="5"] .bdg').forEach(x=>x.remove());
@@ -465,9 +473,14 @@ $('#acc').onclick=()=>accShow(true);$('#accbk').onclick=()=>accShow(false);
 $('#adl').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||!password)return alert('メールアドレスとパスワードを入力してください');
 const{error}=await sb.auth.signInWithPassword({email,password});if(error)return alert('ログインできません: '+error.message);$('#adp').value='';await chkAdmin()};
 $('#adr').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||password.length<6)return alert('メールアドレスと6文字以上のパスワードを入力してください');
-const{data,error}=await sb.auth.signUp({email,password});if(error&&!/rate limit/i.test(error.message))return alert('登録できません: '+error.message);
+const{data,error}=await sb.auth.signUp({email,password});
+const retry=error&&(error.status==429||/seconds|rate limit|already/i.test(error.message));
+if(error&&!retry)return alert('登録できません: '+error.message);
 if(!(data&&data.session)){const r=await sb.auth.signInWithPassword({email,password});
-if(r.error)return alert(/confirm/i.test(r.error.message)?'メール認証がまだオンのままです。supabase.sql の「メール認証なし」(8番)を実行してください':'登録できません: '+r.error.message)}
+if(r.error){const m=r.error.message||'';
+if(/confirm/i.test(m))return alert('このメールアドレスはまだ認証されていません。supabase.sql の8番(メール認証なし)を実行し、このメールだけ認証済みにするSQLも実行してください');
+if(retry)return alert('このメールアドレスは登録済みか、短時間に何度も送信しています。「ログイン」を押して、パスワードを確認してください。('+m+')');
+return alert('登録できません: '+m)}}
 $('#adp').value='';await chkAdmin()};
 async function saveProf(icon){if(!me)return false;const P=S.prof&&S.prof.uid==me.id?S.prof:{},name=$('#pfn').value.trim().slice(0,20);if(!name){alert('名前を入力してください');return false}
 const n={uid:me.id,name,icon:icon!==undefined?icon:(P.icon||'')};
@@ -487,7 +500,7 @@ $$('#sseg button').forEach(b=>b.classList.toggle('on',b.dataset.s==tabS));$('#sr
 function enter(keep){view();if(pv)return;
 if(tabS=='dl')dlView();else if(tabS=='dv')mineSync();else if(tabS=='rv'){if(!keep||!rv)rvView();if(!keep)loadPend()}}
 $('#sseg').onclick=e=>{const b=e.target.closest('button[data-s]');if(!b)return;tabS=b.dataset.s;det=null;rv=null;enter()};
-OPEN[5]=()=>{pv=null;enter();if(list===undefined||Date.now()-lt>20000)loadList().then(()=>{if(tabS=='dl'&&S.tab==5&&!pv)dlView()})};
+OPEN[5]=()=>{pv=null;enter();if(S.mine.some(m=>m.st=='pending')&&tabS!='dv')mineSync();if(list===undefined||Date.now()-lt>20000)loadList().then(()=>{if(tabS=='dl'&&S.tab==5&&!pv)dlView()})};
 mineRender();chkAdmin();
 if(sb)sb.auth.onAuthStateChange(()=>setTimeout(chkAdmin,0));
 })();
