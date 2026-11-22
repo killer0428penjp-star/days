@@ -390,11 +390,12 @@ if(p>=100&&ok!=null){clearInterval(iv);bz.delete(id);fin(id,ok)}},110)}
 function fin(id,html){const r=(list||[]).find(x=>x.id==id);if(!r)return gbtn();
 try{localStorage.setItem('xa:'+id,JSON.stringify({...r,html}))}catch(e){gbtn();return alert('この端末の保存容量が足りません')}
 const t=regExt(r);if(!S.inst.includes(t))S.inst.push(t);const l=S.hm.p[S.hm.p.length-1];l.length<20?l.push(t):S.hm.p.push([t]);save();renderHome();if(tabS=='dl')dlView()}
-async function takeDown(id){const msg=($('#rmm')?$('#rmm').value:'').trim();if(!confirm('このアプリをApp Storeから除外しますか?(すでにダウンロードした人の端末には残ります)'))return;
+async function takeDown(id,msg){msg=(msg||'').trim();if(!confirm('このアプリをApp Storeから除外しますか?(すでにダウンロードした人の端末には残ります)'))return false;
 const{data,error}=await sb.from('phone_apps').update({status:'removed',reject_reason:msg||null,reviewed_at:new Date().toISOString()}).eq('id',id).select('id');
-if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('このアカウントには権限がありません');det=null;list=undefined;await loadList();dlView()}
+if(error){alert('失敗しました: '+error.message);return false}if(!data||!data.length){alert('このアカウントには権限がありません');return false}
+list=undefined;await loadList();return true}
 $('#sdl').onclick=e=>{if(e.target.closest('#sbk2')){det=null;dlView();return}
-if(e.target.closest('#rmv')){takeDown(det);return}
+if(e.target.closest('#rmv')){takeDown(det,$('#rmm').value).then(ok=>{if(ok){det=null;dlView()}});return}
 const g=e.target.closest('.gt[data-g]'),r=e.target.closest('.sr[data-t]');
 if(g){const id=+g.dataset.g;if(has(id)){const t=XID(id),ic=$(`#home .ic[data-t="${t}"]`);if(ic)openApp(t,ic)}else install(id);return}
 if(r){det=+r.dataset.t;dlView();$('main').scrollTo(0,0)}};
@@ -410,40 +411,51 @@ dvs.html=t;dvs.size=f.size;$('#dvfn').textContent=f.name+'('+kb(f.size)+')';
 if(!$('#dvn').value){$('#dvn').value=f.name.replace(/\.html?$/i,'').slice(0,30);if(!dvs.icon)dvIcon()}};
 $('#dvic').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
 rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;const x=c.getContext('2d'),s=Math.min(im.width,im.height)||1;x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,192,192);dvs.icon=c.toDataURL('image/png');dvIcon()};im.src=rd.result};rd.readAsDataURL(f)};
-const ST={pending:['審査中',''],approved:['公開中','ok'],rejected:['拒否','ng'],removed:['公開停止','ng']};
-function mineRender(){$('#dvm').innerHTML=S.mine.length?S.mine.map(m=>{const s=ST[m.st]||ST.pending,bad=m.st=='rejected'||m.st=='removed';
-return `<div class="trow" style="flex-wrap:wrap"><span>${E(m.name)}</span><span class="chip ${s[1]}">${s[0]}</span>${bad?`<div class="msgb"><b>管理者からのメッセージ</b><br>${m.msg?E(m.msg):'<span class="mu">メッセージはありません</span>'}</div><button class="mx" data-x="${m.id}" style="font-size:.85em">消す</button>`:''}</div>`}).join(''):'<p class="mu">まだ申請はありません</p>'}
-$('#dvm').onclick=e=>{const b=e.target.closest('.mx');if(!b)return;S.mine=S.mine.filter(m=>m.id!=+b.dataset.x);save();mineRender()};
+const ST={pending:['審査中',''],approved:['公開中','ok'],rejected:['拒否','ng'],removed:['公開停止','ng'],withdrawn:['公開中止','ng']};
+function mineRender(){$('#dvm').innerHTML=S.mine.length?S.mine.map(m=>{const s=ST[m.st]||ST.pending,bad=m.st=='rejected'||m.st=='removed'||m.st=='withdrawn',wb=m.key&&(m.st=='approved'||m.st=='pending');
+return `<div class="trow" style="flex-wrap:wrap"><span>${E(m.name)}</span><span class="chip ${s[1]}">${s[0]}</span>${wb?`<button class="mw" data-w="${m.id}" style="font-size:.85em">${m.st=='approved'?'公開を中止する':'申請を取り下げる'}</button>`:''}${bad&&m.st!='withdrawn'?`<div class="msgb"><b>管理者からのメッセージ</b><br>${m.msg?E(m.msg):'<span class="mu">メッセージはありません</span>'}</div>`:''}${bad?`<button class="mx" data-x="${m.id}" style="font-size:.85em">消す</button>`:''}</div>`}).join(''):'<p class="mu">まだ申請はありません</p>'}
+$('#dvm').onclick=async e=>{const x=e.target.closest('.mx'),w=e.target.closest('.mw');
+if(x){S.mine=S.mine.filter(m=>m.id!=+x.dataset.x);save();mineRender();return}
+if(!w)return;const m=S.mine.find(k=>k.id==+w.dataset.w);if(!m||!sb)return;
+if(!confirm(m.st=='approved'?'このアプリの公開を中止しますか?(App Storeから消えます。すでにダウンロードした人の端末には残ります)':'この申請を取り下げますか?'))return;
+w.disabled=true;const{data,error}=await sb.rpc('phone_withdraw_app',{p_id:m.id,p_key:m.key});
+if(error){w.disabled=false;return alert('失敗しました: '+error.message)}
+if(!data){alert('できませんでした。すでに状態が変わっています');return mineSync()}
+m.st='withdrawn';m.msg='';save();list=undefined;mineRender()};
 async function mineSync(){mineRender();if(!sb||!S.mine.length)return;const{data}=await sb.rpc('phone_app_status',{ids:S.mine.map(m=>m.id)});if(!data)return;let ch=0;
 data.forEach(d=>{const m=S.mine.find(x=>x.id==d.id);if(m&&(m.st!=d.status||(m.msg||'')!=(d.reason||''))){m.st=d.status;m.msg=d.reason||'';ch=1}});if(ch){save();mineRender();list=undefined}}
 const draft=()=>({name:$('#dvn').value.trim(),subtitle:$('#dvt').value.trim(),description:$('#dvd').value.trim(),category:$('#dvc').value,icon:dvs.icon,html:dvs.html,size:dvs.size,created_at:new Date().toISOString()});
 $('#dvp').onclick=()=>{const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');d.name||='(名前なし)';pv=d;view()};
 $('#dvs').onclick=async()=>{const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');if(!d.name)return alert('名前を入力してください');if(!sb)return noSb();
 const b=$('#dvs');b.disabled=true;b.textContent='送信中…';
-const{data,error}=await sb.rpc('phone_submit_app',{p_name:d.name,p_subtitle:d.subtitle,p_desc:d.description,p_cat:d.category,p_icon:d.icon||null,p_html:d.html});
+const key=(crypto.randomUUID?crypto.randomUUID()+crypto.randomUUID():String(Math.random()).slice(2)+String(Math.random()).slice(2)),{data,error}=await sb.rpc('phone_submit_app',{p_key:key,p_name:d.name,p_subtitle:d.subtitle,p_desc:d.description,p_cat:d.category,p_icon:d.icon||null,p_html:d.html});
 b.disabled=false;b.textContent='審査に出す';
 if(error)return alert('送信できませんでした: '+(noTbl(error)?'データベースの準備ができていません(supabase.sqlを実行してください)':error.message));
-S.mine=[{id:data,name:d.name,st:'pending'},...S.mine].slice(0,30);save();
+S.mine=[{id:data,name:d.name,st:'pending',key},...S.mine].slice(0,30);save();
 dvs.html='';dvs.icon='';dvs.size=0;['#dvn','#dvt','#dvd'].forEach(s=>$(s).value='');$('#dvfn').textContent='未選択';dvIcon();mineRender();
 alert('審査に出しました。許可されるとApp Storeに並びます')};
 // ---------- シミュレーター(プレビュー / 審査)----------
-function simShow(v,r,mode){v.innerHTML=`<button class="ib" id="xbk">‹</button><h2 style="margin-top:6px">${mode=='rv'?'審査':'プレビュー'}</h2>
+function simShow(v,r,mode){v.innerHTML=`<button class="ib" id="xbk">‹</button><h2 style="margin-top:6px">${mode=='rv'?'審査':mode=='ap'?'公開中のアプリ':'プレビュー'}</h2>
 <div class="sr" style="cursor:default"><div class="sa">${iconOf(r)}</div><div class="tx"><b>${E(r.name)}</b><span class="mu">${E(r.subtitle)}</span><span class="mu">${E(r.category)}</span></div><button class="gt on" disabled>入手</button></div>
 <p class="mu" style="margin-top:12px">上: App Storeでの見え方 ／ 下: ダウンロード後の動き</p>
 <div class="simw"><div class="sim" id="sim"><iframe id="simf" sandbox="${SBX}"></iframe><button class="simx" id="simx">閉じる</button></div></div>
 <div class="row"><button id="simfs" style="flex:1">全画面で試す</button></div>
 <h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p><p class="mu" style="margin-top:8px">${kb(r.size)} ・ ${date(r.created_at)}</p>
-${mode=='rv'?'<label class="fld">申請者へのメッセージ(拒否するときは理由を書きます)</label><textarea id="rvm" rows="3" maxlength="300" placeholder="例: 起動しないので直して、もう一度出してください"></textarea>':''}
-${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div>':''}`;
+${mode=='rv'||mode=='ap'?'<label class="fld">申請者へのメッセージ('+(mode=='rv'?'拒否するときは理由を書きます':'公開停止の理由など・任意')+')</label><textarea id="rvm" rows="3" maxlength="300" placeholder="例: 起動しないので直して、もう一度出してください"></textarea>':''}
+${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div>':mode=='ap'?'<div class="act"><button id="rst" class="on" style="flex:1">公開停止</button></div>':''}`;
 $('#simf').srcdoc=frameDoc(r.html||'',{},0);
-$('#xbk').onclick=()=>{if(mode=='rv'){rv=null;rvView()}else{pv=null;view()}};
+$('#xbk').onclick=()=>{if(mode=='rv'||mode=='ap'){rv=null;rvView()}else{pv=null;view()}};
 $('#simfs').onclick=()=>$('#sim').classList.add('full');$('#simx').onclick=()=>$('#sim').classList.remove('full');
-if(mode=='rv'){$('#rok').onclick=()=>decide(true);$('#rng').onclick=()=>decide(false)}}
+if(mode=='rv'){$('#rok').onclick=()=>decide(true);$('#rng').onclick=()=>decide(false)}
+if(mode=='ap')$('#rst').onclick=async()=>{if(await takeDown(r.id,$('#rvm').value)){rv=null;rvView()}}}
 // ---------- 審査(管理者)----------
 async function loadPend(){if(!sb||!adm)return;const{data,error}=await sb.from('phone_apps').select(COLS).eq('status','pending').order('created_at');
 if(!error){pend=data;badge();if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()}}
-function rvView(){const v=$('#srv');if(rv)return simShow(v,rv,'rv');
-v.innerHTML=pend.length?`<p class="mu" style="margin:12px 0 0">審査待ち ${pend.length}件</p>`+pend.map(r=>row(r,'<button class="gt on">確認</button>',E(r.category)+' ・ '+date(r.created_at))).join(''):'<p class="mu" style="text-align:center;margin-top:24px">審査待ちはありません</p>'}
+function rvView(){const v=$('#srv');if(rv)return simShow(v,rv,rv.status=='approved'?'ap':'rv');
+const ap=list||[],sub=r=>E(r.category)+' ・ '+date(r.created_at);
+v.innerHTML=`<p class="mu" style="margin:12px 0 0">審査待ち ${pend.length}件</p>`+(pend.length?pend.map(r=>row(r,'<button class="gt on">確認</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">審査待ちはありません</p>')
++`<h2>公開中 ${list===undefined?'':ap.length+'件'}</h2>`+(list===undefined?'<p class="mu">読み込み中…</p>':ap.length?ap.map(r=>row(r,'<button class="gt">管理</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">公開中のアプリはありません</p>');
+if(list===undefined)loadList().then(()=>{if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()})}
 $('#srv').onclick=async e=>{const r=e.target.closest('.sr[data-t]');if(!r||rv)return;
 const{data,error}=await sb.from('phone_apps').select('*').eq('id',+r.dataset.t).single();if(error)return alert(error.message);rv=data;rvView();$('main').scrollTo(0,0)};
 async function decide(ok){const msg=($('#rvm')?$('#rvm').value:'').trim();if(!rv)return;if(!ok&&!msg)return alert('拒否の理由をメッセージ欄に書いてください');if(!confirm(ok?'このアプリを許可して公開しますか?':'このアプリを拒否しますか?'))return;
