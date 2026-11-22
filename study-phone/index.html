@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>スマホ</title>
+<!DOCTYPE html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><title>スマホ</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -231,6 +231,13 @@ i svg.lt{width:100%;height:100%}
 @media(hover:hover){.rdel:hover{background:none;color:#ff3b30}}
 .rs{background:none!important;border:0;padding:0 4px;font-size:1.9em;line-height:1;color:var(--hl)}.rs.on{color:#f5a623}
 @media(hover:hover){.rs:not(:disabled):hover{background:none;color:var(--hl)}.rs.on:not(:disabled):hover{color:#f5a623}}
+.ic.off .rm{display:none!important}
+.ofc{font-size:.7em;font-weight:700;color:#fff;background:#2563eb;border-radius:999px;padding:.1em .65em;vertical-align:middle;margin-left:6px;white-space:nowrap}
+/* 文字選択・長押しメニュー・拡大を止める */
+*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text}
+html,body{touch-action:manipulation}
+input,select,textarea{font-size:16px!important}
 </style></head><body>
 <div class="phone" data-v="lock"><div id="wp"><svg viewBox="0 0 100 200" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a8ca0"/><stop offset=".35" stop-color="#4f8ba5"/><stop offset=".75" stop-color="#1c4a70"/><stop offset="1" stop-color="#0a2236"/></linearGradient></defs><path d="M100 18C70 24 58 50 58 90 58 140 32 160 0 196V200H100Z" fill="url(#wg)" stroke="none"/></svg></div>
 <div id="home" class="scr"><div id="hz"></div><div class="hs" id="ht"></div></div>
@@ -316,7 +323,8 @@ if(d.pos){if(!p.w)delete pend[d.rid];p.ok&&p.ok(d.pos)}else if(d.err){if(!p.w)de
 Object.defineProperty(navigator,'geolocation',{configurable:true,get:()=>G})}catch(e){}}
 function frameDoc(html,init,persist){
 const J=JSON.stringify(init||{}).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
-const sc='<script>('+shim.toString()+')('+J+','+(persist?1:0)+')<\/script>';
+const ZS='<style>html{touch-action:manipulation}input,textarea,select{font-size:16px!important}</style><script>["gesturestart","gesturechange","gestureend"].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault()},{passive:false})})<\/script>';
+const sc=ZS+'<script>('+shim.toString()+')('+J+','+(persist?1:0)+')<\/script>';
 const m=/<head(\s[^>]*)?>/i.exec(html)||/<html(\s[^>]*)?>/i.exec(html)||/^\s*<!doctype[^>]*>/i.exec(html);
 return m?html.slice(0,m.index+m[0].length)+sc+html.slice(m.index+m[0].length):sc+html}
 function mkExt(t){if($('#t'+t))return;const id=t-1000,r=loadX(id);if(!r)return;
@@ -420,7 +428,7 @@ $('#home').insertAdjacentHTML('beforeend','<div id="pgw"><div id="pgs"></div></d
 S.edit=0;
 let pcur=0;
 const rs=()=>PH.style.setProperty('--w',PH.clientWidth+'px');rs();addEventListener('resize',rs);
-function mkIc(t){const b=document.createElement('button');b.className='ic';b.dataset.t=t;b.innerHTML=APPS[t].i+'<span>'+E(APPS[t].n)+'</span><b class="rm">−</b>';return b}
+function mkIc(t){const b=document.createElement('button');b.className='ic'+(isOff(t)?' off':'');b.dataset.t=t;b.innerHTML=APPS[t].i+'<span>'+E(APPS[t].n)+'</span><b class="rm">−</b>';return b}
 function pgGo(){$('#pgs').style.transform=`translateX(${-pcur*100}%)`;const n=$$('.pg').length;$('#dots2').innerHTML=n>1?Array.from({length:n},(_,i)=>`<i class="${i==pcur?'on':''}"></i>`).join(''):''}
 function renderHome(){const pg=$('#pgs'),dk=$('#dock');pg.innerHTML='';dk.innerHTML='';S.hm.p.forEach(a=>{const g=document.createElement('div');g.className='pg';a.forEach(t=>g.append(mkIc(t)));pg.append(g)});S.hm.d.forEach(t=>dk.append(mkIc(t)));pcur=Math.min(pcur,S.hm.p.length-1);pgGo();window.badge&&badge()}
 function commit(){S.hm.p=[...$$('.pg')].map(g=>[...g.children].map(c=>+c.dataset.t));if(!S.hm.p.length)S.hm.p=[[]];S.hm.d=[...$('#dock').children].map(c=>+c.dataset.t);save()}
@@ -448,7 +456,8 @@ if(cur>=0){if(bi==cur)return;flipMove(box,ic,bi>cur?list[bi+1]||null:list[bi])}
 else{const[cx,cy]=pos(list[bi]),h=list[bi].offsetHeight,before=box==dk?x<cx:(y<cy-h/2||(y<cy+h/2&&x<cx));flipMove(box,ic,before?list[bi]:list[bi+1]||null)}}
 function end(){clearTimeout(d.et);const g=d.g,ic=d.ic,q=PH.getBoundingClientRect(),r=ic.getBoundingClientRect();g.style.transition='left .25s var(--e),top .25s var(--e),transform .25s';g.style.left=r.left-q.left+'px';g.style.top=r.top-q.top+'px';g.style.transform='';setTimeout(()=>{g.remove();ic.classList.remove('hid')},250);cleanPages(ic);commit()}
 })();
-function removeApp(t){if(t==4||t==5)return;S.inst=S.inst.filter(x=>x!=t);S.hm.p=S.hm.p.map(a=>a.filter(x=>x!=t)).filter(a=>a.length);if(!S.hm.p.length)S.hm.p=[[]];S.hm.d=S.hm.d.filter(x=>x!=t);S.open=S.open.filter(x=>x!=t);
+function isOff(t){return t>=1000&&!!(S.off&&S.off[t-1000])}
+function removeApp(t){if(t==4||t==5||isOff(t))return;S.inst=S.inst.filter(x=>x!=t);S.hm.p=S.hm.p.map(a=>a.filter(x=>x!=t)).filter(a=>a.length);if(!S.hm.p.length)S.hm.p=[[]];S.hm.d=S.hm.d.filter(x=>x!=t);S.open=S.open.filter(x=>x!=t);
 if(t>=1000){localStorage.removeItem('xa:'+(t-1000));localStorage.removeItem('xd:'+(t-1000));delete APPS[t];delete NM[t]}
 syncExt();save();renderHome()}
 // ===== 設定アプリ(スマホ本体) =====
@@ -470,7 +479,7 @@ theme();
 const CATS=['ゲーム','ツール','勉強','エンタメ','ソーシャル','ライフスタイル','ユーティリティ','その他'];
 const COLS='id,name,subtitle,description,category,icon,size,created_at,reviewed_at';
 const CC={'ゲーム':['#a18cd1','#6a5af9'],'ツール':['#9fb8e8','#5a8bd6'],'勉強':['#8fd19e','#4fae6a'],'エンタメ':['#f0a8c0','#d9608a'],'ソーシャル':['#f5c28a','#e08a44'],'ライフスタイル':['#8fd6d0','#3fa8a0'],'ユーティリティ':['#b0b6c2','#7a8294'],'その他':['#c9b3a1','#9a7e68']};
-let tabS='dl',q='',det=null,sub=null,rec=[],rv=null,pv=null,list,lerr='',pend=[],adm=false,lt=0,pt2;
+let offOK=true,tabS='dl',q='',det=null,sub=null,rec=[],rv=null,pv=null,list,lerr='',pend=[],adm=false,lt=0,pt2;
 const bz=new Map(),has=id=>(S.inst||[]).includes(XID(id));
 // ---------- アップデート ----------
 const ver=r=>r.reviewed_at||r.created_at||'';
@@ -486,7 +495,7 @@ return `<h2>評価とレビュー</h2><div class="card"><div class="row" id="rvs
 const outd=id=>{const r=(list||[]).find(a=>a.id==id);return !!(has(id)&&S.xv&&S.xv[id]&&r&&ver(r)&&S.xv[id]!==ver(r))};
 const outList=()=>(list||[]).filter(r=>outd(r.id)),updN=()=>outList().length;
 function baseline(){S.xv??={};S.dlh??={};let c=0;(list||[]).forEach(r=>{if(has(r.id)&&!S.xv[r.id]&&ver(r)){S.xv[r.id]=ver(r);c=1}});
-(S.inst||[]).forEach(t=>{if(t>=1000){const id=t-1000;if(!S.dlh[id]){const r=(list||[]).find(a=>a.id==id)||loadX(id);if(r){S.dlh[id]={t:Date.parse(r.created_at)||Date.now(),n:r.name,s:r.subtitle||'',i:okIcon(r.icon)?r.icon:''};c=1}}}});if(c)save()}
+(S.inst||[]).forEach(t=>{if(t>=1000){const id=t-1000;if(!S.dlh[id]&&!(S.off&&S.off[id])){const r=(list||[]).find(a=>a.id==id)||loadX(id);if(r){S.dlh[id]={t:Date.parse(r.created_at)||Date.now(),n:r.name,s:r.subtitle||'',i:okIcon(r.icon)?r.icon:''};c=1}}}});if(c)save()}
 async function upd(id,quiet){if(bz.has(id))return false;if(!sb){if(!quiet)noSb();return false}bz.set(id,'更新中…');gbtn();let ok=false;
 try{const{data,error}=await sb.from('phone_apps').select(COLS+',html').eq('id',id).eq('status','approved').single();if(error||!data)throw 0;
 localStorage.setItem('xa:'+id,JSON.stringify({...data,ver:ver(data)}));
@@ -495,8 +504,12 @@ S.xv??={};S.xv[id]=ver(data);S.xu??={};S.xu[id]=Date.now();save();
 const sec=$('#t'+t);if(sec){const f=sec.querySelector('iframe');if(f)f.srcdoc=frameDoc(html,loadD(id),1)}
 renderHome();ok=true}catch(e){}
 bz.delete(id);refresh();if(!ok&&!quiet)alert('アップデートに失敗しました。通信を確認して、もう一度試してください');return ok}
-let ar=0;async function autoRun(){if(!S.auto||ar)return;ar=1;try{for(const r of outList())await upd(r.id,true)}finally{ar=0}refresh()}
+let ar=0;async function autoRun(){const L=outList().filter(r=>S.auto||r.official);if(!L.length||ar)return;ar=1;try{for(const r of L)await upd(r.id,true)}finally{ar=0}refresh()}
 function gtClick(id){if(has(id)){if(outd(id))return upd(id);const t=XID(id),ic=$(`#home .ic[data-t="${t}"]`);if(ic){if(!$('#sht').hidden)shtClose();S.use??={};S.use[id]=(S.use[id]||0)+1;save();openApp(t,ic)}}else install(id)}
+async function syncOff(){if(!sb||!list||lerr||!offOK)return;
+const nw={};list.forEach(r=>{if(r.official)nw[r.id]=1});
+if(JSON.stringify(nw)!=JSON.stringify(S.off||{})){S.off=nw;save();renderHome()}
+for(const r of list.filter(x=>x.official&&!has(x.id))){try{const{data,error}=await sb.from('phone_apps').select('html').eq('id',r.id).eq('status','approved').single();if(!error&&data)fin(r.id,data.html)}catch(e){}}}
 function pickRec(){const a=[...(list||[])];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}rec=a.slice(0,3).map(r=>r.id)}
 const date=s=>{const d=new Date(s);return isNaN(d)?'-':d.getFullYear()+'/'+(d.getMonth()+1)+'/'+d.getDate()};
 const kb=n=>n==null?'-':n<1024?n+' B':n<1048576?Math.round(n/1024)+' KB':(n/1048576).toFixed(1)+' MB';
@@ -505,7 +518,8 @@ const noTbl=e=>/schema cache|does not exist|42P01|PGRST20/.test((e.code||'')+(e.
 const row=(r,btn,sub)=>`<div class="sr" data-t="${r.id}"><div class="sa">${iconOf(r)}</div><div class="tx"><b>${E(r.name)}</b><span class="mu">${E(r.subtitle||r.description)}</span><span class="mu">${sub}</span></div>${btn}</div>`;
 // ---------- ダウンロード ----------
 async function loadList(){if(!sb){list=[];lerr='Supabaseに接続できません';return}
-const{data,error}=await sb.from('phone_apps').select(COLS).eq('status','approved').order('created_at',{ascending:false});
+let{data,error}=await sb.from('phone_apps').select(COLS+',official').eq('status','approved').order('created_at',{ascending:false});offOK=!error;
+if(error&&/official/i.test(error.message||'')){({data,error}=await sb.from('phone_apps').select(COLS).eq('status','approved').order('created_at',{ascending:false}))}
 if(error){list=[];lerr=noTbl(error)?'データベースの準備ができていません(supabase.sqlを実行してください)':error.message}else{list=data;lerr=''}lt=Date.now()}
 function gbtn(){$$('.gt[data-g],.cl[data-g]').forEach(b=>{const id=+b.dataset.g,inS=!!b.closest('#sht'),bs=bz.has(id);
 if(b.classList.contains('cl')){b.innerHTML=bs?RING:CLOUD;return}
@@ -514,15 +528,15 @@ b.classList.remove('rb');const u=has(id)&&outd(id);b.textContent=!has(id)?'入�
 function slist(){const o=$('#sl');if(!o)return;
 if(list===undefined){o.innerHTML='<p class="mu" style="text-align:center;margin-top:24px">読み込み中…</p>';return}
 const k=sub?'':q.trim().toLowerCase(),cat=sub&&sub.startsWith('c:')?sub.slice(2):null,a=list.filter(r=>(!cat||r.category==cat)&&(!k||(r.name+(r.subtitle||'')+(r.description||'')+r.category).toLowerCase().includes(k)));
-o.innerHTML=a.map(r=>row(r,`<button class="gt" data-g="${r.id}"></button>`,E(r.category))).join('')||`<p class="mu" style="text-align:center;margin-top:24px">${E(lerr)||(k?'見つかりませんでした':'このカテゴリーのアプリはまだありません')}</p>`;gbtn()}
+o.innerHTML=a.map(r=>row(r,`<button class="gt" data-g="${r.id}"></button>`,E(r.category)+(r.official?' ・ 公式':''))).join('')||`<p class="mu" style="text-align:center;margin-top:24px">${E(lerr)||(k?'見つかりませんでした':'このカテゴリーのアプリはまだありません')}</p>`;gbtn()}
 function shome(){const o=$('#shm');if(!o)return;
 if(q.trim()){o.innerHTML='<div id="sl"></div>';return slist()}
 if(list===undefined){o.innerHTML='<p class="mu" style="text-align:center;margin-top:24px">読み込み中…</p>';return}
 if(!list.length){o.innerHTML=`<p class="mu" style="text-align:center;margin-top:24px">${E(lerr)||'まだアプリがありません。「アプリ開発」から追加できます'}</p>`;return}
 if(!rec.some(id=>list.some(x=>x.id==id)))pickRec();
 const rr=rec.map(id=>list.find(x=>x.id==id)).filter(Boolean);
-o.innerHTML=`<h3 class="sh3" id="srec">おすすめ <i>›</i></h3>${rr.map(r=>row(r,`<button class="gt" data-g="${r.id}"></button>`,E(r.category))).join('')}<h3 class="sh3" style="cursor:default">閲覧</h3><div class="cgrid">${CATS.map(c=>`<button class="cc" data-c="${E(c)}" style="--a:${CC[c][0]};--b:${CC[c][1]}"><span>${E(c)}</span><em>${list.filter(r=>r.category==c).length}件</em></button>`).join('')}</div>`;gbtn()}
-function ddet(v,r){v.innerHTML=`<button class="ib" id="sbk2">‹</button><div class="row" style="gap:16px;margin-top:10px;flex-wrap:nowrap"><div class="sa lgi">${iconOf(r)}</div><div style="flex:1;min-width:0"><b style="font-size:1.3em">${E(r.name)}</b><div class="mu">${E(r.subtitle)}</div><button class="gt" style="margin-top:8px" data-g="${r.id}"></button></div></div><div class="dgrid"><div><b>${E(r.category)}</b><span class="mu">カテゴリー</span></div><div><b>${kb(r.size)}</b><span class="mu">サイズ</span></div><div><b>${date(r.created_at)}</b><span class="mu">公開日</span></div></div><h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p>${revBox(r.id)}${has(r.id)?`<h2>位置情報</h2><p class="mu" style="line-height:1.6">このアプリが現在地を使うときは、スマホ本体が代わりに位置情報を取得して渡します(初回に許可の確認が出ます)。許可の状態: <b>${(S.geo||{})[r.id]===undefined?'未確認':S.geo[r.id]?'許可':'拒否'}</b></p><button id="glr" style="width:100%;margin-top:8px">許可をリセット</button><button id="otab" style="width:100%;margin-top:8px">通常のタブで開く(それでも使えないとき)</button><p class="mu" style="margin-top:8px;line-height:1.6">それでも動かないときは、ブラウザのアドレスバー横かサイト設定で、このサイトの位置情報が「ブロック」ではなく「許可(または確認)」になっているか確認してください。</p>`:''}${adm?'<h2>管理者メニュー</h2><div class="card"><label class="fld" style="margin-top:0">申請者へのメッセージ(任意)</label><textarea id="rmm" rows="3" maxlength="300" placeholder="除外する理由など"></textarea><button id="rmv" style="width:100%;margin-top:12px">App Storeから除外する</button></div>':''}`;gbtn()}
+o.innerHTML=`<h3 class="sh3" id="srec">おすすめ <i>›</i></h3>${rr.map(r=>row(r,`<button class="gt" data-g="${r.id}"></button>`,E(r.category)+(r.official?' ・ 公式':''))).join('')}<h3 class="sh3" style="cursor:default">閲覧</h3><div class="cgrid">${CATS.map(c=>`<button class="cc" data-c="${E(c)}" style="--a:${CC[c][0]};--b:${CC[c][1]}"><span>${E(c)}</span><em>${list.filter(r=>r.category==c).length}件</em></button>`).join('')}</div>`;gbtn()}
+function ddet(v,r){v.innerHTML=`<button class="ib" id="sbk2">‹</button><div class="row" style="gap:16px;margin-top:10px;flex-wrap:nowrap"><div class="sa lgi">${iconOf(r)}</div><div style="flex:1;min-width:0"><b style="font-size:1.3em">${E(r.name)}</b>${r.official?'<span class="ofc">公式</span>':''}<div class="mu">${E(r.subtitle)}</div><button class="gt" style="margin-top:8px" data-g="${r.id}"></button></div></div><div class="dgrid"><div><b>${E(r.category)}</b><span class="mu">カテゴリー</span></div><div><b>${kb(r.size)}</b><span class="mu">サイズ</span></div><div><b>${date(r.created_at)}</b><span class="mu">公開日</span></div></div><h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p>${revBox(r.id)}${has(r.id)?`<h2>位置情報</h2><p class="mu" style="line-height:1.6">このアプリが現在地を使うときは、スマホ本体が代わりに位置情報を取得して渡します(初回に許可の確認が出ます)。許可の状態: <b>${(S.geo||{})[r.id]===undefined?'未確認':S.geo[r.id]?'許可':'拒否'}</b></p><button id="glr" style="width:100%;margin-top:8px">許可をリセット</button><button id="otab" style="width:100%;margin-top:8px">通常のタブで開く(それでも使えないとき)</button><p class="mu" style="margin-top:8px;line-height:1.6">それでも動かないときは、ブラウザのアドレスバー横かサイト設定で、このサイトの位置情報が「ブロック」ではなく「許可(または確認)」になっているか確認してください。</p>`:''}${adm?'<h2>管理者メニュー</h2><div class="card"><label class="fld" style="margin-top:0">申請者へのメッセージ(任意)</label><textarea id="rmm" rows="3" maxlength="300" placeholder="除外する理由など"></textarea><button id="rmv" style="width:100%;margin-top:12px">App Storeから除外する</button></div>':''}`;gbtn()}
 function dlView(){const v=$('#sdl');if(det!=null){const r=(list||[]).find(x=>x.id==det);if(r){ttl();return ddet(v,r)}det=null}
 ttl();if(sub){v.innerHTML='<button class="ib" id="sbk3">‹</button><div id="sl"></div>';return slist()}
 v.innerHTML='<div class="sbox"><svg width="20" height="20" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="sq" type="search" placeholder="ゲーム、アプリ、ストーリーなど"></div><div id="shm"></div>';
@@ -534,7 +548,7 @@ if(bad){clearInterval(iv);bz.delete(id);gbtn();alert('ダウンロードに失�
 if(p>=100&&ok!=null){clearInterval(iv);bz.delete(id);fin(id,ok)}},110)}
 function fin(id,html){const r=(list||[]).find(x=>x.id==id);if(!r)return gbtn();
 try{localStorage.setItem('xa:'+id,JSON.stringify({...r,html}))}catch(e){gbtn();return alert('この端末の保存容量が足りません')}
-const t=regExt(r);S.xv??={};if(ver(r))S.xv[id]=ver(r);S.dlh??={};S.dlh[id]={...(S.dlh[id]||{t:Date.now()}),n:r.name,s:r.subtitle||'',i:okIcon(r.icon)?r.icon:''};if(!S.inst.includes(t))S.inst.push(t);const l=S.hm.p[S.hm.p.length-1];l.length<20?l.push(t):S.hm.p.push([t]);save();renderHome();if(tabS=='dl')dlView();refresh()}
+const t=regExt(r);S.xv??={};if(ver(r))S.xv[id]=ver(r);if(!r.official){S.dlh??={};S.dlh[id]={...(S.dlh[id]||{t:Date.now()}),n:r.name,s:r.subtitle||'',i:okIcon(r.icon)?r.icon:''}}if(!S.inst.includes(t))S.inst.push(t);const l=S.hm.p[S.hm.p.length-1];l.length<20?l.push(t):S.hm.p.push([t]);save();renderHome();if(tabS=='dl')dlView();refresh()}
 function openTab(id){const r=loadX(id);if(!r)return alert('このアプリはこの端末に保存されていません');
 if(!confirm('このアプリを通常のタブで開きます。\nこの方法ではスマホの枠の保護(サンドボックス)が外れ、アプリがこのサイトのデータに触れられます。信頼できるアプリだけ開いてください。'))return;
 const u=URL.createObjectURL(new Blob([r.html],{type:'text/html'}));window.open(u,'_blank','noopener');setTimeout(()=>URL.revokeObjectURL(u),60000)}
@@ -598,26 +612,30 @@ function simShow(v,r,mode){v.innerHTML=`<button class="ib" id="xbk">‹</button>
 <div class="row"><button id="simfs" style="flex:1">全画面で試す</button></div>
 <h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p><p class="mu" style="margin-top:8px">${kb(r.size)} ・ ${date(r.created_at)}</p>
 ${mode=='rv'||mode=='ap'?'<label class="fld">申請者へのメッセージ('+(mode=='rv'?'拒否するときは理由を書きます':'公開停止の理由など・任意')+')</label><textarea id="rvm" rows="3" maxlength="300" placeholder="例: 起動しないので直して、もう一度出してください"></textarea>':''}
-${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div>':mode=='ap'?'<div class="act"><button id="rst" class="on" style="flex:1">公開停止</button></div>':''}`;
+${mode=='rv'?'<div class="act"><button id="rng" style="flex:1">拒否</button><button id="rok" class="on" style="flex:1">許可</button></div><div class="act" style="margin-top:8px"><button id="rof" style="flex:1">公式アプリとして許可</button></div>':mode=='ap'?'<div class="act"><button id="rof2" style="flex:1">'+(r.official?'公式を解除':'公式アプリにする')+'</button><button id="rst" class="on" style="flex:1">公開停止</button></div>':''}`;
 $('#simf').srcdoc=frameDoc(r.html||'',{},0);
 $('#xbk').onclick=()=>{if(mode=='rv'||mode=='ap'){rv=null;rvView()}else{pv=null;view()}};
 $('#simfs').onclick=()=>$('#sim').classList.add('full');$('#simx').onclick=()=>$('#sim').classList.remove('full');
-if(mode=='rv'){$('#rok').onclick=()=>decide(true);$('#rng').onclick=()=>decide(false)}
+if(mode=='rv'){$('#rof').onclick=()=>decide(true,true);$('#rok').onclick=()=>decide(true);$('#rng').onclick=()=>decide(false)}
+if(mode=='ap')$('#rof2').onclick=async()=>{const nv=!r.official;if(!confirm(nv?'公式アプリにしますか?全員の端末に最初から入り、削除できなくなります':'公式アプリを解除しますか?'))return;
+const{data,error}=await sb.from('phone_apps').update({official:nv}).eq('id',r.id).select('id');
+if(error)return alert('失敗しました: '+(/official/i.test(error.message)?'supabase_official.sql を実行してください':error.message));if(!data||!data.length)return alert('このアカウントには権限がありません');
+rv=null;list=undefined;rvView();loadList().then(()=>{baseline();syncOff();refresh()})};
 if(mode=='ap')$('#rst').onclick=async()=>{if(await takeDown(r.id,$('#rvm').value)){rv=null;rvView()}}}
 // ---------- 審査(管理者)----------
 async function loadPend(){if(!sb||!adm)return;const{data,error}=await sb.from('phone_apps').select(COLS).eq('status','pending').order('created_at');
 if(!error){pend=data;badge();if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()}}
 function rvView(){const v=$('#srv');if(rv)return simShow(v,rv,rv.status=='approved'?'ap':'rv');
-const ap=list||[],sub=r=>E(r.category)+' ・ '+date(r.created_at);
+const ap=list||[],sub=r=>E(r.category)+' ・ '+date(r.created_at)+(r.official?' ・ 公式':'');
 v.innerHTML=`<p class="mu" style="margin:12px 0 0">審査待ち ${pend.length}件</p>`+(pend.length?pend.map(r=>row(r,'<button class="gt on">確認</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">審査待ちはありません</p>')
 +`<h2>公開中 ${list===undefined?'':ap.length+'件'}</h2>`+(list===undefined?'<p class="mu">読み込み中…</p>':ap.length?ap.map(r=>row(r,'<button class="gt">管理</button>',sub(r))).join(''):'<p class="mu" style="text-align:center;margin:16px 0">公開中のアプリはありません</p>');
 if(list===undefined)loadList().then(()=>{if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()})}
 $('#srv').onclick=async e=>{const r=e.target.closest('.sr[data-t]');if(!r||rv)return;
 const{data,error}=await sb.from('phone_apps').select('*').eq('id',+r.dataset.t).single();if(error)return alert(error.message);rv=data;rvView();$('main').scrollTo(0,0)};
-async function decide(ok){const msg=($('#rvm')?$('#rvm').value:'').trim();if(!rv)return;if(!ok&&!msg)return alert('拒否の理由をメッセージ欄に書いてください');if(!confirm(ok?'このアプリを許可して公開しますか?':'このアプリを拒否しますか?'))return;
-const{data,error}=await sb.from('phone_apps').update({status:ok?'approved':'rejected',reject_reason:ok?null:msg,reviewed_at:new Date().toISOString()}).eq('id',rv.id).select('id');
-if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('このアカウントには審査の権限がありません');
-rv=null;list=undefined;await loadPend();rvView()}
+async function decide(ok,off){const msg=($('#rvm')?$('#rvm').value:'').trim();if(!rv)return;if(!ok&&!msg)return alert('拒否の理由をメッセージ欄に書いてください');if(!confirm(ok?(off?'公式アプリとして許可しますか?全員の端末に最初から入り、削除できなくなります':'このアプリを許可して公開しますか?'):'このアプリを拒否しますか?'))return;
+const{data,error}=await sb.from('phone_apps').update({status:ok?'approved':'rejected',reject_reason:ok?null:msg,reviewed_at:new Date().toISOString(),...(ok&&off?{official:true}:{})}).eq('id',rv.id).select('id');
+if(error)return alert('失敗しました: '+(/official/i.test(error.message)?'supabase_official.sql を実行してください':error.message));if(!data||!data.length)return alert('このアカウントには審査の権限がありません');
+rv=null;list=undefined;await loadPend();rvView();loadList().then(()=>{baseline();syncOff();refresh()})}
 function badge(){const n=(adm?pend.length:0)+updN();$('#srvb span').textContent='審査'+(pend.length?'('+pend.length+')':'');$$('#home .ic[data-t="5"] .bdg').forEach(x=>x.remove());
 if(n){const ic=$('#home .ic[data-t="5"]');if(ic)ic.insertAdjacentHTML('beforeend',`<b class="bdg">${n}</b>`)}sacUI()}
 window.badge=badge;
@@ -753,10 +771,10 @@ $$('#snav button').forEach(b=>b.classList.toggle('on',b.dataset.s==tabS));$('#sr
 function enter(keep){view();if(pv)return;
 if(tabS=='dl')dlView();else if(tabS=='dv')dvBanner();else if(tabS=='my')mineSync();else if(tabS=='rv'){if(!keep||!rv)rvView();if(!keep)loadPend()}}
 $('#snav').onclick=e=>{const b=e.target.closest('button[data-s]');if(!b)return;tabS=b.dataset.s;det=null;rv=null;if(tabS=='dl')sub=null;enter();$('main').scrollTo(0,0)};
-const after=()=>{baseline();if(list)pickRec();refresh();notif();if(tabS=='dl'&&S.tab==5&&!pv)dlView();autoRun()};
+const after=()=>{baseline();syncOff();if(list)pickRec();refresh();notif();if(tabS=='dl'&&S.tab==5&&!pv)dlView();autoRun()};
 OPEN[5]=()=>{pv=null;sub=null;if(list)pickRec();enter();if(S.mine.some(m=>m.st=='pending')&&tabS!='dv')mineSync();if(list===undefined||Date.now()-lt>20000)loadList().then(after)};
-setTimeout(()=>loadList().then(()=>{baseline();refresh();notif();autoRun()}),1200);
-setInterval(()=>loadList().then(()=>{baseline();refresh();notif();autoRun()}),300000);
+setTimeout(()=>loadList().then(()=>{baseline();syncOff();refresh();notif();autoRun()}),1200);
+setInterval(()=>loadList().then(()=>{baseline();syncOff();refresh();notif();autoRun()}),300000);
 mineRender();chkAdmin();
 if(sb)sb.auth.onAuthStateChange(()=>setTimeout(chkAdmin,0));
 })();
@@ -775,4 +793,11 @@ renderHome();theme();save();
 }
 boot();
 
+
+// ---------- 選択・コピー・拡大の禁止 ----------
+['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+const inEdit=e=>{const n=e.target&&e.target.nodeType==3?e.target.parentElement:e.target;return !!(n&&n.closest&&n.closest('input,textarea,[contenteditable="true"]'))};
+document.addEventListener('contextmenu',e=>{if(!inEdit(e))e.preventDefault()});
+document.addEventListener('selectstart',e=>{if(!inEdit(e))e.preventDefault()});
+document.addEventListener('wheel',e=>{if(e.ctrlKey)e.preventDefault()},{passive:false});
 </script></body></html>
