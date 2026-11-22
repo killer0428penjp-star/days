@@ -144,6 +144,8 @@ i svg.lt{width:100%;height:100%}
 #app[data-k=ext] main{padding:env(safe-area-inset-top) 0 0;overflow:hidden}
 .tab.ext.on{display:block;height:100%;animation:none}
 .tab.ext iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+.accb{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:12px 14px;margin:6px 0 4px;border-radius:18px;background:var(--bg);border:1px solid var(--bd);cursor:pointer}
+.accb .sa{width:56px;flex:none}.accb .tx{flex:1;min-width:0;display:flex;flex-direction:column}.accb .tx b{font-size:1.1em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.accb .tx span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 </style></head><body>
 <div class="phone" data-v="lock"><div id="wp"><svg viewBox="0 0 100 200" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a8ca0"/><stop offset=".35" stop-color="#4f8ba5"/><stop offset=".75" stop-color="#1c4a70"/><stop offset="1" stop-color="#0a2236"/></linearGradient></defs><path d="M100 18C70 24 58 50 58 90 58 140 32 160 0 196V200H100Z" fill="url(#wg)" stroke="none"/></svg></div>
@@ -151,10 +153,14 @@ i svg.lt{width:100%;height:100%}
 <div id="app" class="scr app">
 <header><b class="lg"><span id="an"></span></b></header>
 <main>
-<section class="tab" id="t4"><h2>設定</h2><div class="card"><div class="row sp"><span>明るさ</span><span class="mu" id="bv"></span></div><input type="range" id="br" min="30" max="100" value="100" style="width:100%;margin-top:10px;accent-color:var(--fg);padding:0;border:0"></div><div class="card"><div class="row sp"><span>テーマ</span><span class="thm" data-i="2">
+<section class="tab" id="t4"><div id="setm"><h2>設定</h2><button class="accb" id="acc"><div class="sa" id="accic"></div><div class="tx"><b id="accn"></b><span class="mu" id="accs"></span></div><span class="mu">›</span></button><div class="card"><div class="row sp"><span>明るさ</span><span class="mu" id="bv"></span></div><input type="range" id="br" min="30" max="100" value="100" style="width:100%;margin-top:10px;accent-color:var(--fg);padding:0;border:0"></div><div class="card"><div class="row sp"><span>テーマ</span><span class="thm" data-i="2">
 <button class="tb" data-m="light" title="ホワイト"><svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></button>
 <button class="tb" data-m="dark" title="ダーク"><svg width="19" height="19" viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6.5 6.5 0 0 0 10 10z"/></svg></button>
-<button class="tb" data-m="auto" title="時間で自動"><svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button></span></div><p class="mu" style="margin-top:8px">ホワイト / ダーク / 時間で自動(17時〜5時はダーク)</p></div><div class="card"><div class="row sp"><span>壁紙</span><button id="wadd">追加</button></div><div class="row" id="wps" style="margin-top:10px"></div><input type="file" id="wf" accept="image/*" hidden></div><div class="card"><div class="row sp"><span>パスコード</span><span class="mu" id="pcs"></span></div><p class="mu" style="margin-top:6px">ロック画面を上にスライドすると、6桁のパスコード入力画面が出ます</p><div class="row" style="margin-top:10px"><button id="pcset" class="on" style="flex:1">設定する</button><button id="pcoff" style="flex:1;display:none">解除</button></div></div><div class="card"><div class="row sp"><span>Supabase接続</span><span class="mu" id="sbst"></span></div><input class="sbu" placeholder="Project URL (https://xxxx.supabase.co)" style="width:100%;margin-top:10px;border-radius:12px"><input class="sbk" placeholder="publishable key" style="width:100%;margin-top:8px;border-radius:12px"><div class="row" style="margin-top:8px"><button class="sbs on" style="flex:1">保存して再読み込み</button><button class="sbc" style="flex:1">初期値に戻す</button></div></div><div class="card"><div class="row sp"><span>管理者</span><span class="mu" id="adst">未ログイン</span></div><p class="mu" style="margin-top:6px">アプリを審査する人用のログインです。ログインするとApp Storeに「審査」が出ます</p><div id="adin"><input id="ade" type="email" placeholder="メールアドレス" style="width:100%;margin-top:10px;border-radius:12px"><input id="adp" type="password" placeholder="パスワード" style="width:100%;margin-top:8px;border-radius:12px"><button id="adl" class="on" style="width:100%;margin-top:8px">ログイン</button></div><button id="ado" style="width:100%;margin-top:10px;display:none">ログアウト</button></div></section>
+<button class="tb" data-m="auto" title="時間で自動"><svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button></span></div><p class="mu" style="margin-top:8px">ホワイト / ダーク / 時間で自動(17時〜5時はダーク)</p></div><div class="card"><div class="row sp"><span>壁紙</span><button id="wadd">追加</button></div><div class="row" id="wps" style="margin-top:10px"></div><input type="file" id="wf" accept="image/*" hidden></div><div class="card"><div class="row sp"><span>パスコード</span><span class="mu" id="pcs"></span></div><p class="mu" style="margin-top:6px">ロック画面を上にスライドすると、6桁のパスコード入力画面が出ます</p><div class="row" style="margin-top:10px"><button id="pcset" class="on" style="flex:1">設定する</button><button id="pcoff" style="flex:1;display:none">解除</button></div></div></div><div id="accp" hidden><button class="ib" id="accbk">‹</button><h2 style="margin-top:6px">アカウント</h2>
+<div id="accin"><p class="mu" style="margin-top:6px">ログインすると名前とアイコンを設定できます。</p><div class="card"><input id="ade" type="email" placeholder="メールアドレス" autocomplete="email" style="width:100%;border-radius:12px"><input id="adp" type="password" placeholder="パスワード(6文字以上)" autocomplete="current-password" style="width:100%;margin-top:8px;border-radius:12px"><div class="row" style="margin-top:10px"><button id="adl" class="on" style="flex:1">ログイン</button><button id="adr" style="flex:1">新規登録</button></div></div></div>
+<div id="accout" hidden><div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin:14px 0 6px"><div class="sa" id="pfic" style="width:96px;cursor:pointer"></div><button id="pfi" type="button">アイコンを変更</button><input type="file" id="pfif" accept="image/*" hidden></div>
+<div class="card"><label class="fld" style="margin-top:0">名前</label><input id="pfn" maxlength="20" placeholder="名前" style="width:100%;border-radius:12px"><div class="row sp" style="margin-top:14px"><span>メールアドレス</span><span class="mu" id="pfe" style="overflow:hidden;text-overflow:ellipsis;max-width:60%"></span></div><div class="row sp" id="pfa" style="margin-top:12px" hidden><span>権限</span><span class="chip ok">管理者</span></div><button id="pfs" class="on" style="width:100%;margin-top:14px">保存</button></div>
+<button id="ado" style="width:100%;margin-top:28px">ログアウト</button></div></div></section>
 <section class="tab" id="t5"><div id="stv"><h2 style="margin-top:4px">App Store</h2>
 <div class="seg" id="sseg" style="--n:2;--i:0"><button data-s="dl" class="on">ダウンロード</button><button data-s="dv">アプリ開発</button><button data-s="rv" id="srvb" hidden>審査</button></div>
 <div id="sdl"></div>
@@ -185,8 +191,8 @@ i svg.lt{width:100%;height:100%}
 <div id="tz"></div></div>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-// ▼ Supabase(公開用キー)。設定アプリから別の接続先に変えることもできます
-const SB_URL=localStorage.getItem('sbu2')||'https://phdmsfmecnoyccsllojj.supabase.co',SB_KEY=localStorage.getItem('sbk2')||'sb_publishable_wLC0oOe62qew79PJK9ubrg_Ksu4lSyS';
+// ▼ Supabase(公開用キー・固定)
+const SB_URL='https://phdmsfmecnoyccsllojj.supabase.co',SB_KEY='sb_publishable_wLC0oOe62qew79PJK9ubrg_Ksu4lSyS';
 let sb=null;try{if(window.supabase)sb=supabase.createClient(SB_URL,SB_KEY)}catch(e){console.warn(e)}
 let S={};try{S=JSON.parse(localStorage.getItem('st')||'{}')||{}}catch(e){}
 ['logs','chat','laps','T','p','accs','cacc','uid','mp','hide','mode','snd','ana','wk','am','tab','cfg'].forEach(k=>delete S[k]);
@@ -343,10 +349,6 @@ const WP={default:['既定',''],sakura:['桜','radial-gradient(circle at 30% 20%
 const wpCss=id=>id[0]=='u'?`url(${S.wps[+id.slice(1)]}) center/cover`:WP[id][1];
 function wpApply(){const id=S.wp||'default';if(id[0]=='u'&&!S.wps?.[+id.slice(1)])S.wp=id='default';$('#wp').style.background=wpCss(id);$('#wp svg').style.display=id=='default'?'block':'none'}
 function wpUI(){const ids=[...Object.keys(WP),...(S.wps||[]).map((_,i)=>'u'+i)];$('#wps').innerHTML=ids.map(id=>`<button class="wt${(S.wp||'default')==id?' on':''}" data-w="${id}" style="background:${id=='default'?'linear-gradient(170deg,#f1c3c3,#4f8ba5 60%,#0a2236)':wpCss(id)}"></button>`).join('')}
-function bindCfg(){$$('.sbu').forEach(i=>i.value=SB_URL);$$('.sbk').forEach(i=>i.value=SB_KEY);
-$$('.sbs').forEach(b=>b.onclick=()=>{const c=b.closest('.card'),u=c.querySelector('.sbu').value.trim().replace(/\/$/,''),k=c.querySelector('.sbk').value.trim();if(!/^https:\/\/.+/.test(u)||k.length<20)return alert('Project URLとキーを正しく入力してください');localStorage.setItem('sbu2',u);localStorage.setItem('sbk2',k);location.reload()});
-$$('.sbc').forEach(b=>b.onclick=()=>{if(!confirm('初期の接続先に戻しますか?'))return;localStorage.removeItem('sbu2');localStorage.removeItem('sbk2');location.reload()});
-}
 $$('button.tb').forEach(b=>b.onclick=()=>{S.theme=b.dataset.m;save();theme()});
 $('#br').oninput=()=>{S.br=+$('#br').value;save();bright()};bright();
 $('#wps').onclick=e=>{const b=e.target.closest('[data-w]');if(!b)return;S.wp=b.dataset.w;save();wpApply();wpUI()};
@@ -354,7 +356,7 @@ $('#wadd').onclick=()=>$('#wf').click();
 $('#wf').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);S.wps=[...(S.wps||[]),c.toDataURL('image/jpeg',.72)].slice(-4);S.wp='u'+(S.wps.length-1);save();wpApply();wpUI()};im.src=rd.result};rd.readAsDataURL(f);e.target.value=''};
 wpApply();wpUI();
 $('#pcset').onclick=PC.set;$('#pcoff').onclick=PC.off;PC.stat();
-bindCfg();theme();
+theme();
 // ===== App Store(ダウンロード / アプリ開発 / 審査)=====
 (()=>{
 const CATS=['ゲーム','ツール','勉強','エンタメ','ソーシャル','ライフスタイル','ユーティリティ','その他'];
@@ -368,7 +370,7 @@ const noTbl=e=>/schema cache|does not exist|42P01|PGRST20/.test((e.code||'')+(e.
 const row=(r,btn,sub)=>`<div class="sr" data-t="${r.id}"><div class="sa">${iconOf(r)}</div><div class="tx"><b>${E(r.name)}</b><span class="mu">${E(r.subtitle||r.description)}</span><span class="mu">${sub}</span></div>${btn}</div>`;
 // ---------- ダウンロード ----------
 async function loadList(){if(!sb){list=[];lerr='Supabaseに接続できません';return}
-const{data,error}=await sb.from('store_apps').select(COLS).eq('status','approved').order('created_at',{ascending:false});
+const{data,error}=await sb.from('phone_apps').select(COLS).eq('status','approved').order('created_at',{ascending:false});
 if(error){list=[];lerr=noTbl(error)?'データベースの準備ができていません(supabase.sqlを実行してください)':error.message}else{list=data;lerr=''}lt=Date.now()}
 function gbtn(){$$('#sdl .gt[data-g]').forEach(b=>{const id=+b.dataset.g;if(bz.has(id)){b.textContent=bz.get(id);b.classList.add('on')}else{b.textContent=has(id)?'開く':'入手';b.classList.toggle('on',!has(id))}})}
 function slist(){const o=$('#sl');if(!o)return;
@@ -380,7 +382,7 @@ function dlView(){const v=$('#sdl');if(det!=null){const r=(list||[]).find(x=>x.i
 v.innerHTML='<input id="sq" type="search" placeholder="アプリ名・説明で検索" style="width:100%;margin:10px 0 4px"><div id="sl"></div>';
 $('#sq').value=q;$('#sq').oninput=()=>{q=$('#sq').value;slist()};slist()}
 function install(id){if(bz.has(id))return;if(!sb)return noSb();bz.set(id,'0%');let p=0,ok=null,bad='';
-sb.from('store_apps').select('html').eq('id',id).eq('status','approved').single().then(({data,error})=>{if(error||!data)bad=(error&&error.message)||'取得できませんでした';else ok=data.html});
+sb.from('phone_apps').select('html').eq('id',id).eq('status','approved').single().then(({data,error})=>{if(error||!data)bad=(error&&error.message)||'取得できませんでした';else ok=data.html});
 const iv=setInterval(()=>{p+=6+Math.random()*10;bz.set(id,Math.min(99,Math.round(p))+'%');gbtn();
 if(bad){clearInterval(iv);bz.delete(id);gbtn();alert('ダウンロードに失敗しました: '+bad);return}
 if(p>=100&&ok!=null){clearInterval(iv);bz.delete(id);fin(id,ok)}},110)}
@@ -405,13 +407,13 @@ $('#dvic').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return
 rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;const x=c.getContext('2d'),s=Math.min(im.width,im.height)||1;x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,192,192);dvs.icon=c.toDataURL('image/png');dvIcon()};im.src=rd.result};rd.readAsDataURL(f)};
 const ST={pending:['審査中',''],approved:['公開中','ok'],rejected:['拒否','ng']};
 function mineRender(){$('#dvm').innerHTML=S.mine.length?S.mine.map(m=>{const s=ST[m.st]||ST.pending;return `<div class="trow"><span>${E(m.name)}</span><span class="chip ${s[1]}">${s[0]}</span></div>`}).join(''):'<p class="mu">まだ申請はありません</p>'}
-async function mineSync(){mineRender();if(!sb||!S.mine.length)return;const{data}=await sb.rpc('app_status',{ids:S.mine.map(m=>m.id)});if(!data)return;let ch=0;
+async function mineSync(){mineRender();if(!sb||!S.mine.length)return;const{data}=await sb.rpc('phone_app_status',{ids:S.mine.map(m=>m.id)});if(!data)return;let ch=0;
 data.forEach(d=>{const m=S.mine.find(x=>x.id==d.id);if(m&&m.st!=d.status){m.st=d.status;ch=1}});if(ch){save();mineRender();list=undefined}}
 const draft=()=>({name:$('#dvn').value.trim(),subtitle:$('#dvt').value.trim(),description:$('#dvd').value.trim(),category:$('#dvc').value,icon:dvs.icon,html:dvs.html,size:dvs.size,created_at:new Date().toISOString()});
 $('#dvp').onclick=()=>{const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');d.name||='(名前なし)';pv=d;view()};
 $('#dvs').onclick=async()=>{const d=draft();if(!d.html)return alert('HTMLファイルを選んでください');if(!d.name)return alert('名前を入力してください');if(!sb)return noSb();
 const b=$('#dvs');b.disabled=true;b.textContent='送信中…';
-const{data,error}=await sb.rpc('submit_app',{p_name:d.name,p_subtitle:d.subtitle,p_desc:d.description,p_cat:d.category,p_icon:d.icon||null,p_html:d.html});
+const{data,error}=await sb.rpc('phone_submit_app',{p_name:d.name,p_subtitle:d.subtitle,p_desc:d.description,p_cat:d.category,p_icon:d.icon||null,p_html:d.html});
 b.disabled=false;b.textContent='審査に出す';
 if(error)return alert('送信できませんでした: '+(noTbl(error)?'データベースの準備ができていません(supabase.sqlを実行してください)':error.message));
 S.mine=[{id:data,name:d.name,st:'pending'},...S.mine].slice(0,30);save();
@@ -430,29 +432,52 @@ $('#xbk').onclick=()=>{if(mode=='rv'){rv=null;rvView()}else{pv=null;view()}};
 $('#simfs').onclick=()=>$('#sim').classList.add('full');$('#simx').onclick=()=>$('#sim').classList.remove('full');
 if(mode=='rv'){$('#rok').onclick=()=>decide(true);$('#rng').onclick=()=>decide(false)}}
 // ---------- 審査(管理者)----------
-async function loadPend(){if(!sb||!adm)return;const{data,error}=await sb.from('store_apps').select(COLS).eq('status','pending').order('created_at');
+async function loadPend(){if(!sb||!adm)return;const{data,error}=await sb.from('phone_apps').select(COLS).eq('status','pending').order('created_at');
 if(!error){pend=data;badge();if(S.tab==5&&tabS=='rv'&&!rv&&!pv)rvView()}}
 function rvView(){const v=$('#srv');if(rv)return simShow(v,rv,'rv');
 v.innerHTML=pend.length?`<p class="mu" style="margin:12px 0 0">審査待ち ${pend.length}件</p>`+pend.map(r=>row(r,'<button class="gt on">確認</button>',E(r.category)+' ・ '+date(r.created_at))).join(''):'<p class="mu" style="text-align:center;margin-top:24px">審査待ちはありません</p>'}
 $('#srv').onclick=async e=>{const r=e.target.closest('.sr[data-t]');if(!r||rv)return;
-const{data,error}=await sb.from('store_apps').select('*').eq('id',+r.dataset.t).single();if(error)return alert(error.message);rv=data;rvView();$('main').scrollTo(0,0)};
+const{data,error}=await sb.from('phone_apps').select('*').eq('id',+r.dataset.t).single();if(error)return alert(error.message);rv=data;rvView();$('main').scrollTo(0,0)};
 async function decide(ok){if(!rv||!confirm(ok?'このアプリを許可して公開しますか?':'このアプリを拒否しますか?'))return;
-const{data,error}=await sb.from('store_apps').update({status:ok?'approved':'rejected',reviewed_at:new Date().toISOString()}).eq('id',rv.id).select('id');
+const{data,error}=await sb.from('phone_apps').update({status:ok?'approved':'rejected',reviewed_at:new Date().toISOString()}).eq('id',rv.id).select('id');
 if(error)return alert('失敗しました: '+error.message);if(!data||!data.length)return alert('このアカウントには審査の権限がありません');
 rv=null;list=undefined;await loadPend();rvView()}
 function badge(){$('#srvb').textContent='審査'+(pend.length?'('+pend.length+')':'');$$('#home .ic[data-t="5"] .bdg').forEach(x=>x.remove());
 if(adm&&pend.length){const ic=$('#home .ic[data-t="5"]');if(ic)ic.insertAdjacentHTML('beforeend',`<b class="bdg">${pend.length}</b>`)}}
 window.badge=badge;
-async function chkAdmin(){let a=false,em='';
-if(sb){try{const{data:{session}}=await sb.auth.getSession();if(session){em=session.user.email||'ログイン中';const{data}=await sb.from('admins').select('user_id').eq('user_id',session.user.id).maybeSingle();a=!!data}}catch(e){}}
-adm=a;$('#adst').textContent=a?'管理者でログイン中':em?'ログイン中(管理者ではありません)':'未ログイン';
-$('#adin').style.display=em?'none':'block';$('#ado').style.display=em?'block':'none';
+// ---------- アカウント(設定の一番上)----------
+let me=null;
+const guest='<i style="background:linear-gradient(145deg,#8a8f98,#4b4f57);color:#fff"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="3.5"/><path d="M5 20c1-4 4-5.5 7-5.5s6 1.5 7 5.5"/></svg></i>';
+function accUI(){const P=me&&S.prof&&S.prof.uid==me.id?S.prof:{},nm=me?(P.name||me.email.split('@')[0]):'ログイン';
+$('#accic').innerHTML=me?iconOf({icon:P.icon,name:nm}):guest;$('#accn').textContent=nm;
+$('#accs').textContent=me?(adm?'管理者 ・ '+me.email:me.email):'ログインまたは新規登録';
+$('#accin').hidden=!!me;$('#accout').hidden=!me;
+if(me){$('#pfic').innerHTML=iconOf({icon:P.icon,name:nm});if(document.activeElement!==$('#pfn'))$('#pfn').value=P.name||nm;$('#pfe').textContent=me.email;$('#pfa').hidden=!adm}}
+async function chkAdmin(){let a=false;me=null;
+if(sb){try{const{data:{session}}=await sb.auth.getSession();if(session){me={id:session.user.id,email:session.user.email||''};
+const[ad,pf]=await Promise.all([sb.from('phone_admins').select('user_id').eq('user_id',me.id).maybeSingle(),sb.from('phone_profiles').select('name,icon').eq('user_id',me.id).maybeSingle()]);
+a=!!(ad.data);if(pf.data)S.prof={uid:me.id,name:pf.data.name,icon:pf.data.icon};else if(!S.prof||S.prof.uid!=me.id)S.prof={uid:me.id,name:'',icon:''}}}catch(e){}}
+if(!me)S.prof=null;save();adm=a;accUI();
 clearInterval(pt2);if(a){loadPend();pt2=setInterval(loadPend,30000)}else{pend=[];rv=null;badge()}
 if(S.tab==5&&!pv)enter(1)}
+const accShow=p=>{$('#setm').hidden=p;$('#accp').hidden=!p;$('main').scrollTo(0,0)};
+$('#acc').onclick=()=>accShow(true);$('#accbk').onclick=()=>accShow(false);
 $('#adl').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||!password)return alert('メールアドレスとパスワードを入力してください');
-const{error}=await sb.auth.signInWithPassword({email,password});if(error)return alert('ログインできません: '+error.message);
-$('#adp').value='';await chkAdmin();if(!adm)alert('このアカウントは管理者ではありません')};
-$('#ado').onclick=async()=>{if(sb)await sb.auth.signOut();chkAdmin()};
+const{error}=await sb.auth.signInWithPassword({email,password});if(error)return alert('ログインできません: '+error.message);$('#adp').value='';await chkAdmin()};
+$('#adr').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||password.length<6)return alert('メールアドレスと6文字以上のパスワードを入力してください');
+const{data,error}=await sb.auth.signUp({email,password});if(error)return alert('登録できません: '+error.message);
+if(!data.session)return alert('確認メールを送りました。メールのリンクを開いてからログインしてください');$('#adp').value='';await chkAdmin()};
+async function saveProf(icon){if(!me)return false;const P=S.prof&&S.prof.uid==me.id?S.prof:{},name=$('#pfn').value.trim().slice(0,20);if(!name){alert('名前を入力してください');return false}
+const n={uid:me.id,name,icon:icon!==undefined?icon:(P.icon||'')};
+const{error}=await sb.from('phone_profiles').upsert({user_id:me.id,name:n.name,icon:n.icon||null,updated_at:new Date().toISOString()});
+if(error){alert('保存できませんでした: '+(noTbl(error)?'データベースの準備ができていません(supabase.sqlを実行してください)':error.message));return false}
+S.prof=n;save();accUI();return true}
+$('#pfs').onclick=async()=>{const b=$('#pfs');b.disabled=true;const ok=await saveProf();b.disabled=false;if(ok){b.textContent='保存しました';setTimeout(()=>b.textContent='保存',1200)}};
+$('#pfi').onclick=$('#pfic').onclick=()=>$('#pfif').click();
+$('#pfif').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
+rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),s=Math.min(im.width,im.height)||1;x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,128,128);saveProf(c.toDataURL('image/png'))};im.src=rd.result};rd.readAsDataURL(f)};
+$('#ado').onclick=async()=>{if(!confirm('ログアウトしますか?'))return;if(sb)await sb.auth.signOut();await chkAdmin();accShow(false)};
+OPEN[4]=()=>{accShow(false);accUI()};
 // ---------- 画面の切り替え ----------
 function view(){const P=!!pv;if(!adm&&tabS=='rv')tabS='dl';const sg=$('#sseg');sg.hidden=P;sg.style.setProperty('--n',adm?3:2);sg.style.setProperty('--i',['dl','dv','rv'].indexOf(tabS));
 $$('#sseg button').forEach(b=>b.classList.toggle('on',b.dataset.s==tabS));$('#srvb').hidden=!adm;
@@ -461,11 +486,7 @@ function enter(keep){view();if(pv)return;
 if(tabS=='dl')dlView();else if(tabS=='dv')mineSync();else if(tabS=='rv'){if(!keep||!rv)rvView();if(!keep)loadPend()}}
 $('#sseg').onclick=e=>{const b=e.target.closest('button[data-s]');if(!b)return;tabS=b.dataset.s;det=null;rv=null;enter()};
 OPEN[5]=()=>{pv=null;enter();if(list===undefined||Date.now()-lt>20000)loadList().then(()=>{if(tabS=='dl'&&S.tab==5&&!pv)dlView()})};
-// ---------- 接続確認 ----------
-async function ping(){const st=$('#sbst');if(!st)return;if(!sb){st.textContent='未接続';return}
-const{error}=await sb.from('store_apps').select('id',{count:'exact',head:true});
-st.textContent=!error?'接続済み':noTbl(error)?'接続済み(テーブル未作成)':'エラー';}
-mineRender();ping();chkAdmin();
+mineRender();chkAdmin();
 if(sb)sb.auth.onAuthStateChange(()=>setTimeout(chkAdmin,0));
 })();
 
