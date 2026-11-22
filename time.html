@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>時計 - 勉強タイマー＆記録</title>
+<title>時計 - 世界時計・アラーム・勉強タイマー</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -13,25 +13,31 @@
   initial-value: 100%;
 }
 :root {
-  --bg: #fff;
+  --bg: #ffffff;
   --fg: #1b1d21;
   --mu: #737985;
   --bd: #dfe1e6;
   --sf: #f3f4f6;
   --hl: #e4e6ea;
   --dt: #e6e8ec;
+  --ac: #ff9f0a;
+  --gn: #34c759;
+  --rd: #ff3b30;
   --e: cubic-bezier(.22,.9,.28,1);
   --sp: cubic-bezier(.3,1.35,.5,1);
   --mi: "Shippori Mincho", "Hiragino Mincho ProN", serif;
 }
 [data-t="dark"] {
-  --bg: #0e0f11;
-  --fg: #eceef1;
-  --mu: #8e95a1;
-  --bd: #2a2d33;
-  --sf: #17191c;
-  --hl: #2b2e35;
-  --dt: #1c1e22;
+  --bg: #000000;
+  --fg: #ffffff;
+  --mu: #8e8e93;
+  --bd: #2c2c2e;
+  --sf: #1c1c1e;
+  --hl: #2c2c2e;
+  --dt: #161618;
+  --ac: #ff9f0a;
+  --gn: #30d158;
+  --rd: #ff453a;
 }
 * {
   box-sizing: border-box;
@@ -44,52 +50,73 @@ html, body {
 body {
   background: radial-gradient(var(--dt) 1.3px, transparent 1.5px) 0 0 / 22px 22px fixed var(--bg);
   color: var(--fg);
-  font: clamp(14px, 3.8vw, 16px)/1.6 "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  font: clamp(14px, 3.8vw, 16px)/1.5 "Zen Kaku Gothic New", -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
   overflow-wrap: anywhere;
   padding-top: env(safe-area-inset-top);
-  transition: background-color .4s, color .4s;
+  transition: background-color .35s, color .35s;
 }
-header, .card, input, select, .wheels::before {
-  transition: background-color .4s, border-color .4s, color .4s;
+header, .card, input, select, .wheels::before, dialog, .ios-card {
+  transition: background-color .35s, border-color .35s, color .35s;
 }
 :focus-visible {
-  outline: 2px solid var(--fg);
+  outline: 2px solid var(--ac);
   outline-offset: 2px;
 }
 
-/* ヘッダー＆テーマ切り替え */
+/* ヘッダー＆上部タブバー */
 header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: calc(56px + env(safe-area-inset-top));
-  padding: env(safe-area-inset-top) 4% 0;
+  padding-top: env(safe-area-inset-top);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--bd);
+  z-index: 20;
+}
+.hbar {
+  height: 54px;
+  padding: 0 4%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: color-mix(in srgb, var(--bg) 86%, transparent);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--bd);
-  z-index: 10;
 }
 .lg {
   display: flex;
   align-items: center;
   gap: 9px;
   font: 600 1.15em var(--mi);
+  cursor: pointer;
+  background: none !important;
+  border: 0;
+  padding: 4px 6px 4px 0;
+  border-radius: 10px;
 }
 .lg u {
   text-decoration: none;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border: 1.5px solid var(--fg);
-  border-radius: 7px;
+  border-radius: 8px;
   transform: rotate(-6deg);
   font-size: .85em;
+  transition: transform .25s var(--sp), background-color .25s, color .25s;
 }
+@media (hover: hover) {
+  .lg:hover u {
+    transform: rotate(0deg) scale(1.06);
+    background: var(--fg);
+    color: var(--bg);
+  }
+}
+.lg:active u {
+  transform: scale(.92);
+}
+
+/* テーマ切替スイッチ */
 .thm {
   display: flex;
   position: relative;
@@ -103,17 +130,17 @@ header {
   position: absolute;
   top: 3px;
   left: 3px;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--fg);
-  transition: transform .55s var(--sp);
+  transition: transform .5s var(--sp);
 }
-.thm[data-i="1"]::before { transform: translateX(34px); }
-.thm[data-i="2"]::before { transform: translateX(68px); }
+.thm[data-i="1"]::before { transform: translateX(32px); }
+.thm[data-i="2"]::before { transform: translateX(64px); }
 .tb {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: 0;
   background: none !important;
@@ -124,15 +151,46 @@ header {
   place-items: center;
   transition: color .3s;
 }
-.tb.on {
-  color: var(--bg);
-}
+.tb.on { color: var(--bg); }
 @media (hover: hover) {
   .tb:hover { color: var(--fg); }
   .tb.on:hover { color: var(--bg); }
 }
 
-/* 共通UIパーツ */
+/* 上部ナビゲーション（サイドバー/タブバー） */
+.tnav {
+  display: flex;
+  justify-content: space-around;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2px 2% 6px;
+  gap: 4px;
+}
+.tnav button {
+  flex: 1;
+  border: 0;
+  background: none !important;
+  border-radius: 14px;
+  padding: 5px 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: .68em;
+  font-weight: 600;
+  color: var(--mu);
+  transition: color .25s, background-color .25s;
+}
+.tnav button svg {
+  width: 22px;
+  height: 22px;
+}
+.tnav button.on {
+  color: var(--ac);
+  background: color-mix(in srgb, var(--ac) 12%, transparent) !important;
+}
+
+/* 共通パーツ */
 button, select, input {
   font: inherit;
   color: var(--fg);
@@ -143,29 +201,16 @@ button, select, input {
 }
 input, select {
   max-width: 100%;
-  transition: border-color .3s, box-shadow .3s;
 }
 input:focus, select:focus {
   outline: none;
-  border-color: var(--fg);
-  box-shadow: 0 0 0 3px var(--hl);
+  border-color: var(--ac);
 }
 button {
   cursor: pointer;
-  background-image: linear-gradient(var(--fg), var(--fg));
-  background-repeat: no-repeat;
-  background-position: 0 100%;
-  background-size: 100% 0;
-  transition: background-size .4s var(--e), color .3s, transform .25s var(--sp), border-color .3s;
+  transition: transform .2s var(--sp), opacity .2s, background-color .25s, color .25s;
 }
-@media (hover: hover) {
-  button:not(:disabled):hover {
-    background-size: 100% 100%;
-    color: var(--bg);
-    border-color: var(--fg);
-  }
-}
-button:active { transform: scale(.93); }
+button:active { transform: scale(.94); }
 button:disabled { opacity: .4; cursor: default; }
 .ib {
   width: 38px;
@@ -177,8 +222,12 @@ button:disabled { opacity: .4; cursor: default; }
 main {
   max-width: 600px;
   margin: 0 auto;
-  padding: calc(72px + env(safe-area-inset-top)) 4% calc(40px + env(safe-area-inset-bottom));
+  padding: calc(114px + env(safe-area-inset-top)) 4% calc(44px + env(safe-area-inset-bottom));
 }
+.view { display: none; }
+.view.on { display: block; animation: tin .35s var(--e); }
+@keyframes tin { from { opacity: 0; transform: translateY(8px); } }
+
 svg {
   fill: none;
   stroke: currentColor;
@@ -199,63 +248,402 @@ svg {
   align-items: center;
   flex-wrap: wrap;
 }
-.sp {
-  justify-content: space-between;
-}
-.mu {
-  color: var(--mu);
-  font-size: .85em;
-}
+.sp { justify-content: space-between; }
+.mu { color: var(--mu); font-size: .85em; }
 h2 {
   font: 600 1.2em var(--mi);
-  margin: 24px 0 10px;
+  margin: 20px 0 10px;
   display: inline-block;
   background: linear-gradient(transparent 62%, var(--hl) 0);
   padding: 0 .2em;
   margin-left: -.2em;
 }
-h2:first-child {
-  margin-top: 4px;
+
+/* iOS時計風 上部アクションバー＆大見出し（世界時計・アラーム用） */
+.ios-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.ios-pill {
+  border: 0;
+  background: var(--sf) !important;
+  color: var(--fg);
+  font-size: .92em;
+  font-weight: 600;
+  padding: 7px 16px;
+  border-radius: 999px;
+}
+.ios-plus {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--sf) !important;
+  color: var(--fg);
+  display: grid;
+  place-items: center;
+  font-size: 1.35em;
+  line-height: 1;
+}
+.ios-title {
+  font-size: clamp(28px, 8vw, 34px);
+  font-weight: 700;
+  letter-spacing: -.02em;
+  margin: 4px 0 12px;
+}
+.ios-sub {
+  font-size: .95em;
+  font-weight: 700;
+  color: var(--fg);
+  padding: 12px 0 6px;
+  border-bottom: 1px solid var(--bd);
 }
 
-/* セグメント切り替え */
-.seg {
-  display: flex;
-  border: 1px solid var(--bd);
-  border-radius: 999px;
-  padding: 3px;
-  position: relative;
-  touch-action: pan-y;
-  background: var(--bg);
+/* 世界時計リスト */
+.wc-list {
+  border-top: 1px solid var(--bd);
 }
-.seg::before {
+.wc-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--bd);
+  gap: 10px;
+  transition: transform .2s, background-color .2s;
+}
+.wc-item.dragging {
+  opacity: .5;
+}
+.wc-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.wc-info {
+  min-width: 0;
+}
+.wc-diff {
+  font-size: .82em;
+  color: var(--mu);
+}
+.wc-city {
+  font-size: 1.55em;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wc-time {
+  font-size: clamp(38px, 11vw, 52px);
+  font-weight: 300;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.del-circ {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--rd) !important;
+  color: #fff;
+  border: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  flex: none;
+}
+.drag-hdl {
+  color: var(--mu);
+  cursor: grab;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  touch-action: none;
+}
+.ord-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ord-btns button {
+  padding: 1px 6px;
+  font-size: .7em;
+  border-radius: 6px;
+  border: 1px solid var(--bd);
+  background: var(--sf);
+}
+
+/* アラームリスト＆トグルスイッチ */
+.al-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bd);
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.al-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+.al-time {
+  font-size: clamp(42px, 12vw, 56px);
+  font-weight: 300;
+  letter-spacing: -.03em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  color: var(--mu);
+  transition: color .25s;
+}
+.al-item.on .al-time,
+.al-item.editing .al-time {
+  color: var(--fg);
+}
+.al-meta {
+  font-size: .85em;
+  color: var(--mu);
+}
+.al-item.on .al-meta {
+  color: var(--fg);
+}
+/* iOS風スイッチ */
+.sw-tog {
+  position: relative;
+  width: 52px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--hl);
+  border: 0;
+  padding: 0;
+  flex: none;
+  transition: background-color .25s;
+}
+.sw-tog::after {
   content: "";
   position: absolute;
-  top: 3px;
-  bottom: 3px;
-  left: 3px;
-  width: calc(50% - 3px);
-  border-radius: 999px;
-  background: var(--fg);
-  transition: transform .55s var(--sp);
+  top: 2px;
+  left: 2px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,.25);
+  transition: transform .25s var(--sp);
 }
-.seg[data-i="1"]::before {
-  transform: translateX(100%);
+.sw-tog.on {
+  background: var(--gn);
 }
-.seg button {
-  flex: 1;
+.sw-tog.on::after {
+  transform: translateX(20px);
+}
+.al-del-btn {
+  background: var(--rd) !important;
+  color: #fff;
   border: 0;
-  background: none !important;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: .85em;
+  font-weight: 600;
+  flex: none;
+}
+
+/* モーダル（ダイアログ）共通 */
+dialog {
+  border: 1px solid var(--bd);
+  border-radius: 24px;
+  background: var(--bg);
+  color: var(--fg);
+  width: min(94vw, 460px);
+  max-height: 88dvh;
+  padding: 0;
+  margin: auto;
+  overflow: hidden;
+}
+dialog[open] {
+  display: flex;
+  flex-direction: column;
+  animation: dg .35s var(--sp);
+}
+@keyframes dg {
+  from { opacity: 0; transform: translateY(18px) scale(.97); }
+}
+dialog::backdrop {
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(6px);
+}
+.dlg-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--bd);
+  background: var(--sf);
+}
+.dlg-hd b { font-size: 1.02em; }
+.dlg-bd {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+.dlg-x {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--hl) !important;
+  display: grid;
+  place-items: center;
+}
+.dlg-ok {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--ac) !important;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+/* アラーム設定リスト（iOSグループ風） */
+.ios-grp {
+  background: var(--sf);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+.ios-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--bd);
+  gap: 10px;
+}
+.ios-row:last-child { border-bottom: 0; }
+.ios-row label { font-size: .95em; }
+.ios-row input[type="text"], .ios-row select {
+  border: 0;
+  background: transparent;
+  text-align: right;
+  color: var(--mu);
+  padding: 2px 4px;
+  border-radius: 6px;
+  font-size: .95em;
+}
+.ios-row input[type="text"]:focus {
+  color: var(--fg);
+}
+.days-bar {
+  display: flex;
+  gap: 5px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--bd);
+  justify-content: space-between;
+}
+.day-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--bd);
+  background: var(--bg);
+  font-size: .8em;
+  font-weight: 600;
+}
+.day-btn.on {
+  background: var(--ac);
+  color: #fff;
+  border-color: var(--ac);
+}
+
+/* 都市検索リスト */
+.city-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 6px;
+  border-bottom: 1px solid var(--bd);
+  cursor: pointer;
+}
+.city-row:hover {
+  background: var(--sf);
+}
+
+/* ホイール（タイマー＆アラーム共通） */
+.wheels {
   position: relative;
+  display: flex;
+  height: 180px;
+}
+.wheels::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 72px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--sf);
+}
+.wh {
+  position: relative;
+  flex: 1;
+  height: 180px;
   z-index: 1;
-  transition: color .3s;
 }
-.seg button.on {
-  color: var(--bg);
+.wh ul {
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  list-style: none;
+  padding: 72px 0;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
-@media (hover: hover) {
-  .seg button:hover { color: var(--fg); }
-  .seg button.on:hover { color: var(--bg); }
+.wh ul::-webkit-scrollbar { display: none; }
+.wh li {
+  height: 36px;
+  scroll-snap-align: center;
+  text-align: center;
+  font: 400 1.45em/36px var(--mi);
+  will-change: transform;
+}
+.wh.unit li {
+  text-align: right;
+  padding-right: 52%;
+}
+.wh em {
+  position: absolute;
+  left: 52%;
+  top: 72px;
+  line-height: 36px;
+  font-style: normal;
+  font-size: .85em;
+  pointer-events: none;
+  padding-left: 8px;
 }
 
 /* ストップウォッチ・ダイヤル */
@@ -310,9 +698,7 @@ h2:first-child {
   font: 400 clamp(30px, 10.5vw, 46px) var(--mi);
   transition: transform .7s var(--sp);
 }
-.ana #disp {
-  transform: translateY(34%) scale(.5);
-}
+.ana #disp { transform: translateY(34%) scale(.5); }
 #disp i {
   display: inline-block;
   width: .62em;
@@ -327,7 +713,7 @@ h2:first-child {
   padding: 0;
 }
 #b2.run {
-  background-size: 100% 100%;
+  background: var(--fg);
   color: var(--bg);
   border-color: var(--fg);
 }
@@ -337,58 +723,7 @@ h2:first-child {
   padding: 8px;
 }
 
-/* タイマー（iOS風ホイール） */
-.wheels {
-  position: relative;
-  display: flex;
-  height: 180px;
-}
-.wheels::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 72px;
-  height: 36px;
-  border-radius: 12px;
-  background: var(--sf);
-}
-.wh {
-  position: relative;
-  flex: 1;
-  height: 180px;
-  z-index: 1;
-}
-.wh ul {
-  position: relative;
-  height: 100%;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  list-style: none;
-  padding: 72px 0;
-  scrollbar-width: none;
-  overscroll-behavior: contain;
-  touch-action: pan-y;
-}
-.wh ul::-webkit-scrollbar { display: none; }
-.wh li {
-  height: 36px;
-  scroll-snap-align: center;
-  text-align: right;
-  padding-right: 52%;
-  font: 400 1.35em/36px var(--mi);
-  will-change: transform;
-}
-.wh em {
-  position: absolute;
-  left: 52%;
-  top: 72px;
-  line-height: 36px;
-  font-style: normal;
-  font-size: .85em;
-  pointer-events: none;
-  padding-left: 8px;
-}
+/* タイマー実行画面 */
 .trow {
   display: flex;
   justify-content: space-between;
@@ -396,12 +731,8 @@ h2:first-child {
   padding: 10px 0;
   border-bottom: 1px solid var(--bd);
 }
-.big {
-  font: 400 clamp(34px, 11vw, 52px)/1.15 var(--mi);
-}
-.bt.sm {
-  width: 58px;
-}
+.big { font: 400 clamp(34px, 11vw, 52px)/1.15 var(--mi); }
+.bt.sm { width: 58px; }
 .pbar {
   height: 3px;
   background: var(--hl);
@@ -416,7 +747,7 @@ h2:first-child {
   width: 0;
 }
 
-/* 記録・グラフ */
+/* 記録・グラフ（モーダル内） */
 .res {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -431,11 +762,11 @@ h2:first-child {
 }
 .res b {
   display: block;
-  font: 400 1.25em var(--mi);
+  font: 400 1.2em var(--mi);
 }
 .ch {
   position: relative;
-  height: 150px;
+  height: 145px;
   margin: 12px 0 28px 30px;
   border-bottom: 1px solid var(--fg);
 }
@@ -470,8 +801,8 @@ h2:first-child {
   background: var(--fg);
   border-radius: 6px 6px 0 0;
   transform-origin: bottom;
-  animation: grow .8s var(--e) both;
-  animation-delay: calc(var(--i) * 60ms);
+  animation: grow .7s var(--e) both;
+  animation-delay: calc(var(--i) * 50ms);
   min-height: 2px;
 }
 @keyframes grow { from { transform: scaleY(0); } }
@@ -484,7 +815,7 @@ h2:first-child {
   color: var(--mu);
 }
 .pie {
-  width: min(52vw, 200px);
+  width: min(48vw, 185px);
   aspect-ratio: 1;
   border-radius: 50%;
   margin: 14px auto;
@@ -492,7 +823,7 @@ h2:first-child {
   -webkit-mask: conic-gradient(#000 var(--p), transparent 0);
   mask: conic-gradient(#000 var(--p), transparent 0);
 }
-.pie.sw { animation: sweep 1.1s var(--e); }
+.pie.sw { animation: sweep 1s var(--e); }
 @keyframes sweep { from { --p: 0%; } }
 .dot {
   display: inline-block;
@@ -502,128 +833,259 @@ h2:first-child {
   margin-right: 6px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: .01ms !important;
-    transition-duration: .01ms !important;
-  }
+/* アラーム鳴動バナー */
+#ringBox {
+  display: none;
+  position: fixed;
+  top: calc(14px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 420px);
+  background: var(--sf);
+  border: 1.5px solid var(--ac);
+  border-radius: 22px;
+  padding: 16px 18px;
+  box-shadow: 0 16px 40px rgba(0,0,0,.45);
+  z-index: 100;
+  animation: dg .35s var(--sp);
 }
+#ringBox.on { display: block; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="lg"><u>時</u><span>時計</span></div>
-  <div class="thm" data-i="2" title="テーマ切り替え（ホワイト / ダーク / 時間で自動）">
-    <button class="tb" data-m="light" title="ホワイトモード" aria-label="ホワイトモード">
-      <svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+  <div class="hbar">
+    <button class="lg" id="openStudy" title="勉強時間の記録とグラフを見る">
+      <u>学</u><span>時計</span>
     </button>
-    <button class="tb" data-m="dark" title="ダークモード" aria-label="ダークモード">
-      <svg width="19" height="19" viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6.5 6.5 0 0 0 10 10z"/></svg>
-    </button>
-    <button class="tb" data-m="auto" title="時間による自動切り替え（17時〜翌5時はダーク）" aria-label="時間による自動切り替え">
-      <svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
-    </button>
+    <div class="thm" data-i="2" title="テーマ切り替え（ホワイト / ダーク / 時間で自動）">
+      <button class="tb" data-m="light" title="ホワイトモード" aria-label="ホワイトモード">
+        <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>
+      </button>
+      <button class="tb" data-m="dark" title="ダークモード" aria-label="ダークモード">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6.5 6.5 0 0 0 10 10z"/></svg>
+      </button>
+      <button class="tb" data-m="auto" title="時間による自動切り替え（17時〜翌5時はダーク）" aria-label="時間による自動切り替え">
+        <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+      </button>
+    </div>
   </div>
+  <nav class="tnav" id="tnav">
+    <button data-v="wc" class="on">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+      <span>世界時計</span>
+    </button>
+    <button data-v="al">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M5 3L2 6M22 6l-3-3"/></svg>
+      <span>アラーム</span>
+    </button>
+    <button data-v="sw">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4M9 2h6M19 5l1.5-1.5"/></svg>
+      <span>ストップウォッチ</span>
+    </button>
+    <button data-v="tm">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 13l3-3M10 2h4"/></svg>
+      <span>タイマー</span>
+    </button>
+  </nav>
 </header>
 
 <main>
-  <h2>勉強タイマー</h2>
-  <div class="seg" id="mseg">
-    <button data-k="sw" class="on">ストップウォッチ</button>
-    <button data-k="tm">タイマー</button>
-  </div>
-
-  <!-- ストップウォッチ画面 -->
-  <div class="card" id="swc" style="margin-top:10px">
-    <div class="dial" id="dial" title="左右スワイプまたは下の●をタップでアナログ/デジタル切替">
-      <svg viewBox="0 0 100 100">
-        <circle class="tr" cx="50" cy="50" r="46" fill="none"/>
-        <circle class="tk" cx="50" cy="50" r="44" fill="none"/>
-        <circle class="rg" id="rg" cx="50" cy="50" r="45" fill="none" stroke-linecap="round"/>
-        <path class="hd" id="hand" d="M50 50V14"/>
-      </svg>
-      <div id="disp"></div>
+  <!-- 1. 世界時計ビュー -->
+  <section class="view on" id="v-wc">
+    <div class="ios-top">
+      <button class="ios-pill" id="wcEditBtn">編集</button>
+      <button class="ios-plus" id="wcAddBtn" aria-label="都市を追加">＋</button>
     </div>
-    <div class="row sp" style="margin-top:12px">
-      <button class="bt" id="b1">リセット</button>
-      <span class="mu" id="dots" title="表示スタイル切替">● ○</span>
-      <button class="bt" id="b2">開始</button>
-    </div>
-    <ol id="laps" class="mu" style="padding-left:1.4em;margin-top:8px"></ol>
-  </div>
+    <div class="ios-title">世界時計</div>
+    <div class="wc-list" id="wcList"></div>
+  </section>
 
-  <!-- タイマー画面 -->
-  <div class="card" id="tmc" style="margin-top:10px;display:none">
-    <div id="tset">
-      <div class="wheels">
-        <div class="wh" data-n="24"><em>時間</em></div>
-        <div class="wh" data-n="60"><em>分</em></div>
-        <div class="wh" data-n="60"><em>秒</em></div>
+  <!-- 2. アラームビュー -->
+  <section class="view" id="v-al">
+    <div class="ios-top">
+      <button class="ios-pill" id="alEditBtn">編集</button>
+      <button class="ios-plus" id="alAddBtn" aria-label="アラームを追加">＋</button>
+    </div>
+    <div class="ios-title">アラーム</div>
+    <div class="ios-sub">その他</div>
+    <div id="alList"></div>
+  </section>
+
+  <!-- 3. ストップウォッチビュー -->
+  <section class="view" id="v-sw">
+    <div class="ios-title" style="margin-top:0">ストップウォッチ</div>
+    <div class="card">
+      <div class="dial" id="dial" title="左右スワイプまたは下の●をタップでアナログ/デジタル切替">
+        <svg viewBox="0 0 100 100">
+          <circle class="tr" cx="50" cy="50" r="46" fill="none"/>
+          <circle class="tk" cx="50" cy="50" r="44" fill="none"/>
+          <circle class="rg" id="rg" cx="50" cy="50" r="45" fill="none" stroke-linecap="round"/>
+          <path class="hd" id="hand" d="M50 50V14"/>
+        </svg>
+        <div id="disp"></div>
       </div>
       <div class="row sp" style="margin-top:12px">
-        <button class="bt" id="c1">キャンセル</button>
-        <button class="bt" id="c2">開始</button>
+        <button class="bt" id="b1">リセット</button>
+        <span class="mu" id="dots" title="表示スタイル切替">● ○</span>
+        <button class="bt" id="b2">開始</button>
       </div>
+      <ol id="laps" class="mu" style="padding-left:1.4em;margin-top:8px"></ol>
     </div>
-    <div id="tmr" style="display:none">
-      <div class="trow">
-        <div>
-          <div class="big" id="tbig"></div>
-          <div class="mu" id="tcap"></div>
+    <div class="row" style="margin-top:6px">
+      <span class="mu">記録する科目：</span>
+      <select id="subjSw" style="flex:1"></select>
+    </div>
+  </section>
+
+  <!-- 4. タイマービュー -->
+  <section class="view" id="v-tm">
+    <div class="ios-title" style="margin-top:0">タイマー</div>
+    <div class="card">
+      <div id="tset">
+        <div class="wheels">
+          <div class="wh unit" data-n="24"><em>時間</em></div>
+          <div class="wh unit" data-n="60"><em>分</em></div>
+          <div class="wh unit" data-n="60"><em>秒</em></div>
         </div>
-        <button class="bt sm" id="tp">❚❚</button>
+        <div class="row sp" style="margin-top:12px">
+          <button class="bt" id="c1">キャンセル</button>
+          <button class="bt" id="c2">開始</button>
+        </div>
       </div>
-      <div class="pbar"><u id="tpb"></u></div>
-      <button id="tx" style="margin-top:12px">キャンセル</button>
+      <div id="tmr" style="display:none">
+        <div class="trow">
+          <div>
+            <div class="big" id="tbig"></div>
+            <div class="mu" id="tcap"></div>
+          </div>
+          <button class="bt sm" id="tp">❚❚</button>
+        </div>
+        <div class="pbar"><u id="tpb"></u></div>
+        <button id="tx" style="margin-top:12px">キャンセル</button>
+      </div>
+      <h2>最近の項目</h2>
+      <div id="rec"></div>
     </div>
-    <h2>最近の項目</h2>
-    <div id="rec"></div>
-  </div>
-
-  <!-- 科目・通知音設定 -->
-  <div class="row" style="margin-top:2px">
-    <select id="subj" style="flex:1" aria-label="科目"></select>
-    <select id="snd" style="flex:1" aria-label="通知音"></select>
-    <button class="ib" id="tsn" title="通知音を試聴">♪</button>
-  </div>
-
-  <!-- 記録＆グラフ -->
-  <h2>記録</h2>
-  <div class="res">
-    <div><span class="mu">合計</span><b id="s1"></b></div>
-    <div><span class="mu">1日平均</span><b id="s2"></b></div>
-    <div><span class="mu">日数</span><b id="s3"></b></div>
-  </div>
-  <div class="row sp" style="margin-top:12px">
-    <button class="ib" onclick="wk(-1)" aria-label="前の週">‹</button>
-    <span id="wl" class="mu"></span>
-    <button class="ib" onclick="wk(1)" aria-label="次の週">›</button>
-  </div>
-  <div class="ch" id="wb2" style="touch-action:pan-y"></div>
-
-  <h2>1日の内訳</h2>
-  <input type="date" id="pd" aria-label="日付選択">
-  <div class="pie" id="pie"></div>
-  <div id="leg"></div>
+    <div class="row" style="margin-top:6px">
+      <select id="subjTm" style="flex:1" aria-label="科目"></select>
+      <select id="snd" style="flex:1" aria-label="通知音"></select>
+      <button class="ib" id="tsn" title="通知音を試聴">♪</button>
+    </div>
+  </section>
 </main>
+
+<!-- アラーム鳴動バナー -->
+<div id="ringBox">
+  <div class="row sp">
+    <div>
+      <div style="font-size:.82em;color:var(--ac);font-weight:700" id="ringLbl">アラーム</div>
+      <div style="font-size:2em;font-weight:700;line-height:1.1" id="ringTime">08:00</div>
+    </div>
+    <div class="row">
+      <button id="ringSnooze" style="background:var(--ac);color:#fff;border:0;font-weight:700">スヌーズ</button>
+      <button id="ringStop" style="background:var(--hl);border:0;font-weight:700">停止</button>
+    </div>
+  </div>
+</div>
+
+<!-- モーダル1: 勉強記録一式（「学」アイコンクリックで表示） -->
+<dialog id="studyDlg">
+  <div class="dlg-hd">
+    <b>勉強時間の記録</b>
+    <button class="dlg-x" onclick="$('#studyDlg').close()">✕</button>
+  </div>
+  <div class="dlg-bd">
+    <div class="res">
+      <div><span class="mu">合計</span><b id="s1"></b></div>
+      <div><span class="mu">1日平均</span><b id="s2"></b></div>
+      <div><span class="mu">日数</span><b id="s3"></b></div>
+    </div>
+    <div class="row sp" style="margin-top:14px">
+      <button class="ib" onclick="wk(-1)" aria-label="前の週">‹</button>
+      <span id="wl" class="mu"></span>
+      <button class="ib" onclick="wk(1)" aria-label="次の週">›</button>
+    </div>
+    <div class="ch" id="wb2" style="touch-action:pan-y"></div>
+    <h2>1日の内訳</h2>
+    <input type="date" id="pd" style="width:100%;border-radius:12px" aria-label="日付選択">
+    <div class="pie" id="pie"></div>
+    <div id="leg"></div>
+  </div>
+</dialog>
+
+<!-- モーダル2: 世界時計の都市選択 -->
+<dialog id="wcDlg">
+  <div class="dlg-hd">
+    <b>都市を選択</b>
+    <button class="dlg-x" onclick="$('#wcDlg').close()">✕</button>
+  </div>
+  <div class="dlg-bd">
+    <input type="search" id="wcSearch" placeholder="都市名・国名で検索（例: ニューヨーク, ロンドン）" style="width:100%;border-radius:12px;margin-bottom:8px">
+    <div id="wcCatalog"></div>
+  </div>
+</dialog>
+
+<!-- モーダル3: アラーム追加・編集（動画仕様） -->
+<dialog id="alDlg">
+  <div class="dlg-hd">
+    <button class="dlg-x" onclick="$('#alDlg').close()">✕</button>
+    <b id="alDlgTitle">アラームを追加</b>
+    <button class="dlg-ok" id="alSaveBtn">✓</button>
+  </div>
+  <div class="dlg-bd">
+    <div class="wheels" id="alWheels">
+      <div class="wh" id="alWhH" data-n="24"></div>
+      <div class="wh" id="alWhM" data-n="60"></div>
+    </div>
+    <div class="ios-grp">
+      <div style="padding:10px 14px 4px;font-size:.82em;color:var(--mu)">繰り返し</div>
+      <div class="days-bar" id="alDays"></div>
+      <div class="ios-row">
+        <label for="alLabel">ラベル</label>
+        <input type="text" id="alLabel" value="アラーム" placeholder="アラーム">
+      </div>
+      <div class="ios-row">
+        <label for="alSound">サウンド</label>
+        <div class="row" style="gap:4px">
+          <select id="alSound"></select>
+          <button type="button" class="ib" id="alTrySnd" style="width:30px;height:30px;font-size:.85em" title="試聴">♪</button>
+        </div>
+      </div>
+      <div class="ios-row">
+        <label>スヌーズ</label>
+        <button type="button" class="sw-tog on" id="alSnoozeTog" aria-label="スヌーズ切り替え"></button>
+      </div>
+      <div class="ios-row" id="alSnoozeDurRow">
+        <label for="alSnoozeMin">スヌーズの継続時間</label>
+        <select id="alSnoozeMin"></select>
+      </div>
+    </div>
+  </div>
+</dialog>
 
 <script>
 const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 
-// データの読み込みと初期化（元のスマホ版と同じキーで互換性あり）
+// データの読み込みと初期化
 let S = JSON.parse(localStorage.getItem('st') || '{}');
 S.logs ??= [];
 S.theme ??= 'auto';
 S.snd ??= 0;
-S.mode ??= 'sw';
+S.tab ??= 'wc';
 S.wk = 0;
 S.ana ??= 0;
 S.T ??= { sw: { run: 0, t0: 0, acc: 0 }, tm: { run: 0, t0: 0, acc: 0, target: 0 } };
 S.laps ??= [];
 S.pk ??= [0, 25, 0];
 S.rec ??= [];
+S.wc ??= ['Asia/Tokyo'];
+S.alarms ??= [
+  { id: 1, h: 8, m: 0, on: false, days: [], label: 'アラーム', snd: 0, snooze: true, snoozeMin: 9 },
+  { id: 2, h: 15, m: 35, on: false, days: [], label: 'アラーム', snd: 0, snooze: true, snoozeMin: 9 }
+];
 
 const save = () => localStorage.setItem('st', JSON.stringify(S));
 const pad = n => String(n).padStart(2, '0');
@@ -638,37 +1100,42 @@ const SUBJ = {
 };
 
 const SND = [
-  ['sine', [880, 880]],
+  ['sine', [880, 880, 880]],
+  ['triangle', [523, 659, 784, 1046]],
+  ['sine', [659, 523, 659, 784]],
   ['square', [660, 880]],
-  ['triangle', [523, 659, 784]],
   ['sine', [440, 440, 440]],
   ['sawtooth', [330, 440]],
   ['square', [988, 740, 988]],
   ['triangle', [392, 523, 392, 523]],
-  ['sine', [1200]],
-  ['sawtooth', [220, 330, 440]],
+  ['sine', [1200, 1200]],
   ['sine', [784, 988, 1175, 988]]
 ];
-const SN = ['ビープ', 'ツー', 'チャイム', 'トリプル', 'ブザー', 'アラート', 'メロディ', 'ピン', 'アップ', 'ベル'];
+const SN = ['ラジアル', 'アルペジオ', 'アンフォールド', 'ツー', 'トリプル', 'ブザー', 'アラート', 'メロディ', 'ピン', 'ベル'];
 
 let ac;
 function beep(i) {
-  ac ??= new AudioContext();
-  const [ty, fs] = SND[i];
-  fs.forEach((f, k) => {
-    const o = ac.createOscillator(), g = ac.createGain();
-    o.type = ty;
-    o.frequency.value = f;
-    g.gain.value = .15;
-    o.connect(g);
-    g.connect(ac.destination);
-    const t = ac.currentTime + k * .22;
-    o.start(t);
-    o.stop(t + .18);
-  });
+  try {
+    ac ??= new AudioContext();
+    if (ac.state === 'suspended') ac.resume();
+    const [ty, fs] = SND[i] || SND[0];
+    fs.forEach((f, k) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = ty;
+      o.frequency.value = f;
+      g.gain.value = .16;
+      o.connect(g);
+      g.connect(ac.destination);
+      const t = ac.currentTime + k * .22;
+      o.start(t);
+      o.stop(t + .18);
+    });
+  } catch (e) {}
 }
 
-// テーマ制御（ホワイト / ダーク / 時間による自動）
+// ==========================================
+// テーマ切り替え（ホワイト / ダーク / 時間自動）
+// ==========================================
 function applyTheme() {
   let t = S.theme;
   if (t === 'auto') {
@@ -690,36 +1157,478 @@ $$('button.tb').forEach(b => {
 setInterval(applyTheme, 60000);
 applyTheme();
 
-// グラフ用集計関数
-function dayTotals() {
-  const m = {};
-  S.logs.forEach(l => m[l.d] = (m[l.d] || 0) + l.sec);
-  return m;
+// ==========================================
+// 上部ナビゲーション切り替え
+// ==========================================
+function switchTab(v) {
+  S.tab = v;
+  save();
+  $$('#tnav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $$('.view').forEach(sec => sec.classList.toggle('on', sec.id === 'v-' + v));
+  if (v === 'tm' && !S.T.tm.target) wset();
 }
-function week(off) {
-  const m = dayTotals(), r = [], n = new Date();
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(n.getFullYear(), n.getMonth(), n.getDate() - i + off * 7);
-    r.push([d, m[dk(d)] || 0]);
+$('#tnav').onclick = e => {
+  const b = e.target.closest('button[data-v]');
+  if (b) switchTab(b.dataset.v);
+};
+
+// ==========================================
+// 1. 世界時計機能（標準都市追加・編集で削除＆並び替え）
+// ==========================================
+const CITIES = [
+  { tz: 'Asia/Tokyo', name: '東京', country: '日本' },
+  { tz: 'Asia/Seoul', name: 'ソウル', country: '韓国' },
+  { tz: 'Asia/Shanghai', name: '北京 / 上海', country: '中国' },
+  { tz: 'Asia/Taipei', name: '台北', country: '台湾' },
+  { tz: 'Asia/Hong_Kong', name: '香港', country: '中国' },
+  { tz: 'Asia/Singapore', name: 'シンガポール', country: 'シンガポール' },
+  { tz: 'Asia/Bangkok', name: 'バンコク', country: 'タイ' },
+  { tz: 'Asia/Kolkata', name: 'ニューデリー', country: 'インド' },
+  { tz: 'Asia/Dubai', name: 'ドバイ', country: 'アラブ首長国連邦' },
+  { tz: 'Europe/London', name: 'ロンドン', country: 'イギリス' },
+  { tz: 'Europe/Paris', name: 'パリ', country: 'フランス' },
+  { tz: 'Europe/Berlin', name: 'ベルリン', country: 'ドイツ' },
+  { tz: 'Europe/Rome', name: 'ローマ', country: 'イタリア' },
+  { tz: 'Europe/Madrid', name: 'マドリード', country: 'スペイン' },
+  { tz: 'Europe/Moscow', name: 'モスクワ', country: 'ロシア' },
+  { tz: 'Africa/Cairo', name: 'カイロ', country: 'エジプト' },
+  { tz: 'Australia/Sydney', name: 'シドニー', country: 'オーストラリア' },
+  { tz: 'Pacific/Auckland', name: 'オークランド', country: 'ニュージーランド' },
+  { tz: 'Pacific/Honolulu', name: 'ホノルル', country: 'アメリカ（ハワイ）' },
+  { tz: 'America/Los_Angeles', name: 'ロサンゼルス', country: 'アメリカ' },
+  { tz: 'America/Denver', name: 'デンバー', country: 'アメリカ' },
+  { tz: 'America/Chicago', name: 'シカゴ', country: 'アメリカ' },
+  { tz: 'America/New_York', name: 'ニューヨーク', country: 'アメリカ' },
+  { tz: 'America/Sao_Paulo', name: 'サンパウロ', country: 'ブラジル' },
+  { tz: 'UTC', name: '協定世界時 (UTC)', country: '世界標準時' }
+];
+
+let wcEditing = false;
+
+function getCityInfo(tz, now = new Date()) {
+  const meta = CITIES.find(c => c.tz === tz) || { tz, name: tz.split('/').pop().replace(/_/g, ' '), country: '' };
+  const fmtTime = new Intl.DateTimeFormat('ja-JP', { timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false }).format(now);
+  // 時差と日付差を計算
+  const localParts = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(now);
+  const targetParts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(now);
+  const toUtcMs = parts => {
+    const g = t => +parts.find(p => p.type === t).value;
+    return Date.UTC(g('year'), g('month') - 1, g('day'), g('hour') % 24, g('minute'));
+  };
+  const diffMin = Math.round((toUtcMs(targetParts) - toUtcMs(localParts)) / 60000);
+  const diffHr = diffMin / 60;
+  const diffStr = (diffHr >= 0 ? '+' : '') + (Number.isInteger(diffHr) ? diffHr : diffHr.toFixed(1)) + '時間';
+
+  const lDay = localParts.find(p => p.type === 'day').value;
+  const tDay = targetParts.find(p => p.type === 'day').value;
+  let dayLabel = '今日';
+  if (lDay !== tDay) {
+    dayLabel = diffMin > 0 ? '明日' : '昨日';
   }
-  return r;
-}
-function bars(el, off) {
-  const w = week(off), mx = Math.max(1, Math.ceil(Math.max(...w.map(x => x[1])) / 3600));
-  let h = '';
-  for (let i = 1; i <= mx; i++) h += `<i class="gl" style="bottom:${i / mx * 100}%"><b>${i}h</b></i>`;
-  h += '<div class="bars">' + w.map(([d, s], i) => `<div class="c" style="--i:${i}"><u style="height:${s / 3600 / mx * 100}%" title="${hm(s)}"></u><span>${d.getMonth() + 1}/${d.getDate()}</span></div>`).join('') + '</div>';
-  el.innerHTML = h;
+  return { name: meta.name, time: fmtTime, sub: `${dayLabel}、${diffStr}` };
 }
 
-// 時計・ストップウォッチ・タイマー処理
+function renderWorldClocks() {
+  const box = $('#wcList');
+  const now = new Date();
+  $('#wcEditBtn').textContent = wcEditing ? '完了' : '編集';
+  if (!S.wc.length) {
+    box.innerHTML = '<p class="mu" style="text-align:center;padding:30px 0">世界時計がありません。「＋」から追加できます。</p>';
+    return;
+  }
+  box.innerHTML = S.wc.map((tz, idx) => {
+    const info = getCityInfo(tz, now);
+    return `
+      <div class="wc-item" data-idx="${idx}" draggable="${wcEditing}">
+        <div class="wc-left">
+          ${wcEditing ? `<button class="del-circ" data-del="${idx}" aria-label="削除">−</button>` : ''}
+          <div class="wc-info">
+            <div class="wc-diff">${info.sub}</div>
+            <div class="wc-city">${info.name}</div>
+          </div>
+        </div>
+        ${wcEditing ? `
+          <div class="row" style="gap:6px">
+            <div class="ord-btns">
+              <button data-mv="-1" data-idx="${idx}" ${idx === 0 ? 'disabled' : ''}>▲</button>
+              <button data-mv="1" data-idx="${idx}" ${idx === S.wc.length - 1 ? 'disabled' : ''}>▼</button>
+            </div>
+            <div class="drag-hdl" title="ドラッグして並び替え">
+              <svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 8h16M4 12h16M4 16h16"/></svg>
+            </div>
+          </div>
+        ` : `<div class="wc-time">${info.time}</div>`}
+      </div>
+    `;
+  }).join('');
+}
+
+$('#wcEditBtn').onclick = () => {
+  wcEditing = !wcEditing;
+  renderWorldClocks();
+};
+
+$('#wcList').onclick = e => {
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    S.wc.splice(+del.dataset.del, 1);
+    save();
+    renderWorldClocks();
+    return;
+  }
+  const mv = e.target.closest('[data-mv]');
+  if (mv) {
+    const i = +mv.dataset.idx, d = +mv.dataset.mv;
+    if (i + d >= 0 && i + d < S.wc.length) {
+      [S.wc[i], S.wc[i + d]] = [S.wc[i + d], S.wc[i]];
+      save();
+      renderWorldClocks();
+    }
+  }
+};
+
+// ドラッグ＆ドロップで世界時計の順番変更
+let dragIdx = null;
+$('#wcList').addEventListener('dragstart', e => {
+  const item = e.target.closest('.wc-item');
+  if (!item || !wcEditing) return;
+  dragIdx = +item.dataset.idx;
+  item.classList.add('dragging');
+});
+$('#wcList').addEventListener('dragend', e => {
+  const item = e.target.closest('.wc-item');
+  if (item) item.classList.remove('dragging');
+  dragIdx = null;
+});
+$('#wcList').addEventListener('dragover', e => {
+  if (!wcEditing || dragIdx === null) return;
+  e.preventDefault();
+  const over = e.target.closest('.wc-item');
+  if (!over) return;
+  const toIdx = +over.dataset.idx;
+  if (toIdx !== dragIdx) {
+    const moved = S.wc.splice(dragIdx, 1)[0];
+    S.wc.splice(toIdx, 0, moved);
+    dragIdx = toIdx;
+    save();
+    renderWorldClocks();
+  }
+});
+
+// 都市追加モーダル
+function renderCityCatalog() {
+  const q = $('#wcSearch').value.trim().toLowerCase();
+  const list = CITIES.filter(c => !q || (c.name + c.country + c.tz).toLowerCase().includes(q));
+  $('#wcCatalog').innerHTML = list.map(c => {
+    const added = S.wc.includes(c.tz);
+    return `<div class="city-row" data-tz="${c.tz}">
+      <div><b>${c.name}</b> <span class="mu">${c.country}</span></div>
+      <span class="mu">${added ? '追加済み' : '＋'}</span>
+    </div>`;
+  }).join('') || '<p class="mu" style="text-align:center;padding:16px">該当する都市が見つかりません</p>';
+}
+$('#wcAddBtn').onclick = () => {
+  $('#wcSearch').value = '';
+  renderCityCatalog();
+  $('#wcDlg').showModal();
+};
+$('#wcSearch').oninput = renderCityCatalog;
+$('#wcCatalog').onclick = e => {
+  const row = e.target.closest('[data-tz]');
+  if (!row) return;
+  const tz = row.dataset.tz;
+  if (!S.wc.includes(tz)) {
+    S.wc.push(tz);
+    save();
+    renderWorldClocks();
+  }
+  $('#wcDlg').close();
+};
+
+// ==========================================
+// 2. アラーム機能（動画仕様・睡眠起床欄なし）
+// ==========================================
+const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
+let alEditing = false;
+let alDeleteConfirmId = null;
+let editingAlarmId = null;
+let alPickH = 8, alPickM = 0, alSelDays = [], alSnoozeState = true;
+
+function formatDays(days) {
+  if (!days || !days.length) return '';
+  if (days.length === 7) return '毎日';
+  const sorted = [...days].sort((a, b) => a - b);
+  return sorted.map(d => '毎' + DAY_NAMES[d] + '曜日').join('、');
+}
+
+function renderAlarms() {
+  $('#alEditBtn').textContent = alEditing ? '完了' : '編集';
+  const box = $('#alList');
+  if (!S.alarms.length) {
+    box.innerHTML = '<p class="mu" style="text-align:center;padding:30px 0">アラームがありません。「＋」から追加できます。</p>';
+    return;
+  }
+  box.innerHTML = S.alarms.map(a => {
+    const dText = formatDays(a.days);
+    const meta = (a.label || 'アラーム') + (dText ? '、' + dText : '');
+    const showDel = alEditing && alDeleteConfirmId === a.id;
+    return `
+      <div class="al-item ${a.on ? 'on' : ''} ${alEditing ? 'editing' : ''}" data-id="${a.id}">
+        <div class="al-main" data-edit="${a.id}">
+          ${alEditing ? `<button type="button" class="del-circ" data-pre-del="${a.id}" aria-label="削除確認">−</button>` : ''}
+          <div>
+            <div class="al-time">${a.h}:${pad(a.m)}</div>
+            <div class="al-meta">${meta}</div>
+          </div>
+        </div>
+        ${showDel
+          ? `<button type="button" class="al-del-btn" data-do-del="${a.id}">削除</button>`
+          : alEditing
+            ? `<span class="mu" style="font-size:1.2em;padding-right:4px">›</span>`
+            : `<button type="button" class="sw-tog ${a.on ? 'on' : ''}" data-tog="${a.id}" aria-label="アラーム切り替え"></button>`
+        }
+      </div>
+    `;
+  }).join('');
+}
+
+$('#alEditBtn').onclick = () => {
+  alEditing = !alEditing;
+  alDeleteConfirmId = null;
+  renderAlarms();
+};
+
+$('#alList').onclick = e => {
+  const tog = e.target.closest('[data-tog]');
+  if (tog) {
+    const a = S.alarms.find(x => x.id === +tog.dataset.tog);
+    if (a) { a.on = !a.on; save(); renderAlarms(); }
+    return;
+  }
+  const preDel = e.target.closest('[data-pre-del]');
+  if (preDel) {
+    e.stopPropagation();
+    const id = +preDel.dataset.preDel;
+    alDeleteConfirmId = (alDeleteConfirmId === id) ? null : id;
+    renderAlarms();
+    return;
+  }
+  const doDel = e.target.closest('[data-do-del]');
+  if (doDel) {
+    S.alarms = S.alarms.filter(x => x.id !== +doDel.dataset.doDel);
+    alDeleteConfirmId = null;
+    save();
+    renderAlarms();
+    return;
+  }
+  const ed = e.target.closest('[data-edit]');
+  if (ed && alEditing) {
+    openAlarmModal(+ed.dataset.edit);
+  }
+};
+
+// アラーム追加・編集モーダル初期化
+function initAlarmModalUI() {
+  // 時・分ホイール生成
+  ['alWhH', 'alWhM'].forEach((id, idx) => {
+    const w = $('#' + id);
+    const u = document.createElement('ul');
+    const max = idx === 0 ? 24 : 60;
+    for (let j = 0; j < max; j++) {
+      u.insertAdjacentHTML('beforeend', `<li>${idx === 0 ? j : pad(j)}</li>`);
+    }
+    w.append(u);
+    let q = 0;
+    u.onscroll = () => {
+      const val = Math.round(u.scrollTop / 36);
+      if (idx === 0) alPickH = val; else alPickM = val;
+      if (!q) {
+        q = 1;
+        requestAnimationFrame(() => { q = 0; fx(u); });
+      }
+    };
+  });
+
+  // 曜日ボタン
+  $('#alDays').innerHTML = DAY_NAMES.map((d, i) => `<button type="button" class="day-btn" data-d="${i}">${d}</button>`).join('');
+  $('#alDays').onclick = e => {
+    const b = e.target.closest('[data-d]');
+    if (!b) return;
+    const d = +b.dataset.d;
+    if (alSelDays.includes(d)) alSelDays = alSelDays.filter(x => x !== d);
+    else alSelDays.push(d);
+    b.classList.toggle('on', alSelDays.includes(d));
+  };
+
+  // サウンド選択
+  $('#alSound').innerHTML = SN.map((n, i) => `<option value="${i}">${n}</option>`).join('');
+  $('#alTrySnd').onclick = () => beep(+$('#alSound').value);
+
+  // スヌーズ切り替え＆継続時間（1〜15分）
+  $('#alSnoozeTog').onclick = () => {
+    alSnoozeState = !alSnoozeState;
+    $('#alSnoozeTog').classList.toggle('on', alSnoozeState);
+    $('#alSnoozeDurRow').style.display = alSnoozeState ? 'flex' : 'none';
+  };
+  $('#alSnoozeMin').innerHTML = Array.from({ length: 15 }, (_, i) => `<option value="${i + 1}">${i + 1}分</option>`).join('');
+}
+initAlarmModalUI();
+
+function openAlarmModal(id = null) {
+  editingAlarmId = id;
+  const now = new Date();
+  const a = id ? S.alarms.find(x => x.id === id) : {
+    h: now.getHours(),
+    m: now.getMinutes(),
+    days: [],
+    label: 'アラーム',
+    snd: 0,
+    snooze: true,
+    snoozeMin: 9
+  };
+  $('#alDlgTitle').textContent = id ? 'アラームを編集' : 'アラームを追加';
+  alPickH = a.h;
+  alPickM = a.m;
+  alSelDays = [...(a.days || [])];
+  alSnoozeState = a.snooze !== false;
+
+  $('#alLabel').value = a.label || 'アラーム';
+  $('#alSound').value = a.snd ?? 0;
+  $('#alSnoozeTog').classList.toggle('on', alSnoozeState);
+  $('#alSnoozeDurRow').style.display = alSnoozeState ? 'flex' : 'none';
+  $('#alSnoozeMin').value = a.snoozeMin || 9;
+  $$('#alDays .day-btn').forEach(b => b.classList.toggle('on', alSelDays.includes(+b.dataset.d)));
+
+  $('#alDlg').showModal();
+  requestAnimationFrame(() => {
+    const uh = $('#alWhH ul'), um = $('#alWhM ul');
+    uh.scrollTop = alPickH * 36;
+    um.scrollTop = alPickM * 36;
+    fx(uh);
+    fx(um);
+  });
+}
+
+$('#alAddBtn').onclick = () => openAlarmModal(null);
+
+$('#alSaveBtn').onclick = () => {
+  const data = {
+    id: editingAlarmId || Date.now(),
+    h: alPickH,
+    m: alPickM,
+    on: true,
+    days: [...alSelDays].sort((a, b) => a - b),
+    label: $('#alLabel').value.trim() || 'アラーム',
+    snd: +$('#alSound').value,
+    snooze: alSnoozeState,
+    snoozeMin: +$('#alSnoozeMin').value || 9
+  };
+  if (editingAlarmId) {
+    const idx = S.alarms.findIndex(x => x.id === editingAlarmId);
+    if (idx >= 0) S.alarms[idx] = data;
+  } else {
+    S.alarms.push(data);
+  }
+  S.alarms.sort((a, b) => (a.h * 60 + a.m) - (b.h * 60 + b.m));
+  save();
+  renderAlarms();
+  $('#alDlg').close();
+};
+
+// アラーム鳴動監視
+let lastTriggeredKey = '';
+let ringingAlarm = null;
+let ringInterval = null;
+let snoozeQueue = []; // { at: timestamp, alarm }
+
+function triggerAlarmRing(a) {
+  ringingAlarm = a;
+  $('#ringLbl').textContent = a.label || 'アラーム';
+  $('#ringTime').textContent = `${a.h}:${pad(a.m)}`;
+  $('#ringSnooze').style.display = a.snooze ? 'inline-block' : 'none';
+  $('#ringBox').classList.add('on');
+  beep(a.snd ?? 0);
+  clearInterval(ringInterval);
+  ringInterval = setInterval(() => beep(a.snd ?? 0), 2200);
+}
+
+function stopAlarmRing() {
+  clearInterval(ringInterval);
+  ringInterval = null;
+  ringingAlarm = null;
+  $('#ringBox').classList.remove('on');
+}
+
+$('#ringStop').onclick = stopAlarmRing;
+$('#ringSnooze').onclick = () => {
+  if (ringingAlarm) {
+    const min = ringingAlarm.snoozeMin || 9;
+    snoozeQueue.push({ at: Date.now() + min * 60000, alarm: { ...ringingAlarm } });
+  }
+  stopAlarmRing();
+};
+
+setInterval(() => {
+  const now = new Date();
+  // 世界時計の時刻更新（編集モード中でないとき）
+  if (S.tab === 'wc' && !wcEditing) renderWorldClocks();
+
+  // スヌーズチェック
+  const dueIdx = snoozeQueue.findIndex(x => Date.now() >= x.at);
+  if (dueIdx >= 0) {
+    const item = snoozeQueue.splice(dueIdx, 1)[0];
+    triggerAlarmRing(item.alarm);
+  }
+
+  // 通常アラームチェック（0秒台に1回判定）
+  if (now.getSeconds() === 0) {
+    const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}-${now.getHours()}:${now.getMinutes()}`;
+    if (key !== lastTriggeredKey) {
+      lastTriggeredKey = key;
+      const dow = now.getDay();
+      S.alarms.forEach(a => {
+        if (!a.on) return;
+        if (a.h === now.getHours() && a.m === now.getMinutes()) {
+          if (!a.days || !a.days.length || a.days.includes(dow)) {
+            triggerAlarmRing(a);
+            if (!a.days || !a.days.length) {
+              a.on = false;
+              save();
+              renderAlarms();
+            }
+          }
+        }
+      });
+    }
+  }
+}, 1000);
+
+// ==========================================
+// 3 & 4. ストップウォッチ・タイマー・勉強記録
+// ==========================================
+function fx(u) {
+  const c = u.scrollTop + 90;
+  [...u.children].forEach(l => {
+    const o = (l.offsetTop + 18 - c) / 36, a = Math.min(Math.abs(o), 3);
+    l.style.transform = `perspective(260px) rotateX(${-o * 26}deg) scale(${1 - a * .07})`;
+    l.style.opacity = Math.max(.12, 1 - a * .3);
+  });
+}
+function wset() {
+  $$('#v-tm .wh ul').forEach((u, i) => {
+    u.scrollTop = S.pk[i] * 36;
+    fx(u);
+  });
+}
+
 const el = k => {
   const o = S.T[k];
   return o.acc + (o.run ? Date.now() - o.t0 : 0);
 };
 function addLog(sec) {
   if (sec > .5) {
-    S.logs.push({ d: dk(new Date()), s: $('#subj').value, sec: Math.round(sec) });
+    const s = S.subj || '数学';
+    S.logs.push({ d: dk(new Date()), s, sec: Math.round(sec) });
   }
 }
 function go(k) {
@@ -757,7 +1666,6 @@ function startTm(sec) {
   go('tm');
   save();
   draw();
-  stats();
 }
 function endTm() {
   const o = S.T.tm;
@@ -766,30 +1674,10 @@ function endTm() {
   o.target = 0;
   save();
   draw();
-  stats();
-}
-
-function fx(u) {
-  const c = u.scrollTop + 90;
-  [...u.children].forEach(l => {
-    const o = (l.offsetTop + 18 - c) / 36, a = Math.min(Math.abs(o), 3);
-    l.style.transform = `perspective(260px) rotateX(${-o * 26}deg) scale(${1 - a * .07})`;
-    l.style.opacity = Math.max(.12, 1 - a * .3);
-  });
-}
-function wset() {
-  $$('.wh ul').forEach((u, i) => {
-    u.scrollTop = S.pk[i] * 36;
-    fx(u);
-  });
 }
 
 function draw() {
-  const tm = S.mode === 'tm', o = S.T.tm, w = S.T.sw;
-  $('#mseg').dataset.i = tm ? 1 : 0;
-  $$('#mseg button').forEach(b => b.classList.toggle('on', b.dataset.k === S.mode));
-  $('#swc').style.display = tm ? 'none' : 'block';
-  $('#tmc').style.display = tm ? 'block' : 'none';
+  const o = S.T.tm, w = S.T.sw;
   $('#b2').textContent = w.run ? '停止' : (w.acc ? '再開' : '開始');
   $('#b2').classList.toggle('run', !!w.run);
   $('#b1').textContent = w.run ? 'ラップ' : 'リセット';
@@ -803,7 +1691,7 @@ function draw() {
   $('#tp').textContent = o.run ? '❚❚' : '▶';
   $('#tcap').textContent = jp(o.target / 1000);
   $('#rec').innerHTML = S.rec.map(x => `<div class="trow"><div><div class="big">${big(x)}</div><div class="mu">${jp(x)}</div></div><button class="bt sm" data-s="${x}">▶</button></div>`).join('') || '<p class="mu">まだありません</p>';
-  if (tm && !act) wset();
+  if (S.tab === 'tm' && !act) wset();
   tick();
 }
 
@@ -822,54 +1710,11 @@ function tick() {
   }
 }
 
-let x0;
-const sw = (el, fn) => {
-  el.addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: 1 });
-  el.addEventListener('touchend', e => {
-    const d = e.changedTouches[0].clientX - x0;
-    if (Math.abs(d) > 50) fn(d);
-  });
-};
-
-const COL = ['#3b3f46', '#6b7280', '#9aa0aa', '#c4c9d2', '#52606d', '#7b8794', '#a5adb8', '#2f343b', '#8a93a0', '#d3d7de', '#5a6270'];
-function stats() {
-  const m = dayTotals(), ds = Object.keys(m), tot = ds.reduce((a, d) => a + m[d], 0);
-  $('#s1').textContent = hm(tot);
-  $('#s2').textContent = ds.length ? hm(tot / ds.length) : '0時間00分';
-  $('#s3').textContent = ds.length + '日';
-
-  const w = week(S.wk);
-  $('#wl').textContent = `${w[0][0].getMonth() + 1}/${w[0][0].getDate()} – ${w[6][0].getMonth() + 1}/${w[6][0].getDate()}`;
-  bars($('#wb2'), S.wk);
-
-  $('#pd').value || ($('#pd').value = dk(new Date()));
-  const d = $('#pd').value, by = {};
-  S.logs.filter(l => l.d === d).forEach(l => by[l.s] = (by[l.s] || 0) + l.sec);
-  const en = Object.entries(by), sum = en.reduce((a, x) => a + x[1], 0);
-  let a = 0;
-  $('#pie').style.background = sum ? 'conic-gradient(' + en.map(([s, v], i) => {
-    const g = `${COL[i % COL.length]} ${a / sum * 100}% ${(a + v) / sum * 100}%`;
-    a += v;
-    return g;
-  }).join(',') + ')' : 'var(--sf)';
-  const pe = $('#pie');
-  pe.classList.remove('sw');
-  void pe.offsetWidth;
-  pe.classList.add('sw');
-  $('#leg').innerHTML = en.map(([s, v], i) => `<div class="row sp" style="margin-top:6px"><span><span class="dot" style="background:${COL[i % COL.length]}"></span>${s}</span><span class="mu">${hm(v)}</span></div>`).join('') || '<p class="mu" style="text-align:center">この日の記録はありません</p>';
-}
-function wk(d) {
-  S.wk = Math.min(0, S.wk + d);
-  stats();
-}
-
-// イベント登録
 $('#b2').onclick = () => {
   const o = S.T.sw;
   o.run ? stop('sw') : go('sw');
   save();
   draw();
-  stats();
 };
 $('#b1').onclick = () => {
   const o = S.T.sw;
@@ -885,7 +1730,6 @@ $('#tp').onclick = () => {
   o.run ? stop('tm') : go('tm');
   save();
   draw();
-  stats();
 };
 $('#tx').onclick = endTm;
 $('#rec').onclick = e => {
@@ -893,8 +1737,8 @@ $('#rec').onclick = e => {
   if (b) startTm(+b.dataset.s);
 };
 
-// ホイール生成
-$$('.wh').forEach((w, i) => {
+// タイマーホイール生成
+$$('#v-tm .wh').forEach((w, i) => {
   const u = document.createElement('ul');
   for (let j = 0; j < +w.dataset.n; j++) u.insertAdjacentHTML('beforeend', `<li>${j}</li>`);
   w.prepend(u);
@@ -919,23 +1763,9 @@ setInterval(() => {
     save();
     beep(S.snd);
     draw();
-    stats();
   }
   if (S.T.sw.run || o.run) tick();
 }, 200);
-
-$('#mseg').onclick = e => {
-  if (e.target.dataset.k) {
-    S.mode = e.target.dataset.k;
-    save();
-    draw();
-  }
-};
-sw($('#mseg'), d => {
-  S.mode = d < 0 ? 'tm' : 'sw';
-  save();
-  draw();
-});
 
 // アナログ・デジタル切り替えスワイプ
 (() => {
@@ -970,18 +1800,96 @@ sw($('#mseg'), d => {
 })();
 $('#dots').onclick = () => { S.ana = !S.ana; save(); draw(); };
 
-// セレクトボックス初期化
-$('#subj').innerHTML = Object.entries(SUBJ).map(([g, a]) => `<optgroup label="${g}">` + a.map(x => `<option>${x}</option>`).join('') + '</optgroup>').join('');
-$('#subj').value = S.subj || '数学';
-$('#subj').onchange = () => { S.subj = $('#subj').value; save(); };
+// 科目・通知音セレクト初期化（ストップウォッチ・タイマー双方で同期）
+const subjHtml = Object.entries(SUBJ).map(([g, a]) => `<optgroup label="${g}">` + a.map(x => `<option>${x}</option>`).join('') + '</optgroup>').join('');
+['subjSw', 'subjTm'].forEach(id => {
+  const el = $('#' + id);
+  el.innerHTML = subjHtml;
+  el.value = S.subj || '数学';
+  el.onchange = () => {
+    S.subj = el.value;
+    $('#subjSw').value = S.subj;
+    $('#subjTm').value = S.subj;
+    save();
+  };
+});
 
 $('#snd').innerHTML = SN.map((n, i) => `<option value="${i}">音${i + 1} ${n}</option>`).join('');
 $('#snd').value = S.snd;
 $('#snd').onchange = () => { S.snd = +$('#snd').value; save(); beep(S.snd); };
 $('#tsn').onclick = () => beep(S.snd);
 
+// ==========================================
+// 勉強記録モーダル（左上の「学」マーククリックで表示）
+// ==========================================
+function dayTotals() {
+  const m = {};
+  S.logs.forEach(l => m[l.d] = (m[l.d] || 0) + l.sec);
+  return m;
+}
+function week(off) {
+  const m = dayTotals(), r = [], n = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(n.getFullYear(), n.getMonth(), n.getDate() - i + off * 7);
+    r.push([d, m[dk(d)] || 0]);
+  }
+  return r;
+}
+function bars(el, off) {
+  const w = week(off), mx = Math.max(1, Math.ceil(Math.max(...w.map(x => x[1])) / 3600));
+  let h = '';
+  for (let i = 1; i <= mx; i++) h += `<i class="gl" style="bottom:${i / mx * 100}%"><b>${i}h</b></i>`;
+  h += '<div class="bars">' + w.map(([d, s], i) => `<div class="c" style="--i:${i}"><u style="height:${s / 3600 / mx * 100}%" title="${hm(s)}"></u><span>${d.getMonth() + 1}/${d.getDate()}</span></div>`).join('') + '</div>';
+  el.innerHTML = h;
+}
+
+const COL = ['#ff9f0a', '#30d158', '#0a84ff', '#bf5af2', '#ff453a', '#64d2ff', '#ffd60a', '#5e5ce6', '#ac8e68', '#8e8e93'];
+function stats() {
+  const m = dayTotals(), ds = Object.keys(m), tot = ds.reduce((a, d) => a + m[d], 0);
+  $('#s1').textContent = hm(tot);
+  $('#s2').textContent = ds.length ? hm(tot / ds.length) : '0時間00分';
+  $('#s3').textContent = ds.length + '日';
+
+  const w = week(S.wk);
+  $('#wl').textContent = `${w[0][0].getMonth() + 1}/${w[0][0].getDate()} – ${w[6][0].getMonth() + 1}/${w[6][0].getDate()}`;
+  bars($('#wb2'), S.wk);
+
+  $('#pd').value || ($('#pd').value = dk(new Date()));
+  const d = $('#pd').value, by = {};
+  S.logs.filter(l => l.d === d).forEach(l => by[l.s] = (by[l.s] || 0) + l.sec);
+  const en = Object.entries(by), sum = en.reduce((a, x) => a + x[1], 0);
+  let a = 0;
+  $('#pie').style.background = sum ? 'conic-gradient(' + en.map(([s, v], i) => {
+    const g = `${COL[i % COL.length]} ${a / sum * 100}% ${(a + v) / sum * 100}%`;
+    a += v;
+    return g;
+  }).join(',') + ')' : 'var(--sf)';
+  const pe = $('#pie');
+  pe.classList.remove('sw');
+  void pe.offsetWidth;
+  pe.classList.add('sw');
+  $('#leg').innerHTML = en.map(([s, v], i) => `<div class="row sp" style="margin-top:6px"><span><span class="dot" style="background:${COL[i % COL.length]}"></span>${s}</span><span class="mu">${hm(v)}</span></div>`).join('') || '<p class="mu" style="text-align:center">この日の記録はありません</p>';
+}
+function wk(d) {
+  S.wk = Math.min(0, S.wk + d);
+  stats();
+}
+
+let x0;
+const sw = (el, fn) => {
+  el.addEventListener('touchstart', e => x0 = e.touches[0].clientX, { passive: 1 });
+  el.addEventListener('touchend', e => {
+    const d = e.changedTouches[0].clientX - x0;
+    if (Math.abs(d) > 50) fn(d);
+  });
+};
 $('#pd').onchange = stats;
 sw($('#wb2'), d => wk(d > 0 ? -1 : 1));
+
+$('#openStudy').onclick = () => {
+  stats();
+  $('#studyDlg').showModal();
+};
 
 // 滑らかな描画ループ
 (function L() {
@@ -989,8 +1897,11 @@ sw($('#wb2'), d => wk(d > 0 ? -1 : 1));
   requestAnimationFrame(L);
 })();
 
+// 初期描画
+renderWorldClocks();
+renderAlarms();
 draw();
-stats();
+switchTab(['wc', 'al', 'sw', 'tm'].includes(S.tab) ? S.tab : 'wc');
 </script>
 </body>
 </html>
