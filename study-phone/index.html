@@ -220,7 +220,14 @@ const own=k=>Object.prototype.hasOwnProperty.call(d,k);
 const api={getItem:k=>own(k)?d[k]:null,setItem:(k,v)=>{d[k]=String(v);sync()},removeItem:k=>{delete d[k];sync()},clear:()=>{for(const k in d)delete d[k];sync()},key:i=>Object.keys(d)[i]??null};
 return new Proxy(api,{get:(o,p)=>p=='length'?Object.keys(d).length:p in o?o[p]:(typeof p=='string'&&own(p)?d[p]:undefined),set:(o,p,v)=>{if(typeof p=='string'){d[p]=String(v);sync()}return true},deleteProperty:(o,p)=>{delete d[p];sync();return true},has:(o,p)=>p in o||own(p),ownKeys:()=>Object.keys(d),getOwnPropertyDescriptor:(o,p)=>own(p)?{value:d[p],enumerable:true,configurable:true,writable:true}:undefined})};
 const L=mk(I,P),Z=mk({},0);
-Object.defineProperty(window,'localStorage',{configurable:true,get:()=>L});Object.defineProperty(window,'sessionStorage',{configurable:true,get:()=>Z})}catch(e){}}
+Object.defineProperty(window,'localStorage',{configurable:true,get:()=>L});Object.defineProperty(window,'sessionStorage',{configurable:true,get:()=>Z})}catch(e){}
+try{const pend={};let n=0;const post=m=>parent.postMessage(Object.assign({xapp:1},m),'*');
+const G={getCurrentPosition(ok,err,opt){const id=++n;pend[id]={ok,err};post({geo:'get',rid:id,opt:opt||{}})},
+watchPosition(ok,err,opt){const id=++n;pend[id]={ok,err,w:1};post({geo:'watch',rid:id,opt:opt||{}});return id},
+clearWatch(id){delete pend[id];post({geo:'clear',rid:id})}};
+addEventListener('message',e=>{const d=e.data;if(e.source!==parent||!d||!d.xgeo)return;const p=pend[d.rid];if(!p)return;
+if(d.pos){if(!p.w)delete pend[d.rid];p.ok&&p.ok(d.pos)}else if(d.err){if(!p.w)delete pend[d.rid];p.err&&p.err(d.err)}});
+Object.defineProperty(navigator,'geolocation',{configurable:true,get:()=>G})}catch(e){}}
 function frameDoc(html,init,persist){
 const J=JSON.stringify(init||{}).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
 const sc='<script>('+shim.toString()+')('+J+','+(persist?1:0)+')<\/script>';
@@ -229,9 +236,22 @@ return m?html.slice(0,m.index+m[0].length)+sc+html.slice(m.index+m[0].length):sc
 function mkExt(t){if($('#t'+t))return;const id=t-1000,r=loadX(id);if(!r)return;
 const s=document.createElement('section');s.className='tab ext';s.id='t'+t;
 const f=document.createElement('iframe');f.dataset.xid=id;f.setAttribute('sandbox',SBX);f.setAttribute('allow',ALW);f.srcdoc=frameDoc(r.html,loadD(id),1);s.append(f);$('main').append(s)}
-function syncExt(){$$('section.ext').forEach(s=>{if(!S.open.includes(+s.id.slice(1)))s.remove()})}
+function syncExt(){$$('section.ext').forEach(s=>{if(!S.open.includes(+s.id.slice(1))){const id=+s.id.slice(1)-1000;Object.keys(GEO).forEach(k=>{if(k.split(':')[0]==id){navigator.geolocation.clearWatch(GEO[k]);delete GEO[k]}});s.remove()}})}
+let simGeo;const GEO={};
+function geoAsk(id){if(id=='sim'){if(simGeo===undefined)simGeo=confirm('このアプリのプレビューが現在地を使おうとしています。許可しますか?');return simGeo}
+S.geo??={};if(S.geo[id]===undefined){S.geo[id]=confirm('「'+(NM[XID(+id)]||'このアプリ')+'」が現在地を使おうとしています。許可しますか?');save()}return S.geo[id]}
+function geoReq(f,d){const id=f.dataset.xid||'sim',w=f.contentWindow,key=id+':'+d.rid;
+const reply=m=>{try{w.postMessage(Object.assign({xgeo:1,rid:d.rid},m),'*')}catch(e){}};
+if(d.geo=='clear'){if(GEO[key]!=null){navigator.geolocation.clearWatch(GEO[key]);delete GEO[key]}return}
+if(!geoAsk(id))return reply({err:{code:1,message:'User denied Geolocation'}});
+if(!navigator.geolocation)return reply({err:{code:2,message:'Geolocation unavailable'}});
+const o=d.opt||{},opt={enableHighAccuracy:!!o.enableHighAccuracy,timeout:o.timeout>0?o.timeout:20000,maximumAge:o.maximumAge>=0?o.maximumAge:0};
+const ok=p=>{const c=p.coords;reply({pos:{coords:{latitude:c.latitude,longitude:c.longitude,accuracy:c.accuracy,altitude:c.altitude,altitudeAccuracy:c.altitudeAccuracy,heading:c.heading,speed:c.speed},timestamp:p.timestamp}})},
+er=e=>reply({err:{code:e.code,message:e.message}});
+if(d.geo=='watch')GEO[key]=navigator.geolocation.watchPosition(ok,er,opt);else navigator.geolocation.getCurrentPosition(ok,er,opt)}
 addEventListener('message',e=>{const d=e.data;if(!d||typeof d!='object'||!d.xapp)return;
-const f=$$('iframe[data-xid]').find(x=>x.contentWindow===e.source);if(!f)return;
+const f=$$('iframe[data-xid],#simf').find(x=>x.contentWindow===e.source);if(!f)return;
+if(d.geo)return geoReq(f,d);if(!f.dataset.xid)return;
 try{const s=JSON.stringify(d.ls);if(s.length<3e6)localStorage.setItem('xd:'+f.dataset.xid,s)}catch(_){}});
 
 function theme(){let t=S.theme;if(t=='auto'){const h=new Date().getHours();t=(h>=17||h<5)?'dark':'light'}document.documentElement.dataset.t=t;$$('button.tb').forEach(b=>b.classList.toggle('on',b.dataset.m==S.theme));$('.thm')&&($('.thm').dataset.i=['light','dark','auto'].indexOf(S.theme))}
@@ -379,7 +399,7 @@ function slist(){const o=$('#sl');if(!o)return;
 if(list===undefined){o.innerHTML='<p class="mu" style="text-align:center;margin-top:24px">読み込み中…</p>';return}
 const k=q.trim().toLowerCase(),a=list.filter(r=>!k||(r.name+(r.subtitle||'')+(r.description||'')+r.category).toLowerCase().includes(k));
 o.innerHTML=a.map(r=>row(r,`<button class="gt" data-g="${r.id}"></button>`,E(r.category))).join('')||`<p class="mu" style="text-align:center;margin-top:24px">${E(lerr)||(k?'見つかりませんでした':'まだアプリがありません。「アプリ開発」から追加できます')}</p>`;gbtn()}
-function ddet(v,r){v.innerHTML=`<button class="ib" id="sbk2">‹</button><div class="row" style="gap:16px;margin-top:10px;flex-wrap:nowrap"><div class="sa lgi">${iconOf(r)}</div><div style="flex:1;min-width:0"><b style="font-size:1.3em">${E(r.name)}</b><div class="mu">${E(r.subtitle)}</div><button class="gt" style="margin-top:8px" data-g="${r.id}"></button></div></div><div class="dgrid"><div><b>${E(r.category)}</b><span class="mu">カテゴリー</span></div><div><b>${kb(r.size)}</b><span class="mu">サイズ</span></div><div><b>${date(r.created_at)}</b><span class="mu">公開日</span></div></div><h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p>${has(r.id)?'<h2>位置情報が使えないとき</h2><button id="otab" style="width:100%">通常のタブで開く</button><p class="mu" style="margin-top:8px;line-height:1.6">アプリ内で位置情報が使えない場合は、通常のタブで開くと許可の確認が出ます。それでも動かないときは、ブラウザのアドレスバー横かサイト設定で、このサイトの位置情報が「ブロック」ではなく「許可(または確認)」になっているか確認してください。</p>':''}${adm?'<h2>管理者メニュー</h2><div class="card"><label class="fld" style="margin-top:0">申請者へのメッセージ(任意)</label><textarea id="rmm" rows="3" maxlength="300" placeholder="除外する理由など"></textarea><button id="rmv" style="width:100%;margin-top:12px">App Storeから除外する</button></div>':''}`;gbtn()}
+function ddet(v,r){v.innerHTML=`<button class="ib" id="sbk2">‹</button><div class="row" style="gap:16px;margin-top:10px;flex-wrap:nowrap"><div class="sa lgi">${iconOf(r)}</div><div style="flex:1;min-width:0"><b style="font-size:1.3em">${E(r.name)}</b><div class="mu">${E(r.subtitle)}</div><button class="gt" style="margin-top:8px" data-g="${r.id}"></button></div></div><div class="dgrid"><div><b>${E(r.category)}</b><span class="mu">カテゴリー</span></div><div><b>${kb(r.size)}</b><span class="mu">サイズ</span></div><div><b>${date(r.created_at)}</b><span class="mu">公開日</span></div></div><h2>説明</h2><p style="white-space:pre-wrap">${E(r.description)||'<span class="mu">説明はありません</span>'}</p>${has(r.id)?`<h2>位置情報</h2><p class="mu" style="line-height:1.6">このアプリが現在地を使うときは、スマホ本体が代わりに位置情報を取得して渡します(初回に許可の確認が出ます)。許可の状態: <b>${(S.geo||{})[r.id]===undefined?'未確認':S.geo[r.id]?'許可':'拒否'}</b></p><button id="glr" style="width:100%;margin-top:8px">許可をリセット</button><button id="otab" style="width:100%;margin-top:8px">通常のタブで開く(それでも使えないとき)</button><p class="mu" style="margin-top:8px;line-height:1.6">それでも動かないときは、ブラウザのアドレスバー横かサイト設定で、このサイトの位置情報が「ブロック」ではなく「許可(または確認)」になっているか確認してください。</p>`:''}${adm?'<h2>管理者メニュー</h2><div class="card"><label class="fld" style="margin-top:0">申請者へのメッセージ(任意)</label><textarea id="rmm" rows="3" maxlength="300" placeholder="除外する理由など"></textarea><button id="rmv" style="width:100%;margin-top:12px">App Storeから除外する</button></div>':''}`;gbtn()}
 function dlView(){const v=$('#sdl');if(det!=null){const r=(list||[]).find(x=>x.id==det);if(r)return ddet(v,r);det=null}
 v.innerHTML='<input id="sq" type="search" placeholder="アプリ名・説明で検索" style="width:100%;margin:10px 0 4px"><div id="sl"></div>';
 $('#sq').value=q;$('#sq').oninput=()=>{q=$('#sq').value;slist()};slist()}
@@ -399,6 +419,7 @@ const{data,error}=await sb.from('phone_apps').update({status:'removed',reject_re
 if(error){alert('失敗しました: '+error.message);return false}if(!data||!data.length){alert('このアカウントには権限がありません');return false}
 list=undefined;await loadList();return true}
 $('#sdl').onclick=e=>{if(e.target.closest('#sbk2')){det=null;dlView();return}
+if(e.target.closest('#glr')){if(S.geo)delete S.geo[det];save();dlView();return}
 if(e.target.closest('#otab')){openTab(det);return}
 if(e.target.closest('#rmv')){takeDown(det,$('#rmm').value).then(ok=>{if(ok){det=null;dlView()}});return}
 const g=e.target.closest('.gt[data-g]'),r=e.target.closest('.sr[data-t]');
