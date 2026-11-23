@@ -243,20 +243,89 @@ input,select,textarea{font-size:16px!important}
 #isl{display:none;position:absolute;top:11px;left:50%;transform:translateX(-50%);width:126px;height:37px;border-radius:999px;background:#000;z-index:99;pointer-events:none}
 #isl::after{content:"";position:absolute;right:13px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#2b3550,#0a0d16 62%)}
 .phone[data-isl="1"] #isl{display:block}
+
+/* ===== 設定アプリ(iOSふう)===== */
+#app:has(#t4.on) header{display:none}
+#app:has(#t4.on) main{padding:calc(var(--sat) + 10px) 4% 120px;background:var(--sf)}
+.phone{font-size:calc(var(--ts,1)*clamp(14px,3.8vw,16px))}
+html[data-bold="1"] .phone *:not(b,strong,h1,h2,h3){font-weight:600}
+#warm{position:absolute;inset:0;pointer-events:none;z-index:49;mix-blend-mode:multiply}
+#slp{position:absolute;inset:0;background:#000;z-index:98;opacity:0;pointer-events:none;transition:opacity .35s}
+#slp.on{opacity:1;pointer-events:auto}
+.ih{font:700 2.1em/1.2 "Zen Kaku Gothic New","Hiragino Sans",sans-serif;margin:8px 4px 14px}
+.ig{background:var(--bg);border-radius:24px;margin-bottom:20px;overflow:hidden}
+.ig[hidden],.ir[hidden]{display:none}
+.ir{display:flex;align-items:center;gap:14px;padding:0 16px;min-height:52px;position:relative}
+.ir+.ir::before{content:"";position:absolute;top:0;left:60px;right:0;border-top:1px solid var(--bd)}
+.ir.ni+.ir::before,.ir.ni::before{left:16px!important}
+.ir[data-k],.ir[data-go],.ir[data-al],.apo,.wpill,.wcu,.wci,.wrc,.wrow[data-cat]{cursor:pointer}
+.ii{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+.ii svg{width:19px;height:19px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.il{flex:1;min-width:0}.iv{color:var(--mu)}.ich{color:var(--mu);font-size:1.3em;line-height:1}
+.acr{padding:12px 16px}.acr .sa{width:56px}.acr .sa i{border-radius:50%}.acr .tx{flex:1;min-width:0;display:flex;flex-direction:column}.acr .tx b{font-size:1.1em}.acr .tx span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+div.swc,span.swc{display:block;flex:none}
+#ssb{position:absolute;left:16px;right:16px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:4;display:flex;align-items:center;gap:10px;padding:0 18px;height:52px;border-radius:999px;background:color-mix(in srgb,var(--bg) 74%,transparent);backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--bd);box-shadow:0 8px 28px rgba(0,0,0,.14);color:var(--mu)}
+#ssb[hidden]{display:none}
+#ssb input{flex:1;min-width:0;border:0;background:none;padding:0;border-radius:0;-webkit-appearance:none;appearance:none}#ssb input:focus{box-shadow:none}
+#ssb svg{width:20px;height:20px;flex:none}
+#ssn{text-align:center;color:var(--mu);padding:60px 20px}#ssn svg{width:44px;height:44px;margin-bottom:8px}#ssn b{display:block;color:var(--fg)}
+.ihd{display:flex;align-items:center;justify-content:space-between;margin:4px 0 16px;position:relative}.ihd b{position:absolute;left:0;right:0;text-align:center;pointer-events:none}.ihr{width:44px}
+.isx{color:var(--mu);font-size:.85em;margin:18px 8px 8px}.icp{color:var(--mu);font-size:.8em;margin:-10px 10px 18px;line-height:1.5}
+.ir select{border:0;background:var(--sf);border-radius:10px;padding:.3em .6em;color:var(--fg)}
+.brr{padding:6px 16px;gap:12px}.brr input[type=range]{flex:1;padding:0;border:0;background:none;accent-color:#2563eb}
+.apr{display:flex;justify-content:space-around;padding:18px 10px}.apo{display:flex;flex-direction:column;align-items:center;gap:8px}
+.apv{width:64px;height:92px;border-radius:12px;border:1px solid var(--bd);padding:8px;display:flex;flex-direction:column;gap:6px}.apv i{display:block;height:10px;border-radius:5px;background:rgba(128,128,128,.4)}.apv.lt{background:#f2f2f7}.apv.dk{background:#1c1c1e}.apv.dk i{background:rgba(255,255,255,.3)}
+.rad,.ck{width:24px;height:24px;border-radius:50%;border:2px solid var(--bd);display:block;position:relative;flex:none;font-style:normal}
+.rad.on,.ck.on{background:#2563eb;border-color:#2563eb}.rad.on::after,.ck.on::after{content:"✓";color:#fff;position:absolute;inset:0;display:grid;place-items:center;font-size:.75em}
+.wcard{padding:16px 0 18px;text-align:center}
+.wcar{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:0 8%;scrollbar-width:none}.wcar::-webkit-scrollbar{display:none}
+.wc{flex:none;width:84%;scroll-snap-align:center}
+.wch{height:34px;display:flex;align-items:center;justify-content:center;font-size:.9em}
+.wpill{border:0;border-radius:999px;background:#d9e8ff;color:#2563eb;font-size:.85em;padding:.25em 1em;font-weight:600}
+.wpr,.wphc,.wshp{display:flex;gap:10px;justify-content:center}.wphc,.wshp{margin:10px 0 14px}
+.wph{position:relative;width:47%;aspect-ratio:9/19;border-radius:18px;background-size:cover;background-position:center;overflow:hidden;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.wph.big{width:38%}.wshp .wph{width:34%}.wshp .wph+.wph{margin-left:-8%;transform:scale(.92)}
+.wt1{font:700 1.9em/1 -apple-system,system-ui,sans-serif;color:rgba(255,255,255,.88);text-align:center;margin-top:14%;text-shadow:0 1px 8px rgba(0,0,0,.25)}
+.wgr{position:absolute;inset:12% 8% auto;display:grid;grid-template-columns:repeat(4,1fr);gap:7% 8%}.wgr i{aspect-ratio:1;border-radius:22%;background:rgba(255,255,255,.38)}
+.wcu{position:absolute;left:50%;bottom:6%;transform:translateX(-50%);border:0;border-radius:999px;background:rgba(255,255,255,.3);backdrop-filter:blur(8px);color:#fff;font-size:.6em;font-weight:700;padding:.35em .9em;white-space:nowrap}
+.wph.nw{background:var(--sf)}.wph.nw b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#2563eb;color:#fff;font-size:1.3em}
+.wdots{display:flex;justify-content:center;gap:7px;margin:14px 0}.wdots i{width:7px;height:7px;border-radius:50%;background:var(--hl)}.wdots i.on{background:var(--mu)}
+.wadd{border:0;background:#2563eb;color:#fff;border-radius:999px;padding:.4em 1.2em;font-weight:700}
+.winf{display:flex;gap:12px;align-items:center;padding:14px 16px;color:var(--mu);font-size:.8em;line-height:1.5}.winf b{display:block;color:var(--fg);font-size:1.05em}.winf .mp{flex:none;width:38px;aspect-ratio:9/19;border-radius:9px;border:2px solid var(--bd);background:var(--sf)}
+#wdk,#wbt{position:absolute}
+#wdk{left:0;right:0;bottom:0;top:5%;z-index:9;background:#000;color:#fff;border-radius:34px 34px 0 0;overflow:auto;padding:14px 5% 40px}
+#wdk[hidden],#wbt[hidden]{display:none}
+.wdh{display:flex;align-items:center;justify-content:space-between;position:relative;margin-bottom:16px}.wdh b{position:absolute;left:0;right:0;text-align:center;pointer-events:none}
+.cb.dk{background:#1c1c1e;color:#fff;box-shadow:none}
+.wcat{display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;padding-bottom:6px}.wci{flex:none;width:68px;text-align:center;font-size:.7em}.wci i{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;margin:0 auto 6px;font-style:normal;font-size:1.9em}
+.wds{font-weight:700;font-size:1.3em;margin:22px 0 10px}
+.wrec{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none}.wrc{flex:none;width:31%;font-size:.75em;color:#aaa;text-align:center}.wrc .wph{width:100%;margin-bottom:6px}
+.wrow{display:flex;gap:14px;align-items:flex-start;color:#aaa;font-size:.85em}.wrow .wph{width:30%}.wrow p{margin:0 0 8px}
+.wget{border:0;border-radius:999px;background:#1c1c1e;color:#4da3ff;font-weight:700;padding:.3em 1.2em}
+#wbt{inset:0;display:flex;flex-direction:column;justify-content:flex-end;z-index:10}
+.wbk{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.wbs{position:relative;background:var(--bg);color:var(--fg);border-radius:34px 34px 0 0;padding:10px 6% calc(22px + env(safe-area-inset-bottom));text-align:center;animation:wbi .35s var(--e);max-height:92%;overflow:auto}
+@keyframes wbi{from{transform:translateY(100%)}}
+.wsg{width:40px;height:5px;border-radius:3px;background:var(--hl);margin:0 auto 12px}
+.wbs h3{margin:0 0 4px;font-size:1.4em}.wsub{color:var(--mu);font-size:.85em;margin:0 0 14px}
+.wchk{text-align:left}.wchk>div{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--bd);cursor:pointer}
+.wfq{display:flex;justify-content:space-between;align-items:center;padding:12px 4px;color:var(--mu)}.wfq select{border:0;background:none;color:var(--mu)}
+.wpri{display:block;width:100%;border:0;background:#2563eb;color:#fff;border-radius:999px;padding:.8em;font-weight:700;margin-top:10px}
+.wsec{display:block;width:100%;border:0;background:none;color:#2563eb;padding:.8em;font-weight:600}
+.wsw{display:flex;gap:10px;justify-content:center;margin:10px 0;flex-wrap:wrap}.wsw i{width:34px;height:34px;border-radius:50%;border:3px solid transparent;box-shadow:0 0 0 1px var(--bd);cursor:pointer}.wsw i.on{border-color:var(--fg)}
+.wem{width:100%;font-size:1.6em;text-align:center;border-radius:14px}
+@media(hover:hover){.wadd:hover,.wpri:hover,.wcu:hover{color:#fff;background-color:#2563eb}.wcu:hover{background-color:rgba(255,255,255,.3)}.wpill:hover{color:#2563eb;background:#d9e8ff}.wsec:hover,.wget:hover{color:#2563eb;background:none}.wget:hover{background:#1c1c1e;color:#4da3ff}.cb.dk:hover{background:#1c1c1e;color:#fff}}
 </style></head><body>
-<div class="phone" data-v="lock"><div id="isl"></div><div id="wp"><svg viewBox="0 0 100 200" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a8ca0"/><stop offset=".35" stop-color="#4f8ba5"/><stop offset=".75" stop-color="#1c4a70"/><stop offset="1" stop-color="#0a2236"/></linearGradient></defs><path d="M100 18C70 24 58 50 58 90 58 140 32 160 0 196V200H100Z" fill="url(#wg)" stroke="none"/></svg></div>
+<div class="phone" data-v="lock"><div id="isl"></div><div id="slp"></div><div id="wp"><svg viewBox="0 0 100 200" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a8ca0"/><stop offset=".35" stop-color="#4f8ba5"/><stop offset=".75" stop-color="#1c4a70"/><stop offset="1" stop-color="#0a2236"/></linearGradient></defs><path d="M100 18C70 24 58 50 58 90 58 140 32 160 0 196V200H100Z" fill="url(#wg)" stroke="none"/></svg></div>
 <div id="home" class="scr"><div id="hz"></div><div class="hs" id="ht"></div></div>
 <div id="app" class="scr app">
 <header><b class="lg"><span id="an"></span></b></header>
 <main>
-<section class="tab" id="t4"><div id="setm"><h2>設定</h2><button class="accb" id="acc"><div class="sa" id="accic"></div><div class="tx"><b id="accn"></b><span class="mu" id="accs"></span></div><span class="mu">›</span></button><div class="card"><div class="row sp"><span>明るさ</span><span class="mu" id="bv"></span></div><input type="range" id="br" min="30" max="100" value="100" style="width:100%;margin-top:10px;accent-color:var(--fg);padding:0;border:0"></div><div class="card"><div class="row sp"><span>テーマ</span><span class="thm" data-i="2">
-<button class="tb" data-m="light" title="ホワイト"><svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg></button>
-<button class="tb" data-m="dark" title="ダーク"><svg width="19" height="19" viewBox="0 0 24 24"><path d="M20 14A8 8 0 1 1 10 4a6.5 6.5 0 0 0 10 10z"/></svg></button>
-<button class="tb" data-m="auto" title="時間で自動"><svg width="19" height="19" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button></span></div><p class="mu" style="margin-top:8px">ホワイト / ダーク / 時間で自動(17時〜5時はダーク)</p></div><div class="card"><div class="row sp"><span>壁紙</span><button id="wadd">追加</button></div><div class="row" id="wps" style="margin-top:10px"></div><input type="file" id="wf" accept="image/*" hidden></div><div class="card"><div class="row sp"><span>パスコード</span><span class="mu" id="pcs"></span></div><p class="mu" style="margin-top:6px">ロック画面を上にスライドすると、6桁のパスコード入力画面が出ます</p><div class="row" style="margin-top:10px"><button id="pcset" class="on" style="flex:1">設定する</button><button id="pcoff" style="flex:1;display:none">解除</button></div></div></div><div id="accp" hidden><button class="ib" id="accbk">‹</button><h2 style="margin-top:6px">アカウント</h2>
+<section class="tab" id="t4"><div id="setm"></div><div id="setp" hidden></div><div id="accp" hidden><button class="ib" id="accbk">‹</button><h2 style="margin-top:6px">アカウント</h2>
 <div id="accin"><p class="mu" style="margin-top:6px">ログインすると名前とアイコンを設定できます。</p><div class="card"><input id="ade" type="email" placeholder="メールアドレス" autocomplete="email" style="width:100%;border-radius:12px"><input id="adp" type="password" placeholder="パスワード(6文字以上)" autocomplete="current-password" style="width:100%;margin-top:8px;border-radius:12px"><div class="row" style="margin-top:10px"><button id="adl" class="on" style="flex:1">ログイン</button><button id="adr" style="flex:1">新規登録</button></div></div></div>
 <div id="accout" hidden><div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin:14px 0 6px"><div class="sa" id="pfic" style="width:96px;cursor:pointer"></div><button id="pfi" type="button">アイコンを変更</button><input type="file" id="pfif" accept="image/*" hidden></div>
 <div class="card"><label class="fld" style="margin-top:0">名前</label><input id="pfn" maxlength="20" placeholder="名前" style="width:100%;border-radius:12px"><div class="row sp" style="margin-top:14px"><span>メールアドレス</span><span class="mu" id="pfe" style="overflow:hidden;text-overflow:ellipsis;max-width:60%"></span></div><div class="row sp" id="pfa" style="margin-top:12px" hidden><span>権限</span><span class="chip ok">管理者</span></div><button id="pfs" class="on" style="width:100%;margin-top:14px">保存</button></div>
-<button id="ado" style="width:100%;margin-top:28px">ログアウト</button></div></div></section>
+<div class="card" style="margin-top:14px"><div class="row sp"><span>パスワード</span><button id="pwo" type="button">追加・変更</button></div><div id="pwf" hidden style="margin-top:10px"><input id="pw1" type="password" placeholder="新しいパスワード(6文字以上)" autocomplete="new-password" style="width:100%;border-radius:12px"><input id="pw2" type="password" placeholder="もう一度入力" autocomplete="new-password" style="width:100%;margin-top:8px;border-radius:12px"><div class="row" style="margin-top:10px"><button id="pwc" type="button" style="flex:1">キャンセル</button><button id="pws" type="button" class="on" style="flex:1">保存</button></div></div></div><button id="ado" style="width:100%;margin-top:28px">ログアウト</button></div><div style="margin-top:18px"><div class="card"><div class="row sp"><span>パスコード</span><span class="mu" id="pcs"></span></div><p class="mu" style="margin-top:6px">ロック画面を上にスライドすると、6桁のパスコード入力画面が出ます</p><div class="row" style="margin-top:10px"><button id="pcset" class="on" style="flex:1">設定する</button><button id="pcoff" style="flex:1;display:none">解除</button></div></div></div></div></section>
 <section class="tab" id="t5"><div id="stv">
 <div class="sh"><h1 id="sttl">検索</h1><button class="sav sa" id="sacc" aria-label="アカウント"></button></div>
 <div id="sdl"></div>
@@ -278,11 +347,13 @@ input,select,textarea{font-size:16px!important}
 <div id="spv" hidden></div>
 </div></section>
 </main>
+<div id="ssb" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="ssq" type="search" placeholder="検索"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>
+<div id="wdk" hidden></div><div id="wbt" hidden></div><input type="file" id="wpf" accept="image/*" hidden><input type="file" id="wpf2" accept="image/*" multiple hidden>
 <div id="snav"><button data-s="dl" class="on"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><span>ストア</span></button><button data-s="dv"><svg viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14"/></svg><span>アプリ開発</span></button><button data-s="my"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8.5 9h7M8.5 13h7M8.5 17h4"/></svg><span>自分の申請</span></button><button data-s="rv" id="srvb" hidden><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg><span>審査</span></button></div>
 <div id="sht" hidden><div id="shb"></div></div>
 </div><div id="hb"></div>
 <div id="sw" class="scr"><div id="sws"></div><div id="swh">上にスライドして閉じる</div></div>
-<div id="dim"></div><div id="lock" class="scr"><div class="lc"><div id="ld"></div><div id="lt"></div></div><button class="lb" id="lbL" style="left:11%" tabindex="-1" aria-label="カメラ"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/></svg></button><button class="lb" id="lbR" style="right:11%" tabindex="-1" aria-label="ライト"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M9 2h6v4l-1 2v13a2 2 0 0 1-4 0V8L9 6z"/></svg></button><div id="lh">スライドして開く</div><div id="lk"></div></div>
+<div id="warm"></div><div id="dim"></div><div id="lock" class="scr"><div class="lc"><div id="ld"></div><div id="lt"></div></div><button class="lb" id="lbL" style="left:11%" tabindex="-1" aria-label="カメラ"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/></svg></button><button class="lb" id="lbR" style="right:11%" tabindex="-1" aria-label="ライト"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M9 2h6v4l-1 2v13a2 2 0 0 1-4 0V8L9 6z"/></svg></button><div id="lh">スライドして開く</div><div id="lk"></div></div>
 <div id="pc"><div id="pct">パスコードを入力</div><div id="pcd"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <div id="pck"><button class="kb" data-k="1">1</button><button class="kb" data-k="2">2</button><button class="kb" data-k="3">3</button><button class="kb" data-k="4">4</button><button class="kb" data-k="5">5</button><button class="kb" data-k="6">6</button><button class="kb" data-k="7">7</button><button class="kb" data-k="8">8</button><button class="kb" data-k="9">9</button><span></span><button class="kb" data-k="0">0</button><span></span></div>
 <div class="pcb"><button class="pcl" id="pce">緊急</button><button class="pcl" id="pcx">キャンセル</button></div></div>
@@ -328,7 +399,7 @@ if(d.pos){if(!p.w)delete pend[d.rid];p.ok&&p.ok(d.pos)}else if(d.err){if(!p.w)de
 Object.defineProperty(navigator,'geolocation',{configurable:true,get:()=>G})}catch(e){}}
 function frameDoc(html,init,persist){
 const J=JSON.stringify(init||{}).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
-const ZS='<style>html{touch-action:manipulation}input,textarea,select{font-size:16px!important}</style><script>["gesturestart","gesturechange","gestureend"].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault()},{passive:false})})<\/script>';
+const ZS='<style>html{touch-action:manipulation}input,textarea,select{font-size:16px!important}</style><script>["gesturestart","gesturechange","gestureend"].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault()},{passive:false})});(function(){var q=0;["pointerdown","keydown","touchstart"].forEach(function(t){addEventListener(t,function(){var n=Date.now();if(n-q>1500){q=n;try{parent.postMessage({act:1},"*")}catch(x){}}},{passive:true})})})()<\/script>';
 const sc=ZS+'<script>('+shim.toString()+')('+J+','+(persist?1:0)+')<\/script>';
 const m=/<head(\s[^>]*)?>/i.exec(html)||/<html(\s[^>]*)?>/i.exec(html)||/^\s*<!doctype[^>]*>/i.exec(html);
 return m?html.slice(0,m.index+m[0].length)+sc+html.slice(m.index+m[0].length):sc+html}
@@ -353,7 +424,7 @@ const f=$$('iframe[data-xid],#simf').find(x=>x.contentWindow===e.source);if(!f)r
 if(d.geo)return geoReq(f,d);if(!f.dataset.xid)return;
 try{const s=JSON.stringify(d.ls);if(s.length<3e6)localStorage.setItem('xd:'+f.dataset.xid,s)}catch(_){}});
 
-function theme(){let t=S.theme;if(t=='auto'){const h=new Date().getHours();t=(h>=17||h<5)?'dark':'light'}document.documentElement.dataset.t=t;$$('button.tb').forEach(b=>b.classList.toggle('on',b.dataset.m==S.theme));$('.thm')&&($('.thm').dataset.i=['light','dark','auto'].indexOf(S.theme))}
+function theme(){let t=S.theme;if(t=='auto'){const h=new Date().getHours();t=(h>=(S.dk0??17)||h<(S.dk1??5))?'dark':'light'}document.documentElement.dataset.t=t;$$('button.tb').forEach(b=>b.classList.toggle('on',b.dataset.m==S.theme));$('.thm')&&($('.thm').dataset.i=['light','dark','auto'].indexOf(S.theme))}
 setInterval(theme,6e4);
 const OPEN={};
 function tab(i){$$('.tab').forEach(e=>e.classList.toggle('on',e.id=='t'+i));S.tab=i;OPEN[i]&&OPEN[i]();$('main').scrollTo(0,0)}
@@ -466,17 +537,175 @@ function removeApp(t){if(t==4||t==5||isOff(t))return;S.inst=S.inst.filter(x=>x!=
 if(t>=1000){localStorage.removeItem('xa:'+(t-1000));localStorage.removeItem('xd:'+(t-1000));delete APPS[t];delete NM[t]}
 syncExt();save();renderHome()}
 // ===== 設定アプリ(スマホ本体) =====
-function bright(){const v=S.br??100;$('#dim').style.opacity=(100-v)/100*.8;$('#br').value=v;$('#bv').textContent=v+'%'}
-const WP={default:['既定',''],sakura:['桜','radial-gradient(circle at 30% 20%,rgba(255,255,255,.8) 0 2px,transparent 3px) 0 0/46px 52px,radial-gradient(circle at 70% 60%,rgba(255,200,215,.9) 0 3px,transparent 4px) 0 0/61px 67px,linear-gradient(180deg,#c9c5f0,#f2bfd0 55%,#e59ab0)'],night:['夜空','radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.5px) 0 0/37px 41px,linear-gradient(180deg,#0b1030,#27285c 60%,#53406d)'],forest:['森','linear-gradient(180deg,#cfe8d5,#6aa981 55%,#1f4d3a)'],white:['白','#f4f5f7'],black:['黒','#0b0b0d']};
-const wpCss=id=>id[0]=='u'?`url(${S.wps[+id.slice(1)]}) center/cover`:WP[id][1];
-function wpApply(){const id=S.wp||'default';if(id[0]=='u'&&!S.wps?.[+id.slice(1)])S.wp=id='default';$('#wp').style.background=wpCss(id);$('#wp svg').style.display=id=='default'?'block':'none'}
-function wpUI(){const ids=[...Object.keys(WP),...(S.wps||[]).map((_,i)=>'u'+i)];$('#wps').innerHTML=ids.map(id=>`<button class="wt${(S.wp||'default')==id?' on':''}" data-w="${id}" style="background:${id=='default'?'linear-gradient(170deg,#f1c3c3,#4f8ba5 60%,#0a2236)':wpCss(id)}"></button>`).join('')}
-$$('button.tb').forEach(b=>b.onclick=()=>{S.theme=b.dataset.m;save();theme()});
-$('#br').oninput=()=>{S.br=+$('#br').value;save();bright()};bright();
-$('#wps').onclick=e=>{const b=e.target.closest('[data-w]');if(!b)return;S.wp=b.dataset.w;save();wpApply();wpUI()};
-$('#wadd').onclick=()=>$('#wf').click();
-$('#wf').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);S.wps=[...(S.wps||[]),c.toDataURL('image/jpeg',.72)].slice(-4);S.wp='u'+(S.wps.length-1);save();wpApply();wpUI()};im.src=rd.result};rd.readAsDataURL(f);e.target.value=''};
-wpApply();wpUI();
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sv=()=>{try{save()}catch(e){alert('保存容量が足りません。壁紙や写真を減らしてください')}};
+// --- 明るさ・色味・文字 ---
+function bright(){const v=S.br??100;$('#dim').style.opacity=((100-v)/100*.85).toFixed(3)}
+const nsAct=()=>{const n=S.ns||{};if(n.man&&n.man>Date.now())return 1;if(!n.on)return 0;const d=new Date(),h=d.getHours()+d.getMinutes()/60,a=n.a??22,b=n.b??7;return a>b?(h>=a||h<b):(h>=a&&h<b)};
+function warmTint(){const w=(S.ns&&S.ns.w)??50,a=(S.tt?.07:0)+(nsAct()?.08+.3*w/100:0);$('#warm').style.background=`rgba(255,160,70,${a.toFixed(3)})`}
+const TS=[.82,.9,.96,1,1.1,1.22,1.36];
+function applyTS(){PH.style.setProperty('--ts',TS[S.ts??3]);document.documentElement.dataset.bold=S.bold?'1':''}
+// --- 自動ロック(画面オフ・傾けて解除)---
+let idleT=0,asleep=0,tb0=null;
+function idleArm(){clearTimeout(idleT);if(S.al&&!asleep)idleT=setTimeout(sleepNow,S.al*1000)}
+function sleepNow(){lockNow();asleep=1;tb0=null;$('#slp').classList.add('on');addEventListener('deviceorientation',tiltW)}
+function wake(){if(!asleep)return;asleep=0;$('#slp').classList.remove('on');removeEventListener('deviceorientation',tiltW);idleArm()}
+function tiltW(e){if(!S.tilt||e.beta==null)return;if(tb0==null){tb0=e.beta;return}if(Math.abs(e.beta-tb0)>25)wake()}
+$('#slp').addEventListener('pointerdown',wake);
+['pointerdown','keydown','touchstart'].forEach(t=>addEventListener(t,()=>{if(!asleep)idleArm()},{passive:true}));
+addEventListener('message',e=>{if(e.data&&e.data.act&&!asleep)idleArm()});
+// --- 壁紙の素材 ---
+const PRE={default:{n:'既定',c:'linear-gradient(170deg,#f1c3c3,#4f8ba5 60%,#0a2236)'},
+ios26:{n:'iOS 26',c:'radial-gradient(120% 60% at 20% 30%,#7fe0d0 0,transparent 60%),radial-gradient(100% 70% at 85% 70%,#b48cf5 0,transparent 60%),linear-gradient(160deg,#16253f,#2b4f86 55%,#e9a1c4)'},
+collection:{n:'コレクション',c:'radial-gradient(circle at 25% 30%,rgba(120,230,255,.75) 0 9%,transparent 10%),radial-gradient(circle at 70% 22%,rgba(150,160,255,.7) 0 12%,transparent 13%),radial-gradient(circle at 60% 62%,rgba(90,220,230,.65) 0 14%,transparent 15%),radial-gradient(circle at 22% 78%,rgba(140,120,255,.6) 0 10%,transparent 11%),linear-gradient(180deg,#25336e,#3d4aa0 60%,#2a6f9e)'},
+sakura:{n:'桜',c:'radial-gradient(circle at 30% 20%,rgba(255,255,255,.8) 0 2px,transparent 3px) 0 0/46px 52px,radial-gradient(circle at 70% 60%,rgba(255,200,215,.9) 0 3px,transparent 4px) 0 0/61px 67px,linear-gradient(180deg,#c9c5f0,#f2bfd0 55%,#e59ab0)'},
+night:{n:'夜空',c:'radial-gradient(circle,rgba(255,255,255,.8) 0 1px,transparent 1.5px) 0 0/37px 41px,linear-gradient(180deg,#0b1030,#27285c 60%,#53406d)'},
+forest:{n:'森',c:'linear-gradient(180deg,#cfe8d5,#6aa981 55%,#1f4d3a)'},white:{n:'白',c:'#f4f5f7'},black:{n:'黒',c:'#0b0b0d'}};
+const ASTRO='radial-gradient(ellipse 130% 34% at 50% 108%,#bfe6ff 0,#4b9be0 14%,#103a78 34%,transparent 62%),radial-gradient(circle,rgba(255,255,255,.9) 0 1px,transparent 1.6px) 0 0/53px 61px,radial-gradient(circle,rgba(255,255,255,.6) 0 1px,transparent 1.5px) 20px 30px/37px 43px,#02040d';
+const wxBg=()=>{const h=new Date().getHours(),c=h<5||h>=20?['#0a1230','#2b3a78']:h<8?['#f4a98a','#7fa8e0']:h<17?['#3d8fe6','#bfe4ff']:['#ef7f5c','#5a4a8e'];return `radial-gradient(ellipse 45% 7% at 28% 24%,rgba(255,255,255,.85),transparent),radial-gradient(ellipse 50% 8% at 72% 40%,rgba(255,255,255,.7),transparent),linear-gradient(180deg,${c[0]},${c[1]})`};
+function scene(k,seed){let s=seed*7919+13;const R=n=>{s=(s*9301+49297)%233280;return s/233280*n};
+const h=R(60)+(k?200:150),a=`hsl(${h},60%,${k?24:68}%)`,b=`hsl(${h+30},70%,${k?55:88}%)`;let g='';
+if(!k){for(let i=0;i<3;i++){const y=100+i*22;let d=`M0 200V${y}`;for(let x=0;x<=100;x+=12)d+=`L${x} ${(y-R(26-i*6)).toFixed(1)}`;g+=`<path d="${d}L100 ${y}V200Z" fill="hsl(${160+i*10},${30+i*5}%,${38-i*9}%)"/>`}g+='<rect y="150" width="100" height="50" fill="hsl(185,55%,55%)" opacity=".8"/>'}
+else{for(let i=0;i<14;i++){const w=6+R(9),x=i*7.5-2,hh=40+R(70),y=200-hh;g+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${hh.toFixed(1)}" fill="hsl(${h},30%,${(14+R(10)).toFixed(0)}%)"/>`;for(let j=0;j<hh/8|0;j++)if(R(1)>.5)g+=`<rect x="${(x+1.5).toFixed(1)}" y="${(y+3+j*8).toFixed(1)}" width="1.6" height="2.4" fill="#ffd98a"/>`}}
+return 'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="100" height="200" fill="url(#a)"/>${g}</svg>`)}
+const SC={},scn=(k,i)=>SC[k+'_'+i]??=scene(k,i+1);
+const pool=it=>[...(it.cats&&it.cats.nat?[0,1,2,3,4,5].map(i=>scn(0,i)):[]),...(it.cats&&it.cats.city?[0,1,2,3,4,5].map(i=>scn(1,i)):[]),...(it.alb||[])];
+const emojiBg=it=>{const e=[...(it.e||'😀')].slice(0,9),r=Math.ceil(e.length/3),H=r*40+6;let t='';e.forEach((c,i)=>{t+=`<text x="${(i%3)*34+6}" y="${(i/3|0)*40+30}" font-size="27">${c}</text>`});
+return `url('data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="108" height="${H}">${t}</svg>`)}') 0 0/108px ${H}px,${it.bg||'#ffd6e0'}`};
+function wpBg(it,pv){switch(it.t){case'pre':return it.k=='default'?(pv?PRE.default.c:''):PRE[it.k].c;case'photo':return `url(${it.d}) center/cover`;
+case'shuf':{const p=pool(it);return p.length?`url('${p[(it.i||0)%p.length]}') center/cover`:'#222'}case'emoji':return emojiBg(it);case'color':return it.g?`linear-gradient(180deg,${it.a},${it.b})`:it.a;case'wx':return wxBg();case'astro':return ASTRO}return '#222'}
+if(!S.wl){S.wl=[{id:'w0',t:'pre',k:(S.wp&&PRE[S.wp])?S.wp:'default'}];(S.wps||[]).forEach((d,i)=>S.wl.push({id:'w'+(i+1),t:'photo',d}));S.wc=(S.wp&&S.wp[0]=='u')?'w'+(+S.wp.slice(1)+1):'w0';sv()}
+const wpCur=()=>S.wl.find(x=>x.id==S.wc)||S.wl[0];
+function wpApply(){const it=wpCur(),w=$('#wp');w.style.background=wpBg(it);w.querySelector('svg').style.display=(it.t=='pre'&&it.k=='default')?'block':'none'}
+function shufTick(f){let ch=0;const now=Date.now();S.wl.forEach(it=>{if(it.t!='shuf')return;const q=it.f||'h',gap=q=='h'?36e5:q=='d'?864e5:0;if(f=='lock'?q=='l':(q!='l'&&now-(it.last||0)>=gap)){const n=pool(it).length;if(n>1){it.i=((it.i||0)+1+Math.floor(Math.random()*(n-1)))%n;it.last=now;ch=1}}});if(ch){sv();if(wpCur().t=='shuf')wpApply()}}
+new MutationObserver(()=>{if(PH.dataset.v=='lock')shufTick('lock')}).observe(PH,{attributes:true,attributeFilter:['data-v']});
+// --- 設定の一覧(動画1)---
+const GCS='<svg viewBox="0 0 24 24" stroke="none"><circle cx="9" cy="9" r="4.5" fill="#ff6b6b"/><circle cx="15" cy="9" r="4.5" fill="#4dabf7" opacity=".85"/><circle cx="9" cy="15" r="4.5" fill="#ffd43b" opacity=".85"/><circle cx="15" cy="15" r="4.5" fill="#51cf66" opacity=".85"/></svg>';
+const GR=[[['#ff9f0a','M12 3.5l1.8 5.7 6.7 3.8v1.9l-6.7-2.1-.9 4.4 2.1 1.8v1.5L12 19.5l-3 1v-1.5l2.1-1.8-.9-4.4-6.7 2.1v-1.9l6.7-3.8z','機内モード','sw'],['#0a84ff','M3 9.5a13 13 0 0 1 18 0M6 13a8.5 8.5 0 0 1 12 0M9 16.3a4 4 0 0 1 6 0M12 19.5h.01','Wi-Fi','オン'],['#0a84ff','M7 7.5l10 9-5 4.5V3l5 4.5-10 9','Bluetooth','オン'],['#34c759','M5 19v-3M10 19v-6M15 19v-9M20 19V5','モバイル通信'],['#34c759','M10 14a4 4 0 0 1 0-6l2-2a4 4 0 0 1 6 6l-1 1M14 10a4 4 0 0 1 0 6l-2 2a4 4 0 0 1-6-6l1-1','インターネット共有','オフ'],['#34c759','M3.5 8h15v8h-15zM20.5 11v2','バッテリー']],
+[['#8e8e93','M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1','一般','1'],['#0a84ff','M12 3.5a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6zM5 9l7 1 7-1M12 10v5l-3 5.5M12 15l3 5.5','アクセシビリティ'],['linear-gradient(135deg,#ff6bd6,#7a6bff 50%,#35c8ff)','M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z','Apple Intelligence と Siri'],['#0a84ff','M8 4h8v16H8zM11 8h2','アクションボタン'],['#8e8e93','M4 8h4l1.5-2h5L16 8h4v11H4zM12 11a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z','カメラ'],['#8e8e93','M4 8h9M17 8h3M4 16h3M11 16h9M15 8a2 2 0 1 0 .01 0M9 16a2 2 0 1 0 .01 0','コントロールセンター'],['#1c1c1e','M4 6h16v12H4zM8 10v4M12 9v6M16 11v2','スタンバイ'],['#0a84ff','M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z','ホーム画面とアプリライブラリ'],['#0a84ff','M12 8a4 4 0 1 0 .01 0M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2l1.8 1.8M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8','画面表示と明るさ','','disp'],['#8e8e93','M11 4a7 7 0 1 0 .01 0M16 16l4.5 4.5','検索'],['#32ade6','M12 4a2.6 2.6 0 1 0 .01 0M18 9a2.6 2.6 0 1 0 .01 0M6 9a2.6 2.6 0 1 0 .01 0M12 15a2.6 2.6 0 1 0 .01 0M12 8v3','壁紙','','wp']],
+[['#ff3b30','M6 17h12l-1.5-2.2V11a4.5 4.5 0 0 0-9 0v3.8zM10 20h4','通知'],['#ff2d55','M4 10h3l4-3.2v10.4L7 14H4zM15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11','サウンドと触覚'],['#5e5ce6','M18.5 14.5A7 7 0 1 1 9.5 5.5a5.5 5.5 0 0 0 9 9z','集中モード'],['#5e5ce6','M7 4h10M7 20h10M8 4c0 5 8 5 8 10v6M16 4c0 5-8 5-8 10v6','スクリーンタイム']],
+[['#34c759','M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10v1.5M15 10v1.5M12 10v3.5h-1M9 16c1.7 1.3 4.3 1.3 6 0','Face IDとパスコード'],['#ff3b30','T:SOS','緊急SOS'],['#0a84ff','M12 3.5l7 3v5.5c0 4.2-3 7.4-7 8.5-4-1.1-7-4.3-7-8.5V6.5z','プライバシーとセキュリティ']],
+[['#fff','GC','Game Center'],['#0a84ff','M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5 4 4 0 0 1 17.5 18z','iCloud'],['#2c2c2e','M4 7h16v11H4zM4 7l3-3h10l3 3M15 12h5v3h-5z','ウォレットとApple Pay']],
+[['linear-gradient(135deg,#7a5cff,#2f80ff)','M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5zM13 13h6v6h-6z','アプリ']]];
+const rowH=([c,g,l,v,k])=>`<div class="ir"${k?` data-k="${k}"`:''}><div class="ii" style="background:${c}">${g.startsWith('T:')?`<svg viewBox="0 0 24 24"><text x="12" y="15.5" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" stroke="none">${g.slice(2)}</text></svg>`:g=='GC'?GCS:`<svg viewBox="0 0 24 24"><path d="${g}"/></svg>`}</div><span class="il">${l}</span>${v==='sw'?'<span class="swc"><i></i></span>':v==='1'?'<b class="bdg0">1</b><span class="ich">›</span>':(v?`<span class="iv">${v}</span>`:'')+'<span class="ich">›</span>'}</div>`;
+$('#setm').innerHTML='<h1 class="ih">設定</h1><div class="ig"><div class="ir acr" id="acc"><div class="sa" id="accic"></div><div class="tx"><b id="accn"></b><span class="mu" id="accs"></span></div><span class="ich">›</span></div></div>'+GR.map(g=>`<div class="ig">${g.map(rowH).join('')}</div>`).join('')+'<div id="ssn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><b></b><span>スペルをチェックするか、新規検索をしてみてください。</span></div>';
+$('#ssq').oninput=()=>{const v=$('#ssq').value.trim().toLowerCase();let n=0;$$('#setm .ig').forEach(g=>{let m=0;g.querySelectorAll('.ir').forEach(r=>{const ok=!v||r.textContent.toLowerCase().includes(v);r.hidden=!ok;if(ok)m++});g.hidden=!m;n+=m});$('#setm .ih').hidden=!!v;$('#ssn').hidden=!v||n>0;$('#ssn b').textContent='“'+$('#ssq').value+'”の検索結果なし'};
+// --- ページ移動 ---
+let setCur='main';
+function setNav(n){setCur=n;$('#setm').hidden=n!='main';$('#accp').hidden=n!='acc';$('#setp').hidden=n=='main'||n=='acc';$('#ssb').hidden=n!='main';if(!$('#setp').hidden){$('#setp').innerHTML=PGS[n]();if(n=='wp')wpAfter()}$('main').scrollTo(0,0)}
+function setRr(id){const m=$('main'),y=m.scrollTop;$('#setp').innerHTML=PGS[setCur]();if(setCur=='wp')wpAfter(id);m.scrollTop=y}
+const accShow=p=>setNav(p?'acc':'main');
+const hd=t=>`<div class="ihd"><button class="cb" data-back="1" aria-label="戻る">‹</button><b>${t}</b><span class="ihr"></span></div>`;
+const swB=(k,on)=>`<button class="swc${on?' on':''}" data-sw="${k}" role="switch" aria-checked="${!!on}"><i></i></button>`;
+const hs=v=>[...Array(24).keys()].map(h=>`<option value="${h}"${h==v?' selected':''}>${h}:00</option>`).join('');
+const AL=[[30,'30秒'],[60,'1分'],[120,'2分'],[180,'3分'],[240,'4分'],[300,'5分'],[0,'なし']],alT=()=>(AL.find(a=>a[0]==(S.al||0))||AL[6])[1];
+const SUN=s=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2L7 7M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8"/></svg>`;
+const wgr='<div class="wgr">'+'<i></i>'.repeat(20)+'</div>';
+const PGS={
+disp:()=>{const th=S.theme||'auto',c=document.documentElement.dataset.t,auto=th=='auto';
+return hd('画面表示と明るさ')+`<div class="isx">外観モード</div><div class="ig"><div class="apr"><div class="apo" data-th="light"><div class="apv lt"><i></i><i></i></div><span>ライト</span><em class="rad${c=='light'?' on':''}"></em></div><div class="apo" data-th="dark"><div class="apv dk"><i></i><i></i></div><span>ダーク</span><em class="rad${c=='dark'?' on':''}"></em></div></div><div class="ir ni"><span class="il">自動</span>${swB('auto',auto)}</div>${auto?`<div class="ir ni"><span class="il">ダークにする時刻</span><select data-hr="dk0">${hs(S.dk0??17)}</select></div><div class="ir ni"><span class="il">ライトに戻す時刻</span><select data-hr="dk1">${hs(S.dk1??5)}</select></div>`:''}</div>
+<div class="isx">明るさ</div><div class="ig"><div class="ir ni brr">${SUN(16)}<input type="range" id="brs" min="5" max="100" value="${S.br??100}">${SUN(24)}</div><div class="ir ni"><span class="il">True Tone</span>${swB('tt',S.tt)}</div></div><p class="icp">True Toneは、周囲の環境に合わせて画面の色味を暖かくします。</p>
+<div class="ig"><div class="ir ni" data-go="ns"><span class="il">Night Shift</span><span class="iv">${nsAct()?'オン':'オフ'}</span><span class="ich">›</span></div></div>
+<div class="ig"><div class="ir ni" data-go="al"><span class="il">自動ロック</span><span class="iv">${alT()}</span><span class="ich">›</span></div><div class="ir ni"><span class="il">手前に傾けてスリープ解除</span>${swB('tilt',S.tilt)}</div></div>
+<div class="ig"><div class="ir ni" data-go="ts"><span class="il">テキストサイズを変更</span><span class="ich">›</span></div><div class="ir ni"><span class="il">文字を太くする</span>${swB('bold',S.bold)}</div></div>`},
+ns:()=>{const n=S.ns||{};return hd('Night Shift')+`<div class="ig"><div class="ir ni"><span class="il">時間指定</span>${swB('ns.on',n.on)}</div><div class="ir ni"><span class="il">開始</span><select data-hr="ns.a">${hs(n.a??22)}</select></div><div class="ir ni"><span class="il">終了</span><select data-hr="ns.b">${hs(n.b??7)}</select></div></div>
+<div class="ig"><div class="ir ni"><span class="il">明日まで手動で有効にする</span>${swB('ns.man',n.man&&n.man>Date.now())}</div></div><p class="icp">明日の朝7:00まで、画面の色味を暖かくします。</p>
+<div class="isx">色温度</div><div class="ig"><div class="ir ni brr"><span class="mu">低</span><input type="range" id="nsw" min="0" max="100" value="${n.w??50}"><span class="mu">高</span></div></div>`},
+al:()=>hd('自動ロック')+`<div class="ig">${AL.map(a=>`<div class="ir ni" data-al="${a[0]}"><span class="il">${a[1]}</span>${(S.al||0)==a[0]?'<span style="color:#2563eb">✓</span>':''}</div>`).join('')}</div><p class="icp">操作しない時間がこの長さになると、画面がオフになりロックされます。タップで復帰します。</p>`,
+ts:()=>hd('テキストサイズ')+`<div class="ig" style="padding:18px 16px"><p style="margin:0 0 18px;line-height:1.7">文字サイズを変更すると、このスマホの中の表示が大きくなったり小さくなったりします。</p><div class="brr" style="display:flex;align-items:center;gap:12px"><span style="font-size:.8em">A</span><input type="range" id="tsr" min="0" max="6" step="1" value="${S.ts??3}" style="flex:1;accent-color:#2563eb"><span style="font-size:1.5em">A</span></div></div>`,
+wp:()=>{const L=S.wl,c=wpCur().id,card=it=>{const bg=wpBg(it,1),on=it.id==c;return `<div class="wc" data-id="${it.id}"><div class="wch">${on?'<span class="mu">現在の壁紙</span>':`<button class="wpill" data-set="${it.id}">現在の壁紙に設定</button>`}</div><div class="wpr"><div class="wph" style="background:${bg}"><div class="wt1">9:41</div><button class="wcu" data-cu="${it.id}">カスタマイズ</button></div><div class="wph" style="background:${bg}">${wgr}<button class="wcu" data-cu="${it.id}">カスタマイズ</button></div></div></div>`};
+return hd('壁紙')+`<div class="ig wcard"><div class="wcar" id="wcar">${L.map(card).join('')}<div class="wc" data-add="1"><div class="wch"><span class="mu">新規</span></div><div class="wpr"><div class="wph nw"><b>＋</b></div><div class="wph nw">${wgr}</div></div></div></div><div class="wdots" id="wdots">${'<i></i>'.repeat(L.length+1)}</div><button class="wadd" data-add="1">＋新しい壁紙を追加</button></div>
+<div class="ig winf"><div><b>ロック画面から壁紙を変更</b>ロック画面から、壁紙やウィジェットの追加、編集、または切り替えを行うにはタッチして押さえたままにします。</div><div class="mp"></div></div>`}};
+// --- 壁紙のページ ---
+function wpAfter(id){const car=$('#wcar');if(!car)return;const el=car.querySelector(`[data-id="${id||S.wc}"]`);if(el)car.scrollLeft=el.offsetLeft-(car.clientWidth-el.clientWidth)/2;wDots()}
+function wDots(){const car=$('#wcar');if(!car)return;const cs=[...car.children],m=car.scrollLeft+car.clientWidth/2;let k=0,b=1e9;cs.forEach((c,i)=>{const d=Math.abs(c.offsetLeft+c.clientWidth/2-m);if(d<b){b=d;k=i}});$$('#wdots i').forEach((d,i)=>d.classList.toggle('on',i==k))}
+$('#setp').addEventListener('scroll',e=>{if(e.target.id=='wcar')wDots()},true);
+let PEND=null,SH=null,EM=null,CO=null;
+const wCloseAll=()=>{$('#wbt').hidden=true;$('#wdk').hidden=true};
+const wSheet=h=>{const b=$('#wbt');b.hidden=false;b.innerHTML='<div class="wbk"></div><div class="wbs"><div class="wsg"></div>'+h+'</div>'};
+function addItem(it){if(it.id){const i=S.wl.findIndex(x=>x.id==it.id);if(i>=0)S.wl[i]=it}else{it.id='w'+Date.now().toString(36);S.wl.push(it);while(S.wl.length>9){const k=S.wl.findIndex(x=>x.id!=it.id&&x.id!=S.wc);if(k<0)break;S.wl.splice(k,1)}}
+S.wc=it.id;sv();wpApply();wCloseAll();if(setCur=='wp')setRr(it.id)}
+const lk=bg=>`<div class="wph big" style="background:${bg}"><div class="wt1">9:41</div></div><div class="wph big" style="background:${bg}">${wgr}</div>`;
+function sheetPrev(it,t){PEND=it;const bg=wpBg(it,1);wSheet(`<h3>${t}</h3><div class="wphc">${lk(bg)}</div><button class="wpri" data-ok="1">壁紙に設定</button><button class="wsec" data-x2="1">キャンセル</button>`)}
+function sheetShuf(){const p=pool({cats:SH.cats,alb:SH.useAlb?SH.alb:[]}),a=p[0]||scn(0,0),b=p[1]||scn(1,0);
+wSheet(`<h3>写真シャッフル</h3><p class="wsub">iPhoneで選択された写真のセットが1日を通して設定した頻度でシャッフルされます。</p><div class="wshp"><div class="wph" style="background:url('${a}') center/cover"><div class="wt1">9:41</div></div><div class="wph" style="background:url('${b}') center/cover"></div></div>
+<div class="wchk"><div data-sc="nat"><i class="ck${SH.cats.nat?' on':''}"></i>🌿 自然</div><div data-sc="city"><i class="ck${SH.cats.city?' on':''}"></i>🏙 都市</div><div data-sc="alb"><i class="ck${SH.useAlb&&SH.alb.length?' on':''}"></i>📁 アルバム${SH.alb.length?`(${SH.alb.length}枚)`:''}</div></div>
+<div class="wfq"><span>シャッフルの頻度</span><select id="wfq"><option value="h"${SH.f=='h'?' selected':''}>1時間ごと</option><option value="d"${SH.f=='d'?' selected':''}>1日ごと</option><option value="l"${SH.f=='l'?' selected':''}>ロック時</option></select></div>
+<button class="wpri" data-shok="1">${SH.edit?'保存':SH.useAlb&&SH.alb.length?'この設定で追加':'おすすめの写真を使用'}</button><button class="wsec" data-shpick="1">写真を手動で選択</button>`)}
+function sheetEmoji(){const it={e:EM.e,bg:EM.bg},SW=['#ffd6e0','#ffe9a8','#c9f2d0','#cfe4ff','#e3d4ff','#ffffff','#2c2c2e','#ff7a59'];
+wSheet(`<h3>絵文字</h3><p class="wsub">好きな絵文字を並べた壁紙を作れます。</p><div class="wphc"><div class="wph big" id="wemp" style="background:${emojiBg(it)}"></div></div><input class="wem" id="wem" maxlength="18" value="${esc(EM.e)}" placeholder="😀🌸🍓"><div class="wsw">${SW.map(c=>`<i data-bg="${c}" class="${EM.bg==c?'on':''}" style="background:${c}"></i>`).join('')}</div><button class="wpri" data-emok="1">${EM.edit?'保存':'追加'}</button><button class="wsec" data-x2="1">キャンセル</button>`)}
+function sheetColor(){const bg=CO.g?`linear-gradient(180deg,${CO.a},${CO.b})`:CO.a;
+wSheet(`<h3>カラー</h3><p class="wsub">単色またはグラデーションの壁紙を作れます。</p><div class="wphc"><div class="wph big" id="wcop" style="background:${bg}"><div class="wt1">9:41</div></div></div><div class="wfq"><span>色1</span><input type="color" id="wca" value="${CO.a}" style="width:60px;padding:0;border:0;background:none"></div><div class="wfq"><span>色2</span><input type="color" id="wcb" value="${CO.b}" style="width:60px;padding:0;border:0;background:none"></div><div class="wchk"><div data-cg="1"><i class="ck${CO.g?' on':''}"></i>グラデーションにする</div></div><button class="wpri" data-cook="1">${CO.edit?'保存':'追加'}</button><button class="wsec" data-x2="1">キャンセル</button>`)}
+function readImgs(files,max,px,q){return Promise.all([...files].slice(0,max).map(f=>new Promise(r=>{const rd=new FileReader();rd.onload=()=>{const im=new Image();im.onerror=()=>r(null);im.onload=()=>{const k=Math.min(1,px/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',q))};im.src=rd.result};rd.onerror=()=>r(null);rd.readAsDataURL(f)}))).then(a=>a.filter(Boolean))}
+function wDark(){const o=$('#wdk');o.hidden=false;
+const CAT=[['photo','写真','🌼','conic-gradient(#ff5e5e,#ffb84d,#fff06b,#5ee07a,#4dd2ff,#7a6bff,#ff5ed0,#ff5e5e)'],['shuf','写真シャッフル','🔀','#2c2c2e'],['emoji','絵文字','😀','#ffd60a'],['color','カラー','','linear-gradient(135deg,#ff375f,#bf5af2)'],['wx','天気','☁️','#0a84ff'],['astro','アストロノミー','🪐','#1c1c1e']];
+o.innerHTML=`<div class="wdh"><button class="cb dk" data-x="1" aria-label="閉じる">✕</button><b>新しい壁紙を追加</b><span class="ihr"></span></div><div class="wcat">${CAT.map(c=>`<div class="wci" data-cat="${c[0]}"><i style="background:${c[3]}">${c[2]}</i>${c[1]}</div>`).join('')}</div>
+<div class="wds">おすすめ</div><div class="wrec">${['ios26','collection','sakura','night','forest','black'].map(k=>`<div class="wrc" data-pre="${k}"><div class="wph" style="background:${PRE[k].c}"><div class="wt1">9:41</div></div>${PRE[k].n}</div>`).join('')}</div>
+<div class="wds">写真シャッフル</div><div class="wrow" data-cat="shuf"><div class="wph" style="background:url('${scn(0,2)}') center/cover"><div class="wt1">9:41</div></div><div><p>iPhoneで選択された写真のセットが1日を通して設定した頻度でシャッフルされます。</p></div></div>
+<div class="wds">天気</div><div class="wrow"><div class="wph" style="background:${wxBg()}"><div class="wt1">9:41</div></div><div><p>いまの時間帯の空の様子を表示します。</p><button class="wget" data-cat="wx">入手</button></div></div>
+<div class="wds">アストロノミー</div><div class="wrow"><div class="wph" style="background:${ASTRO}"><div class="wt1">9:41</div></div><div><p>地球から見た宇宙の風景です。</p><button class="wget" data-cat="astro">入手</button></div></div>
+<div class="wds">絵文字</div><div class="wrow"><div class="wph" style="background:${emojiBg({e:'🌸🍓🌼🍀🐣🍋',bg:'#ffd6e0'})}"></div><div><p>好きな絵文字を並べた壁紙を作ります。</p><button class="wget" data-cat="emoji">入手</button></div></div>`}
+$('#wdk').onclick=e=>{const T=e.target,c=s=>T.closest(s);if(c('[data-x]'))return wCloseAll();
+const ca=c('[data-cat]');if(ca){const k=ca.dataset.cat;if(k=='photo')return $('#wpf').click();
+if(k=='shuf'){SH={cats:{nat:1,city:1},alb:[],useAlb:0,f:'h'};return sheetShuf()}
+if(k=='emoji'){EM={e:'😀🌸🍓',bg:'#ffd6e0'};return sheetEmoji()}
+if(k=='color'){CO={a:'#ff5e7e',b:'#5b6cff',g:1};return sheetColor()}
+if(k=='wx')return sheetPrev({t:'wx'},'天気');if(k=='astro')return sheetPrev({t:'astro'},'アストロノミー')}
+const p=c('[data-pre]');if(p)sheetPrev({t:'pre',k:p.dataset.pre},PRE[p.dataset.pre].n)};
+$('#wpf').onchange=async e=>{const f=e.target.files;e.target.value='';if(!f.length)return;const a=await readImgs(f,1,900,.72);if(!a.length)return alert('画像を読み込めませんでした');sheetPrev({t:'photo',d:a[0]},'写真')};
+$('#wpf2').onchange=async e=>{const f=e.target.files;e.target.value='';if(!f.length||!SH)return;const a=await readImgs(f,10,640,.6);if(!a.length)return alert('画像を読み込めませんでした');SH.alb=a;SH.useAlb=1;SH.cats={};sheetShuf()};
+$('#wbt').onclick=async e=>{const T=e.target,c=s=>T.closest(s);
+if(T.classList.contains('wbk')||c('[data-x2]')){$('#wbt').hidden=true;return}
+if(c('[data-ok]')){if(PEND)addItem(PEND);PEND=null;return}
+const sc=c('[data-sc]');if(sc&&SH){const k=sc.dataset.sc;if(k=='alb'){if(SH.alb.length)SH.useAlb=!SH.useAlb;else return $('#wpf2').click()}else SH.cats[k]=SH.cats[k]?0:1;return sheetShuf()}
+if(c('[data-shpick]'))return $('#wpf2').click();
+if(c('[data-shok]')){const alb=SH.useAlb?SH.alb:[];if(!pool({cats:SH.cats,alb}).length)return alert('写真のセットを1つ以上選んでください');const it={t:'shuf',cats:SH.cats,alb,f:SH.f,i:0,last:Date.now()};if(SH.edit)it.id=SH.edit;return addItem(it)}
+const bg=c('[data-bg]');if(bg&&EM){EM.bg=bg.dataset.bg;$$('.wsw i').forEach(i=>i.classList.toggle('on',i==bg));$('#wemp').style.background=emojiBg(EM);return}
+if(c('[data-emok]')){if(![...EM.e.trim()].length)return alert('絵文字を入力してください');const it={t:'emoji',e:EM.e.trim(),bg:EM.bg};if(EM.edit)it.id=EM.edit;return addItem(it)}
+if(c('[data-cg]')&&CO){CO.g=!CO.g;return sheetColor()}
+if(c('[data-cook]')){const it={t:'color',a:CO.a,b:CO.b,g:CO.g?1:0};if(CO.edit)it.id=CO.edit;return addItem(it)}
+const st=c('[data-wset]');if(st){S.wc=st.dataset.wset;sv();wpApply();$('#wbt').hidden=true;return setRr(S.wc)}
+const ed=c('[data-wedit]');if(ed){const it=S.wl.find(x=>x.id==ed.dataset.wedit);if(!it)return;
+if(it.t=='shuf'){SH={cats:it.cats||{},alb:it.alb||[],useAlb:(it.alb||[]).length?1:0,f:it.f||'h',edit:it.id};return sheetShuf()}
+if(it.t=='emoji'){EM={e:it.e,bg:it.bg,edit:it.id};return sheetEmoji()}
+if(it.t=='color'){CO={a:it.a,b:it.b,g:it.g,edit:it.id};return sheetColor()}}
+const dl=c('[data-wdel]');if(dl){if(S.wl.length<2)return alert('最後の壁紙は削除できません');if(!confirm('この壁紙を削除しますか?'))return;S.wl=S.wl.filter(x=>x.id!=dl.dataset.wdel);if(!S.wl.find(x=>x.id==S.wc))S.wc=S.wl[0].id;sv();wpApply();$('#wbt').hidden=true;setRr()}};
+$('#wbt').oninput=e=>{const T=e.target;
+if(T.id=='wem'&&EM){EM.e=T.value;$('#wemp').style.background=emojiBg(EM)}
+else if((T.id=='wca'||T.id=='wcb')&&CO){CO[T.id=='wca'?'a':'b']=T.value;$('#wcop').style.background=CO.g?`linear-gradient(180deg,${CO.a},${CO.b})`:CO.a}
+else if(T.id=='wfq'&&SH)SH.f=T.value};
+function wCustom(id){const it=S.wl.find(x=>x.id==id);if(!it)return;const bg=wpBg(it,1);
+wSheet(`<h3>カスタマイズ</h3><div class="wphc">${lk(bg)}</div>${it.id!=S.wc?`<button class="wpri" data-wset="${id}">現在の壁紙に設定</button>`:''}${['shuf','emoji','color'].includes(it.t)?`<button class="wsec" data-wedit="${id}">編集</button>`:''}<button class="wsec" style="color:#ff3b30" data-wdel="${id}">削除</button><button class="wsec" data-x2="1">閉じる</button>`)}
+// --- 設定ページのイベント ---
+$('#setm').onclick=e=>{if(e.target.closest('#acc'))return accShow(true);const k=e.target.closest('[data-k]');if(k)setNav(k.dataset.k)};
+$('#setp').onclick=async e=>{const T=e.target,c=s=>T.closest(s);
+if(c('[data-back]'))return setNav({ns:'disp',al:'disp',ts:'disp'}[setCur]||'main');
+const g=c('[data-go]');if(g)return setNav(g.dataset.go);
+const th=c('[data-th]');if(th){S.theme=th.dataset.th;sv();theme();return setRr()}
+const al=c('[data-al]');if(al){S.al=+al.dataset.al;sv();idleArm();return setRr()}
+const s=c('[data-sw]');if(s){const k=s.dataset.sw;
+if(k=='auto'){S.theme=S.theme=='auto'?document.documentElement.dataset.t:'auto'}
+else if(k=='tt')S.tt=!S.tt;
+else if(k=='bold')S.bold=!S.bold;
+else if(k=='tilt'){S.tilt=!S.tilt;if(S.tilt&&window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission=='function'){try{if(await DeviceOrientationEvent.requestPermission()!='granted'){S.tilt=false;alert('モーションと画面の向きの許可が必要です')}}catch(x){S.tilt=false}}}
+else if(k=='ns.on'){S.ns={...(S.ns||{}),on:!(S.ns&&S.ns.on)}}
+else if(k=='ns.man'){const d=new Date();d.setDate(d.getDate()+1);d.setHours(7,0,0,0);const o=S.ns||{};S.ns={...o,man:o.man&&o.man>Date.now()?0:d.getTime()}}
+sv();theme();warmTint();applyTS();return setRr()}
+const st=c('[data-set]');if(st){S.wc=st.dataset.set;sv();wpApply();return setRr(S.wc)}
+const cu=c('[data-cu]');if(cu)return wCustom(cu.dataset.cu);
+if(c('[data-add]')){if(S.wl.length>=9)return alert('壁紙は9個までです。不要な壁紙を削除してください');return wDark()}};
+$('#setp').oninput=e=>{const T=e.target;if(T.id=='brs'){S.br=+T.value;bright()}else if(T.id=='tsr'){S.ts=+T.value;applyTS()}else if(T.id=='nsw'){S.ns={...(S.ns||{}),w:+T.value};warmTint()}};
+$('#setp').onchange=e=>{const T=e.target;if(T.id=='brs'||T.id=='tsr'||T.id=='nsw')return sv();const k=T.dataset.hr;if(!k)return;
+if(k=='dk0'||k=='dk1'){S[k]=+T.value;theme()}else{S.ns={...(S.ns||{}),[k.slice(3)]:+T.value};warmTint()}sv();setRr()};
+// --- パスワード(アカウントのページ)---
+$('#pwo').onclick=()=>{$('#pwf').hidden=!$('#pwf').hidden};
+$('#pwc').onclick=()=>{$('#pwf').hidden=true;$('#pw1').value=$('#pw2').value=''};
+$('#pws').onclick=async()=>{const a=$('#pw1').value,b=$('#pw2').value;if(!sb)return noSb();if(a.length<6)return alert('パスワードは6文字以上にしてください');if(a!==b)return alert('2つのパスワードが一致しません');
+const{error}=await sb.auth.updateUser({password:a});if(error)return alert('パスワードを保存できませんでした: '+error.message);$('#pw1').value=$('#pw2').value='';$('#pwf').hidden=true;alert('パスワードを保存しました。次回からこのパスワードでログインできます')};
+// --- 起動時 ---
+$$('button.tb').forEach(b=>b.onclick=()=>{S.theme=b.dataset.m;sv();theme()});
+wpApply();bright();warmTint();applyTS();idleArm();shufTick();
+setInterval(()=>{shufTick();warmTint();if(wpCur().t=='wx')wpApply()},6e4);
 $('#pcset').onclick=PC.set;$('#pcoff').onclick=PC.off;PC.stat();
 theme();
 // ===== App Store(ダウンロード / アプリ開発 / 審査)=====
@@ -661,7 +890,6 @@ a=!!(ad.data);if(pf.data)S.prof={uid:me.id,name:pf.data.name,icon:pf.data.icon};
 if(!me)S.prof=null;save();adm=a;accUI();
 clearInterval(pt2);if(a){loadPend();pt2=setInterval(loadPend,30000)}else{pend=[];rv=null;badge()}
 if(S.tab==5&&!pv)enter(1)}
-const accShow=p=>{$('#setm').hidden=p;$('#accp').hidden=!p;$('main').scrollTo(0,0)};
 $('#acc').onclick=()=>accShow(true);$('#accbk').onclick=()=>accShow(false);
 $('#adl').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||!password)return alert('メールアドレスとパスワードを入力してください');
 const{error}=await sb.auth.signInWithPassword({email,password});if(error)return alert('ログインできません: '+error.message);$('#adp').value='';await chkAdmin()};
