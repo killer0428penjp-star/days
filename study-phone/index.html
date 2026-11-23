@@ -47,8 +47,8 @@ body{display:grid;place-items:center;height:100dvh;overflow:hidden;padding:0}
 .phone{position:relative;width:100%;height:100dvh;overflow:hidden;transform:translateZ(0);background:#0b2237}
 @media(min-width:768px){.phone{width:400px;height:min(860px,94dvh);border-radius:46px;box-shadow:0 0 0 10px #111,0 0 0 12px #3a3d44,0 30px 80px rgba(0,0,0,.35)}}
 .scr{position:absolute;inset:0}
-#wp{position:absolute;inset:0;background:linear-gradient(transparent 68%,rgba(8,26,43,.75)),radial-gradient(90% 40% at 100% 0,#e9d982,transparent 70%),linear-gradient(170deg,#f1c3c3,#e8929a 45%,#e9a7a9 70%,#f0d3cf)}
-#wp svg{position:absolute;inset:0;width:100%;height:100%}
+#wp,#wpl{position:absolute;inset:0;background:linear-gradient(transparent 68%,rgba(8,26,43,.75)),radial-gradient(90% 40% at 100% 0,#e9d982,transparent 70%),linear-gradient(170deg,#f1c3c3,#e8929a 45%,#e9a7a9 70%,#f0d3cf)}
+#wp svg,#wpl svg{position:absolute;inset:0;width:100%;height:100%}#wpl{z-index:3;pointer-events:none;overflow:hidden;transition:opacity .5s}#lock.gone~#wpl{opacity:0}
 #home{z-index:1;color:#fff}.hs{padding:calc(14px + var(--sat)) 9% 0;font-weight:700}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px 10px;padding:26px 6% 0}
 .ic{background:none!important;border:0;padding:0;border-radius:0;display:flex;flex-direction:column;align-items:center;gap:6px;color:#fff;font-size:.72em;text-shadow:0 1px 4px rgba(0,0,0,.35)}
@@ -315,6 +315,13 @@ div.swc,span.swc{display:block;flex:none}
 .wsw{display:flex;gap:10px;justify-content:center;margin:10px 0;flex-wrap:wrap}.wsw i{width:34px;height:34px;border-radius:50%;border:3px solid transparent;box-shadow:0 0 0 1px var(--bd);cursor:pointer}.wsw i.on{border-color:var(--fg)}
 .wem{width:100%;font-size:1.6em;text-align:center;border-radius:14px}
 @media(hover:hover){.wadd:hover,.wpri:hover,.wcu:hover{color:#fff;background-color:#2563eb}.wcu:hover{background-color:rgba(255,255,255,.3)}.wpill:hover{color:#2563eb;background:#d9e8ff}.wsec:hover,.wget:hover{color:#2563eb;background:none}.wget:hover{background:#1c1c1e;color:#4da3ff}.cb.dk:hover{background:#1c1c1e;color:#fff}}
+
+.wchd{gap:10px}.wchd>*{width:47%;text-align:center;white-space:nowrap;padding:.25em .2em;box-sizing:border-box;font-size:.78em}
+.nbtn{display:block;width:100%;border:0;border-radius:24px;background:var(--bg);color:#0a84ff;font-weight:600;padding:15px;margin-bottom:20px;cursor:pointer;font-size:1em}
+.nlk{border:0;background:none;color:#0a84ff;font-weight:600;padding:8px 0 8px 10px;cursor:pointer;font-size:1em}
+.bat0{padding:22px 16px;text-align:center}.bpct{font:700 3em/1.1 "Zen Kaku Gothic New","Hiragino Sans",sans-serif;display:flex;align-items:center;justify-content:center;gap:14px}.bpct svg{color:var(--fg);flex:none}
+.bseg{display:flex;background:var(--sf);border-radius:10px;padding:2px;margin:14px 14px 4px}.bseg button{flex:1;border:0;background:transparent;border-radius:8px;padding:7px 4px;color:var(--fg);font-weight:600;font-size:.9em}.bseg button.on{background:var(--bg);background-size:0;color:var(--fg);border:0;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.bchart{padding:6px 14px 14px}.bchart svg{width:100%;height:auto;display:block}
 </style></head><body>
 <div class="phone" data-v="lock"><div id="isl"></div><div id="slp"></div><div id="wp"><svg viewBox="0 0 100 200" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a8ca0"/><stop offset=".35" stop-color="#4f8ba5"/><stop offset=".75" stop-color="#1c4a70"/><stop offset="1" stop-color="#0a2236"/></linearGradient></defs><path d="M100 18C70 24 58 50 58 90 58 140 32 160 0 196V200H100Z" fill="url(#wg)" stroke="none"/></svg></div>
 <div id="home" class="scr"><div id="hz"></div><div class="hs" id="ht"></div></div>
@@ -353,7 +360,7 @@ div.swc,span.swc{display:block;flex:none}
 <div id="sht" hidden><div id="shb"></div></div>
 </div><div id="hb"></div>
 <div id="sw" class="scr"><div id="sws"></div><div id="swh">上にスライドして閉じる</div></div>
-<div id="warm"></div><div id="dim"></div><div id="lock" class="scr"><div class="lc"><div id="ld"></div><div id="lt"></div></div><button class="lb" id="lbL" style="left:11%" tabindex="-1" aria-label="カメラ"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/></svg></button><button class="lb" id="lbR" style="right:11%" tabindex="-1" aria-label="ライト"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M9 2h6v4l-1 2v13a2 2 0 0 1-4 0V8L9 6z"/></svg></button><div id="lh">スライドして開く</div><div id="lk"></div></div>
+<div id="warm"></div><div id="dim"></div><div id="lock" class="scr"><div class="lc"><div id="ld"></div><div id="lt"></div></div><button class="lb" id="lbL" style="left:11%" tabindex="-1" aria-label="カメラ"><svg width="26" height="26" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.500"/></svg></button><button class="lb" id="lbR" style="right:11%" tabindex="-1" aria-label="ライト"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M9 2h6v4l-1 2v13a2 2 0 0 1-4 0V8L9 6z"/></svg></button><div id="lh">スライドして開く</div><div id="lk"></div></div><div id="wpl"></div>
 <div id="pc"><div id="pct">パスコードを入力</div><div id="pcd"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <div id="pck"><button class="kb" data-k="1">1</button><button class="kb" data-k="2">2</button><button class="kb" data-k="3">3</button><button class="kb" data-k="4">4</button><button class="kb" data-k="5">5</button><button class="kb" data-k="6">6</button><button class="kb" data-k="7">7</button><button class="kb" data-k="8">8</button><button class="kb" data-k="9">9</button><span></span><button class="kb" data-k="0">0</button><span></span></div>
 <div class="pcb"><button class="pcl" id="pce">緊急</button><button class="pcl" id="pcx">キャンセル</button></div></div>
@@ -576,24 +583,28 @@ function wpBg(it,pv){switch(it.t){case'pre':return it.k=='default'?(pv?PRE.defau
 case'shuf':{const p=pool(it);return p.length?`url('${p[(it.i||0)%p.length]}') center/cover`:'#222'}case'emoji':return emojiBg(it);case'color':return it.g?`linear-gradient(180deg,${it.a},${it.b})`:it.a;case'wx':return wxBg();case'astro':return ASTRO}return '#222'}
 if(!S.wl){S.wl=[{id:'w0',t:'pre',k:(S.wp&&PRE[S.wp])?S.wp:'default'}];(S.wps||[]).forEach((d,i)=>S.wl.push({id:'w'+(i+1),t:'photo',d}));S.wc=(S.wp&&S.wp[0]=='u')?'w'+(+S.wp.slice(1)+1):'w0';sv()}
 const wpCur=()=>S.wl.find(x=>x.id==S.wc)||S.wl[0];
-function wpApply(){const it=wpCur(),w=$('#wp');w.style.background=wpBg(it);w.querySelector('svg').style.display=(it.t=='pre'&&it.k=='default')?'block':'none'}
-function shufTick(f){let ch=0;const now=Date.now();S.wl.forEach(it=>{if(it.t!='shuf')return;const q=it.f||'h',gap=q=='h'?36e5:q=='d'?864e5:0;if(f=='lock'?q=='l':(q!='l'&&now-(it.last||0)>=gap)){const n=pool(it).length;if(n>1){it.i=((it.i||0)+1+Math.floor(Math.random()*(n-1)))%n;it.last=now;ch=1}}});if(ch){sv();if(wpCur().t=='shuf')wpApply()}}
+if(S.wcl===undefined)S.wcl=S.wc;
+const wpCurL=()=>S.wl.find(x=>x.id==S.wcl)||wpCur();
+function wpApply(){const w=$('#wp'),x=$('#wpl');if(!x.firstChild)x.innerHTML=w.querySelector('svg').outerHTML.replace('id="wg"','id="wg2"').replace('url(#wg)','url(#wg2)');
+[[w,wpCur()],[x,wpCurL()]].forEach(([e,it])=>{e.style.background=wpBg(it);e.querySelector('svg').style.display=(it.t=='pre'&&it.k=='default')?'block':'none'})}
+function wSetT(id,tg){if(tg=='l')S.wcl=id;else if(tg=='h')S.wc=id;else{S.wc=id;S.wcl=id}sv();wpApply()}
+function shufTick(f){let ch=0;const now=Date.now();S.wl.forEach(it=>{if(it.t!='shuf')return;const q=it.f||'h',gap=q=='h'?36e5:q=='d'?864e5:0;if(f=='lock'?q=='l':(q!='l'&&now-(it.last||0)>=gap)){const n=pool(it).length;if(n>1){it.i=((it.i||0)+1+Math.floor(Math.random()*(n-1)))%n;it.last=now;ch=1}}});if(ch){sv();if(wpCur().t=='shuf'||wpCurL().t=='shuf')wpApply()}}
 new MutationObserver(()=>{if(PH.dataset.v=='lock')shufTick('lock')}).observe(PH,{attributes:true,attributeFilter:['data-v']});
 // --- 設定の一覧(動画1)---
 const GCS='<svg viewBox="0 0 24 24" stroke="none"><circle cx="9" cy="9" r="4.5" fill="#ff6b6b"/><circle cx="15" cy="9" r="4.5" fill="#4dabf7" opacity=".85"/><circle cx="9" cy="15" r="4.5" fill="#ffd43b" opacity=".85"/><circle cx="15" cy="15" r="4.5" fill="#51cf66" opacity=".85"/></svg>';
-const GR=[[['#ff9f0a','M12 3.5l1.8 5.7 6.7 3.8v1.9l-6.7-2.1-.9 4.4 2.1 1.8v1.5L12 19.5l-3 1v-1.5l2.1-1.8-.9-4.4-6.7 2.1v-1.9l6.7-3.8z','機内モード','sw'],['#0a84ff','M3 9.5a13 13 0 0 1 18 0M6 13a8.5 8.5 0 0 1 12 0M9 16.3a4 4 0 0 1 6 0M12 19.5h.01','Wi-Fi','オン'],['#0a84ff','M7 7.5l10 9-5 4.5V3l5 4.5-10 9','Bluetooth','オン'],['#34c759','M5 19v-3M10 19v-6M15 19v-9M20 19V5','モバイル通信'],['#34c759','M10 14a4 4 0 0 1 0-6l2-2a4 4 0 0 1 6 6l-1 1M14 10a4 4 0 0 1 0 6l-2 2a4 4 0 0 1-6-6l1-1','インターネット共有','オフ'],['#34c759','M3.5 8h15v8h-15zM20.5 11v2','バッテリー']],
+const GR=[[['#ff9f0a','M12 3.5l1.8 5.7 6.7 3.8v1.9l-6.7-2.1-.9 4.4 2.1 1.8v1.5L12 19.5l-3 1v-1.5l2.1-1.8-.9-4.4-6.7 2.1v-1.9l6.7-3.8z','機内モード','sw'],['#0a84ff','M3 9.5a13 13 0 0 1 18 0M6 13a8.5 8.5 0 0 1 12 0M9 16.3a4 4 0 0 1 6 0M12 19.5h.01','Wi-Fi','\u200b','wifi'],['#0a84ff','M7 7.5l10 9-5 4.5V3l5 4.5-10 9','Bluetooth','\u200b','bt'],['#34c759','M5 19v-3M10 19v-6M15 19v-9M20 19V5','モバイル通信','\u200b','cell'],['#34c759','M3.5 8h15v8h-15zM20.5 11v2','バッテリー','','bat']],
 [['#8e8e93','M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1','一般','1'],['#0a84ff','M12 3.5a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6zM5 9l7 1 7-1M12 10v5l-3 5.5M12 15l3 5.5','アクセシビリティ'],['linear-gradient(135deg,#ff6bd6,#7a6bff 50%,#35c8ff)','M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z','Apple Intelligence と Siri'],['#0a84ff','M8 4h8v16H8zM11 8h2','アクションボタン'],['#8e8e93','M4 8h4l1.5-2h5L16 8h4v11H4zM12 11a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z','カメラ'],['#8e8e93','M4 8h9M17 8h3M4 16h3M11 16h9M15 8a2 2 0 1 0 .01 0M9 16a2 2 0 1 0 .01 0','コントロールセンター'],['#1c1c1e','M4 6h16v12H4zM8 10v4M12 9v6M16 11v2','スタンバイ'],['#0a84ff','M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z','ホーム画面とアプリライブラリ'],['#0a84ff','M12 8a4 4 0 1 0 .01 0M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2l1.8 1.8M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8','画面表示と明るさ','','disp'],['#8e8e93','M11 4a7 7 0 1 0 .01 0M16 16l4.5 4.5','検索'],['#32ade6','M12 4a2.6 2.6 0 1 0 .01 0M18 9a2.6 2.6 0 1 0 .01 0M6 9a2.6 2.6 0 1 0 .01 0M12 15a2.6 2.6 0 1 0 .01 0M12 8v3','壁紙','','wp']],
 [['#ff3b30','M6 17h12l-1.5-2.2V11a4.5 4.5 0 0 0-9 0v3.8zM10 20h4','通知'],['#ff2d55','M4 10h3l4-3.2v10.4L7 14H4zM15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11','サウンドと触覚'],['#5e5ce6','M18.5 14.5A7 7 0 1 1 9.5 5.5a5.5 5.5 0 0 0 9 9z','集中モード'],['#5e5ce6','M7 4h10M7 20h10M8 4c0 5 8 5 8 10v6M16 4c0 5-8 5-8 10v6','スクリーンタイム']],
 [['#34c759','M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10v1.5M15 10v1.5M12 10v3.5h-1M9 16c1.7 1.3 4.3 1.3 6 0','Face IDとパスコード'],['#ff3b30','T:SOS','緊急SOS'],['#0a84ff','M12 3.5l7 3v5.5c0 4.2-3 7.4-7 8.5-4-1.1-7-4.3-7-8.5V6.5z','プライバシーとセキュリティ']],
 [['#fff','GC','Game Center'],['#0a84ff','M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5 4 4 0 0 1 17.5 18z','iCloud'],['#2c2c2e','M4 7h16v11H4zM4 7l3-3h10l3 3M15 12h5v3h-5z','ウォレットとApple Pay']],
 [['linear-gradient(135deg,#7a5cff,#2f80ff)','M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5zM13 13h6v6h-6z','アプリ']]];
-const rowH=([c,g,l,v,k])=>`<div class="ir"${k?` data-k="${k}"`:''}><div class="ii" style="background:${c}">${g.startsWith('T:')?`<svg viewBox="0 0 24 24"><text x="12" y="15.5" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" stroke="none">${g.slice(2)}</text></svg>`:g=='GC'?GCS:`<svg viewBox="0 0 24 24"><path d="${g}"/></svg>`}</div><span class="il">${l}</span>${v==='sw'?'<span class="swc"><i></i></span>':v==='1'?'<b class="bdg0">1</b><span class="ich">›</span>':(v?`<span class="iv">${v}</span>`:'')+'<span class="ich">›</span>'}</div>`;
+const rowH=([c,g,l,v,k0])=>{const k=k0||(v==='sw'?'':'x:'+l);return `<div class="ir"${k?` data-k="${k}"`:''}><div class="ii" style="background:${c}">${g.startsWith('T:')?`<svg viewBox="0 0 24 24"><text x="12" y="15.5" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" stroke="none">${g.slice(2)}</text></svg>`:g=='GC'?GCS:`<svg viewBox="0 0 24 24"><path d="${g}"/></svg>`}</div><span class="il">${l}</span>${v==='sw'?'<span class="swc"><i></i></span>':v==='1'?'<b class="bdg0">1</b><span class="ich">›</span>':(v?`<span class="iv">${v}</span>`:'')+'<span class="ich">›</span>'}</div>`};
 $('#setm').innerHTML='<h1 class="ih">設定</h1><div class="ig"><div class="ir acr" id="acc"><div class="sa" id="accic"></div><div class="tx"><b id="accn"></b><span class="mu" id="accs"></span></div><span class="ich">›</span></div></div>'+GR.map(g=>`<div class="ig">${g.map(rowH).join('')}</div>`).join('')+'<div id="ssn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><b></b><span>スペルをチェックするか、新規検索をしてみてください。</span></div>';
 $('#ssq').oninput=()=>{const v=$('#ssq').value.trim().toLowerCase();let n=0;$$('#setm .ig').forEach(g=>{let m=0;g.querySelectorAll('.ir').forEach(r=>{const ok=!v||r.textContent.toLowerCase().includes(v);r.hidden=!ok;if(ok)m++});g.hidden=!m;n+=m});$('#setm .ih').hidden=!!v;$('#ssn').hidden=!v||n>0;$('#ssn b').textContent='“'+$('#ssq').value+'”の検索結果なし'};
 // --- ページ移動 ---
 let setCur='main';
-function setNav(n){setCur=n;$('#setm').hidden=n!='main';$('#accp').hidden=n!='acc';$('#setp').hidden=n=='main'||n=='acc';$('#ssb').hidden=n!='main';if(!$('#setp').hidden){$('#setp').innerHTML=PGS[n]();if(n=='wp')wpAfter()}$('main').scrollTo(0,0)}
-function setRr(id){const m=$('main'),y=m.scrollTop;$('#setp').innerHTML=PGS[setCur]();if(setCur=='wp')wpAfter(id);m.scrollTop=y}
+function setNav(n){setCur=n;$('#setm').hidden=n!='main';$('#accp').hidden=n!='acc';$('#setp').hidden=n=='main'||n=='acc';$('#ssb').hidden=n!='main';if(!$('#setp').hidden){$('#setp').innerHTML=pgH(n);if(n=='wp')wpAfter();pgAfter(n)}$('main').scrollTo(0,0)}
+function setRr(id){const m=$('main'),y=m.scrollTop;$('#setp').innerHTML=pgH(setCur);if(setCur=='wp')wpAfter(id);pgAfter(setCur);m.scrollTop=y}
 const accShow=p=>setNav(p?'acc':'main');
 const hd=t=>`<div class="ihd"><button class="cb" data-back="1" aria-label="戻る">‹</button><b>${t}</b><span class="ihr"></span></div>`;
 const swB=(k,on)=>`<button class="swc${on?' on':''}" data-sw="${k}" role="switch" aria-checked="${!!on}"><i></i></button>`;
@@ -613,18 +624,79 @@ ns:()=>{const n=S.ns||{};return hd('Night Shift')+`<div class="ig"><div class="i
 <div class="isx">色温度</div><div class="ig"><div class="ir ni brr"><span class="mu">低</span><input type="range" id="nsw" min="0" max="100" value="${n.w??50}"><span class="mu">高</span></div></div>`},
 al:()=>hd('自動ロック')+`<div class="ig">${AL.map(a=>`<div class="ir ni" data-al="${a[0]}"><span class="il">${a[1]}</span>${(S.al||0)==a[0]?'<span style="color:#2563eb">✓</span>':''}</div>`).join('')}</div><p class="icp">操作しない時間がこの長さになると、画面がオフになりロックされます。タップで復帰します。</p>`,
 ts:()=>hd('テキストサイズ')+`<div class="ig" style="padding:18px 16px"><p style="margin:0 0 18px;line-height:1.7">文字サイズを変更すると、このスマホの中の表示が大きくなったり小さくなったりします。</p><div class="brr" style="display:flex;align-items:center;gap:12px"><span style="font-size:.8em">A</span><input type="range" id="tsr" min="0" max="6" step="1" value="${S.ts??3}" style="flex:1;accent-color:#2563eb"><span style="font-size:1.5em">A</span></div></div>`,
-wp:()=>{const L=S.wl,c=wpCur().id,card=it=>{const bg=wpBg(it,1),on=it.id==c;return `<div class="wc" data-id="${it.id}"><div class="wch">${on?'<span class="mu">現在の壁紙</span>':`<button class="wpill" data-set="${it.id}">現在の壁紙に設定</button>`}</div><div class="wpr"><div class="wph" style="background:${bg}"><div class="wt1">9:41</div><button class="wcu" data-cu="${it.id}">カスタマイズ</button></div><div class="wph" style="background:${bg}">${wgr}<button class="wcu" data-cu="${it.id}">カスタマイズ</button></div></div></div>`};
+wp:()=>{const L=S.wl,cH=wpCur().id,cL=wpCurL().id,pl=(it,on,tg,nm)=>on?`<span class="mu">${nm}に使用中</span>`:`<button class="wpill" data-set="${it.id}" data-tg="${tg}">${nm}に設定</button>`,card=it=>{const bg=wpBg(it,1);return `<div class="wc" data-id="${it.id}"><div class="wch wchd">${pl(it,it.id==cL,'l','ロック画面')}${pl(it,it.id==cH,'h','ホーム画面')}</div><div class="wpr"><div class="wph" style="background:${bg}"><div class="wt1">9:41</div><button class="wcu" data-cu="${it.id}" data-tg="l">カスタマイズ</button></div><div class="wph" style="background:${bg}">${wgr}<button class="wcu" data-cu="${it.id}" data-tg="h">カスタマイズ</button></div></div></div>`};
 return hd('壁紙')+`<div class="ig wcard"><div class="wcar" id="wcar">${L.map(card).join('')}<div class="wc" data-add="1"><div class="wch"><span class="mu">新規</span></div><div class="wpr"><div class="wph nw"><b>＋</b></div><div class="wph nw">${wgr}</div></div></div></div><div class="wdots" id="wdots">${'<i></i>'.repeat(L.length+1)}</div><button class="wadd" data-add="1">＋新しい壁紙を追加</button></div>
 <div class="ig winf"><div><b>ロック画面から壁紙を変更</b>ロック画面から、壁紙やウィジェットの追加、編集、または切り替えを行うにはタッチして押さえたままにします。</div><div class="mp"></div></div>`}};
+
+// ===== 実機の情報(Wi-Fi / Bluetooth / モバイル通信 / バッテリー)=====
+const pgH=n=>PGS[n]?PGS[n]():(String(n).startsWith('x:')?hd(String(n).slice(2)):'');
+const CN=()=>navigator.connection||navigator.mozConnection||navigator.webkitConnection||null;
+const netKind=()=>{if(!navigator.onLine)return 'off';const t=(CN()||{}).type;return t=='cellular'?'cell':(t=='wifi'||t=='ethernet')?'wifi':'unk'};
+let NI=null,NIT=0,NIP=null;
+function netInfo(){if(NI&&Date.now()-NIT<6e4)return Promise.resolve(NI);if(NIP)return NIP;const t0=performance.now();
+NIP=(async()=>{let r={};try{const x=await fetch('https://ipwho.is/',{cache:'no-store'}),j=await x.json();if(j&&j.success!==false&&j.ip)r={ip:j.ip,isp:(j.connection&&(j.connection.isp||j.connection.org))||'',city:j.city||'',region:j.region||'',country:j.country||''}}catch(e){}
+if(!r.ip){try{const x=await fetch('https://api.ipify.org?format=json',{cache:'no-store'}),j=await x.json();r.ip=j.ip}catch(e){}}
+r.ms=r.ip?Math.round(performance.now()-t0):0;NI=r;NIT=Date.now();NIP=null;return r})();return NIP}
+function localIP(){return new Promise(res=>{let d=0;const fin=v=>{if(!d){d=1;res(v)}};try{const pc=new RTCPeerConnection({iceServers:[]});pc.createDataChannel('x');
+pc.onicecandidate=e=>{if(!e.candidate)return fin(null);const m=/\b(\d{1,3}(?:\.\d{1,3}){3})\b/.exec(e.candidate.candidate);if(m&&m[1]!='0.0.0.0'){fin(m[1]);try{pc.close()}catch(_){}}};
+pc.createOffer().then(o=>pc.setLocalDescription(o)).catch(()=>fin(null));setTimeout(()=>{fin(null);try{pc.close()}catch(_){}},2500)}catch(e){fin(null)}})}
+const row2=(l,v,id)=>`<div class="ir ni"><span class="il">${l}</span><span class="iv"${id?` data-ni="${id}"`:''}>${v}</span></div>`;
+function netFill(){const set=(k,v)=>$$('#setp [data-ni="'+k+'"]').forEach(e=>e.textContent=v);
+if(!navigator.onLine){['ip','isp','loc','ms'].forEach(k=>set(k,'—'));return}
+netInfo().then(r=>{set('ip',r.ip||'取得できません');set('isp',r.isp||'不明');set('loc',[r.country,r.region,r.city].filter(Boolean).join(' ')||'不明');set('ms',r.ms?r.ms+' ms':'—')});
+if(setCur=='wifi')localIP().then(ip=>{const row=$('#setp [data-ni-row="lip"]');if(row&&ip){row.hidden=false;row.querySelector('.iv').textContent=ip}})}
+// --- Bluetooth(Web Bluetooth)---
+const BT={list:[],busy:0};let btInited=0;
+const btOK=()=>!!navigator.bluetooth;
+function btAdd(dev){let o=BT.list.find(x=>x.id==dev.id);if(!o){o={id:dev.id,dev,name:dev.name||'名称未設定のデバイス',batt:null,conn:false,err:''};BT.list.push(o);dev.addEventListener('gattserverdisconnected',()=>{o.conn=false;o.batt=null;btNotify()})}return o}
+async function btConnect(o){try{BT.busy=o.id;o.err='';btNotify();const sv=await o.dev.gatt.connect();o.conn=true;
+try{const b=await sv.getPrimaryService('battery_service'),ch=await b.getCharacteristic('battery_level'),v=await ch.readValue();o.batt=v.getUint8(0)}catch(e){o.batt=null}}catch(e){o.conn=false;o.err='接続できませんでした'}BT.busy=0;btNotify()}
+const btNotify=()=>{netSum();if(setCur=='bt'&&!$('#setp').hidden)setRr()};
+function btInit(){if(btInited||!btOK())return;btInited=1;try{if(navigator.bluetooth.getDevices)navigator.bluetooth.getDevices().then(a=>{a.forEach(d=>{const o=btAdd(d);o.conn=!!(d.gatt&&d.gatt.connected)});btNotify()}).catch(()=>{})}catch(e){}}
+// --- バッテリー(Battery Status API)---
+const BA={b:null,rng:'24'};
+function batSample(f){const b=BA.b;if(!b)return;const lv=Math.round(b.level*100),now=Date.now();S.bh??=[];const a=S.bh,l=a[a.length-1];
+if(l&&l[1]==lv&&now-l[0]<(f?3e4:9e5))return;a.push([now,lv,b.charging?1:0]);const lim=now-10*864e5;while(a.length&&a[0][0]<lim)a.shift();if(a.length>1600)a.splice(0,a.length-1600);save()}
+const batNotify=()=>{if(setCur=='bat'&&!$('#setp').hidden)setRr()};
+const batIc=(lv,ch)=>`<svg width="64" height="30" viewBox="0 0 64 30"><rect x="1.5" y="1.5" width="53" height="27" rx="8" fill="none" stroke="currentColor" opacity=".5" stroke-width="3"/><rect x="5" y="5" width="${Math.max(3,46*lv/100).toFixed(1)}" height="20" rx="5" fill="${lv<=20&&!ch?'#ff3b30':'#34c759'}"/><path d="M58 10v10c2-1 3.500-3 3.500-5S60 11 58 10z" fill="currentColor" opacity=".5"/>${ch?'<path d="M30 5l-8 12h6l-2 8 8-12h-6z" fill="#fff"/>':''}</svg>`;
+function batChart(){const a=S.bh||[],now=Date.now(),H=BA.rng=='24',span=H?24*36e5:10*864e5,step=H?36e5:6*36e5,n=span/step,end=Math.ceil(now/step)*step,start=end-span,bars=Array(n).fill(null);
+a.forEach(([t,l])=>{if(t>=start&&t<end)bars[Math.floor((t-start)/step)]=l});if(BA.b)bars[Math.floor((now-start)/step)]=Math.round(BA.b.level*100);
+const W=320,HH=150,pl=4,pr=34,pt=8,pb=22,bw=(W-pl-pr)/n,gx=Math.min(3,bw*.25),Y=v=>pt+(HH-pt-pb)*(1-v/100);let g='';
+[0,50,100].forEach(v=>{g+=`<line x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--bd)" stroke-width="1"/><text x="${W-pr+4}" y="${Y(v)+4}" font-size="10" style="fill:var(--mu)">${v}%</text>`});
+bars.forEach((l,i)=>{if(l==null)return;const h=(HH-pt-pb)*l/100;g+=`<rect x="${(pl+i*bw+gx/2).toFixed(1)}" y="${(HH-pb-h).toFixed(1)}" width="${(bw-gx).toFixed(1)}" height="${Math.max(h,1).toFixed(1)}" rx="2" fill="${l<=20?'#ff3b30':'#34c759'}"/>`});
+(H?[0,6,12,18]:[0,8,16,24,32]).forEach(i=>{const d=new Date(start+i*step);g+=`<text x="${(pl+i*bw).toFixed(1)}" y="${HH-6}" font-size="10" style="fill:var(--mu)">${H?d.getHours()+'時':(d.getMonth()+1)+'/'+d.getDate()}</text>`});
+return `<div class="bchart"><svg viewBox="0 0 ${W} ${HH}">${g}</svg></div>`}
+Object.assign(PGS,{
+wifi:()=>{const k=netKind(),c=CN(),kt={off:'オフライン',cell:'未接続(モバイル通信を使用中)',wifi:'接続済み',unk:'インターネットに接続中'}[k],
+ty=c&&c.type&&c.type!='unknown'?({wifi:'Wi-Fi',ethernet:'有線(イーサネット)',cellular:'モバイル通信',bluetooth:'Bluetooth',wimax:'WiMAX',other:'その他',none:'なし'}[c.type]||c.type):'';
+return hd('Wi-Fi')+`<div class="ig">${row2('状態',kt)}${ty?row2('接続の種類',ty):''}</div>`+(k=='off'?'':`<div class="isx">ネットワークの詳細</div><div class="ig">${row2('IPアドレス','取得中…','ip')}<div class="ir ni" data-ni-row="lip" hidden><span class="il">ローカルIPアドレス</span><span class="iv"></span></div>${c&&c.downlink!=null?row2('通信速度(目安)',c.downlink+' Mbps'):''}${c&&c.rtt!=null?row2('遅延(目安)',c.rtt+' ms'):row2('応答時間','…','ms')}${c&&c.effectiveType?row2('回線品質(目安)',c.effectiveType.toUpperCase()):''}</div><button class="nbtn" data-neti="1">情報を更新</button>`)+`<p class="icp">ネットワーク名(SSID)の取得と、Wi-Fiのオン/オフ・切断は、ブラウザの制限でできません。</p>`},
+cell:()=>{const k=netKind(),c=CN(),kt={off:'オフライン',cell:'モバイル通信で接続中',wifi:'Wi-Fiで接続中(モバイル通信は未使用)',unk:'接続中(回線の種類は判別できません)'}[k];
+return hd('モバイル通信')+`<div class="ig">${row2('状態',kt)}</div>`+(k=='off'?'':`<div class="isx">通信情報</div><div class="ig">${row2('IPアドレス','取得中…','ip')}${row2('プロバイダ','取得中…','isp')}${row2('おおよその地域','取得中…','loc')}${c&&c.effectiveType?row2('通信方式(目安)',c.effectiveType.toUpperCase()):''}${c&&c.downlink!=null?row2('通信速度(目安)',c.downlink+' Mbps'):''}${c&&c.rtt!=null?row2('遅延(目安)',c.rtt+' ms'):''}${c&&'saveData' in c?row2('データセーバー',c.saveData?'オン':'オフ'):''}</div><button class="nbtn" data-neti="1">情報を更新</button>`)+`<p class="icp">キャリア名・電波の強さ・SIM・データ使用量は、ブラウザの制限で取得できません。</p>`},
+bt:()=>{if(!btOK())return hd('Bluetooth')+`<div class="ig"><div class="ir ni"><span class="il">このブラウザはBluetoothに対応していません</span></div></div><p class="icp">Chrome(AndroidやPC)で開くと使えます。iPhoneのSafariは非対応です。</p>`;
+return hd('Bluetooth')+(BT.list.length?`<div class="isx">自分のデバイス</div><div class="ig">${BT.list.map(o=>`<div class="ir ni"><div class="il">${E(o.name)}<div class="mu">${o.conn?'接続済み'+(o.batt!=null?' ・ バッテリー '+o.batt+'%':''):(BT.busy==o.id?'接続中…':(o.err||'未接続'))}</div></div><button class="nlk" ${o.conn?'data-btdc':'data-btcn'}="${E(o.id)}">${o.conn?'切断':'接続'}</button></div>`).join('')}</div>`:'')+`<button class="nbtn" data-btadd="1">デバイスを追加…</button><p class="icp">ブラウザの選択画面でペアリングしたデバイスだけが表示されます。Bluetoothのオン/オフと、周辺デバイスの自動検索はブラウザの制限でできません。</p>`},
+bat:()=>{const b=BA.b;if(!b)return hd('バッテリー')+`<div class="ig"><div class="ir ni"><span class="il">この端末・ブラウザではバッテリー情報を取得できません</span></div></div><p class="icp">Chrome(AndroidやPC)で開くと実際の残量が表示されます。iPhoneのSafariは非対応です。</p>`;
+const lv=Math.round(b.level*100),ft=t=>{if(!isFinite(t)||t<=0)return '';const h=Math.floor(t/3600),m=Math.round(t%3600/60);return (h?h+'時間':'')+m+'分'},
+tm=b.charging?(ft(b.chargingTime)?'フル充電まで 約'+ft(b.chargingTime):''):(ft(b.dischargingTime)?'残り 約'+ft(b.dischargingTime):'');
+return hd('バッテリー')+`<div class="ig bat0"><div class="bpct">${lv}%${batIc(lv,b.charging)}</div><div class="mu">${b.charging?'充電中':'電池を使用中'}${tm?' ・ '+tm:''}</div></div><div class="isx">バッテリー残量</div><div class="ig"><div class="bseg"><button data-br="24" class="${BA.rng=='24'?'on':''}">過去24時間</button><button data-br="10" class="${BA.rng=='10'?'on':''}">過去10日間</button></div>${batChart()}</div><p class="icp">残量の履歴は、このスマホを開いている間に記録されたものです。</p>`}
+});
+function pgAfter(n){if(n=='wifi'||n=='cell')netFill();else if(n=='bt')btInit()}
+function netSum(){const k=netKind(),s=(q,t)=>{const e=$('#setm [data-k="'+q+'"] .iv');if(e)e.textContent=t};
+s('wifi',k=='off'?'オフライン':k=='cell'?'未接続':k=='wifi'?'接続済み':'接続中');s('cell',k=='cell'?'接続中':'');s('bt',!btOK()?'非対応':BT.list.some(o=>o.conn)?'接続済み':'未接続')}
+function pgRef(){NI=null;netSum();if(!$('#setp').hidden&&['wifi','cell'].includes(setCur))setRr()}
+addEventListener('online',pgRef);addEventListener('offline',pgRef);try{CN()&&CN().addEventListener('change',pgRef)}catch(e){}
+if(navigator.getBattery)navigator.getBattery().then(b=>{BA.b=b;['levelchange','chargingchange','chargingtimechange','dischargingtimechange'].forEach(t=>b.addEventListener(t,()=>{batSample(t=='chargingchange');batNotify()}));batSample(1);batNotify()}).catch(()=>{});
+setInterval(()=>{batSample(0);batNotify()},3e5);
+netSum();
 // --- 壁紙のページ ---
 function wpAfter(id){const car=$('#wcar');if(!car)return;const el=car.querySelector(`[data-id="${id||S.wc}"]`);if(el)car.scrollLeft=el.offsetLeft-(car.clientWidth-el.clientWidth)/2;wDots()}
 function wDots(){const car=$('#wcar');if(!car)return;const cs=[...car.children],m=car.scrollLeft+car.clientWidth/2;let k=0,b=1e9;cs.forEach((c,i)=>{const d=Math.abs(c.offsetLeft+c.clientWidth/2-m);if(d<b){b=d;k=i}});$$('#wdots i').forEach((d,i)=>d.classList.toggle('on',i==k))}
 $('#setp').addEventListener('scroll',e=>{if(e.target.id=='wcar')wDots()},true);
-let PEND=null,SH=null,EM=null,CO=null;
-const wCloseAll=()=>{$('#wbt').hidden=true;$('#wdk').hidden=true};
+let PEND=null,SH=null,EM=null,CO=null,WT=null;
+const wCloseAll=()=>{$('#wbt').hidden=true;$('#wdk').hidden=true;WT=null};
 const wSheet=h=>{const b=$('#wbt');b.hidden=false;b.innerHTML='<div class="wbk"></div><div class="wbs"><div class="wsg"></div>'+h+'</div>'};
-function addItem(it){if(it.id){const i=S.wl.findIndex(x=>x.id==it.id);if(i>=0)S.wl[i]=it}else{it.id='w'+Date.now().toString(36);S.wl.push(it);while(S.wl.length>9){const k=S.wl.findIndex(x=>x.id!=it.id&&x.id!=S.wc);if(k<0)break;S.wl.splice(k,1)}}
-S.wc=it.id;sv();wpApply();wCloseAll();if(setCur=='wp')setRr(it.id)}
+function addItem(it){const used=it.id&&(it.id==S.wc||it.id==S.wcl);if(it.id){const i=S.wl.findIndex(x=>x.id==it.id);if(i>=0)S.wl[i]=it}else{it.id='w'+Date.now().toString(36);S.wl.push(it);while(S.wl.length>9){const k=S.wl.findIndex(x=>x.id!=it.id&&x.id!=S.wc&&x.id!=S.wcl);if(k<0)break;S.wl.splice(k,1)}}
+const tg=WT;if(tg=='l')S.wcl=it.id;else if(tg=='h')S.wc=it.id;else if(!used){S.wc=it.id;S.wcl=it.id}
+sv();wpApply();wCloseAll();if(setCur=='wp')setRr(it.id)}
 const lk=bg=>`<div class="wph big" style="background:${bg}"><div class="wt1">9:41</div></div><div class="wph big" style="background:${bg}">${wgr}</div>`;
 function sheetPrev(it,t){PEND=it;const bg=wpBg(it,1);wSheet(`<h3>${t}</h3><div class="wphc">${lk(bg)}</div><button class="wpri" data-ok="1">壁紙に設定</button><button class="wsec" data-x2="1">キャンセル</button>`)}
 function sheetShuf(){const p=pool({cats:SH.cats,alb:SH.useAlb?SH.alb:[]}),a=p[0]||scn(0,0),b=p[1]||scn(1,0);
@@ -664,22 +736,28 @@ const bg=c('[data-bg]');if(bg&&EM){EM.bg=bg.dataset.bg;$$('.wsw i').forEach(i=>i
 if(c('[data-emok]')){if(![...EM.e.trim()].length)return alert('絵文字を入力してください');const it={t:'emoji',e:EM.e.trim(),bg:EM.bg};if(EM.edit)it.id=EM.edit;return addItem(it)}
 if(c('[data-cg]')&&CO){CO.g=!CO.g;return sheetColor()}
 if(c('[data-cook]')){const it={t:'color',a:CO.a,b:CO.b,g:CO.g?1:0};if(CO.edit)it.id=CO.edit;return addItem(it)}
-const st=c('[data-wset]');if(st){S.wc=st.dataset.wset;sv();wpApply();$('#wbt').hidden=true;return setRr(S.wc)}
+const wn=c('[data-wnew]');if(wn){$('#wbt').hidden=true;WT=wn.dataset.wnew;return wDark()}
+const st=c('[data-wset]');if(st){wSetT(st.dataset.wset,st.dataset.tg);$('#wbt').hidden=true;return setRr(st.dataset.wset)}
 const ed=c('[data-wedit]');if(ed){const it=S.wl.find(x=>x.id==ed.dataset.wedit);if(!it)return;
 if(it.t=='shuf'){SH={cats:it.cats||{},alb:it.alb||[],useAlb:(it.alb||[]).length?1:0,f:it.f||'h',edit:it.id};return sheetShuf()}
 if(it.t=='emoji'){EM={e:it.e,bg:it.bg,edit:it.id};return sheetEmoji()}
 if(it.t=='color'){CO={a:it.a,b:it.b,g:it.g,edit:it.id};return sheetColor()}}
-const dl=c('[data-wdel]');if(dl){if(S.wl.length<2)return alert('最後の壁紙は削除できません');if(!confirm('この壁紙を削除しますか?'))return;S.wl=S.wl.filter(x=>x.id!=dl.dataset.wdel);if(!S.wl.find(x=>x.id==S.wc))S.wc=S.wl[0].id;sv();wpApply();$('#wbt').hidden=true;setRr()}};
+const dl=c('[data-wdel]');if(dl){if(S.wl.length<2)return alert('最後の壁紙は削除できません');if(!confirm('この壁紙を削除しますか?'))return;S.wl=S.wl.filter(x=>x.id!=dl.dataset.wdel);if(!S.wl.find(x=>x.id==S.wc))S.wc=S.wl[0].id;if(!S.wl.find(x=>x.id==S.wcl))S.wcl=S.wc;sv();wpApply();$('#wbt').hidden=true;setRr()}};
 $('#wbt').oninput=e=>{const T=e.target;
 if(T.id=='wem'&&EM){EM.e=T.value;$('#wemp').style.background=emojiBg(EM)}
 else if((T.id=='wca'||T.id=='wcb')&&CO){CO[T.id=='wca'?'a':'b']=T.value;$('#wcop').style.background=CO.g?`linear-gradient(180deg,${CO.a},${CO.b})`:CO.a}
 else if(T.id=='wfq'&&SH)SH.f=T.value};
-function wCustom(id){const it=S.wl.find(x=>x.id==id);if(!it)return;const bg=wpBg(it,1);
-wSheet(`<h3>カスタマイズ</h3><div class="wphc">${lk(bg)}</div>${it.id!=S.wc?`<button class="wpri" data-wset="${id}">現在の壁紙に設定</button>`:''}${['shuf','emoji','color'].includes(it.t)?`<button class="wsec" data-wedit="${id}">編集</button>`:''}<button class="wsec" style="color:#ff3b30" data-wdel="${id}">削除</button><button class="wsec" data-x2="1">閉じる</button>`)}
+function wCustom(id,tg){const it=S.wl.find(x=>x.id==id);if(!it)return;tg=tg=='l'?'l':'h';const bg=wpBg(it,1),nm=tg=='l'?'ロック画面':'ホーム画面',cur=tg=='l'?wpCurL().id:wpCur().id;
+wSheet(`<h3>${nm}をカスタマイズ</h3><div class="wphc">${lk(bg)}</div>${it.id!=cur?`<button class="wpri" data-wset="${id}" data-tg="${tg}">${nm}に設定</button>`:''}<button class="wsec" data-wnew="${tg}">${nm}の壁紙を新しく選ぶ</button>${['shuf','emoji','color'].includes(it.t)?`<button class="wsec" data-wedit="${id}">編集</button>`:''}<button class="wsec" style="color:#ff3b30" data-wdel="${id}">削除</button><button class="wsec" data-x2="1">閉じる</button>`)}
 // --- 設定ページのイベント ---
-$('#setm').onclick=e=>{if(e.target.closest('#acc'))return accShow(true);const k=e.target.closest('[data-k]');if(k)setNav(k.dataset.k)};
+$('#setm').onclick=e=>{if(e.target.closest('#acc'))return accShow(true);const k=e.target.closest('.ir[data-k]');if(k&&k.dataset.k)setNav(k.dataset.k)};
 $('#setp').onclick=async e=>{const T=e.target,c=s=>T.closest(s);
 if(c('[data-back]'))return setNav({ns:'disp',al:'disp',ts:'disp'}[setCur]||'main');
+if(c('[data-btadd]')){try{const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:['battery_service','device_information']});await btConnect(btAdd(dev))}catch(x){if(x&&x.name!='NotFoundError')alert('Bluetoothデバイスを追加できませんでした')}return}
+const bdc=c('[data-btdc]');if(bdc){const o=BT.list.find(x=>x.id==bdc.dataset.btdc);if(o){try{o.dev.gatt.disconnect()}catch(x){}o.conn=false;o.batt=null;btNotify()}return}
+const bcn=c('[data-btcn]');if(bcn){const o=BT.list.find(x=>x.id==bcn.dataset.btcn);if(o)btConnect(o);return}
+if(c('[data-neti]')){NI=null;return setRr()}
+const br=c('[data-br]');if(br){BA.rng=br.dataset.br;return setRr()}
 const g=c('[data-go]');if(g)return setNav(g.dataset.go);
 const th=c('[data-th]');if(th){S.theme=th.dataset.th;sv();theme();return setRr()}
 const al=c('[data-al]');if(al){S.al=+al.dataset.al;sv();idleArm();return setRr()}
@@ -691,8 +769,8 @@ else if(k=='tilt'){S.tilt=!S.tilt;if(S.tilt&&window.DeviceOrientationEvent&&type
 else if(k=='ns.on'){S.ns={...(S.ns||{}),on:!(S.ns&&S.ns.on)}}
 else if(k=='ns.man'){const d=new Date();d.setDate(d.getDate()+1);d.setHours(7,0,0,0);const o=S.ns||{};S.ns={...o,man:o.man&&o.man>Date.now()?0:d.getTime()}}
 sv();theme();warmTint();applyTS();return setRr()}
-const st=c('[data-set]');if(st){S.wc=st.dataset.set;sv();wpApply();return setRr(S.wc)}
-const cu=c('[data-cu]');if(cu)return wCustom(cu.dataset.cu);
+const st=c('[data-set]');if(st){wSetT(st.dataset.set,st.dataset.tg);return setRr(st.dataset.set)}
+const cu=c('[data-cu]');if(cu)return wCustom(cu.dataset.cu,cu.dataset.tg);
 if(c('[data-add]')){if(S.wl.length>=9)return alert('壁紙は9個までです。不要な壁紙を削除してください');return wDark()}};
 $('#setp').oninput=e=>{const T=e.target;if(T.id=='brs'){S.br=+T.value;bright()}else if(T.id=='tsr'){S.ts=+T.value;applyTS()}else if(T.id=='nsw'){S.ns={...(S.ns||{}),w:+T.value};warmTint()}};
 $('#setp').onchange=e=>{const T=e.target;if(T.id=='brs'||T.id=='tsr'||T.id=='nsw')return sv();const k=T.dataset.hr;if(!k)return;
@@ -705,7 +783,7 @@ const{error}=await sb.auth.updateUser({password:a});if(error)return alert('パ�
 // --- 起動時 ---
 $$('button.tb').forEach(b=>b.onclick=()=>{S.theme=b.dataset.m;sv();theme()});
 wpApply();bright();warmTint();applyTS();idleArm();shufTick();
-setInterval(()=>{shufTick();warmTint();if(wpCur().t=='wx')wpApply()},6e4);
+setInterval(()=>{shufTick();warmTint();if(wpCur().t=='wx'||wpCurL().t=='wx')wpApply()},6e4);
 $('#pcset').onclick=PC.set;$('#pcoff').onclick=PC.off;PC.stat();
 theme();
 // ===== App Store(ダウンロード / アプリ開発 / 審査)=====
