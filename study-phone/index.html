@@ -322,6 +322,20 @@ div.swc,span.swc{display:block;flex:none}
 .bat0{padding:22px 16px;text-align:center}.bpct{font:700 3em/1.1 "Zen Kaku Gothic New","Hiragino Sans",sans-serif;display:flex;align-items:center;justify-content:center;gap:14px}.bpct svg{color:var(--fg);flex:none}
 .bseg{display:flex;background:var(--sf);border-radius:10px;padding:2px;margin:14px 14px 4px}.bseg button{flex:1;border:0;background:transparent;border-radius:8px;padding:7px 4px;color:var(--fg);font-weight:600;font-size:.9em}.bseg button.on{background:var(--bg);background-size:0;color:var(--fg);border:0;box-shadow:0 1px 4px rgba(0,0,0,.18)}
 .bchart{padding:6px 14px 14px}.bchart svg{width:100%;height:auto;display:block}
+
+.gh{padding:18px 18px 20px}.gh .gi{display:grid;place-items:center;width:62px;height:62px;border-radius:16px;background:linear-gradient(#a8a8ad,#7d7d82);margin-bottom:14px}.gh .gi svg{width:38px;height:38px;fill:none;stroke:#fff;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}.gh b{display:block;font-size:1.5em;margin-bottom:6px}.gh p{margin:0;line-height:1.55}
+.sbar{display:flex;height:14px;border-radius:5px;overflow:hidden;background:var(--sf);margin:12px 0 10px}.sbar i{display:block;height:100%}
+.sleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85em}.sleg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px}
+.sti{width:44px;height:44px;flex:none}.sti i{display:grid;place-items:center;width:100%;height:100%;border-radius:22%;overflow:hidden}.sti i svg{width:60%;height:60%;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.sti i img{width:100%;height:100%;object-fit:cover}
+.ir[data-a],.ir[data-pk],.ir[data-lgdel],.ir[data-fsel],.ir[data-fadd],.ir[data-shut],.ir[data-ap]{cursor:pointer}
+.ic.ol i{filter:grayscale(.7) opacity(.6)}.ic.ol span::before{content:"\2601 "}.ic.dling i{opacity:.4}
+.app.pip{left:var(--px,auto);top:var(--py,92px);right:auto;bottom:auto;width:210px;height:118px;transform:none;opacity:1;pointer-events:auto;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.45);overflow:hidden;z-index:4;border:1px solid rgba(255,255,255,.22);transition:none;animation:pipin .25s var(--e)}
+@keyframes pipin{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:none}}
+.app.pip header,.app.pip nav,.app.pip #snav,.app.pip #hb{display:none!important}.app.pip main{padding:0!important}
+#pipo{display:none;position:absolute;inset:0;z-index:9;touch-action:none;cursor:grab}.app.pip #pipo{display:block}
+.pipx,.pipe{position:absolute;top:6px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:13px;padding:0;display:grid;place-items:center}.pipx{left:6px}.pipe{right:6px}
+#pwbar{display:none;position:absolute;left:0;right:0;bottom:0;z-index:11;gap:8px;padding:8px 10px;background:rgba(235,235,240,.97);overflow-x:auto;color:#111}#pwbar.on{display:flex}#pwbar button{flex:none;border:0;border-radius:10px;background:#fff;padding:9px 14px;box-shadow:0 1px 3px rgba(0,0,0,.2);color:#111;font-size:.95em;background-size:0}
+#pwsv{display:none;position:absolute;inset:0;z-index:12;background:rgba(0,0,0,.4);align-items:flex-end;justify-content:center;padding:16px}#pwsv.on{display:flex}#pwsv .pwc{width:100%;background:var(--bg);color:var(--fg);border-radius:26px;padding:20px;display:flex;flex-direction:column;gap:10px;text-align:center}#pwsv button{border:0;border-radius:16px;background:var(--sf);padding:14px;font-weight:600;color:#0a84ff;background-size:0}
 </style></head><body>
 <div class="phone" data-v="lock"><div id="isl"></div><div id="slp"></div><div id="wp"><svg viewBox="0 0 100 200" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a8ca0"/><stop offset=".35" stop-color="#4f8ba5"/><stop offset=".75" stop-color="#1c4a70"/><stop offset="1" stop-color="#0a2236"/></linearGradient></defs><path d="M100 18C70 24 58 50 58 90 58 140 32 160 0 196V200H100Z" fill="url(#wg)" stroke="none"/></svg></div>
 <div id="home" class="scr"><div id="hz"></div><div class="hs" id="ht"></div></div>
@@ -374,7 +388,7 @@ let sb=null;try{if(window.supabase)sb=supabase.createClient(SB_URL,SB_KEY)}catch
 let S={};try{S=JSON.parse(localStorage.getItem('st')||'{}')||{}}catch(e){}
 ['logs','chat','laps','T','p','accs','cacc','uid','mp','hide','mode','snd','ana','wk','am','tab','cfg'].forEach(k=>delete S[k]);
 S.theme??='auto';S.mine??=[];
-const save=()=>{try{localStorage.setItem('st',JSON.stringify(S))}catch(e){}};
+const save=()=>{try{localStorage.setItem('st',JSON.stringify(S))}catch(e){}if(typeof syncSoon=='function')syncSoon()};
 const pad=n=>String(n).padStart(2,'0');
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const APPS={},NM={};
@@ -403,11 +417,41 @@ watchPosition(ok,err,opt){const id=++n;pend[id]={ok,err,w:1};post({geo:'watch',r
 clearWatch(id){delete pend[id];post({geo:'clear',rid:id})}};
 addEventListener('message',e=>{const d=e.data;if(e.source!==parent||!d||!d.xgeo)return;const p=pend[d.rid];if(!p)return;
 if(d.pos){if(!p.w)delete pend[d.rid];p.ok&&p.ok(d.pos)}else if(d.err){if(!p.w)delete pend[d.rid];p.err&&p.err(d.err)}});
-Object.defineProperty(navigator,'geolocation',{configurable:true,get:()=>G})}catch(e){}}
+Object.defineProperty(navigator,'geolocation',{configurable:true,get:()=>G})}catch(e){}
+try{const ps=m=>{try{parent.postMessage(Object.assign({xapp:1},m),'*')}catch(e){}};
+const vp=()=>ps({vid:[...document.querySelectorAll('video')].some(v=>!v.paused&&!v.ended)?1:0});
+['play','playing','pause','ended','emptied'].forEach(t=>document.addEventListener(t,vp,true));
+let pst=null;
+const pipOn=()=>{const v=[...document.querySelectorAll('video')].find(v=>!v.paused&&!v.ended)||document.querySelector('video');if(!v||pst)return;
+const st=document.createElement('style');st.textContent='[data-pipx]{display:none!important}[data-pipc]{position:static!important;transform:none!important;margin:0!important;padding:0!important;border:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;overflow:visible!important;background:#000!important;display:block!important;float:none!important}video[data-pipc]{object-fit:contain!important}html,body{overflow:hidden!important;background:#000!important;margin:0!important}';
+(document.head||document.documentElement).appendChild(st);pst={st,v,els:[]};
+let n=v;while(n&&n!==document.documentElement){n.setAttribute('data-pipc','1');pst.els.push(n);if(n.parentElement)[...n.parentElement.children].forEach(x=>{if(x!==n&&!x.hasAttribute('data-pipc')&&!/^(STYLE|SCRIPT|LINK|META)$/.test(x.tagName)){x.setAttribute('data-pipx','1');pst.els.push(x)}});n=n.parentElement}};
+const pipOff=()=>{if(!pst)return;pst.els.forEach(e=>{e.removeAttribute('data-pipc');e.removeAttribute('data-pipx')});pst.st.remove();const v=pst.v;pst=null;return v};
+const isP=e=>e&&e.tagName=='INPUT'&&String(e.type).toLowerCase()=='password';
+const ins=p=>[...(p.form||document).querySelectorAll('input')];
+const userOf=p=>{const a=ins(p),i=a.indexOf(p);for(let k=i-1;k>=0;k--){const t=String(a[k].type||'text').toLowerCase();if(/^(text|email|tel|search|url|)$/.test(t)&&!a[k].disabled)return a[k]}return null};
+const pwOf=t=>{const a=ins(t),i=a.indexOf(t);for(let k=i+1;k<a.length&&k<=i+2;k++)if(isP(a[k]))return a[k];return null};
+let lp=null,lu=null,tm=0;
+const setV=(el,v)=>{if(!el)return;try{Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(el,v)}catch(e){el.value=v}el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))};
+document.addEventListener('focusin',e=>{const t=e.target;if(!t||t.tagName!='INPUT')return;const p=isP(t)?t:pwOf(t);if(p){lp=p;lu=isP(t)?userOf(p):t;ps({pw:'focus'})}},true);
+document.addEventListener('focusout',e=>{if(e.target&&e.target.tagName=='INPUT')ps({pw:'blur'})},true);
+const svp=()=>{if(!lp||!lp.value)return;ps({pw:'save',u:lu?lu.value:'',p:lp.value})};
+document.addEventListener('change',e=>{if(isP(e.target)){lp=e.target;lu=userOf(lp);clearTimeout(tm);tm=setTimeout(svp,600)}},true);
+document.addEventListener('submit',e=>{const p=e.target.querySelector&&e.target.querySelector('input[type=password]');if(p&&p.value){lp=p;lu=userOf(p);svp()}},true);
+addEventListener('message',e=>{const d=e.data;if(e.source!==parent||!d)return;
+if(d.xpip=='on')pipOn();else if(d.xpip=='off')pipOff();else if(d.xpip=='stop'){const v=pipOff();v&&v.pause()}
+else if(d.xpw&&lp){if(lu&&d.xpw.u!=null)setV(lu,d.xpw.u);setV(lp,d.xpw.p)}})}catch(e){}
+try{let susp=0;const q=[],_st=window.setTimeout,_si=window.setInterval,_raf=window.requestAnimationFrame,pz=[];
+window.setTimeout=function(f,d){const a=[].slice.call(arguments,2);if(typeof f!='function')return _st.apply(window,arguments);return _st.call(window,function(){if(susp)q.push(function(){f.apply(null,a)});else f.apply(null,a)},d)};
+window.setInterval=function(f,d){const a=[].slice.call(arguments,2);if(typeof f!='function')return _si.apply(window,arguments);return _si.call(window,function(){if(!susp)f.apply(null,a)},d)};
+window.requestAnimationFrame=function(f){return _raf.call(window,function(t){if(susp)q.push(function(){f(performance.now())});else f(t)})};
+addEventListener('message',function(e){const d=e.data;if(e.source!==parent||!d||d.xsus===undefined)return;
+if(d.xsus){susp=1;document.querySelectorAll('video,audio').forEach(function(m){if(!m.paused){pz.push(m);m.pause()}})}
+else{susp=0;pz.splice(0).forEach(function(m){try{m.play()}catch(x){}});q.splice(0).forEach(function(f){try{f()}catch(x){}})}})}catch(e){}}
 function frameDoc(html,init,persist){
 const J=JSON.stringify(init||{}).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
 const ZS='<style>html{touch-action:manipulation}input,textarea,select{font-size:16px!important}</style><script>["gesturestart","gesturechange","gestureend"].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault()},{passive:false})});(function(){var q=0;["pointerdown","keydown","touchstart"].forEach(function(t){addEventListener(t,function(){var n=Date.now();if(n-q>1500){q=n;try{parent.postMessage({act:1},"*")}catch(x){}}},{passive:true})})})()<\/script>';
-const sc=ZS+'<script>('+shim.toString()+')('+J+','+(persist?1:0)+')<\/script>';
+const sc=ZS+'<script>('+shim.toString()+')('+J+','+(persist?1:0)+')<\/script><script>'+phoneJS()+'<\/script>';
 const m=/<head(\s[^>]*)?>/i.exec(html)||/<html(\s[^>]*)?>/i.exec(html)||/^\s*<!doctype[^>]*>/i.exec(html);
 return m?html.slice(0,m.index+m[0].length)+sc+html.slice(m.index+m[0].length):sc+html}
 function mkExt(t){if($('#t'+t))return;const id=t-1000,r=loadX(id);if(!r)return;
@@ -428,16 +472,18 @@ er=e=>reply({err:{code:e.code,message:e.message}});
 if(d.geo=='watch')GEO[key]=navigator.geolocation.watchPosition(ok,er,opt);else navigator.geolocation.getCurrentPosition(ok,er,opt)}
 addEventListener('message',e=>{const d=e.data;if(!d||typeof d!='object'||!d.xapp)return;
 const f=$$('iframe[data-xid],#simf').find(x=>x.contentWindow===e.source);if(!f)return;
-if(d.geo)return geoReq(f,d);if(!f.dataset.xid)return;
-try{const s=JSON.stringify(d.ls);if(s.length<3e6)localStorage.setItem('xd:'+f.dataset.xid,s)}catch(_){}});
+if(d.geo)return geoReq(f,d);if(!f.dataset.xid)return;if(d.vid!==undefined){VP[f.dataset.xid]=d.vid;return}if(d.pw)return pwMsg(f,d);
+try{const s=JSON.stringify(d.ls);if(s.length<3e6){localStorage.setItem('xd:'+f.dataset.xid,s);xdSoon(f.dataset.xid)}}catch(_){}});
 
 function theme(){let t=S.theme;if(t=='auto'){const h=new Date().getHours();t=(h>=(S.dk0??17)||h<(S.dk1??5))?'dark':'light'}document.documentElement.dataset.t=t;$$('button.tb').forEach(b=>b.classList.toggle('on',b.dataset.m==S.theme));$('.thm')&&($('.thm').dataset.i=['light','dark','auto'].indexOf(S.theme))}
 setInterval(theme,6e4);
 const OPEN={};
 function tab(i){$$('.tab').forEach(e=>e.classList.toggle('on',e.id=='t'+i));S.tab=i;OPEN[i]&&OPEN[i]();$('main').scrollTo(0,0)}
 // ===== スマホ模擬(ロック画面→ホーム→アプリ) =====
-S.view='lock';const PH=$('.phone'),AP=$('#app');
-function clk(){const n=new Date();$('#lt').textContent=n.getHours()+':'+pad(n.getMinutes());$('#ld').textContent=`${n.getMonth()+1}月${n.getDate()}日(${'日月火水木金土'[n.getDay()]})`;$('#ht').textContent=n.getHours()+':'+pad(n.getMinutes());}
+var PIP=null,VP={};S.view='lock';const PH=$('.phone'),AP=$('#app');
+function uiL(){return (S.lg||['ja']).find(c=>c=='ja'||c=='en'||c=='zh'||c=='ko')||'ja'}
+function ldate(n){const l=uiL();if(l=='en')return n.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});if(l=='zh')return n.toLocaleDateString('zh-CN',{month:'long',day:'numeric',weekday:'short'});if(l=='ko')return n.toLocaleDateString('ko-KR',{month:'long',day:'numeric',weekday:'short'});return `${n.getMonth()+1}月${n.getDate()}日(${'日月火水木金土'[n.getDay()]})`}
+function clk(){const n=new Date(),h=n.getHours(),H=S.h24===false?(h%12||12):h,tm=H+':'+pad(n.getMinutes());$('#lt').textContent=tm;$('#ld').textContent=ldate(n);$('#ht').textContent=tm}
 setInterval(clk,1000);clk();
 $('.lg').onclick=closeApp;
 (()=>{const l=$('#lock'),pc=$('#pc');let y0,dy=0,on=0,tb=null,v='',mode='unlock',tmp='',cb=null,busy=0;
@@ -461,7 +507,7 @@ if(b.dataset.k!=null)press(b.dataset.k);else if(b.id=='pcx'){if(v){v=v.slice(0,-
 addEventListener('keydown',e=>{if(!pc.classList.contains('on'))return;if(/^\d$/.test(e.key))press(e.key);else if(e.key=='Backspace'&&v&&!busy){v=v.slice(0,-1);dots()}else if(e.key=='Escape')hide()});
 window.PC={stat:pcStat,
 set:()=>{if(S.pass){show('cur','現在のパスコードを入力してください');cb=()=>show('set1','新しいパスコードを入力してください')}else show('set1','新しいパスコードを入力してください')},
-off:()=>{show('cur','現在のパスコードを入力してください');cb=()=>{S.pass=null;save();pcStat()}}};
+off:()=>{show('cur','現在のパスコードを入力してください');cb=()=>{S.pass=null;save();pcStat()}},ask:f=>{show('cur','パスコードを入力してください');cb=f}};
 // --- ロック画面のスワイプ ---
 l.addEventListener('pointerdown',e=>{if(l.classList.contains('pc'))return;tb=e.target.closest('.lb');y0=e.clientY;dy=0;on=1;l.setPointerCapture(e.pointerId);l.style.transition='none'});
 l.addEventListener('pointermove',e=>{if(!on)return;dy=e.clientY-y0;if(!tb||Math.abs(dy)>8)l.style.transform=`translateY(${Math.min(0,dy)*.8}px)`});
@@ -485,11 +531,11 @@ $('#lbr').oninput=setB;
 $('#lfl').onclick=async()=>{fl=!fl;const ok=fl?await torch(1):(await torch(0),0);if(fl&&!ok)alert('この端末・ブラウザでは本体のフラッシュを使えません(画面ライトのみ)');fl=!!ok;$('#lfl').classList.toggle('on',fl)};
 })();
 S.open=[];
-function openApp(t,b){AP.dataset.k=t>=1000?'ext':'';if(t>=1000)mkExt(t);const q=PH.getBoundingClientRect(),r=b.getBoundingClientRect();AP.style.transformOrigin=`${r.left+r.width/2-q.left}px ${r.top+r.height/2-q.top}px`;S.open=[t,...S.open.filter(x=>x!=t)];tab(t);$('#an').textContent=NM[t];$('#sw').classList.remove('on');AP.classList.add('open');S.view='app';PH.dataset.v='app'}
-function closeApp(){AP.classList.remove('open');$('#sw').classList.remove('on');S.view='home';PH.dataset.v='home'}
-function lockNow(){setEdit(0);const l=$('#lock');l.classList.remove('gone');l.style.transform='';S.view='lock';PH.dataset.v='lock';AP.classList.remove('open');$('#sw').classList.remove('on');S.open=[];syncExt()}
+function openApp(t,b){if(t>=1000&&S.ol&&S.ol[t-1000]){if(PIP)pipKill(1);return reinstall(t,b)}if(PIP){if(PIP.t==t)pipEnd();else pipKill(1)}(S.lu??={})[t]=Date.now();save();AP.dataset.k=t>=1000?'ext':'';if(t>=1000)mkExt(t);const q=PH.getBoundingClientRect(),r=b.getBoundingClientRect();AP.style.transformOrigin=`${r.left+r.width/2-q.left}px ${r.top+r.height/2-q.top}px`;S.open=[t,...S.open.filter(x=>x!=t)];tab(t);$('#an').textContent=NM[t];$('#sw').classList.remove('on');AP.classList.add('open');S.view='app';PH.dataset.v='app'}
+function closeApp(){if(pipTry())return;AP.classList.remove('open');$('#sw').classList.remove('on');S.view='home';PH.dataset.v='home'}
+function lockNow(){pipKill(1);setEdit(0);const l=$('#lock');l.classList.remove('gone');l.style.transform='';S.view='lock';PH.dataset.v='lock';AP.classList.remove('open');$('#sw').classList.remove('on');S.open=[];syncExt()}
 // アプリスイッチャー
-function swShow(){S.open=S.open.filter(t=>APPS[t]);if(!S.open.length)return closeApp();const box=$('#sws');box.innerHTML=S.open.map(t=>`<div class="sc" data-t="${t}"><div class="tt"></div><div class="cd"></div></div>`).join('');
+function swShow(){if(PIP)pipKill(1);S.open=S.open.filter(t=>APPS[t]);if(!S.open.length)return closeApp();const box=$('#sws');box.innerHTML=S.open.map(t=>`<div class="sc" data-t="${t}"><div class="tt"></div><div class="cd"></div></div>`).join('');
 box.querySelectorAll('.sc').forEach(c=>{const tp=document.createElement('div');tp.innerHTML=APPS[c.dataset.t].i+APPS[c.dataset.t].i;const[a,b]=tp.children;[a,b].forEach(n=>n.querySelectorAll('[id]').forEach(x=>x.removeAttribute('id')));a.style.width='26px';a.style.boxShadow='none';b.style.width='96px';b.style.boxShadow='none';c.querySelector('.tt').append(a,NM[c.dataset.t]);c.querySelector('.cd').append(b)});
 AP.classList.remove('open');$('#sw').classList.add('on');S.view='sw';PH.dataset.v='sw';box.scrollLeft=0}
 (()=>{const box=$('#sws');let c,x0,y0,dy=0,on=0,mv=0;
@@ -511,7 +557,7 @@ $('#home').insertAdjacentHTML('beforeend','<div id="pgw"><div id="pgs"></div></d
 S.edit=0;
 let pcur=0;
 const rs=()=>PH.style.setProperty('--w',PH.clientWidth+'px');rs();addEventListener('resize',rs);
-function mkIc(t){const b=document.createElement('button');b.className='ic'+(isOff(t)?' off':'');b.dataset.t=t;b.innerHTML=APPS[t].i+'<span>'+E(APPS[t].n)+'</span><b class="rm">−</b>';return b}
+function mkIc(t){const b=document.createElement('button');b.className='ic'+(isOff(t)?' off':'')+(S.ol&&S.ol[t-1000]?' ol':'');b.dataset.t=t;b.innerHTML=APPS[t].i+'<span>'+E(APPS[t].n)+'</span><b class="rm">−</b>';return b}
 function pgGo(){$('#pgs').style.transform=`translateX(${-pcur*100}%)`;const n=$$('.pg').length;$('#dots2').innerHTML=n>1?Array.from({length:n},(_,i)=>`<i class="${i==pcur?'on':''}"></i>`).join(''):''}
 function renderHome(){const pg=$('#pgs'),dk=$('#dock');pg.innerHTML='';dk.innerHTML='';S.hm.p.forEach(a=>{const g=document.createElement('div');g.className='pg';a.forEach(t=>g.append(mkIc(t)));pg.append(g)});S.hm.d.forEach(t=>dk.append(mkIc(t)));pcur=Math.min(pcur,S.hm.p.length-1);pgGo();window.badge&&badge()}
 function commit(){S.hm.p=[...$$('.pg')].map(g=>[...g.children].map(c=>+c.dataset.t));if(!S.hm.p.length)S.hm.p=[[]];S.hm.d=[...$('#dock').children].map(c=>+c.dataset.t);save()}
@@ -540,8 +586,8 @@ else{const[cx,cy]=pos(list[bi]),h=list[bi].offsetHeight,before=box==dk?x<cx:(y<c
 function end(){clearTimeout(d.et);const g=d.g,ic=d.ic,q=PH.getBoundingClientRect(),r=ic.getBoundingClientRect();g.style.transition='left .25s var(--e),top .25s var(--e),transform .25s';g.style.left=r.left-q.left+'px';g.style.top=r.top-q.top+'px';g.style.transform='';setTimeout(()=>{g.remove();ic.classList.remove('hid')},250);cleanPages(ic);commit()}
 })();
 function isOff(t){return t>=1000&&!!(S.off&&S.off[t-1000])}
-function removeApp(t){if(t==4||t==5||isOff(t))return;S.inst=S.inst.filter(x=>x!=t);S.hm.p=S.hm.p.map(a=>a.filter(x=>x!=t)).filter(a=>a.length);if(!S.hm.p.length)S.hm.p=[[]];S.hm.d=S.hm.d.filter(x=>x!=t);S.open=S.open.filter(x=>x!=t);
-if(t>=1000){localStorage.removeItem('xa:'+(t-1000));localStorage.removeItem('xd:'+(t-1000));delete APPS[t];delete NM[t]}
+function removeApp(t){if(t==4||t==5||isOff(t))return;if(PIP&&PIP.t==t)pipKill(1);S.inst=S.inst.filter(x=>x!=t);S.hm.p=S.hm.p.map(a=>a.filter(x=>x!=t)).filter(a=>a.length);if(!S.hm.p.length)S.hm.p=[[]];S.hm.d=S.hm.d.filter(x=>x!=t);S.open=S.open.filter(x=>x!=t);
+if(t>=1000){xdDel(t-1000);localStorage.removeItem('xa:'+(t-1000));localStorage.removeItem('xd:'+(t-1000));delete APPS[t];delete NM[t]}
 syncExt();save();renderHome()}
 // ===== 設定アプリ(スマホ本体) =====
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -593,7 +639,7 @@ new MutationObserver(()=>{if(PH.dataset.v=='lock')shufTick('lock')}).observe(PH,
 // --- 設定の一覧(動画1)---
 const GCS='<svg viewBox="0 0 24 24" stroke="none"><circle cx="9" cy="9" r="4.5" fill="#ff6b6b"/><circle cx="15" cy="9" r="4.5" fill="#4dabf7" opacity=".85"/><circle cx="9" cy="15" r="4.5" fill="#ffd43b" opacity=".85"/><circle cx="15" cy="15" r="4.5" fill="#51cf66" opacity=".85"/></svg>';
 const GR=[[['#ff9f0a','M12 3.5l1.8 5.7 6.7 3.8v1.9l-6.7-2.1-.9 4.4 2.1 1.8v1.5L12 19.5l-3 1v-1.5l2.1-1.8-.9-4.4-6.7 2.1v-1.9l6.7-3.8z','機内モード','sw'],['#0a84ff','M3 9.5a13 13 0 0 1 18 0M6 13a8.5 8.5 0 0 1 12 0M9 16.3a4 4 0 0 1 6 0M12 19.5h.01','Wi-Fi','\u200b','wifi'],['#0a84ff','M7 7.5l10 9-5 4.5V3l5 4.5-10 9','Bluetooth','\u200b','bt'],['#34c759','M5 19v-3M10 19v-6M15 19v-9M20 19V5','モバイル通信','\u200b','cell'],['#34c759','M3.5 8h15v8h-15zM20.5 11v2','バッテリー','','bat']],
-[['#8e8e93','M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1','一般','1'],['#0a84ff','M12 3.5a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6zM5 9l7 1 7-1M12 10v5l-3 5.5M12 15l3 5.5','アクセシビリティ'],['linear-gradient(135deg,#ff6bd6,#7a6bff 50%,#35c8ff)','M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z','Apple Intelligence と Siri'],['#0a84ff','M8 4h8v16H8zM11 8h2','アクションボタン'],['#8e8e93','M4 8h4l1.5-2h5L16 8h4v11H4zM12 11a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z','カメラ'],['#8e8e93','M4 8h9M17 8h3M4 16h3M11 16h9M15 8a2 2 0 1 0 .01 0M9 16a2 2 0 1 0 .01 0','コントロールセンター'],['#1c1c1e','M4 6h16v12H4zM8 10v4M12 9v6M16 11v2','スタンバイ'],['#0a84ff','M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z','ホーム画面とアプリライブラリ'],['#0a84ff','M12 8a4 4 0 1 0 .01 0M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2l1.8 1.8M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8','画面表示と明るさ','','disp'],['#8e8e93','M11 4a7 7 0 1 0 .01 0M16 16l4.5 4.5','検索'],['#32ade6','M12 4a2.6 2.6 0 1 0 .01 0M18 9a2.6 2.6 0 1 0 .01 0M6 9a2.6 2.6 0 1 0 .01 0M12 15a2.6 2.6 0 1 0 .01 0M12 8v3','壁紙','','wp']],
+[['#8e8e93','M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1','一般','','gen'],['#0a84ff','M12 3.5a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6zM5 9l7 1 7-1M12 10v5l-3 5.5M12 15l3 5.5','アクセシビリティ'],['linear-gradient(135deg,#ff6bd6,#7a6bff 50%,#35c8ff)','M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6z','Apple Intelligence と Siri'],['#0a84ff','M8 4h8v16H8zM11 8h2','アクションボタン'],['#8e8e93','M4 8h4l1.5-2h5L16 8h4v11H4zM12 11a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z','カメラ'],['#8e8e93','M4 8h9M17 8h3M4 16h3M11 16h9M15 8a2 2 0 1 0 .01 0M9 16a2 2 0 1 0 .01 0','コントロールセンター'],['#1c1c1e','M4 6h16v12H4zM8 10v4M12 9v6M16 11v2','スタンバイ'],['#0a84ff','M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z','ホーム画面とアプリライブラリ'],['#0a84ff','M12 8a4 4 0 1 0 .01 0M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2l1.8 1.8M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8','画面表示と明るさ','','disp'],['#8e8e93','M11 4a7 7 0 1 0 .01 0M16 16l4.5 4.5','検索'],['#32ade6','M12 4a2.6 2.6 0 1 0 .01 0M18 9a2.6 2.6 0 1 0 .01 0M6 9a2.6 2.6 0 1 0 .01 0M12 15a2.6 2.6 0 1 0 .01 0M12 8v3','壁紙','','wp']],
 [['#ff3b30','M6 17h12l-1.5-2.2V11a4.5 4.5 0 0 0-9 0v3.8zM10 20h4','通知'],['#ff2d55','M4 10h3l4-3.2v10.4L7 14H4zM15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11','サウンドと触覚'],['#5e5ce6','M18.5 14.5A7 7 0 1 1 9.5 5.5a5.5 5.5 0 0 0 9 9z','集中モード'],['#5e5ce6','M7 4h10M7 20h10M8 4c0 5 8 5 8 10v6M16 4c0 5-8 5-8 10v6','スクリーンタイム']],
 [['#34c759','M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10v1.5M15 10v1.5M12 10v3.5h-1M9 16c1.7 1.3 4.3 1.3 6 0','Face IDとパスコード'],['#ff3b30','T:SOS','緊急SOS'],['#0a84ff','M12 3.5l7 3v5.5c0 4.2-3 7.4-7 8.5-4-1.1-7-4.3-7-8.5V6.5z','プライバシーとセキュリティ']],
 [['#fff','GC','Game Center'],['#0a84ff','M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5 4 4 0 0 1 17.5 18z','iCloud'],['#2c2c2e','M4 7h16v11H4zM4 7l3-3h10l3 3M15 12h5v3h-5z','ウォレットとApple Pay']],
@@ -603,7 +649,7 @@ $('#setm').innerHTML='<h1 class="ih">設定</h1><div class="ig"><div class="ir a
 $('#ssq').oninput=()=>{const v=$('#ssq').value.trim().toLowerCase();let n=0;$$('#setm .ig').forEach(g=>{let m=0;g.querySelectorAll('.ir').forEach(r=>{const ok=!v||r.textContent.toLowerCase().includes(v);r.hidden=!ok;if(ok)m++});g.hidden=!m;n+=m});$('#setm .ih').hidden=!!v;$('#ssn').hidden=!v||n>0;$('#ssn b').textContent='“'+$('#ssq').value+'”の検索結果なし'};
 // --- ページ移動 ---
 let setCur='main';
-function setNav(n){setCur=n;$('#setm').hidden=n!='main';$('#accp').hidden=n!='acc';$('#setp').hidden=n=='main'||n=='acc';$('#ssb').hidden=n!='main';if(!$('#setp').hidden){$('#setp').innerHTML=pgH(n);if(n=='wp')wpAfter();pgAfter(n)}$('main').scrollTo(0,0)}
+function setNav(n){if(n=='gpwl'&&S.pass&&!PWOK)return PC.ask(()=>{PWOK=1;setNav('gpwl')});if(!/^gpw/.test(n)){PWOK=0;PWSHOW=0}FEDIT=0;setCur=n;$('#setm').hidden=n!='main';$('#accp').hidden=n!='acc';$('#setp').hidden=n=='main'||n=='acc';$('#ssb').hidden=n!='main';if(!$('#setp').hidden){$('#setp').innerHTML=pgH(n);if(n=='wp')wpAfter();pgAfter(n)}$('main').scrollTo(0,0)}
 function setRr(id){const m=$('main'),y=m.scrollTop;$('#setp').innerHTML=pgH(setCur);if(setCur=='wp')wpAfter(id);pgAfter(setCur);m.scrollTop=y}
 const accShow=p=>setNav(p?'acc':'main');
 const hd=t=>`<div class="ihd"><button class="cb" data-back="1" aria-label="戻る">‹</button><b>${t}</b><span class="ihr"></span></div>`;
@@ -629,7 +675,7 @@ return hd('壁紙')+`<div class="ig wcard"><div class="wcar" id="wcar">${L.map(c
 <div class="ig winf"><div><b>ロック画面から壁紙を変更</b>ロック画面から、壁紙やウィジェットの追加、編集、または切り替えを行うにはタッチして押さえたままにします。</div><div class="mp"></div></div>`}};
 
 // ===== 実機の情報(Wi-Fi / Bluetooth / モバイル通信 / バッテリー)=====
-const pgH=n=>PGS[n]?PGS[n]():(String(n).startsWith('x:')?hd(String(n).slice(2)):'');
+const pgH=n=>{n=String(n);if(PGS[n])return PGS[n]();if(n.startsWith('gsa:'))return PGS.gsa(+n.slice(4));if(n.startsWith('gpwd:'))return PGS.gpwd(n.slice(5));const m=/^xg?:(.*)$/.exec(n);return m?hd(m[1]):''};
 const CN=()=>navigator.connection||navigator.mozConnection||navigator.webkitConnection||null;
 const netKind=()=>{if(!navigator.onLine)return 'off';const t=(CN()||{}).type;return t=='cellular'?'cell':(t=='wifi'||t=='ethernet')?'wifi':'unk'};
 let NI=null,NIT=0,NIP=null;
@@ -679,6 +725,457 @@ const lv=Math.round(b.level*100),ft=t=>{if(!isFinite(t)||t<=0)return '';const h=
 tm=b.charging?(ft(b.chargingTime)?'フル充電まで 約'+ft(b.chargingTime):''):(ft(b.dischargingTime)?'残り 約'+ft(b.dischargingTime):'');
 return hd('バッテリー')+`<div class="ig bat0"><div class="bpct">${lv}%${batIc(lv,b.charging)}</div><div class="mu">${b.charging?'充電中':'電池を使用中'}${tm?' ・ '+tm:''}</div></div><div class="isx">バッテリー残量</div><div class="ig"><div class="bseg"><button data-br="24" class="${BA.rng=='24'?'on':''}">過去24時間</button><button data-br="10" class="${BA.rng=='10'?'on':''}">過去10日間</button></div>${batChart()}</div><p class="icp">残量の履歴は、このスマホを開いている間に記録されたものです。</p>`}
 });
+// ===== 一般(情報・ストレージ・PiP・フォント・言語と地域・自動入力・日付と時刻)=====
+var GSORT='size',FEDIT=0,PWSHOW=0,PWOK=0,PWF=null,PWQ=null,BARDOWN=0,PWT=0;
+const CAP=128*1048576;
+const NF={'c.':[',','.'],'d,':['.',','],'s,':['\u202f',','],'q.':['\u2019','.']};
+function fN(n,dec=0){const[g,d]=NF[S.nf||'c.']||NF['c.'];const[i,f]=Number(n).toFixed(dec).split('.');return i.replace(/\B(?=(\d{3})+(?!\d))/g,g)+(f?d+f:'')}
+const fB=b=>b<1024?fN(b)+' B':b<1048576?fN(b/1024)+' KB':(v=>fN(v,v%1?2:0)+' MB')(b/1048576);
+function phoneJS(){const L={ja:'ja-JP',en:'en-US',zh:'zh-CN',ko:'ko-KR',fr:'fr-FR',de:'de-DE',es:'es-ES',it:'it-IT',pt:'pt-BR'},ls=(S.lg||['ja']).map(c=>L[c]||c),o={language:ls[0],languages:ls,region:S.rg||'JP',calendar:S.cal||'gregory',temperature:S.tu||'C',units:S.un||'metric',weekStart:S.wk??0,dateFormat:S.df||'ymd/',numberFormat:S.nf||'c.',hour24:S.h24!==false,kb:kbCfg()};
+return 'window.phoneSettings='+JSON.stringify(o).replace(/</g,'\\u003c')+';try{Object.defineProperty(navigator,"language",{get:function(){return window.phoneSettings.language},configurable:true});Object.defineProperty(navigator,"languages",{get:function(){return window.phoneSettings.languages},configurable:true})}catch(e){}'+';('+kbSetup.toString()+')(window,function(){return window.phoneSettings.kb})'}
+// --- 端末情報(取得できない値はランダムで一度だけ作って保存)---
+function devInfo(){if(S.dev)return S.dev;const R=n=>Math.floor(Math.random()*n),pk=a=>a[R(a.length)],hx=n=>Array.from({length:n},()=>'0123456789ABCDEF'[R(16)]).join(''),dg=n=>Array.from({length:n},()=>R(10)).join(''),al=n=>Array.from({length:n},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789'[R(34)]).join('');
+const lu=b=>{let t=0;for(let i=0;i<b.length;i++){let d=+b[b.length-1-i];if(i%2==0){d*=2;if(d>9)d-=9}t+=d}return String((10-t%10)%10)};
+const im=()=>{const b='35'+dg(12),x=b+lu(b);return x.slice(0,2)+' '+x.slice(2,8)+' '+x.slice(8,14)+' '+x.slice(14)};
+const cr=pk(['KDDI','docomo','SoftBank','楽天モバイル']);
+S.dev={model:pk(['iPhone 15','iPhone 16','iPhone 16 Pro','iPhone 17']),mn:'M'+al(3)+dg(1)+'J/A',sn:al(10),eid:'89049032'+dg(24),imei:im(),imei2:im(),iccid:'898130'+dg(13),mac:'B4:96:A5:'+hx(2)+':'+hx(2)+':'+hx(2),bt:'B4:96:A5:'+hx(2)+':'+hx(2)+':'+hx(2),fw:(1+R(3))+'.'+(10+R(80))+'.0'+R(9),net:cr,cr:cr+' '+(10+R(80))+'.0',ios:(18+R(8))*1048576,sysd:(3+R(5))*1048576};save();return S.dev}
+function appsInfo(){return (S.inst||[]).filter(t=>t>=1000).map(t=>{const id=t-1000,r=loadX(id)||{},ol=!!(S.ol&&S.ol[id]);return{t,id,n:NM[t]||r.name||'App',app:ol?0:(+r.size||0),data:new Blob([localStorage.getItem('xd:'+id)||'']).size,ol,lu:(S.lu||{})[t]||0}})}
+const stUsed=()=>{const d=devInfo();return appsInfo().reduce((x,y)=>x+y.app+y.data,0)+d.ios+d.sysd};
+const luT=ms=>{if(!ms)return '未使用';const d=Math.floor((new Date().setHours(0,0,0,0)-new Date(ms).setHours(0,0,0,0))/864e5);return d<=0?'今日':d==1?'昨日':d+'日前'};
+function offload(t){const id=t-1000,r=loadX(id);if(!r)return;if(PIP&&PIP.t==t)pipKill(1);try{localStorage.setItem('xa:'+id,JSON.stringify({...r,html:''}))}catch(e){return}S.ol??={};S.ol[id]=1;S.open=S.open.filter(x=>x!=t);syncExt();save();renderHome()}
+function reinstall(t,b,cb){const id=t-1000;if(!sb)return alert('アプリを再ダウンロードできません(オフライン)');const ic=$('.ic[data-t="'+t+'"]');ic&&ic.classList.add('dling');
+sb.from('phone_apps').select('html').eq('id',id).eq('status','approved').single().then(({data,error})=>{ic&&ic.classList.remove('dling');if(error||!data||data.html==null)return alert('再ダウンロードに失敗しました');const r=loadX(id)||{id};try{localStorage.setItem('xa:'+id,JSON.stringify({...r,html:data.html}))}catch(e){return alert('この端末の保存容量が足りません')}delete S.ol[id];save();renderHome();if(cb)cb();else openApp(t,(b&&b.isConnected?b:null)||$('.ic[data-t="'+t+'"]')||PH)})}
+function appAct(a,t){const nm=NM[t]||'App';if(a=='del'){if(confirm('「'+nm+'」を削除しますか?\nこのアプリとデータがこのスマホから削除されます。この操作は取り消せません。')){removeApp(t);setNav('gst')}}else if(a=='off'){offload(t);setRr()}else if(a=='re')reinstall(t,null,()=>setRr())}
+// --- システム終了 ---
+function shutDown(){const sp=$('#slp');sp.classList.add('on');setTimeout(()=>{lockNow();setTimeout(()=>sp.classList.remove('on'),450)},650)}
+// --- ピクチャインピクチャ(このスマホの中)---
+function pipTry(){if(!S.pip||PH.dataset.v!='app'||AP.dataset.k!='ext')return false;const t=S.open[0];if(!(t>=1000)||!VP[t-1000])return false;const f=$('#t'+t+' iframe');if(!f)return false;
+try{f.contentWindow.postMessage({xpip:'on'},'*')}catch(e){return false}
+PIP={t};if(!AP.style.getPropertyValue('--px'))AP.style.setProperty('--px',Math.max(4,PH.getBoundingClientRect().width-222)+'px');AP.classList.add('pip','open');S.view='home';PH.dataset.v='home';$('#sw').classList.remove('on');return true}
+function pipEnd(){if(!PIP)return;const f=$('#t'+PIP.t+' iframe');try{f&&f.contentWindow.postMessage({xpip:'off'},'*')}catch(e){}AP.classList.remove('pip');PIP=null}
+function pipKill(stop){if(!PIP)return;const t=PIP.t,f=$('#t'+t+' iframe');try{f&&f.contentWindow.postMessage({xpip:stop?'stop':'off'},'*')}catch(e){}AP.classList.remove('pip','open');PIP=null;S.open=S.open.filter(x=>x!=t);syncExt()}
+function pipOut(){const t=PIP.t;pipEnd();openApp(t,PH)}
+(()=>{const o=document.createElement('div');o.id='pipo';o.innerHTML='<button class="pipx" aria-label="閉じる">✕</button><button class="pipe" aria-label="拡大">⤢</button>';AP.append(o);let d=null;
+o.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const q=AP.getBoundingClientRect(),p=PH.getBoundingClientRect();d={x:e.clientX,y:e.clientY,l:q.left-p.left,t:q.top-p.top,m:0};o.setPointerCapture(e.pointerId)});
+o.addEventListener('pointermove',e=>{if(!d)return;const dx=e.clientX-d.x,dy=e.clientY-d.y;if(Math.abs(dx)+Math.abs(dy)>6)d.m=1;if(d.m){const q=PH.getBoundingClientRect(),w=AP.offsetWidth,h=AP.offsetHeight;AP.style.setProperty('--px',Math.max(4,Math.min(q.width-w-4,d.l+dx))+'px');AP.style.setProperty('--py',Math.max(4,Math.min(q.height-h-4,d.t+dy))+'px')}});
+const up=e=>{if(!d)return;const m=d.m;d=null;if(!m&&e.type=='pointerup'&&PIP)pipOut()};o.addEventListener('pointerup',up);o.addEventListener('pointercancel',up);
+o.querySelector('.pipx').onclick=()=>pipKill(1);o.querySelector('.pipe').onclick=()=>{if(PIP)pipOut()}})();
+// --- パスワード自動入力 ---
+PH.insertAdjacentHTML('beforeend','<div id="pwbar"></div><div id="pwsv"><div class="pwc"><b></b><p class="mu"></p><button data-pw="y">保存</button><button data-pw="n">今はしない</button></div></div>');
+function pwPos(){const v=window.visualViewport;$('#pwbar').style.bottom=(v?Math.max(0,innerHeight-v.height-v.offsetTop):0)+'px'}
+if(window.visualViewport){visualViewport.addEventListener('resize',pwPos);visualViewport.addEventListener('scroll',pwPos)}
+const pwBarHide=()=>$('#pwbar').classList.remove('on');
+function pwBar(){const b=$('#pwbar'),L=S.pwd||[];if(S.paf===false||!L.length||!PWF)return pwBarHide();const id=PWF.dataset.xid,a=[...L].sort((x,y)=>(y.aid==id)-(x.aid==id));b.innerHTML=a.map(x=>`<button data-pid="${E(x.id)}">🔑 ${E(x.u||'—')} <span style="color:#777;font-size:.85em">${E(x.app)}</span></button>`).join('');pwPos();b.classList.add('on')}
+$('#pwbar').addEventListener('pointerdown',()=>{BARDOWN=1;setTimeout(()=>BARDOWN=0,1500)});
+$('#pwbar').addEventListener('click',e=>{const b=e.target.closest('[data-pid]');if(!b||!PWF)return;const x=(S.pwd||[]).find(z=>z.id==b.dataset.pid);if(x){try{PWF.contentWindow.postMessage({xpw:{u:x.u,p:x.p}},'*')}catch(_){}}pwBarHide()});
+function pwMsg(f,d){const id=f.dataset.xid;if(d.pw=='focus'){PWF=f;clearTimeout(PWT);pwBar()}else if(d.pw=='blur'){PWT=setTimeout(()=>{if(!BARDOWN)pwBarHide()},500)}else if(d.pw=='save')pwSave(id,String(d.u||'').slice(0,200),String(d.p||'').slice(0,200))}
+const PWSKIP=new Set();
+function pwSave(id,u,p){if(!p)return;S.pwd??=[];const ex=S.pwd.find(x=>x.aid==id&&x.u==u);if(ex&&ex.p==p)return;const k=id+'|'+u+'|'+p;if(PWSKIP.has(k)||PWQ)return;PWQ={id,u,p,k,ex:ex&&ex.id};const nm=NM[XID(+id)]||'アプリ';$('#pwsv b').textContent=ex?'パスワードを更新しますか?':'パスワードを保存しますか?';$('#pwsv p').textContent=`「${nm}」のアカウント「${u}」`;$('#pwsv').classList.add('on')}
+$('#pwsv').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const q=PWQ;PWQ=null;$('#pwsv').classList.remove('on');if(!q)return;if(b.dataset.pw=='y'){S.pwd??=[];const nm=NM[XID(+q.id)]||'アプリ';if(q.ex){const x=S.pwd.find(z=>z.id==q.ex);if(x)x.p=q.p}else S.pwd.push({id:'p'+Date.now().toString(36),aid:q.id,app:nm,u:q.u,p:q.p});sv()}else PWSKIP.add(q.k)});
+// --- フォント ---
+const SYSF=[['','標準(システム)',''],['hira','ヒラギノ角ゴシック','"Hiragino Sans","Hiragino Kaku Gothic ProN"'],['yug','游ゴシック体','"Yu Gothic","YuGothic"'],['mei','メイリオ','"Meiryo"'],['hmin','ヒラギノ明朝','"Hiragino Mincho ProN","Yu Mincho"'],['maru','ヒラギノ丸ゴ','"Hiragino Maru Gothic ProN"'],['sans','ゴシック(サンセリフ)','sans-serif'],['serif','明朝(セリフ)','serif'],['mono','等幅','ui-monospace,monospace']];
+const GF=[['Noto Sans JP','Noto+Sans+JP'],['Noto Serif JP','Noto+Serif+JP'],['Zen Maru Gothic','Zen+Maru+Gothic'],['M PLUS Rounded 1c','M+PLUS+Rounded+1c'],['Kosugi Maru','Kosugi+Maru'],['Shippori Mincho','Shippori+Mincho'],['Yomogi','Yomogi'],['Hachi Maru Pop','Hachi+Maru+Pop'],['Dela Gothic One','Dela+Gothic+One'],['Reggae One','Reggae+One']];
+const hasF=st=>{const m=/"([^"]+)"/.exec(st);if(!m)return true;try{const c=document.createElement('canvas').getContext('2d'),t='あいうabcWWiiMM',w=f=>(c.font='40px '+f,c.measureText(t).width);return w(`"${m[1]}",monospace`)!=w('monospace')||w(`"${m[1]}",serif`)!=w('serif')}catch(e){return true}};
+const DEFF=getComputedStyle(PH).fontFamily;
+function fontApply(){const k=S.fnt||'';let st='';if(k.startsWith('my:')){const f=(S.fts||[]).find(x=>x.id==k.slice(3));if(f)st=`"${f.f}"`}else if(k){const o=SYSF.find(x=>x[0]==k);if(o)st=o[2]}PH.style.fontFamily=st?st+','+DEFF:''}
+function fontLoad(f){if(f.k=='g'){if(!document.getElementById('gf_'+f.id)){const l=document.createElement('link');l.rel='stylesheet';l.id='gf_'+f.id;l.href='https://fonts.googleapis.com/css2?family='+f.q+'&display=swap';document.head.append(l)}return Promise.resolve()}
+const b64=localStorage.getItem('fd:'+f.id);if(!b64)return Promise.reject();const bin=atob(b64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new FontFace(f.f,u).load().then(ff=>{document.fonts.add(ff)})}
+function fontDel(id){S.fts=(S.fts||[]).filter(x=>x.id!=id);localStorage.removeItem('fd:'+id);const l=document.getElementById('gf_'+id);l&&l.remove();if(S.fnt=='my:'+id)S.fnt='';sv();fontApply()}
+function fontAddG(i){const[n,q]=GF[i];S.fts??=[];if(S.fts.some(x=>x.k=='g'&&x.f==n))return;const o={id:'g'+Date.now().toString(36),n,k:'g',f:n,q};S.fts.push(o);fontLoad(o);sv()}
+{const fi=document.createElement('input');fi.type='file';fi.accept='.ttf,.otf,.woff,.woff2';fi.hidden=true;fi.id='fntin';PH.append(fi);
+fi.onchange=async()=>{const f=fi.files[0];fi.value='';if(!f)return;if(f.size>1.5e6)return alert('フォントファイルが大きすぎます(1.5MBまで)');const u=new Uint8Array(await f.arrayBuffer());let bin='';u.forEach(b=>bin+=String.fromCharCode(b));const id='f'+Date.now().toString(36),o={id,n:f.name.replace(/\.[^.]+$/,''),k:'file',f:'UF_'+id};
+try{localStorage.setItem('fd:'+id,btoa(bin))}catch(e){return alert('この端末の保存容量が足りません')}
+try{await fontLoad(o)}catch(e){localStorage.removeItem('fd:'+id);return alert('このフォントは読み込めませんでした')}
+S.fts??=[];S.fts.push(o);sv();if(setCur=='gfmy')setRr()}}
+(S.fts||[]).forEach(f=>fontLoad(f).catch(()=>{}));fontApply();
+
+function kbSetup(w,get){const d=w.document,AC=w.AudioContext||w.webkitAudioContext;let ctx=null;
+const cfg=()=>{try{return get()||{}}catch(e){return{}}};
+const ok=e=>e&&(e.tagName=='TEXTAREA'||(e.tagName=='INPUT'&&/^(text|search|email|url|tel|)$/i.test(e.type||'')));
+const ap=e=>{if(!ok(e))return;const k=cfg(),m={autocorrect:k.ac===false?'off':'on',spellcheck:k.sp===false?'false':'true',autocapitalize:k.cap===false?'none':'sentences'};for(const a in m){if(!e.hasAttribute(a)||e.hasAttribute('data-kb-'+a)){e.setAttribute(a,m[a]);e.setAttribute('data-kb-'+a,'1')}}};
+const all=()=>d.querySelectorAll('input,textarea').forEach(ap);
+d.addEventListener('focusin',e=>ap(e.target),true);
+try{new w.MutationObserver(()=>all()).observe(d.documentElement||d,{childList:true,subtree:true})}catch(e){}
+w.addEventListener('DOMContentLoaded',all);
+const click=()=>{const k=cfg();if(k.snd!==false&&AC){try{ctx=ctx||new AC();const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=1700;g.gain.value=.03;o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+.012)}catch(e){}}if(k.hap&&w.navigator.vibrate)w.navigator.vibrate(6)};
+d.addEventListener('input',ev=>{const e=ev.target;if(!ok(e)||ev.isComposing)return;const t=ev.inputType;if(t=='insertText'||t=='deleteContentBackward'||t=='insertLineBreak')click();
+if(t!='insertText'||ev.data==null)return;const k=cfg(),p=e.selectionStart;if(p==null||p!==e.selectionEnd)return;const v=e.value,ch=ev.data;let from=-1,rep='';
+if(ch==' '){const b=v.slice(0,p);let m;if(k.dot!==false&&/[^\s.!?。！？]  $/.test(b)){from=p-2;rep='. '}else if((m=/(\S+) $/.exec(b))&&(k.dict||[]).length){const x=k.dict.find(z=>z.s&&z.s==m[1]);if(x){from=p-m[1].length-1;rep=x.p+' '}}}
+else if(k.sq!==false){const pv=v[p-2],op=(!pv||/[\s(\[{]/.test(pv));if(ch=='"'){from=p-1;rep=op?'\u201c':'\u201d'}else if(ch=="'"){from=p-1;rep=op?'\u2018':'\u2019'}else if(ch=='-'&&pv=='-'){from=p-2;rep='\u2014'}}
+if(from>=0){e.setRangeText(rep,from,p,'end');e.dispatchEvent(new w.Event('input',{bubbles:true}))}},true);
+w.addEventListener('message',e=>{const dd=e.data;if(dd&&dd.xkb&&e.source===w.parent&&e.source!==w){try{w.phoneSettings.kb=dd.xkb}catch(x){}all()}});
+return{apply:all}}
+const kbCfg=()=>({hap:false,snd:true,ac:true,sq:true,cap:true,dot:true,sp:true,dict:[],...(S.kb||{})});
+const KB=kbSetup(window,kbCfg);
+function kbPush(){const c=kbCfg();$$('iframe[data-xid]').forEach(f=>{try{f.contentWindow.postMessage({xkb:c},'*')}catch(e){}});KB.apply()}
+function kbAdd(){const p=prompt('フレーズを入力してください');if(!p)return;const s=prompt('ショートカットを入力してください(空白なし)');if(!s||/\s/.test(s))return alert('ショートカットは空白なしで入力してください');S.kb={...kbCfg(),dict:[...kbCfg().dict,{p,s}]};sv();kbPush();setRr()}
+// --- バックグラウンド更新 ---
+function bgOK(id){const m=S.bgm||'wc';if(m=='off')return false;if(S.bga&&S.bga[id]===false)return false;if(m=='w'&&netKind()=='cell')return false;return true}
+function bgSync(){const fg=(PH.dataset.v=='app'&&AP.dataset.k=='ext')?S.open[0]:(PIP?PIP.t:null);$$('iframe[data-xid]').forEach(f=>{const t=1000+(+f.dataset.xid),sus=(t!==fg&&!bgOK(f.dataset.xid))?'1':'0';if((f.dataset.sus||'0')!==sus){f.dataset.sus=sus;try{f.contentWindow.postMessage({xsus:+sus},'*')}catch(e){}}})}
+new MutationObserver(bgSync).observe(PH,{attributes:true,attributeFilter:['data-v']});setInterval(bgSync,1500);
+// --- 言語と地域 ---
+const LN={ja:['日本語','日本語'],en:['English','英語'],zh:['简体中文','中国語(簡体字)'],ko:['한국어','韓国語'],fr:['Français','フランス語'],de:['Deutsch','ドイツ語'],es:['Español','スペイン語'],it:['Italiano','イタリア語'],pt:['Português','ポルトガル語']};
+const RG={JP:['日本','ymd/','metric','C',0,'c.'],US:['アメリカ合衆国','mdy/','us','F',0,'c.'],GB:['イギリス','dmy/','uk','C',1,'c.'],KR:['韓国','ymd.','metric','C',0,'c.'],CN:['中国','ymd-','metric','C',1,'c.'],TW:['台湾','ymd/','metric','C',0,'c.'],FR:['フランス','dmy/','metric','C',1,'s,'],DE:['ドイツ','dmy.','metric','C',1,'d,'],CA:['カナダ','ymd-','metric','C',0,'c.'],AU:['オーストラリア','dmy/','metric','C',1,'c.']};
+function setRegion(k){const r=RG[k];S.rg=k;S.df=r[1];S.un=r[2];S.tu=r[3];S.wk=r[4];S.nf=r[5]}
+const DFS=['ymd/','dmy/','mdy/','ymd-','dmy.','ymd.','ymdj'];
+function yr(d){const c=S.cal||'gregory';if(c=='gregory')return d.getFullYear();try{const p=new Intl.DateTimeFormat('ja-JP-u-ca-'+c+'-nu-latn',{era:'long',year:'numeric'}).formatToParts(d),era=(p.find(x=>x.type=='era')||{}).value||'',y=(p.find(x=>x.type=='year')||{}).value;return (c=='japanese'?era:c=='roc'?'民国':'')+y}catch(e){return d.getFullYear()}}
+function fmtDate(d,k){k=k||S.df||'ymd/';const Y=yr(d),M=d.getMonth()+1,D=d.getDate(),m2=pad(M),d2=pad(D);return {'ymd/':`${Y}/${m2}/${d2}`,'dmy/':`${d2}/${m2}/${Y}`,'mdy/':`${m2}/${d2}/${Y}`,'ymd-':`${Y}-${m2}-${d2}`,'dmy.':`${d2}.${m2}.${Y}`,'ymd.':`${Y}. ${M}. ${D}.`,'ymdj':`${Y}年${M}月${D}日`}[k]||''}
+const nfS=k=>{const[g,d]=NF[k];return '1'+g+'234'+g+'567'+d+'89'};
+const CALN={gregory:'西暦(グレゴリオ暦)',japanese:'和暦(日本の暦)',buddhist:'仏暦',roc:'民国暦'},UNN={metric:'メートル法',uk:'英国',us:'米国'};
+const PICK={glreg:['地域','rg',()=>Object.keys(RG).map(k=>[k,RG[k][0]])],glcal:['暦法','cal',()=>Object.keys(CALN).map(k=>[k,CALN[k]])],gltmp:['温度単位','tu',()=>[['C','°C'],['F','°F']]],glunit:['単位系','un',()=>Object.keys(UNN).map(k=>[k,UNN[k]])],glwk:['週の始まりの曜日','wk',()=>[0,1,2,3,4,5,6].map(i=>[i,'日月火水木金土'[i]+'曜日'])],gldf:['日付の書式','df',()=>DFS.map(k=>[k,fmtDate(new Date(),k)])],glnf:['数値の書式','nf',()=>Object.keys(NF).map(k=>[k,nfS(k)])],gbgm:['アプリのバックグラウンド更新','bgm',()=>[['off','オフ'],['w','Wi-Fi'],['wc','Wi-Fiとモバイルデータ通信']]]};
+const curV=k=>({rg:S.rg||'JP',cal:S.cal||'gregory',tu:S.tu||'C',un:S.un||'metric',wk:S.wk??0,df:S.df||'ymd/',nf:S.nf||'c.',bgm:S.bgm||'wc'})[k];
+function pickPg(k){const P=PICK[k],cur=curV(P[1]);return hd(P[0])+`<div class="ig">${P[2]().map(([v,l])=>`<div class="ir ni" data-pk="${k}" data-v="${E(String(v))}"><span class="il">${E(l)}</span>${String(cur)==String(v)?'<span style="color:#0a84ff;font-weight:700">✓</span>':''}</div>`).join('')}</div>`}
+function tzName(){try{const z=Intl.DateTimeFormat().resolvedOptions().timeZone||'';return ({'Asia/Tokyo':'東京','Asia/Seoul':'ソウル','Asia/Shanghai':'上海','Asia/Taipei':'台北','America/New_York':'ニューヨーク','America/Los_Angeles':'ロサンゼルス','Europe/London':'ロンドン'})[z]||z.split('/').pop().replace(/_/g,' ')}catch(e){return ''}}
+// --- ページ ---
+const rw=(l,v,go)=>`<div class="ir ni"${go?` data-go="${go}"`:''}><span class="il">${l}</span>${v?`<span class="iv">${v}</span>`:''}${go?'<span class="ich">›</span>':''}</div>`;
+const grow=r=>rowH(r).replace('class="ir" data-k="','class="ir" data-go="');
+const hdR=(t,tx,a)=>`<div class="ihd"><button class="cb" data-back="1" aria-label="戻る">‹</button><b>${t}</b><button class="cb tx" data-a="${a}">${tx}</button></div>`;
+const GEARP='M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1';
+const GEN=[[['#8e8e93','M8 3.5h8a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 19V5A1.5 1.5 0 0 1 8 3.5zM11 17.5h2','情報','','ginfo'],['#8e8e93',GEARP,'ソフトウェアアップデート','','gsw'],['#8e8e93','M4 14h16v5H4zM4 14l2-6h12l2 6M16.5 16.5h.01','iPhoneストレージ','','gst']],
+[['#1c1c1e','M4 6h16v12H4zM11 12h7v5h-7z','ピクチャインピクチャ','','gpip'],['#8e8e93','M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0','画面の取り込み','','xg:画面の取り込み']],
+[['#8e8e93','M5 12a7 7 0 0 1 12-5l2 2M19 5v4h-4M19 12a7 7 0 0 1-12 5l-2-2M5 19v-4h4','アプリのバックグラウンド更新','','gbg'],['#8e8e93','M3.5 7h17v10h-17zM7 10.5h.01M10 10.5h.01M13 10.5h.01M16 10.5h.01M8 14h8','キーボード','','gkb'],['#8e8e93','T:Aa','フォント','','gfont'],['#0a84ff','M12 3a9 9 0 1 0 .01 0M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18','言語と地域','','glang'],['#8e8e93','M9 15a4 4 0 1 1 3.4-1.9L20 20.5M16 17l2-2','自動入力とパスワード','','gpw'],['#0a84ff','M4 6.5h16v13H4zM4 10.5h16M8 4v4M16 4v4','日付と時刻','','gdt']]];
+const BKM={ginfo:'gen',gsw:'gen',gst:'gen',gpip:'gen',gfont:'gen',glang:'gen',gpw:'gen',gdt:'gen',gname:'ginfo',gfsys:'gfont',gfmy:'gfont',gfoth:'gfont',glad:'glang',glreg:'glang',glcal:'glang',gltmp:'glang',glunit:'glang',glwk:'glang',gldf:'glang',glnf:'glang',gpwl:'gpw',gbg:'gen',gbgm:'gbg',gkb:'gen',gkbu:'gkb',gen:'main',ns:'disp',al:'disp',ts:'disp'};
+function parentOf(n){n=String(n);if(BKM[n])return BKM[n];if(n.startsWith('xg:'))return ['xg:iOSバージョン','xg:保証期限切れ','xg:SEID'].includes(n)?'ginfo':'gen';if(n.startsWith('gsa:'))return 'gst';if(n.startsWith('gpwd:'))return 'gpwl';return 'main'}
+Object.assign(PGS,{
+gen:()=>hd('一般')+`<div class="ig gh"><div class="gi"><svg viewBox="0 0 24 24"><path d="${GEARP}"/></svg></div><b>一般</b><p class="mu">ソフトウェアアップデート、デバイスの言語、フォントなど、このスマホの全体的な設定や自分の好みの設定を管理します。</p></div>`+GEN.map(g=>`<div class="ig">${g.map(grow).join('')}</div>`).join('')+`<div class="ig"><div class="ir ni" data-shut="1" style="color:#0a84ff"><span class="il">システム終了</span></div></div>`,
+ginfo:()=>{const d=devInfo(),a=appsInfo(),used=stUsed();return hd('情報')+`<div class="ig">${rw('名前',E(S.dn||'iPhone'),'gname')}${rw('iOSバージョン','1','xg:iOSバージョン')}${rw('機種名',d.model)}${rw('機種番号',d.mn)}${rw('シリアル番号',d.sn)}</div><div class="ig">${rw('保証期限切れ','','xg:保証期限切れ')}</div><div class="ig">${row2('曲','0')}${row2('ビデオ','0')}${row2('写真','0')}${row2('アプリ',fN(2+a.length))}${row2('容量',fB(CAP))}${row2('使用可能',fB(Math.max(0,CAP-used)))}</div><div class="ig">${row2('Wi-Fiアドレス',d.mac)}${row2('Bluetooth',d.bt)}${row2('モデムファームウェア',d.fw)}${rw('SEID','','xg:SEID')}<div class="ir ni" style="flex-direction:column;align-items:flex-start;padding:14px 16px;gap:4px"><span>EID</span><span class="mu" style="word-break:break-all">${d.eid}</span></div>${row2('SIMロック','SIMロックなし')}</div><div class="isx">物理的SIM</div><div class="ig">${row2('ネットワーク',d.net)}${row2('通信事業者',d.cr)}${row2('IMEI',d.imei)}${row2('ICCID',d.iccid)}</div><div class="isx">使用可能なSIM</div><div class="ig">${row2('IMEI2',d.imei2)}</div>`},
+gname:()=>hd('名前')+`<div class="ig"><div class="ir ni"><input id="dnm" value="${E(S.dn||'iPhone')}" maxlength="30" style="flex:1;border:0;background:transparent;font:inherit;color:var(--fg);padding:14px 0;outline:0"></div></div>`,
+gsw:()=>hd('ソフトウェアアップデート')+`<div class="ig" style="padding:34px 20px;text-align:center"><b style="font-size:1.1em">お使いのソフトウェアは最新です</b><p class="mu" style="margin:8px 0 0">iOS 1</p></div>`,
+gst:()=>{const a=appsInfo(),d=devInfo(),ap=a.reduce((x,y)=>x+y.app+y.data,0),used=ap+d.ios+d.sysd,pc=v=>(v/CAP*100).toFixed(2)+'%',srt={size:(x,y)=>(y.app+y.data)-(x.app+x.data),name:(x,y)=>x.n.localeCompare(y.n),used:(x,y)=>y.lu-x.lu}[GSORT],lab={size:'サイズ',name:'名前',used:'最後に使用した日'}[GSORT];
+return hd('iPhoneストレージ')+`<div class="ig" style="padding:16px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>iPhone</span><span class="mu">使用済み: ${fB(used)} / ${fB(CAP)}</span></div><div class="sbar"><i style="width:${pc(ap)};background:#e84c4c"></i><i style="width:0;background:#f09a40"></i><i style="width:${pc(d.ios)};background:#aeaeb2"></i><i style="width:${pc(d.sysd)};background:#c7c7cc"></i></div><div class="sleg"><span><i style="background:#e84c4c"></i>アプリケーション</span><span><i style="background:#f09a40"></i>写真</span><span><i style="background:#aeaeb2"></i>iOS</span><span><i style="background:#c7c7cc"></i>システムデータ</span></div></div><div style="text-align:right;margin:0 8px 10px"><button class="nlk" data-a="gsort"><span>${lab}</span> ⇅</button></div>`+(a.length?`<div class="ig">${[...a].sort(srt).map(x=>`<div class="ir" data-go="gsa:${x.t}" style="min-height:64px"><div class="sti">${APPS[x.t].i}</div><div class="il">${E(x.n)}<div class="mu" style="font-size:.85em">${x.ol?'アプリは取り除かれています':'最後に使用した日: '+luT(x.lu)}</div></div><span class="iv">${fB(x.app+x.data)}</span><span class="ich">›</span></div>`).join('')}</div>`:`<div class="ig"><div class="ir ni"><span class="il mu">ダウンロードしたアプリはありません</span></div></div>`)},
+gsa:t=>{const id=t-1000,r=loadX(id);if(!r||!APPS[t])return hd('')+`<div class="ig"><div class="ir ni"><span class="il">このアプリはありません</span></div></div>`;const a=appsInfo().find(x=>x.t==t)||{app:0,data:0,ol:false};
+return hd(E(NM[t]))+`<div class="ig"><div class="ir" style="min-height:96px;gap:16px"><div class="sti" style="width:72px;height:72px">${APPS[t].i}</div><div class="il"><b>${E(NM[t])}</b><div class="mu">${E((S.xv||{})[id]||'')}</div><div class="mu">${E(r.subtitle||'')}</div></div></div></div><div class="ig">${row2('アプリのサイズ',fB(a.app))}${row2('書類とデータ',fB(a.data))}</div>`+(a.ol?`<div class="ig"><div class="ir ni" data-ap="re" data-t="${t}" style="justify-content:center;color:#0a84ff"><span>アプリを再インストール</span></div></div>`:`<div class="ig"><div class="ir ni" data-ap="off" data-t="${t}" style="justify-content:center;color:#0a84ff"><span>アプリを取り除く</span></div></div><p class="icp">この操作を行うとアプリのサイズ分の容量は解放されますが、その書類とデータは保持されます。アプリがまだダウンロード可能な場合は再インストールするとデータは元に戻ります。</p>`)+`<div class="ig"><div class="ir ni" data-ap="del" data-t="${t}" style="justify-content:center;color:#ff3b30"><span>アプリを削除</span></div></div><p class="icp">この操作を行うとこのアプリとそれに関連するすべてのデータがこのスマホから削除されます。この操作は取り消せません。</p>`},
+gpip:()=>hd('ピクチャインピクチャ')+`<div class="isx">ピクチャインピクチャ</div><div class="ig"><div class="ir ni"><span class="il">ピクチャインピクチャを自動的に開始</span>${swB('pip',S.pip)}</div></div><p class="icp">上にスワイプしてホーム画面に移動すると、アプリ内のビデオ再生は自動的にピクチャインピクチャで継続されます。</p>`,
+gfont:()=>hd('フォント')+`<div class="ig">${rw('システムフォント','','gfsys')}${rw('マイフォント','','gfmy')}</div><p class="icp">デバイスで使用するためにあらかじめインストールされているフォントと追加したフォントを表示します。</p><div class="ig">${rw('その他のフォント','','gfoth')}</div><p class="icp">インストール可能な追加のフォントを表示します。インターネットからフォントを追加できます。</p>`,
+gfsys:()=>hd('システムフォント')+`<div class="ig">${SYSF.filter(f=>!f[0]||['sans','serif','mono'].includes(f[0])||hasF(f[2])).map(f=>`<div class="ir ni" data-fsel="${f[0]}"><span class="il" style="${f[2]?'font-family:'+f[2]:''}">${f[1]}</span>${(S.fnt||'')==f[0]?'<span style="color:#0a84ff;font-weight:700">✓</span>':''}</div>`).join('')}</div>`,
+gfmy:()=>{const L=S.fts||[];return hdR('マイフォント',FEDIT?'完了':'編集','fedit')+(L.length?`<div class="ig">${L.map(f=>`<div class="ir ni" data-fsel="my:${f.id}"><span class="il" style="font-family:'${f.f}'">${E(f.n)}</span>${FEDIT?`<button class="nlk" data-fdel="${f.id}" style="color:#ff3b30">削除</button>`:((S.fnt||'')=='my:'+f.id?'<span style="color:#0a84ff;font-weight:700">✓</span>':'')}</div>`).join('')}</div>`:`<div class="ig"><div class="ir ni"><span class="il mu">追加したフォントはありません</span></div></div>`)+`<div class="ig"><div class="ir ni" data-a="fadd" style="color:#0a84ff"><span class="il">フォントを追加…</span></div></div>`},
+gfoth:()=>hd('その他のフォント')+`<div class="ig">${GF.map((g,i)=>{const on=(S.fts||[]).some(x=>x.k=='g'&&x.f==g[0]);return `<div class="ir ni"${on?'':` data-fadd="${i}"`}><span class="il">${g[0]}</span><span style="color:${on?'var(--mu)':'#0a84ff'}">${on?'追加済み':'追加'}</span></div>`}).join('')}</div>`,
+glang:()=>{const Ls=S.lg||['ja'];return hd('言語と地域')+`<div class="isx">優先する言語</div><div class="ig">${Ls.map((c,i)=>`<div class="ir ni" data-lgdel="${c}"><div class="il"><span data-nt="1">${LN[c][0]}</span><div class="mu" style="font-size:.85em">${i==0?'このスマホの使用言語':LN[c][1]}</div></div><button class="nlk" data-lgup="${c}" style="font-size:1.4em;color:var(--mu)">≡</button></div>`).join('')}<div class="ir ni" data-go="glad" style="color:#0a84ff"><span class="il">言語を追加…</span></div></div><p class="icp">アプリケーションとWebサイトは、このリストの中で対応している最初の言語で表示されます。</p><div class="ig">${rw('地域',RG[curV('rg')][0],'glreg')}${rw('暦法',CALN[curV('cal')],'glcal')}${rw('温度単位','°'+curV('tu'),'gltmp')}${rw('単位系',UNN[curV('un')],'glunit')}${rw('週の始まりの曜日','日月火水木金土'[curV('wk')]+'曜日','glwk')}${rw('日付の書式',fmtDate(new Date()),'gldf')}${rw('数値の書式',nfS(curV('nf')),'glnf')}</div>`},
+glad:()=>hd('言語を追加')+`<div class="ig">${Object.keys(LN).filter(c=>!(S.lg||['ja']).includes(c)).map(c=>`<div class="ir ni" data-lgadd="${c}" style="cursor:pointer"><div class="il"><span data-nt="1">${LN[c][0]}</span><div class="mu" style="font-size:.85em">${LN[c][1]}</div></div></div>`).join('')||'<div class="ir ni"><span class="il mu">追加できる言語はありません</span></div>'}</div>`,
+gbg:()=>{const m=curV('bgm'),L=(S.inst||[]).filter(t=>t>=1000);return hd('アプリのバックグラウンド更新')+`<div class="ig">${rw('アプリのバックグラウンド更新',{off:'オフ',w:'Wi-Fi',wc:'Wi-Fiとモバイルデータ通信'}[m],'gbgm')}</div><p class="icp">アプリがバックグラウンドにある間も動作を続けられるようにします。オフにしたアプリは、画面を離れると一時停止します。</p>`+(m=='off'?'':(L.length?`<div class="ig">${L.map(t=>`<div class="ir"><div class="sti">${APPS[t].i}</div><span class="il">${E(NM[t])}</span>${swB('bg:'+(t-1000),!(S.bga&&S.bga[t-1000]===false))}</div>`).join('')}</div>`:`<div class="ig"><div class="ir ni"><span class="il mu">ダウンロードしたアプリはありません</span></div></div>`))},
+gkb:()=>{const k=kbCfg(),on=x=>x=='hap'?!!k.hap:k[x]!==false,sw=(l,x)=>`<div class="ir ni"><span class="il">${l}</span>${swB('kb.'+x,on(x))}</div>`;return hd('キーボード')+`<div class="ig">${rw('ユーザ辞書',k.dict.length?fN(k.dict.length):'','gkbu')}</div><div class="ig">${sw('触覚フィードバック','hap')}${sw('サウンド','snd')}</div><div class="ig">${sw('自動修正','ac')}${sw('スマート句読点','sq')}${sw('自動大文字入力','cap')}${sw('ピリオドの簡易入力','dot')}</div><p class="icp">spaceキーをダブルタップでピリオドと空白を入力します。</p><div class="isx">英語</div><div class="ig">${sw('スペルチェック','sp')}</div>`},
+gkbu:()=>{const L=kbCfg().dict;return hdR('ユーザ辞書','追加','kbadd')+(L.length?`<div class="ig">${L.map((x,i)=>`<div class="ir ni" data-kbdel="${i}" style="cursor:pointer"><div class="il">${E(x.p)}<div class="mu" style="font-size:.85em">${E(x.s)}</div></div></div>`).join('')}</div>`:`<div class="ig"><div class="ir ni"><span class="il mu">ユーザ辞書はありません</span></div></div>`)},
+gdt:()=>hd('日付と時刻')+`<div class="ig"><div class="ir ni"><span class="il">24時間表示</span>${swB('h24',S.h24!==false)}</div></div><div class="ig"><div class="ir ni"><span class="il">自動設定</span><button class="swc on" disabled style="opacity:.45"><i></i></button></div><div class="ir ni"><span class="il" style="color:var(--mu)">時間帯</span><span class="iv" style="opacity:.6">${E(tzName())}</span></div></div><p class="icp">デバイスの制限により、時間帯を手動で設定することはできません。</p>`,
+gpw:()=>hd('自動入力とパスワード')+`<div class="ig"><div class="ir ni"><span class="il">パスワードを自動入力</span>${swB('paf',S.paf!==false)}</div></div><div class="ig">${rw('パスワード',fN((S.pwd||[]).length),'gpwl')}</div>`,
+gpwl:()=>{const L=S.pwd||[];return hd('パスワード')+(L.length?`<div class="ig">${L.map(x=>`<div class="ir ni" data-go="gpwd:${E(x.id)}"><div class="il">${E(x.app)}<div class="mu" style="font-size:.85em">${E(x.u||'—')}</div></div><span class="ich">›</span></div>`).join('')}</div>`:`<div class="ig"><div class="ir ni"><span class="il mu">保存されたパスワードはありません</span></div></div>`)},
+gpwd:id=>{const x=(S.pwd||[]).find(z=>z.id==id);if(!x)return hd('')+`<div class="ig"><div class="ir ni"><span class="il mu">保存されたパスワードはありません</span></div></div>`;return hd(E(x.app))+`<div class="ig">${row2('ユーザ名',E(x.u||'—'))}<div class="ir ni" data-a="pwshow" style="cursor:pointer"><span class="il">パスワード</span><span class="iv">${PWSHOW?E(x.p):'•'.repeat(Math.min(12,x.p.length))}</span></div></div><div class="ig"><div class="ir ni" data-pwdel="${E(x.id)}" style="justify-content:center;color:#ff3b30;cursor:pointer"><span>パスワードを削除</span></div></div>`}
+});
+Object.keys(PICK).forEach(k=>{PGS[k]=()=>pickPg(k)});
+// --- 言語(日本語 / English / 简体中文 / 한국어)---
+const DICT=`設定|Settings|设置|설정
+クラウド同期|Cloud Sync|云同步|클라우드 동기화
+今すぐ同期|Sync Now|立即同步|지금 동기화
+同期をオフにする|Turn Sync Off|关闭同步|동기화 끄기
+同期をオンにする|Turn Sync On|开启同步|동기화 켜기
+同期中…|Syncing…|同步中…|동기화 중…
+読み込み中…|Loading…|载入中…|불러오는 중…
+ユーザ辞書|User Dictionary|用户词典|사용자 사전
+触覚フィードバック|Haptic Feedback|触感反馈|햅틱 피드백
+サウンド|Sounds|声音|사운드
+自動修正|Auto-Correction|自动修正|자동 수정
+スマート句読点|Smart Punctuation|智能标点|스마트 문장 부호
+自動大文字入力|Auto-Capitalization|自动大写|자동 대문자
+ピリオドの簡易入力|Period Shortcut|句号快捷键|마침표 단축키
+スペルチェック|Check Spelling|检查拼写|맞춤법 검사
+spaceキーをダブルタップでピリオドと空白を入力します。|Double-tapping the space bar inserts a period followed by a space.|轻点两下空格键即可输入句号并添加空格。|스페이스 바를 두 번 탭하면 마침표와 공백이 입력됩니다.
+ユーザ辞書はありません|No user dictionary entries|没有用户词典条目|사용자 사전 항목이 없습니다
+Wi-Fiとモバイルデータ通信|Wi-Fi & Cellular Data|无线局域网与蜂窝数据|Wi-Fi 및 셀룰러 데이터
+アプリがバックグラウンドにある間も動作を続けられるようにします。オフにしたアプリは、画面を離れると一時停止します。|Lets apps keep running while in the background. Apps turned off are paused when you leave them.|允许 App 在后台继续运行。关闭的 App 在您离开后会暂停。|앱이 백그라운드에 있는 동안에도 계속 동작하도록 합니다. 끈 앱은 화면을 벗어나면 일시 정지됩니다.
+追加|Add|添加|추가
+ログイン|Sign In|登录|로그인
+ログインまたは新規登録|Sign in or create an account|登录或注册|로그인 또는 가입
+非対応|Not supported|不支持|지원 안 함
+検索|Search|搜索|검색
+機内モード|Airplane Mode|飞行模式|비행기 모드
+Wi-Fi|Wi-Fi|无线局域网|Wi-Fi
+モバイル通信|Cellular|蜂窝网络|셀룰러
+バッテリー|Battery|电池|배터리
+一般|General|通用|일반
+アクセシビリティ|Accessibility|辅助功能|손쉬운 사용
+Apple Intelligence と Siri|Apple Intelligence & Siri|Apple 智能与 Siri|Apple Intelligence 및 Siri
+アクションボタン|Action Button|操作按钮|동작 버튼
+カメラ|Camera|相机|카메라
+コントロールセンター|Control Center|控制中心|제어 센터
+スタンバイ|StandBy|待机显示|StandBy
+ホーム画面とアプリライブラリ|Home Screen & App Library|主屏幕与 App 资源库|홈 화면 및 앱 보관함
+画面表示と明るさ|Display & Brightness|显示与亮度|디스플레이 및 밝기
+壁紙|Wallpaper|墙纸|배경화면
+通知|Notifications|通知|알림
+サウンドと触覚|Sounds & Haptics|声音与触感|사운드 및 햅틱
+集中モード|Focus|专注模式|집중 모드
+スクリーンタイム|Screen Time|屏幕使用时间|스크린 타임
+Face IDとパスコード|Face ID & Passcode|面容 ID 与密码|Face ID 및 암호
+緊急SOS|Emergency SOS|SOS 紧急联络|긴급 SOS
+プライバシーとセキュリティ|Privacy & Security|隐私与安全性|개인정보 보호 및 보안
+ウォレットとApple Pay|Wallet & Apple Pay|钱包与 Apple Pay|지갑 및 Apple Pay
+アプリ|Apps|App|앱
+外観モード|Appearance|外观模式|화면 모드
+ライト|Light|浅色|라이트
+ダーク|Dark|深色|다크
+自動|Automatic|自动|자동
+ダークにする時刻|Dark Mode Starts|深色模式开始时间|다크 모드 시작 시간
+ライトに戻す時刻|Dark Mode Ends|深色模式结束时间|다크 모드 종료 시간
+明るさ|Brightness|亮度|밝기
+True Toneは、周囲の環境に合わせて画面の色味を暖かくします。|True Tone adapts the screen's color to match your surroundings.|原彩显示会根据周围环境调整屏幕色彩。|True Tone은 주변 환경에 맞춰 화면 색상을 조정합니다.
+オン|On|开|켬
+オフ|Off|关|끔
+自動ロック|Auto-Lock|自动锁定|자동 잠금
+手前に傾けてスリープ解除|Raise to Wake|抬起唤醒|들어서 깨우기
+テキストサイズを変更|Text Size|调整文字大小|텍스트 크기 조절
+文字を太くする|Bold Text|粗体文本|굵은 텍스트
+時間指定|Scheduled|定时|시간 지정
+開始|Start|开始|시작
+終了|End|结束|종료
+明日まで手動で有効にする|Turn On Manually Until Tomorrow|手动开启至明天|내일까지 수동으로 켜기
+色温度|Color Temperature|色温|색온도
+低|Less Warm|偏冷|낮음
+高|More Warm|偏暖|높음
+テキストサイズ|Text Size|文字大小|텍스트 크기
+なし|Never|永不|안 함
+30秒|30 Seconds|30 秒|30초
+1分|1 Minute|1 分钟|1분
+2分|2 Minutes|2 分钟|2분
+3分|3 Minutes|3 分钟|3분
+4分|4 Minutes|4 分钟|4분
+5分|5 Minutes|5 分钟|5분
+カスタマイズ|Customize|自定|사용자화
+新規|New|新建|신규
+＋新しい壁紙を追加|+ Add New Wallpaper|+ 添加新墙纸|+ 새로운 배경화면 추가
+ロック画面|Lock Screen|锁定屏幕|잠금 화면
+ホーム画面|Home Screen|主屏幕|홈 화면
+ロック画面に使用中|In Use on Lock Screen|用于锁定屏幕|잠금 화면에 사용 중
+ホーム画面に使用中|In Use on Home Screen|用于主屏幕|홈 화면에 사용 중
+ロック画面に設定|Set as Lock Screen|设为锁定屏幕|잠금 화면으로 설정
+ホーム画面に設定|Set as Home Screen|设为主屏幕|홈 화면으로 설정
+スライドして開く|Swipe up to open|上滑以打开|밀어서 열기
+状態|Status|状态|상태
+接続済み|Connected|已连接|연결됨
+未接続|Not Connected|未连接|연결 안 됨
+接続中|Connecting|连接中|연결 중
+オフライン|Offline|离线|오프라인
+インターネットに接続中|Connected to the Internet|已连接互联网|인터넷에 연결됨
+IPアドレス|IP Address|IP 地址|IP 주소
+ローカルIPアドレス|Local IP Address|本地 IP 地址|로컬 IP 주소
+ネットワークの詳細|Network Details|网络详情|네트워크 세부사항
+情報を更新|Refresh|刷新信息|정보 새로고침
+取得中…|Loading…|获取中…|가져오는 중…
+接続の種類|Connection Type|连接类型|연결 유형
+通信速度(目安)|Speed (approx.)|速度(估计)|속도(추정)
+遅延(目安)|Latency (approx.)|延迟(估计)|지연(추정)
+応答時間|Response Time|响应时间|응답 시간
+回線品質(目安)|Link Quality (approx.)|线路质量(估计)|회선 품질(추정)
+通信方式(目安)|Network Type (approx.)|网络类型(估计)|네트워크 유형(추정)
+プロバイダ|Provider|运营商|통신사
+おおよその地域|Approximate Region|大致地区|대략적인 지역
+通信情報|Connection Info|连接信息|연결 정보
+データセーバー|Data Saver|流量节省|데이터 절약
+自分のデバイス|My Devices|我的设备|내 기기
+デバイスを追加…|Add Device…|添加设备…|기기 추가…
+切断|Disconnect|断开|연결 해제
+接続|Connect|连接|연결
+充電中|Charging|充电中|충전 중
+電池を使用中|On Battery|使用电池供电|배터리 사용 중
+バッテリー残量|Battery Level|电池电量|배터리 잔량
+過去24時間|Last 24 Hours|过去 24 小时|지난 24시간
+過去10日間|Last 10 Days|过去 10 天|지난 10일
+ネットワーク名(SSID)の取得と、Wi-Fiのオン/オフ・切断は、ブラウザの制限でできません。|The network name (SSID) and turning Wi-Fi on/off aren't available due to browser limits.|受浏览器限制，无法获取网络名称(SSID)或开关无线局域网。|브라우저 제한으로 네트워크 이름(SSID) 확인과 Wi-Fi 켜기/끄기는 할 수 없습니다.
+キャリア名・電波の強さ・SIM・データ使用量は、ブラウザの制限で取得できません。|Carrier name, signal strength, SIM and data usage aren't available due to browser limits.|受浏览器限制，无法获取运营商名称、信号强度、SIM 卡和流量使用情况。|브라우저 제한으로 통신사 이름, 신호 강도, SIM, 데이터 사용량을 확인할 수 없습니다.
+ブラウザの選択画面でペアリングしたデバイスだけが表示されます。Bluetoothのオン/オフと、周辺デバイスの自動検索はブラウザの制限でできません。|Only devices paired in the browser's chooser are shown. Turning Bluetooth on/off and scanning nearby devices aren't available.|仅显示通过浏览器选择界面配对的设备。无法开关蓝牙或自动搜索附近设备。|브라우저 선택 화면에서 페어링한 기기만 표시됩니다. Bluetooth 켜기/끄기와 주변 기기 검색은 할 수 없습니다.
+このブラウザはBluetoothに対応していません|This browser doesn't support Bluetooth|此浏览器不支持蓝牙|이 브라우저는 Bluetooth를 지원하지 않습니다
+この端末・ブラウザではバッテリー情報を取得できません|Battery information isn't available on this device or browser|此设备或浏览器无法获取电池信息|이 기기나 브라우저에서는 배터리 정보를 가져올 수 없습니다
+残量の履歴は、このスマホを開いている間に記録されたものです。|Battery history is recorded only while this phone is open.|电量记录仅在打开此手机期间保存。|배터리 기록은 이 휴대폰을 열어 둔 동안에만 저장됩니다.
+情報|About|关于本机|정보
+ソフトウェアアップデート|Software Update|软件更新|소프트웨어 업데이트
+iPhoneストレージ|iPhone Storage|iPhone 储存空间|iPhone 저장 공간
+ピクチャインピクチャ|Picture in Picture|画中画|화면 속 화면
+画面の取り込み|Screen Capture|屏幕捕捉|화면 캡처
+アプリのバックグラウンド更新|Background App Refresh|后台 App 刷新|백그라운드 앱 새로 고침
+キーボード|Keyboard|键盘|키보드
+フォント|Fonts|字体|서체
+言語と地域|Language & Region|语言与地区|언어 및 지역
+自動入力とパスワード|AutoFill & Passwords|自动填充与密码|자동 완성 및 암호
+日付と時刻|Date & Time|日期与时间|날짜 및 시간
+システム終了|Shut Down|关机|전원 끄기
+ソフトウェアアップデート、デバイスの言語、フォントなど、このスマホの全体的な設定や自分の好みの設定を管理します。|Manage your phone's overall settings and preferences, such as software update, device language and fonts.|管理此手机的整体设置和个人偏好，例如软件更新、设备语言和字体。|소프트웨어 업데이트, 기기 언어, 서체 등 이 휴대폰의 전반적인 설정과 사용자 환경설정을 관리합니다.
+名前|Name|名称|이름
+iOSバージョン|iOS Version|iOS 版本|iOS 버전
+機種名|Model Name|型号名称|모델 이름
+機種番号|Model Number|型号|모델 번호
+シリアル番号|Serial Number|序列号|일련 번호
+保証期限切れ|Coverage Expired|保修已过期|보증 만료
+曲|Songs|歌曲|노래
+ビデオ|Videos|视频|비디오
+写真|Photos|照片|사진
+容量|Capacity|容量|용량
+使用可能|Available|可用|사용 가능
+Wi-Fiアドレス|Wi-Fi Address|无线局域网地址|Wi-Fi 주소
+モデムファームウェア|Modem Firmware|调制解调器固件|모뎀 펌웨어
+SIMロック|SIM Lock|SIM 卡锁|SIM 잠금
+SIMロックなし|No SIM restrictions|无 SIM 卡限制|SIM 제한 없음
+物理的SIM|Physical SIM|实体 SIM 卡|물리적 SIM
+ネットワーク|Network|网络|네트워크
+通信事業者|Carrier|运营商|통신사
+使用可能なSIM|Available SIM|可用 SIM 卡|사용 가능한 SIM
+お使いのソフトウェアは最新です|Your software is up to date.|您的软件已是最新版本。|소프트웨어가 최신 버전입니다.
+アプリケーション|Applications|应用程序|응용 프로그램
+システムデータ|System Data|系统数据|시스템 데이터
+サイズ|Size|大小|크기
+最後に使用した日|Last Used|最后使用日期|마지막 사용일
+今日|Today|今天|오늘
+昨日|Yesterday|昨天|어제
+未使用|Unused|未使用|사용 안 함
+アプリは取り除かれています|App is offloaded|App 已卸载|앱이 제거되었습니다
+ダウンロードしたアプリはありません|No downloaded apps|没有已下载的 App|다운로드한 앱이 없습니다
+アプリのサイズ|App Size|App 大小|앱 크기
+書類とデータ|Documents & Data|文稿与数据|문서 및 데이터
+アプリを取り除く|Offload App|卸载 App|앱 제거
+アプリを再インストール|Reinstall App|重新安装 App|앱 다시 설치
+アプリを削除|Delete App|删除 App|앱 삭제
+この操作を行うとアプリのサイズ分の容量は解放されますが、その書類とデータは保持されます。アプリがまだダウンロード可能な場合は再インストールするとデータは元に戻ります。|This frees the space used by the app but keeps its documents and data. Reinstalling the app restores your data if it's still available.|这将释放 App 占用的空间，但会保留其文稿和数据。如果 App 仍可下载，重新安装即可恢复数据。|앱이 차지한 공간은 확보되지만 문서와 데이터는 유지됩니다. 앱을 다시 설치하면 데이터가 복원됩니다.
+この操作を行うとこのアプリとそれに関連するすべてのデータがこのスマホから削除されます。この操作は取り消せません。|This deletes the app and all of its data from this phone. This action can't be undone.|这将从此手机删除该 App 及其所有数据。此操作无法撤销。|이 앱과 관련된 모든 데이터가 이 휴대폰에서 삭제됩니다. 이 작업은 취소할 수 없습니다.
+ピクチャインピクチャを自動的に開始|Start PiP Automatically|自动开启画中画|화면 속 화면 자동 시작
+上にスワイプしてホーム画面に移動すると、アプリ内のビデオ再生は自動的にピクチャインピクチャで継続されます。|When you swipe up to the Home Screen, video playing in an app continues in Picture in Picture.|上滑回到主屏幕时，App 内播放的视频会以画中画继续播放。|위로 쓸어 홈 화면으로 이동하면 앱의 비디오 재생이 화면 속 화면으로 계속됩니다.
+システムフォント|System Fonts|系统字体|시스템 서체
+マイフォント|My Fonts|我的字体|나의 서체
+その他のフォント|More Fonts|更多字体|기타 서체
+標準(システム)|Default (System)|默认(系统)|기본(시스템)
+デバイスで使用するためにあらかじめインストールされているフォントと追加したフォントを表示します。|Shows fonts preinstalled for use on this device and fonts you've added.|显示设备预装的字体和您添加的字体。|기기에 미리 설치된 서체와 추가한 서체를 표시합니다.
+インストール可能な追加のフォントを表示します。インターネットからフォントを追加できます。|Shows additional fonts you can install. You can add fonts from the internet.|显示可安装的更多字体。您可以从互联网添加字体。|설치할 수 있는 추가 서체를 표시합니다. 인터넷에서 서체를 추가할 수 있습니다.
+編集|Edit|编辑|편집
+完了|Done|完成|완료
+フォントを追加…|Add Font…|添加字体…|서체 추가…
+追加|Add|添加|추가
+追加済み|Added|已添加|추가됨
+追加したフォントはありません|No fonts added|没有添加字体|추가한 서체가 없습니다
+削除|Delete|删除|삭제
+優先する言語|Preferred Languages|首选语言|선호 언어
+このスマホの使用言語|This phone's language|此手机的使用语言|이 휴대폰 사용 언어
+言語を追加…|Add Language…|添加语言…|언어 추가…
+言語を追加|Add Language|添加语言|언어 추가
+アプリケーションとWebサイトは、このリストの中で対応している最初の言語で表示されます。|Apps and websites use the first language in this list that they support.|App 和网站将使用此列表中它们支持的第一种语言。|앱과 웹 사이트는 이 목록에서 지원하는 첫 번째 언어로 표시됩니다.
+英語|English|英语|영어
+中国語(簡体字)|Chinese (Simplified)|简体中文|중국어(간체)
+韓国語|Korean|韩语|한국어
+フランス語|French|法语|프랑스어
+ドイツ語|German|德语|독일어
+スペイン語|Spanish|西班牙语|스페인어
+イタリア語|Italian|意大利语|이탈리아어
+ポルトガル語|Portuguese|葡萄牙语|포르투갈어
+地域|Region|地区|지역
+暦法|Calendar|历法|달력
+温度単位|Temperature Unit|温度单位|온도 단위
+単位系|Measurement System|度量单位|측정 단위
+週の始まりの曜日|First Day of Week|每周第一天|한 주의 시작 요일
+日付の書式|Date Format|日期格式|날짜 형식
+数値の書式|Number Format|数字格式|숫자 형식
+西暦(グレゴリオ暦)|Gregorian|公历|양력(그레고리력)
+和暦(日本の暦)|Japanese|日本历|일본력
+仏暦|Buddhist|佛历|불기
+民国暦|Republic of China|民国纪年|중화민국력
+メートル法|Metric|公制|미터법
+英国|UK|英制|영국식
+米国|US|美制|미국식
+日曜日|Sunday|星期日|일요일
+月曜日|Monday|星期一|월요일
+火曜日|Tuesday|星期二|화요일
+水曜日|Wednesday|星期三|수요일
+木曜日|Thursday|星期四|목요일
+金曜日|Friday|星期五|금요일
+土曜日|Saturday|星期六|토요일
+日本|Japan|日本|일본
+アメリカ合衆国|United States|美国|미국
+イギリス|United Kingdom|英国|영국
+韓国|South Korea|韩国|대한민국
+中国|China|中国|중국
+台湾|Taiwan|台湾|대만
+フランス|France|法国|프랑스
+ドイツ|Germany|德国|독일
+カナダ|Canada|加拿大|캐나다
+オーストラリア|Australia|澳大利亚|호주
+24時間表示|24-Hour Time|24 小时制|24시간 표기
+自動設定|Set Automatically|自动设置|자동으로 설정
+時間帯|Time Zone|时区|시간대
+デバイスの制限により、時間帯を手動で設定することはできません。|The time zone can't be set manually due to device restrictions.|由于设备限制，无法手动设置时区。|기기 제한으로 시간대를 수동으로 설정할 수 없습니다.
+パスワードを自動入力|AutoFill Passwords|自动填充密码|암호 자동 완성
+パスワード|Passwords|密码|암호
+ユーザ名|Username|用户名|사용자 이름
+パスワードを削除|Delete Password|删除密码|암호 삭제
+保存されたパスワードはありません|No saved passwords|没有已存储的密码|저장된 암호가 없습니다
+パスワードを保存しますか?|Save Password?|要存储密码吗?|암호를 저장할까요?
+パスワードを更新しますか?|Update Password?|要更新密码吗?|암호를 업데이트할까요?
+保存|Save|存储|저장
+今はしない|Not Now|暂不|나중에
+パスコードを入力してください|Enter Passcode|输入密码|암호 입력
+緊急|Emergency|紧急|긴급
+キャンセル|Cancel|取消|취소
+もう一度入力してください|Try again|请重试|다시 입력해 주세요
+現在のパスコードを入力してください|Enter Your Current Passcode|输入当前密码|현재 암호를 입력하세요
+新しいパスコードを入力してください|Enter a New Passcode|输入新密码|새로운 암호를 입력하세요
+このアプリはありません|This app isn't available|没有此 App|이 앱이 없습니다`;
+const D=new Map();DICT.split('\n').forEach(l=>{const a=l.split('|');if(a.length>=4)D.set(a[0],a.slice(1,4))});
+const RULES=[[/^同期済み (.+)$/,['Synced $1','已同步 $1','동기화됨 $1']],[/^使用済み: (.+) \/ (.+)$/,['Used: $1 / $2','已用：$1 / $2','사용됨: $1 / $2']],[/^最後に使用した日: (.+)$/,['Last Used: $1','最后使用：$1','마지막 사용: $1']],[/^(.+)日前$/,['$1 days ago','$1 天前','$1일 전']],[/^「(.+)」のアカウント「(.*)」$/,['Account “$2” for “$1”','“$1”的帐户“$2”','“$1”의 계정 “$2”']]];
+const LI={en:0,zh:1,ko:2};
+function tl(t,l){const i=LI[l];if(i===undefined)return null;const r=D.get(t);if(r&&r[i])return r[i];for(const[re,o]of RULES){const m=re.exec(t);if(m)return o[i].replace(/\$(\d)/g,(_,n)=>tl(m[n],l)||m[n])}return null}
+const ORIG=new Map(),TRV=new Map();let TRB=0,ATTRS=0;
+function trNode(n,l){const cur=n.nodeValue;let ja=ORIG.get(n);if(ja!==undefined&&cur!==TRV.get(n))ja=undefined;if(ja===undefined)ja=cur;const t=ja.trim();if(!t)return;const o=l=='ja'?null:tl(t,l);if(o){const v=ja.replace(t,o);ORIG.set(n,ja);TRV.set(n,v);if(cur!==v)n.nodeValue=v}else if(ORIG.has(n)){if(cur!==ja)n.nodeValue=ja;ORIG.delete(n);TRV.delete(n)}}
+function trAttr(root,l){root.querySelectorAll('[placeholder],[aria-label]').forEach(e=>['placeholder','aria-label'].forEach(a=>{if(!e.hasAttribute(a))return;const k='data-ja-'+a;if(!e.hasAttribute(k))e.setAttribute(k,e.getAttribute(a));const ja=e.getAttribute(k),o=l=='ja'?ja:(tl(ja,l)||ja);if(e.getAttribute(a)!==o){e.setAttribute(a,o);ATTRS=1}}))}
+const TROOTS=()=>['#t4','#lock','#pc','#pwsv','#pwbar'].map(s=>$(s)).filter(Boolean);
+function trAll(){if(TRB)return;const l=uiL();if(l=='ja'&&!ORIG.size&&!ATTRS)return;TRB=1;try{TROOTS().forEach(r=>{const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT),arr=[];let n;while(n=w.nextNode())arr.push(n);arr.forEach(n=>{const p=n.parentElement;if(!p||p.closest('[data-nt],script,style,svg'))return;trNode(n,l)});trAttr(r,l)});for(const n of [...ORIG.keys()]){if(!n.isConnected){ORIG.delete(n);TRV.delete(n)}else if(l=='ja')trNode(n,l)}if(l=='ja')ATTRS=0}finally{TRB=0;MO.takeRecords()}}
+const MO=new MutationObserver(()=>trAll());TROOTS().forEach(r=>MO.observe(r,{childList:true,subtree:true,characterData:true}));
+function setLang(){clk();document.documentElement.lang={ja:'ja',en:'en',zh:'zh-CN',ko:'ko'}[uiL()];trAll()}
+setLang();
+
+// ===== クラウド同期(設定・ダウンロードしたアプリ・アプリの中身)=====
+var SYME=null,SY_ON=0,SYBUSY=0,SYPUSH=0,SYTM=0,SYSKIP=0,SYMSG='',SYST=0,XDT={};
+const rid=()=>Math.random().toString(36).slice(2,10);
+const hsh=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+':'+s.length};
+function syBlob(){const o={},ex=['pass','pwd','dev','view','open','prof','sy','lu'];for(const k in S){if(!ex.includes(k))o[k]=S[k]}
+if(o.wl)o.wl=o.wl.filter(x=>JSON.stringify(x).length<=1e5);if(o.fts)o.fts=o.fts.filter(f=>f.k!='file');return o}
+function sySt(m){SYMSG=m;const e=$('#sym');if(e)e.textContent=m||''}
+function syErr(e){const m=(e&&e.message)||String(e);sySt(/relation|does not exist|schema cache|PGRST20|42P01/i.test(m)?'データベースの準備ができていません(supabase_sync.sql を実行してください)':'エラー: '+m)}
+const syNow=()=>{const d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())};
+function syncSoon(){if(!SY_ON||(S.sy&&S.sy.off)||SYTM)return;SYTM=setTimeout(()=>{SYTM=0;syncPush()},3000)}
+async function syncPush(force){if(!SY_ON||SYPUSH||(S.sy&&S.sy.off))return;const j=JSON.stringify(syBlob()),h=hsh(j);S.sy=S.sy||{dev:rid(),xr:{}};if(!force&&S.sy.h===h)return;SYPUSH=1;sySt('同期中…');
+try{const cur=await sb.from('phone_saves').select('rev,device').eq('user_id',SYME.id).maybeSingle();if(cur.error)throw cur.error;
+if(!force&&cur.data&&S.sy.uid==SYME.id&&cur.data.rev>(S.sy.rev||0)&&cur.data.device!==S.sy.dev){SYPUSH=0;if(confirm('他の端末で更新されたデータがあります。\nOK: クラウドのデータを読み込む(この端末の未保存の変更は失われます)\nキャンセル: この端末のデータで上書き')){const r=await sb.from('phone_saves').select('data,rev,device').eq('user_id',SYME.id).maybeSingle();if(r.data)return syApply(r.data)}return syncPush(true)}
+const rev=Date.now(),{error}=await sb.from('phone_saves').upsert({user_id:SYME.id,data:JSON.parse(j),rev,device:S.sy.dev,updated_at:new Date().toISOString()});if(error)throw error;
+S.sy.rev=rev;S.sy.uid=SYME.id;S.sy.h=h;save();sySt('同期済み '+syNow())}catch(e){syErr(e)}finally{SYPUSH=0}}
+async function syPullData(){const{data,error}=await sb.from('phone_app_data').select('app_id,rev,device').eq('user_id',SYME.id);if(error)throw error;S.sy.xr=S.sy.xr||{};
+const inst=new Set((S.inst||[]).filter(t=>t>=1000).map(t=>t-1000));let ch=0;
+for(const r of data||[]){const id=r.app_id;if(!inst.has(id))continue;if(r.rev>(S.sy.xr[id]||0)){if(r.device!==S.sy.dev){const d2=await sb.from('phone_app_data').select('data').eq('user_id',SYME.id).eq('app_id',id).maybeSingle();if(d2.data&&d2.data.data!=null){try{localStorage.setItem('xd:'+id,d2.data.data);S.sy.xr[id]=r.rev;ch=1}catch(e){}}}else{S.sy.xr[id]=r.rev;ch=1}}}
+for(const id of inst){if(!(data||[]).some(r=>r.app_id==id)&&localStorage.getItem('xd:'+id))xdSoon(id)}
+if(ch)save()}
+function xdSoon(id){if(!SY_ON||!S.sy||S.sy.off)return;clearTimeout(XDT[id]);XDT[id]=setTimeout(async()=>{const s=localStorage.getItem('xd:'+id);if(!s||s.length>3e6)return;const rev=Date.now();try{const{error}=await sb.from('phone_app_data').upsert({user_id:SYME.id,app_id:+id,data:s,rev,device:S.sy.dev,updated_at:new Date().toISOString()});if(error)throw error;S.sy.xr=S.sy.xr||{};S.sy.xr[id]=rev;save()}catch(e){syErr(e)}},2000)}
+function xdDel(id){if(SY_ON&&sb&&SYME){try{sb.from('phone_app_data').delete().eq('user_id',SYME.id).eq('app_id',+id).then(()=>{})}catch(e){}}}
+function syStrip(v,t){if(Array.isArray(v))return v.filter(x=>x!==t).map(x=>syStrip(x,t));if(v&&typeof v=='object'){const o={};for(const k in v)o[k]=syStrip(v[k],t);return o}return v}
+async function syApply(row){sySt('読み込み中…');SYBUSY=1;
+try{const c=row.data||{},keep={pass:S.pass,pwd:S.pwd,dev:S.dev,sy:S.sy,prof:S.prof,lu:S.lu},bigwl=(S.wl||[]).filter(x=>JSON.stringify(x).length>1e5),filef=(S.fts||[]).filter(f=>f.k=='file');
+for(const k of Object.keys(S))delete S[k];Object.assign(S,JSON.parse(JSON.stringify(c)));for(const k in keep)if(keep[k]!==undefined)S[k]=keep[k];
+if(c.wl)S.wl=[...c.wl,...bigwl.filter(x=>!c.wl.some(y=>y.id==x.id))];S.fts=[...(c.fts||[]),...filef];S.theme??='auto';S.mine??=[];S.inst??=[5,4];S.hm??={p:[[5,4]],d:[],h:[]};
+const miss=(S.inst||[]).filter(t=>t>=1000&&!localStorage.getItem('xa:'+(t-1000)));
+for(const t of miss){const id=t-1000;let ok=false;try{const{data,error}=await sb.from('phone_apps').select('*').eq('id',id).eq('status','approved').single();if(!error&&data){localStorage.setItem('xa:'+id,JSON.stringify((S.ol&&S.ol[id])?{...data,html:''}:data));ok=true}}catch(e){}
+if(!ok){S.inst=S.inst.filter(x=>x!=t);S.hm=syStrip(S.hm,t);if(S.hm.p&&!S.hm.p.length)S.hm.p=[[]]}}
+const keepIds=new Set((S.inst||[]).filter(t=>t>=1000).map(t=>String(t-1000)));Object.keys(localStorage).forEach(k=>{const m=/^(xa|xd):(\d+)$/.exec(k);if(m&&!keepIds.has(m[2]))localStorage.removeItem(k)});
+S.sy=S.sy||{dev:rid()};S.sy.xr={};S.sy.uid=SYME.id;S.sy.rev=row.rev;
+try{await syPullData()}catch(e){}
+S.sy.h=hsh(JSON.stringify(syBlob()));save();location.reload()}catch(e){SYBUSY=0;syErr(e)}}
+async function syncStart(force){SY_ON=!!(sb&&SYME);if(!SY_ON)return sySt('');if(S.sy&&S.sy.off&&!force)return sySt('オフ');if(SYBUSY)return;if(!force&&Date.now()-SYST<30000)return;SYST=Date.now();SYBUSY=1;sySt('同期中…');
+try{S.sy=S.sy||{dev:rid(),xr:{}};if(force)delete S.sy.off;
+const{data:row,error}=await sb.from('phone_saves').select('data,rev,device').eq('user_id',SYME.id).maybeSingle();if(error)throw error;
+if(row&&(S.sy.uid!=SYME.id||(row.rev>(S.sy.rev||0)&&row.device!==S.sy.dev))){
+if(S.sy.uid!=SYME.id&&!confirm('このアカウントのクラウドデータがあります。\nこの端末のデータをクラウドのデータで置き換えますか?\n(キャンセル: この端末では同期しません)')){S.sy.off=1;save();return sySt('オフ')}
+return await syApply(row)}
+SYBUSY=0;await syncPush(!row);SYBUSY=1;await syPullData();if(!/^エラー|^データベース/.test(SYMSG))sySt('同期済み '+syNow());save()}catch(e){syErr(e)}finally{SYBUSY=0}}
+async function syCheck(){if(!SY_ON||SYBUSY||SYPUSH||(S.sy&&S.sy.off)||!S.sy)return;SYBUSY=1;
+try{const{data:row}=await sb.from('phone_saves').select('data,rev,device').eq('user_id',SYME.id).maybeSingle();
+if(row&&row.rev>(S.sy.rev||0)&&row.device!==S.sy.dev&&row.rev!==SYSKIP){if(S.view=='lock'||confirm('他の端末で更新されたデータがあります。今すぐ読み込みますか?')){return await syApply(row)}SYSKIP=row.rev}
+await syPullData()}catch(e){}finally{SYBUSY=0}}
+setInterval(syCheck,60000);document.addEventListener('visibilitychange',()=>{if(document.visibilityState=='visible')syCheck()});
+$('#ado').insertAdjacentHTML('beforebegin','<div class="card" id="syc" style="margin-top:14px"><div class="row sp"><span>クラウド同期</span><span class="mu" id="sym" style="max-width:62%;text-align:right"></span></div><div class="row" style="margin-top:10px"><button id="syn" type="button" style="flex:1">今すぐ同期</button><button id="syo" type="button" style="flex:1">同期をオフにする</button></div></div>');
+$('#syn').onclick=()=>{SYST=0;syncStart(true)};
+$('#syo').onclick=()=>{S.sy=S.sy||{dev:rid(),xr:{}};if(S.sy.off){delete S.sy.off;save();SYST=0;syncStart(true)}else{S.sy.off=1;save();sySt('オフ')}$('#syo').textContent=S.sy.off?'同期をオンにする':'同期をオフにする'};
+$('#syo').textContent=(S.sy&&S.sy.off)?'同期をオンにする':'同期をオフにする';
+
 function pgAfter(n){if(n=='wifi'||n=='cell')netFill();else if(n=='bt')btInit()}
 function netSum(){const k=netKind(),s=(q,t)=>{const e=$('#setm [data-k="'+q+'"] .iv');if(e)e.textContent=t};
 s('wifi',k=='off'?'オフライン':k=='cell'?'未接続':k=='wifi'?'接続済み':'接続中');s('cell',k=='cell'?'接続中':'');s('bt',!btOK()?'非対応':BT.list.some(o=>o.conn)?'接続済み':'未接続')}
@@ -752,7 +1249,25 @@ wSheet(`<h3>${nm}をカスタマイズ</h3><div class="wphc">${lk(bg)}</div>${it
 // --- 設定ページのイベント ---
 $('#setm').onclick=e=>{if(e.target.closest('#acc'))return accShow(true);const k=e.target.closest('.ir[data-k]');if(k&&k.dataset.k)setNav(k.dataset.k)};
 $('#setp').onclick=async e=>{const T=e.target,c=s=>T.closest(s);
-if(c('[data-back]'))return setNav({ns:'disp',al:'disp',ts:'disp'}[setCur]||'main');
+if(c('[data-back]'))return setNav(parentOf(setCur));
+if(c('[data-shut]'))return shutDown();
+const pk=c('[data-pk]');if(pk){const P=PICK[pk.dataset.pk],it=P[2]().find(x=>String(x[0])==pk.dataset.v);if(it){S[P[1]]=it[0];if(P[1]=='rg')setRegion(it[0]);sv();clk();trAll();bgSync();return setRr()}return}
+const aa=c('[data-a]');if(aa){const a=aa.dataset.a;
+if(a=='gsort'){GSORT={size:'name',name:'used',used:'size'}[GSORT];return setRr()}
+if(a=='fedit'){FEDIT=!FEDIT;return setRr()}
+if(a=='fadd')return $('#fntin').click();
+if(a=='kbadd')return kbAdd();
+if(a=='pwshow'){PWSHOW=!PWSHOW;return setRr()}
+return}
+const lu=c('[data-lgup]');if(lu){const a=[...(S.lg||['ja'])],i=a.indexOf(lu.dataset.lgup);if(i>0){[a[i-1],a[i]]=[a[i],a[i-1]];S.lg=a;sv();setLang()}return setRr()}
+const ld=c('[data-lgdel]');if(ld){const a=S.lg||['ja'],k=ld.dataset.lgdel;if(a.length<2)return alert('優先する言語は1つ以上必要です');if(confirm('「'+LN[k][0]+'」を優先する言語から削除しますか?')){S.lg=a.filter(x=>x!=k);sv();setLang()}return setRr()}
+const la=c('[data-lgadd]');if(la){S.lg=[...(S.lg||['ja']),la.dataset.lgadd];sv();setLang();return setNav('glang')}
+const fd=c('[data-fdel]');if(fd){fontDel(fd.dataset.fdel);return setRr()}
+const fs=c('[data-fsel]');if(fs){S.fnt=fs.dataset.fsel;sv();fontApply();return setRr()}
+const fg=c('[data-fadd]');if(fg){fontAddG(+fg.dataset.fadd);return setRr()}
+const kd=c('[data-kbdel]');if(kd){const i=+kd.dataset.kbdel,L=kbCfg().dict;if(L[i]&&confirm('「'+L[i].p+'」を削除しますか?')){S.kb={...kbCfg(),dict:L.filter((_,j)=>j!=i)};sv();kbPush()}return setRr()}
+const ap=c('[data-ap]');if(ap)return appAct(ap.dataset.ap,+ap.dataset.t);
+const pdl=c('[data-pwdel]');if(pdl){if(confirm('このパスワードを削除しますか?')){S.pwd=(S.pwd||[]).filter(x=>x.id!=pdl.dataset.pwdel);sv();setNav('gpwl')}return}
 if(c('[data-btadd]')){try{const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:['battery_service','device_information']});await btConnect(btAdd(dev))}catch(x){if(x&&x.name!='NotFoundError')alert('Bluetoothデバイスを追加できませんでした')}return}
 const bdc=c('[data-btdc]');if(bdc){const o=BT.list.find(x=>x.id==bdc.dataset.btdc);if(o){try{o.dev.gatt.disconnect()}catch(x){}o.conn=false;o.batt=null;btNotify()}return}
 const bcn=c('[data-btcn]');if(bcn){const o=BT.list.find(x=>x.id==bcn.dataset.btcn);if(o)btConnect(o);return}
@@ -766,6 +1281,8 @@ if(k=='auto'){S.theme=S.theme=='auto'?document.documentElement.dataset.t:'auto'}
 else if(k=='tt')S.tt=!S.tt;
 else if(k=='bold')S.bold=!S.bold;
 else if(k=='tilt'){S.tilt=!S.tilt;if(S.tilt&&window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission=='function'){try{if(await DeviceOrientationEvent.requestPermission()!='granted'){S.tilt=false;alert('モーションと画面の向きの許可が必要です')}}catch(x){S.tilt=false}}}
+else if(k.startsWith('kb.')){const kk=k.slice(3),c=kbCfg();S.kb={...c,[kk]:kk=='hap'?!c.hap:c[kk]===false};kbPush()}else if(k.startsWith('bg:')){const id=k.slice(3);S.bga??={};S.bga[id]=S.bga[id]===false;bgSync()}
+else if(k=='pip')S.pip=!S.pip;else if(k=='paf')S.paf=S.paf===false;else if(k=='h24'){S.h24=S.h24===false;clk()}
 else if(k=='ns.on'){S.ns={...(S.ns||{}),on:!(S.ns&&S.ns.on)}}
 else if(k=='ns.man'){const d=new Date();d.setDate(d.getDate()+1);d.setHours(7,0,0,0);const o=S.ns||{};S.ns={...o,man:o.man&&o.man>Date.now()?0:d.getTime()}}
 sv();theme();warmTint();applyTS();return setRr()}
@@ -773,7 +1290,7 @@ const st=c('[data-set]');if(st){wSetT(st.dataset.set,st.dataset.tg);return setRr
 const cu=c('[data-cu]');if(cu)return wCustom(cu.dataset.cu,cu.dataset.tg);
 if(c('[data-add]')){if(S.wl.length>=9)return alert('壁紙は9個までです。不要な壁紙を削除してください');return wDark()}};
 $('#setp').oninput=e=>{const T=e.target;if(T.id=='brs'){S.br=+T.value;bright()}else if(T.id=='tsr'){S.ts=+T.value;applyTS()}else if(T.id=='nsw'){S.ns={...(S.ns||{}),w:+T.value};warmTint()}};
-$('#setp').onchange=e=>{const T=e.target;if(T.id=='brs'||T.id=='tsr'||T.id=='nsw')return sv();const k=T.dataset.hr;if(!k)return;
+$('#setp').onchange=e=>{const T=e.target;if(T.id=='dnm'){S.dn=T.value.trim().slice(0,30)||'iPhone';sv();return}if(T.id=='brs'||T.id=='tsr'||T.id=='nsw')return sv();const k=T.dataset.hr;if(!k)return;
 if(k=='dk0'||k=='dk1'){S[k]=+T.value;theme()}else{S.ns={...(S.ns||{}),[k.slice(3)]:+T.value};warmTint()}sv();setRr()};
 // --- パスワード(アカウントのページ)---
 $('#pwo').onclick=()=>{$('#pwf').hidden=!$('#pwf').hidden};
@@ -965,7 +1482,7 @@ async function chkAdmin(){let a=false;me=null;
 if(sb){try{const{data:{session}}=await sb.auth.getSession();if(session){me={id:session.user.id,email:session.user.email||''};
 const[ad,pf]=await Promise.all([sb.from('phone_admins').select('user_id').eq('user_id',me.id).maybeSingle(),sb.from('phone_profiles').select('name,icon').eq('user_id',me.id).maybeSingle()]);
 a=!!(ad.data);if(pf.data)S.prof={uid:me.id,name:pf.data.name,icon:pf.data.icon};else if(!S.prof||S.prof.uid!=me.id)S.prof={uid:me.id,name:'',icon:''}}}catch(e){}}
-if(!me)S.prof=null;save();adm=a;accUI();
+if(!me)S.prof=null;save();adm=a;accUI();SYME=me;syncStart();
 clearInterval(pt2);if(a){loadPend();pt2=setInterval(loadPend,30000)}else{pend=[];rv=null;badge()}
 if(S.tab==5&&!pv)enter(1)}
 $('#acc').onclick=()=>accShow(true);$('#accbk').onclick=()=>accShow(false);
