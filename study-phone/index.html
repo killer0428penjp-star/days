@@ -265,7 +265,7 @@ html[data-bold="1"] .phone *:not(b,strong,h1,h2,h3){font-weight:600}
 .acr{padding:12px 16px}.acr .sa{width:56px}.acr .sa i{border-radius:50%}.acr .tx{flex:1;min-width:0;display:flex;flex-direction:column}.acr .tx b{font-size:1.1em}.acr .tx span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 div.swc,span.swc{display:block;flex:none}
 #ssb{position:absolute;left:16px;right:16px;bottom:calc(22px + env(safe-area-inset-bottom));z-index:4;display:flex;align-items:center;gap:10px;padding:0 18px;height:52px;border-radius:999px;background:color-mix(in srgb,var(--bg) 74%,transparent);backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6);border:1px solid var(--bd);box-shadow:0 8px 28px rgba(0,0,0,.14);color:var(--mu)}
-#ssb[hidden]{display:none}
+#ssb[hidden]{display:none}#app:not(:has(#t4.on)) #ssb,#app[data-k=ext] #ssb,.phone:not([data-v=app]) #ssb{display:none}
 #ssb input{flex:1;min-width:0;border:0;background:none;padding:0;border-radius:0;-webkit-appearance:none;appearance:none}#ssb input:focus{box-shadow:none}
 #ssb svg{width:20px;height:20px;flex:none}
 #ssn{text-align:center;color:var(--mu);padding:60px 20px}#ssn svg{width:44px;height:44px;margin-bottom:8px}#ssn b{display:block;color:var(--fg)}
@@ -1126,7 +1126,7 @@ function setLang(){clk();document.documentElement.lang={ja:'ja',en:'en',zh:'zh-C
 setLang();
 
 // ===== クラウド同期(設定・ダウンロードしたアプリ・アプリの中身)=====
-var SYME=null,SY_ON=0,SYBUSY=0,SYPUSH=0,SYTM=0,SYSKIP=0,SYMSG='',SYST=0,XDT={};
+var SYHOLD=0,SYME=null,SY_ON=0,SYBUSY=0,SYPUSH=0,SYTM=0,SYSKIP=0,SYMSG='',SYST=0,XDT={};
 const rid=()=>Math.random().toString(36).slice(2,10);
 const hsh=s=>{let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+':'+s.length};
 function syBlob(){const o={},ex=['pass','pwd','dev','view','open','prof','sy','lu'];for(const k in S){if(!ex.includes(k))o[k]=S[k]}
@@ -1159,11 +1159,10 @@ const keepIds=new Set((S.inst||[]).filter(t=>t>=1000).map(t=>String(t-1000)));Ob
 S.sy=S.sy||{dev:rid()};S.sy.xr={};S.sy.uid=SYME.id;S.sy.rev=row.rev;
 try{await syPullData()}catch(e){}
 S.sy.h=hsh(JSON.stringify(syBlob()));save();location.reload()}catch(e){SYBUSY=0;syErr(e)}}
-async function syncStart(force){SY_ON=!!(sb&&SYME);if(!SY_ON)return sySt('');if(S.sy&&S.sy.off&&!force)return sySt('オフ');if(SYBUSY)return;if(!force&&Date.now()-SYST<30000)return;SYST=Date.now();SYBUSY=1;sySt('同期中…');
+async function syncStart(force){SY_ON=!!(sb&&SYME&&!SYHOLD);if(!SY_ON)return sySt('');if(S.sy&&S.sy.off&&!force)return sySt('オフ');if(SYBUSY)return;if(!force&&Date.now()-SYST<30000)return;SYST=Date.now();SYBUSY=1;sySt('同期中…');
 try{S.sy=S.sy||{dev:rid(),xr:{}};if(force)delete S.sy.off;
 const{data:row,error}=await sb.from('phone_saves').select('data,rev,device').eq('user_id',SYME.id).maybeSingle();if(error)throw error;
 if(row&&(S.sy.uid!=SYME.id||(row.rev>(S.sy.rev||0)&&row.device!==S.sy.dev))){
-if(S.sy.uid!=SYME.id&&!confirm('このアカウントのクラウドデータがあります。\nこの端末のデータをクラウドのデータで置き換えますか?\n(キャンセル: この端末では同期しません)')){S.sy.off=1;save();return sySt('オフ')}
 return await syApply(row)}
 SYBUSY=0;await syncPush(!row);SYBUSY=1;await syPullData();if(!/^エラー|^データベース/.test(SYMSG))sySt('同期済み '+syNow());save()}catch(e){syErr(e)}finally{SYBUSY=0}}
 async function syCheck(){if(!SY_ON||SYBUSY||SYPUSH||(S.sy&&S.sy.off)||!S.sy)return;SYBUSY=1;
@@ -1488,7 +1487,8 @@ if(S.tab==5&&!pv)enter(1)}
 $('#acc').onclick=()=>accShow(true);$('#accbk').onclick=()=>accShow(false);
 $('#adl').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||!password)return alert('メールアドレスとパスワードを入力してください');
 const{error}=await sb.auth.signInWithPassword({email,password});if(error)return alert('ログインできません: '+error.message);$('#adp').value='';await chkAdmin()};
-$('#adr').onclick=async()=>{if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||password.length<6)return alert('メールアドレスと6文字以上のパスワードを入力してください');
+$('#adr').onclick=async()=>{SYHOLD=1;try{await regAcct()}finally{SYHOLD=0}};
+async function regAcct(){if(!sb)return noSb();const email=$('#ade').value.trim(),password=$('#adp').value;if(!email||password.length<6)return alert('メールアドレスと6文字以上のパスワードを入力してください');
 const{data,error}=await sb.auth.signUp({email,password});
 const retry=error&&(error.status==429||/seconds|rate limit|already/i.test(error.message));
 if(error&&!retry)return alert('登録できません: '+error.message);
@@ -1497,7 +1497,8 @@ if(r.error){const m=r.error.message||'';
 if(/confirm/i.test(m))return alert('このメールアドレスはまだ認証されていません。supabase.sql の8番(メール認証なし)を実行し、このメールだけ認証済みにするSQLも実行してください');
 if(retry)return alert('このメールアドレスは登録済みか、短時間に何度も送信しています。「ログイン」を押して、パスワードを確認してください。('+m+')');
 return alert('登録できません: '+m)}}
-$('#adp').value='';await chkAdmin()};
+const fresh=!error&&data&&data.session;
+$('#adp').value='';if(fresh){wipeAcct();location.reload();return}SYHOLD=0;await chkAdmin()}
 async function saveProf(icon){if(!me)return false;const P=S.prof&&S.prof.uid==me.id?S.prof:{},name=$('#pfn').value.trim().slice(0,20);if(!name){alert('名前を入力してください');return false}
 const n={uid:me.id,name,icon:icon!==undefined?icon:(P.icon||'')};
 const{error}=await sb.from('phone_profiles').upsert({user_id:me.id,name:n.name,icon:n.icon||null,updated_at:new Date().toISOString()});
@@ -1507,7 +1508,23 @@ $('#pfs').onclick=async()=>{const b=$('#pfs');b.disabled=true;const ok=await sav
 $('#pfi').onclick=$('#pfic').onclick=()=>$('#pfif').click();
 $('#pfif').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
 rd.onload=()=>{const im=new Image();im.onerror=()=>alert('画像を読み込めませんでした');im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d'),s=Math.min(im.width,im.height)||1;x.drawImage(im,(im.width-s)/2,(im.height-s)/2,s,s,0,0,128,128);saveProf(c.toDataURL('image/png'))};im.src=rd.result};rd.readAsDataURL(f)};
-$('#ado').onclick=async()=>{if(!confirm('ログアウトしますか?'))return;if(sb)await sb.auth.signOut();await chkAdmin();accShow(false)};
+function wipeAcct(){SY_ON=0;SYME=null;clearTimeout(SYTM);SYTM=0;for(const k in XDT)clearTimeout(XDT[k]);
+const keep={pass:S.pass,pwd:S.pwd,dev:S.dev};
+try{Object.keys(localStorage).forEach(k=>{if(/^(xa|xd):\d+$|^fd:/.test(k))localStorage.removeItem(k)})}catch(e){}
+for(const k of Object.keys(S))delete S[k];for(const k in keep)if(keep[k]!==undefined)S[k]=keep[k];
+try{localStorage.setItem('st',JSON.stringify(S))}catch(e){}}
+async function flushAcct(){clearTimeout(SYTM);SYTM=0;for(const k in XDT)clearTimeout(XDT[k]);
+for(let i=0;i<50&&(SYBUSY||SYPUSH);i++)await new Promise(r=>setTimeout(r,100));
+SYMSG='';await syncPush();if(/^エラー|^データベース/.test(SYMSG))return false;
+S.sy=S.sy||{dev:rid(),xr:{}};S.sy.xr=S.sy.xr||{};
+for(const t of (S.inst||[]).filter(t=>t>=1000)){const id=t-1000,s=localStorage.getItem('xd:'+id);if(!s||s.length>3e6)continue;const rev=Date.now();
+try{const{error}=await sb.from('phone_app_data').upsert({user_id:SYME.id,app_id:id,data:s,rev,device:S.sy.dev,updated_at:new Date().toISOString()});if(error)return false;S.sy.xr[id]=rev}catch(e){return false}}
+return true}
+$('#ado').onclick=async()=>{const off=S.sy&&S.sy.off;
+if(!confirm(off?'同期がオフのため、この端末のアプリと設定は保存されずに消えます。ログアウトしますか?':'ログアウトしますか?\nこの端末のアプリと設定は消え、ログインすると元に戻ります。'))return;
+if(sb&&SY_ON&&!off){const ok=await flushAcct();if(!ok&&!confirm('クラウドに保存できませんでした。このままログアウトすると最後の変更が失われます。ログアウトしますか?'))return}
+if(sb){try{await sb.auth.signOut()}catch(e){}}
+wipeAcct();location.reload()};
 OPEN[4]=()=>{accShow(false);accUI()};
 // ---------- 右上アイコン / アップデート画面 ----------
 function sacUI(){const P=me&&S.prof&&S.prof.uid==me.id?S.prof:{},nm=me?(P.name||me.email.split('@')[0]):'ログイン',n=updN();
