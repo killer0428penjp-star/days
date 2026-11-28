@@ -400,6 +400,64 @@ i img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;pointer-e
 #fo.on{visibility:visible;pointer-events:auto;background:rgba(0,0,0,.28);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);transition-delay:0s}
 .fob{margin:auto 0;min-height:0;max-height:100%;display:flex;flex-direction:column;will-change:transform,opacity}
 .fob .alg3{grid-template-columns:repeat(3,var(--iw,64px));justify-content:space-evenly;gap:20px 10px;padding:22px 16px 26px;border-radius:34px;background:rgba(255,255,255,.26);backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);min-height:calc(var(--w)*.78);max-height:calc(var(--w)*1.5);overflow-y:auto;align-content:start;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+
+/* ===== 追加: 修正・新機能CSS ===== */
+.als{backdrop-filter:none!important;-webkit-backdrop-filter:none!important;background:rgba(255,255,255,.26)}
+#alo{background:rgba(0,0,0,.5)}
+#alo .sph{color:rgba(255,255,255,.88);font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,.55)}
+#alo .sph .nlk{color:#8fc4ff}
+#alo .ic2,#alo .sphi{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.55)}
+#alo .mu{color:rgba(255,255,255,.88)}
+#alp .alf>span{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+#edg{position:absolute;left:0;top:calc(var(--sat) + 58px);bottom:36px;width:22px;z-index:25;touch-action:none;display:none}
+.phone.sil #ht::after{content:"";display:inline-block;width:14px;height:14px;margin-left:6px;vertical-align:-2px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 17h12l-1.5-2.2V11a4.5 4.5 0 0 0-9 0v3.8zM10 20h4'/%3E%3Cpath d='M4 4l16 16'/%3E%3C/svg%3E") center/contain no-repeat}
+#lock.noln #ln{display:none!important}
+.lb .ai{margin:0}
+/* ロック画面: 壁紙一覧 */
+#lkg,#lke{position:absolute;inset:0;z-index:9;color:#fff;display:flex;flex-direction:column;user-select:none;-webkit-user-select:none;opacity:0;transition:opacity .28s var(--e)}
+#lkg.on,#lke.on{opacity:1}
+#lkg{background:rgba(9,10,14,.92)}
+.lkh{display:flex;justify-content:flex-end;padding:calc(var(--sat) + 14px) 18px 8px}
+#lkg button,#lke button{font:inherit}
+.lkh button,.lkb button,.lket button,.lkdn,.lkcl{background:rgba(255,255,255,.2)!important;color:#fff!important;border:0!important;border-radius:999px!important;padding:.55em 1.3em!important;font-weight:600}
+.lkc{position:relative;flex:1;display:flex;align-items:center;gap:6vw;overflow-x:auto;scroll-snap-type:x mandatory;touch-action:pan-x;padding:0 calc((100% - var(--w)*.62)/2);scrollbar-width:none}
+.lkc::-webkit-scrollbar{display:none}
+.lkw{flex:none;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;transition:transform .3s var(--e),opacity .3s;transform:scale(.88);opacity:.55;cursor:pointer}
+.lkw.cur{transform:scale(1);opacity:1}
+.lkp{position:relative;width:calc(var(--w)*.62);aspect-ratio:var(--ar,.46);border-radius:calc(var(--w)*.075);overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.18)}
+.lkp .d{position:absolute;top:8%;width:100%;text-align:center;font-weight:600;font-size:calc(var(--w)*.62*.05);color:rgba(255,255,255,.92)}
+.lkp .t{position:absolute;top:calc(8% + var(--w)*.62*.085);width:100%;text-align:center;font-weight:700;font-size:calc(var(--w)*.62*.27);line-height:1;letter-spacing:-.03em;color:rgba(255,255,255,.72);font-family:-apple-system,"SF Pro Display",system-ui,sans-serif;text-shadow:0 2px 14px rgba(255,255,255,.3)}
+.lkpn{display:grid;place-items:center;background:rgba(255,255,255,.08);border:1.5px dashed rgba(255,255,255,.4)}
+.lkpn b{font-size:3.2em;font-weight:300}
+.lkl{font-size:.9em;opacity:.9}
+.lkb{display:flex;justify-content:center;padding:6px 0 48px}
+.lksh{position:absolute;left:0;right:0;bottom:0;max-height:70%;overflow:auto;background:#1d1e24;border-radius:22px 22px 0 0;padding:16px 16px 34px;transform:translateY(105%);transition:transform .3s var(--e);z-index:3;box-shadow:0 -10px 40px rgba(0,0,0,.5)}
+.lksh.on{transform:none}
+.lksh>b{display:block;text-align:center;margin-bottom:12px}
+.lkr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 6px;border-top:1px solid rgba(255,255,255,.12);cursor:pointer}
+.lkr>span:nth-child(2){flex:1}
+.lksub{opacity:.7;font-size:.85em;margin:14px 0 8px}
+.lkpres{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.lkpi{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.72em;cursor:pointer}
+.lkpi i{display:block;width:100%;aspect-ratio:.6;border-radius:10px;border:1px solid rgba(255,255,255,.2)}
+.lkcl{display:block;margin:16px auto 0!important}
+.lkrow{display:flex;gap:10px;overflow-x:auto;padding:4px 0 12px}
+.lkchip{flex:none;background:rgba(255,255,255,.14)!important;color:#fff!important;border:2px solid transparent!important;border-radius:14px!important;padding:.5em 1em!important;font-size:1.05em}
+.lkchip.sel,.lkdot.sel{border-color:#fff!important}
+.lkdot{flex:none;width:34px;height:34px;border-radius:50%!important;border:2px solid rgba(255,255,255,.3)!important;padding:0!important}
+.lksw{position:relative;width:46px;height:28px;border-radius:14px;background:rgba(255,255,255,.25);transition:background .2s}
+.lksw::after{content:"";position:absolute;top:2px;left:2px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s}
+.lksw.on{background:#34c759}.lksw.on::after{transform:translateX(18px)}
+/* ロック画面: カスタマイズ */
+#lke{background:#000}
+.lkbg{position:absolute;inset:0}
+.lket{position:absolute;left:0;right:0;top:calc(var(--sat) + 12px);display:flex;justify-content:space-between;padding:0 16px;z-index:2}
+.lke-d{font-weight:600;font-size:1.25em;color:rgba(255,255,255,.9)}
+.lke-t{display:inline-block;font:700 clamp(92px,31vw,132px)/1.05 -apple-system,"SF Pro Display",system-ui,sans-serif;letter-spacing:-.03em;color:rgba(255,255,255,.72);text-shadow:0 2px 24px rgba(255,255,255,.3);cursor:pointer;outline:2px dashed rgba(255,255,255,.55);outline-offset:6px;border-radius:14px}
+#lke .lc{z-index:1;top:calc(7% + var(--sat) + 36px)}
+#lke .lb{z-index:1;cursor:pointer}
+#lke .lb.emp{border:1.5px dashed rgba(255,255,255,.6)!important;background:rgba(255,255,255,.08)!important}
+.lkdn{position:absolute!important;left:50%;bottom:calc(7% + 9px);transform:translateX(-50%);z-index:2}
 </style></head><body>
 <div class="phone" data-v="lock"><div id="isl"></div><div id="slp"></div><div id="wp"><svg viewBox="0 0 100 200" preserveAspectRatio="none"><defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a8ca0"/><stop offset=".35" stop-color="#4f8ba5"/><stop offset=".75" stop-color="#1c4a70"/><stop offset="1" stop-color="#0a2236"/></linearGradient></defs><path d="M100 18C70 24 58 50 58 90 58 140 32 160 0 196V200H100Z" fill="url(#wg)" stroke="none"/></svg></div>
 <div id="home" class="scr"><div id="hz"></div><div class="hs" id="ht"></div></div>
@@ -410,7 +468,7 @@ i img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;pointer-e
 <div id="accin"><p class="mu" style="margin-top:6px">ログインすると名前とアイコンを設定できます。</p><div class="card"><input id="ade" type="email" placeholder="メールアドレス" autocomplete="email" style="width:100%;border-radius:12px"><input id="adp" type="password" placeholder="パスワード(6文字以上)" autocomplete="current-password" style="width:100%;margin-top:8px;border-radius:12px"><div class="row" style="margin-top:10px"><button id="adl" class="on" style="flex:1">ログイン</button><button id="adr" style="flex:1">新規登録</button></div></div></div>
 <div id="accout" hidden><div style="display:flex;flex-direction:column;align-items:center;gap:8px;margin:14px 0 6px"><div class="sa" id="pfic" style="width:96px;cursor:pointer"></div><button id="pfi" type="button">アイコンを変更</button><input type="file" id="pfif" accept="image/*" hidden></div>
 <div class="card"><label class="fld" style="margin-top:0">名前</label><input id="pfn" maxlength="20" placeholder="名前" style="width:100%;border-radius:12px"><div class="row sp" style="margin-top:14px"><span>メールアドレス</span><span class="mu" id="pfe" style="overflow:hidden;text-overflow:ellipsis;max-width:60%"></span></div><div class="row sp" id="pfa" style="margin-top:12px" hidden><span>権限</span><span class="chip ok">管理者</span></div><button id="pfs" class="on" style="width:100%;margin-top:14px">保存</button></div>
-<div class="card" style="margin-top:14px"><div class="row sp"><span>パスワード</span><button id="pwo" type="button">追加・変更</button></div><div id="pwf" hidden style="margin-top:10px"><input id="pw1" type="password" placeholder="新しいパスワード(6文字以上)" autocomplete="new-password" style="width:100%;border-radius:12px"><input id="pw2" type="password" placeholder="もう一度入力" autocomplete="new-password" style="width:100%;margin-top:8px;border-radius:12px"><div class="row" style="margin-top:10px"><button id="pwc" type="button" style="flex:1">キャンセル</button><button id="pws" type="button" class="on" style="flex:1">保存</button></div></div></div><button id="ado" style="width:100%;margin-top:28px">ログアウト</button></div><div style="margin-top:18px"><div class="card"><div class="row sp"><span>パスコード</span><span class="mu" id="pcs"></span></div><p class="mu" style="margin-top:6px">ロック画面を上にスライドすると、6桁のパスコード入力画面が出ます</p><div class="row" style="margin-top:10px"><button id="pcset" class="on" style="flex:1">設定する</button><button id="pcoff" style="flex:1;display:none">解除</button></div></div></div></div></section>
+<button id="ado" style="width:100%;margin-top:28px">ログアウト</button></div></div></section>
 <section class="tab" id="t5"><div id="stv">
 <div class="sh"><h1 id="sttl">検索</h1><button class="sav sa" id="sacc" aria-label="アカウント"></button></div>
 <div id="sdl"></div>
@@ -442,7 +500,7 @@ i img{-webkit-user-drag:none;user-select:none;-webkit-user-select:none;pointer-e
 <div id="pc"><div id="pct">パスコードを入力</div><div id="pcd"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <div id="pck"><button class="kb" data-k="1">1</button><button class="kb" data-k="2">2</button><button class="kb" data-k="3">3</button><button class="kb" data-k="4">4</button><button class="kb" data-k="5">5</button><button class="kb" data-k="6">6</button><button class="kb" data-k="7">7</button><button class="kb" data-k="8">8</button><button class="kb" data-k="9">9</button><span></span><button class="kb" data-k="0">0</button><span></span></div>
 <div class="pcb"><button class="pcl" id="pce">緊急</button><button class="pcl" id="pcx">キャンセル</button></div></div>
-<div id="light" class="scr"><div id="ltt">ライト</div><div class="row" style="justify-content:center;gap:14px"><button id="lfl" class="lq">フラッシュ</button></div><input type="range" id="lbr" min="25" max="100" value="100"><button id="lx" class="lq">閉じる</button></div>
+
 <div id="tz"></div></div>
 <script type="text/html" id="phsrc"><!DOCTYPE html>
 <html lang="ja">
@@ -1442,7 +1500,8 @@ const SB_URL='https://phdmsfmecnoyccsllojj.supabase.co',SB_KEY='sb_publishable_w
 let sb=null;try{if(window.supabase)sb=supabase.createClient(SB_URL,SB_KEY)}catch(e){console.warn(e)}
 let S={};try{S=JSON.parse(localStorage.getItem('st')||'{}')||{}}catch(e){}
 ['logs','chat','laps','T','p','accs','cacc','uid','mp','hide','mode','snd','ana','wk','am','tab','cfg'].forEach(k=>delete S[k]);
-S.theme??='auto';S.mine??=[];
+S.theme??='auto';S.mine??=[];S.pip??=true;
+const sdh=()=>Object.assign({sil:false,sb:true,vol:70,tone:'rebound',lk:true,sh:true,hap:'always'},S.sdh||{});
 const save=()=>{try{localStorage.setItem('st',JSON.stringify(S))}catch(e){}if(typeof syncSoon=='function')syncSoon()};
 const pad=n=>String(n).padStart(2,'0');
 const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1545,6 +1604,9 @@ function ldate(n){const l=uiL();if(l=='en')return n.toLocaleDateString('en-US',{
 function clk(){const n=new Date(),h=n.getHours(),H=S.h24===false?(h%12||12):h,tm=H+':'+pad(n.getMinutes());$('#lt').textContent=tm;$('#ld').textContent=ldate(n);$('#ht').textContent=tm}
 setInterval(clk,1000);clk();
 $('.lg').onclick=closeApp;
+let LKAT=0;const pcNeed=()=>Date.now()-LKAT>=(S.pcr||0)*1000;
+function pcFail(){S.pcf=(S.pcf||0)+1;save();if(S.pla&&S.pla.wipe&&S.pcf>=10)wipeData()}
+function wipeData(){try{const ks=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k=='st'||/^(xa|xd|fd):/.test(k))ks.push(k)}ks.forEach(k=>localStorage.removeItem(k))}catch(e){}try{sb&&sb.auth.signOut({scope:'local'})}catch(e){}S={};setTimeout(()=>location.reload(),300)}
 (()=>{const l=$('#lock'),pc=$('#pc');let y0,dy=0,on=0,tb=null,v='',mode='unlock',tmp='',cb=null,busy=0;
 const open=d=>{l.style.transition='';l.style.transform=`translateY(${d<0?-110:110}%)`;l.classList.add('gone');S.view='home';PH.dataset.v='home'};
 const cy=(s,seed=0)=>{let a=0xdeadbeef^seed,b=0x41c6ce57^seed;for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);a=Math.imul(a^c,2654435761);b=Math.imul(b^c,1597334677)}a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);return 4294967296*(2097151&b)+(a>>>0)};
@@ -1553,42 +1615,36 @@ const dots=()=>{$$('#pcd i').forEach((d,i)=>d.classList.toggle('f',i<v.length));
 function show(m,t){mode=m;v='';if(m!='set2')tmp='';$('#pct').textContent=t;pc.classList.add('on');if(m=='unlock')l.classList.add('pc');dots()}
 function hide(){pc.classList.remove('on');l.classList.remove('pc');v='';dots()}
 function bad(t){busy=1;$('#pcd').classList.add('sh');setTimeout(()=>{$('#pcd').classList.remove('sh');v='';busy=0;dots();if(t)$('#pct').textContent=t},430)}
-function pcStat(){const o=!!S.pass;if(!$('#pcs'))return;$('#pcs').textContent=o?'オン':'オフ';$('#pcset').textContent=o?'変更':'設定する';$('#pcoff').style.display=o?'block':'none'}
+function pcStat(){window.fidRr&&fidRr();window.plaApply&&plaApply()}
 function done(){const x=v,ok=S.pass&&hp(S.pass.s,x)==S.pass.h;
-if(mode=='unlock'){if(ok){hide();open(-1)}else bad('もう一度入力してください')}
-else if(mode=='cur'){if(ok){const f=cb;hide();f&&f()}else bad('パスコードが違います')}
+if(mode=='unlock'){if(ok){S.pcf=0;hide();open(-1)}else{pcFail();bad('もう一度入力してください')}}
+else if(mode=='cur'){if(ok){S.pcf=0;const f=cb;hide();f&&f()}else{pcFail();bad('パスコードが違います')}}
 else if(mode=='set1'){tmp=x;show('set2','もう一度入力してください')}
 else if(mode=='set2'){if(x==tmp){const s=Math.random().toString(36).slice(2,10);S.pass={s,h:hp(s,x)};save();hide();pcStat()}else{mode='set1';tmp='';bad('一致しません。新しいパスコードを入力')}}}
 const press=k=>{if(busy||v.length>=6)return;v+=k;dots();if(v.length==6)setTimeout(done,120)};
 pc.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||busy)return;
 if(b.dataset.k!=null)press(b.dataset.k);else if(b.id=='pcx'){if(v){v=v.slice(0,-1);dots()}else hide()}else if(b.id=='pce')alert('緊急通報はこのアプリではできません')});
 addEventListener('keydown',e=>{if(!pc.classList.contains('on'))return;if(/^\d$/.test(e.key))press(e.key);else if(e.key=='Backspace'&&v&&!busy){v=v.slice(0,-1);dots()}else if(e.key=='Escape')hide()});
-window.PC={stat:pcStat,open:()=>open(-1),unlock:()=>S.pass?show('unlock','パスコードを入力してください'):open(-1),
+window.PC={stat:pcStat,open:()=>open(-1),unlock:()=>S.pass&&pcNeed()?show('unlock','パスコードを入力してください'):open(-1),
 set:()=>{if(S.pass){show('cur','現在のパスコードを入力してください');cb=()=>show('set1','新しいパスコードを入力してください')}else show('set1','新しいパスコードを入力してください')},
 off:()=>{show('cur','現在のパスコードを入力してください');cb=()=>{S.pass=null;save();pcStat()}},ask:f=>{show('cur','パスコードを入力してください');cb=f}};
 l.addEventListener('pointerdown',e=>{if(l.classList.contains('pc'))return;tb=e.target.closest('.lb');y0=e.clientY;dy=0;on=1;l.setPointerCapture(e.pointerId);l.style.transition='none'});
 l.addEventListener('pointermove',e=>{if(!on)return;dy=e.clientY-y0;if(!tb||Math.abs(dy)>8)l.style.transform=`translateY(${Math.min(0,dy)*.8}px)`});
 const end=e=>{if(!on)return;on=0;l.style.transition='';l.style.transform='';
-if(dy<-110){S.pass?show('unlock','パスコードを入力してください'):open(-1)}
-else if(Math.abs(dy)<8&&tb&&e.type=='pointerup'&&tb.id=='lbR')window.lightOn();tb=null};
+if(dy<-110){S.pass&&pcNeed()?show('unlock','パスコードを入力してください'):open(-1)}
+else if(Math.abs(dy)<8&&tb&&e.type=='pointerup')lkShort(tb.id=='lbL'?'l':'r');tb=null};
 l.addEventListener('pointerup',end);l.addEventListener('pointercancel',end);
 const z=$('#tz');let zy=0,zo=0;
 z.addEventListener('pointerdown',e=>{if(S.view=='lock')return;zo=1;zy=e.clientY;dy=0;z.setPointerCapture(e.pointerId);l.classList.remove('gone');l.style.transition='none';l.style.transform='translateY(-100%)'});
 z.addEventListener('pointermove',e=>{if(!zo)return;dy=Math.max(0,e.clientY-zy);l.style.transform=`translateY(calc(-100% + ${dy}px))`});
-const zend=()=>{if(!zo)return;zo=0;l.style.transition='';if(dy>140)lockNow();else{l.style.transform='translateY(-110%)';l.classList.add('gone')}};
+const zend=()=>{if(!zo)return;zo=0;l.style.transition='';if(dy>140){sdLock();lockNow()}else{l.style.transform='translateY(-110%)';l.classList.add('gone')}};
 z.addEventListener('pointerup',zend);z.addEventListener('pointercancel',zend);
-const L=$('#light');let stream=null,fl=0;
-const setB=()=>{const g=Math.round(255*$('#lbr').value/100);L.style.background=`rgb(${g},${g},${Math.round(g*.95)})`};
-async function torch(o){try{if(o){stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});const t=stream.getVideoTracks()[0];if(!(t.getCapabilities&&t.getCapabilities().torch)){stream.getTracks().forEach(x=>x.stop());stream=null;return 0}await t.applyConstraints({advanced:[{torch:true}]});return 1}stream&&stream.getTracks().forEach(x=>x.stop());stream=null;return 0}catch(e){stream=null;return 0}}
-window.lightOn=()=>{L.classList.add('on');setB()};
-$('#lx').onclick=()=>{L.classList.remove('on');torch(0);fl=0;$('#lfl').classList.remove('on')};
-$('#lbr').oninput=setB;
-$('#lfl').onclick=async()=>{fl=!fl;const ok=fl?await torch(1):(await torch(0),0);if(fl&&!ok)alert('この端末・ブラウザでは本体のフラッシュを使えません(画面ライトのみ)');fl=!!ok;$('#lfl').classList.toggle('on',fl)};
+
 })();
 S.open=[];
 function openApp(t,b){if(t>=1000&&S.ol&&S.ol[t-1000]){if(PIP)pipKill(1);return reinstall(t,b)}if(PIP){if(PIP.t==t)pipEnd();else pipKill(1)}(S.lu??={})[t]=Date.now();save();AP.dataset.k=t>=1000||t==6||t==7?'ext':'';AP.classList.toggle('cam',t==7);if(t==7)mkCam();if(t>=1000)mkExt(t);if(t==6){mkPho();setTimeout(()=>{try{$('#t6 iframe').contentWindow.postMessage('pclsync','*')}catch(e){}},900)}const q=PH.getBoundingClientRect(),r=b.getBoundingClientRect();AP.style.transformOrigin=`${r.left+r.width/2-q.left}px ${r.top+r.height/2-q.top}px`;S.open=[t,...S.open.filter(x=>x!=t)];tab(t);$('#an').textContent=NM[t];$('#sw').classList.remove('on');AP.classList.add('open');S.view='app';PH.dataset.v='app';if(typeof camGate=='function')camGate()}
 function closeApp(){if(pipTry())return;AP.classList.remove('open');$('#sw').classList.remove('on');S.view='home';PH.dataset.v='home'}
-function lockNow(){pipKill(1);setEdit(0);const l=$('#lock');l.classList.remove('gone');l.style.transform='';S.view='lock';PH.dataset.v='lock';AP.classList.remove('open');$('#sw').classList.remove('on');S.open=[];syncExt()}
+function lockNow(){LKAT=Date.now();pipKill(1);setEdit(0);const l=$('#lock');l.classList.remove('gone');l.style.transform='';S.view='lock';PH.dataset.v='lock';AP.classList.remove('open');$('#sw').classList.remove('on');S.open=[];syncExt()}
 function swShow(){if(PIP)pipKill(1);S.open=S.open.filter(t=>APPS[t]);if(!S.open.length)return closeApp();const box=$('#sws');box.innerHTML=S.open.map(t=>`<div class="sc" data-t="${t}"><div class="tt"></div><div class="cd"></div></div>`).join('');
 box.querySelectorAll('.sc').forEach(c=>{const tp=document.createElement('div');tp.innerHTML=APPS[c.dataset.t].i+APPS[c.dataset.t].i;const[a,b]=tp.children;[a,b].forEach(n=>n.querySelectorAll('[id]').forEach(x=>x.removeAttribute('id')));a.style.width='26px';a.style.boxShadow='none';b.style.width='96px';b.style.boxShadow='none';c.querySelector('.tt').append(a,NM[c.dataset.t]);c.querySelector('.cd').append(b)});
 AP.classList.remove('open');$('#sw').classList.add('on');S.view='sw';PH.dataset.v='sw';box.scrollLeft=0}
@@ -1616,21 +1672,21 @@ function pgGo(){$('#pgs').style.transform=`translateX(${-pcur*100}%)`;const n=$$
 function renderHome(){const pg=$('#pgs'),dk=$('#dock');pg.innerHTML='';dk.innerHTML='';S.hm.p.forEach(a=>{const g=document.createElement('div');g.className='pg';a.forEach(t=>g.append(mkIc(t)));pg.append(g)});S.hm.d.forEach(t=>dk.append(mkIc(t)));pg.append(ALP);pcur=Math.min(pcur,S.hm.p.length);pgGo();libRender();pillUp();window.badge&&badge()}
 function commit(){S.hm.p=[...$$('.pg')].map(g=>[...g.children].map(c=>+c.dataset.t));if(!S.hm.p.length)S.hm.p=[[]];S.hm.d=[...$('#dock').children].map(c=>+c.dataset.t);save()}
 function cleanPages(ic){[...$$('.pg')].forEach(g=>{if(!g.children.length&&$$('.pg').length>1)g.remove()});const k=ic?[...$$('.pg')].findIndex(g=>g.contains(ic)):-1;if(k>=0)pcur=k;pcur=Math.min(pcur,$$('.pg').length-1);pgGo()}
-function setEdit(v){S.edit=v;$('#home').classList.toggle('edit',!!v)}$('#hdone').onclick=()=>setEdit(0);
+function setEdit(v){S.edit=v;if(v)try{sdHap(10)}catch(e){}$('#home').classList.toggle('edit',!!v)}$('#hdone').onclick=()=>setEdit(0);
 function flipMove(box,ic,ref){const els=[...$$('.pg .ic'),...$$('#dock .ic')].filter(c=>c!=ic),b=new Map(els.map(c=>[c,c.getBoundingClientRect()]));box.insertBefore(ic,ref);els.forEach(c=>{const a=c.getBoundingClientRect(),o=b.get(c),dx=o.left-a.left,dy=o.top-a.top;if(dx||dy){c.style.transition='none';c.style.transform=`translate(${dx}px,${dy}px)`;requestAnimationFrame(()=>{c.style.transition='transform .3s var(--e)';c.style.transform=''})}})}
 (()=>{const H=$('#home');let d=null,lt;
-H.addEventListener('pointerdown',e=>{if(e.target.closest('.rm,#hdone,#hz'))return;const ic=e.target.closest('.ic');d={ic,x:e.clientX,y:e.clientY,on:0,dx:0,ns:!!e.target.closest('#alp .ai[data-t]')};clearTimeout(lt);if(ic&&!S.edit)lt=setTimeout(()=>{if(d&&!d.on){LPD=1;d.lp=1;homeMenu(ic)}},450)});
+H.addEventListener('pointerdown',e=>{if(e.target.closest('.rm,#hdone,#hz'))return;const ic=e.target.closest('.ic');d={ic,x:e.clientX,y:e.clientY,on:0,dx:0,ns:!!e.target.closest('#alp .ai[data-t]')};clearTimeout(lt);if(ic&&!S.edit)lt=setTimeout(()=>{if(d&&!d.on){LPD=1;d.lp=1;homeMenu(ic)}},450);else if(!ic&&!S.edit&&!e.target.closest('#alo,#fo,#hsp,#alp,#cm'))lt=setTimeout(()=>{if(d&&!d.on&&!S.edit){LPD=1;setEdit(1)}},450)});
 addEventListener('pointermove',e=>{if(!d)return;d.dx=e.clientX-d.x;const m=Math.hypot(d.dx,e.clientY-d.y);if(!d.on&&d.ic&&(S.edit||d.lp)&&m>6){if(d.lp&&!S.edit){cmHide();setEdit(1)}start(e)}else if(!d.on&&m>10&&!d.lp)clearTimeout(lt);if(d.on)move(e)});
 const fin=()=>{clearTimeout(lt);if(!d)return;if(d.on)end();else if(!d.ns&&Math.abs(d.dx)>60){pcur=Math.max(0,Math.min($$('.pg').length-(S.edit?1:0),pcur+(d.dx<0?1:-1)));pgGo()}d=null};
 addEventListener('pointerup',fin);addEventListener('pointercancel',fin);
-H.addEventListener('click',e=>{const ic=e.target.closest('.ic');if(!ic)return;if(e.target.closest('.rm')){rmHome(+ic.dataset.t);return}if(LPD){LPD=0;return}const tt=+ic.dataset.t;if(tt<0)openFolder(tt);else if(!S.edit)openApp(tt,ic)});
+H.addEventListener('click',e=>{const ic=e.target.closest('.ic');if(!ic){if(LPD){LPD=0;return}if(S.edit&&!e.target.closest('#hdone,#alo,#fo,#hsp,#cm,#alp'))setEdit(0);return}if(e.target.closest('.rm')){rmHome(+ic.dataset.t);return}if(LPD){LPD=0;return}const tt=+ic.dataset.t;if(tt<0)openFolder(tt);else if(!S.edit)openApp(tt,ic)});
 window.dragStart=(ic,e)=>{d={ic,x:e.clientX,y:e.clientY,on:0,dx:0,ns:0};start(e)};
 function start(e){const ic=d.ic,r=ic.getBoundingClientRect();d.on=1;d.ox=e.clientX-r.left;d.oy=e.clientY-r.top;const g=ic.cloneNode(true);g.classList.add('fl');g.style.width=r.width+'px';PH.append(g);d.g=g;ic.classList.add('hid');move(e);g.style.transform='scale(1.12)'}
 function edge(k){const gs=$$('.pg');if(k>0&&pcur==gs.length-1){if(gs[pcur].children.length<2)return;const g=document.createElement('div');g.className='pg';$('#pgs').insertBefore(g,ALP)}const n=$$('.pg').length;if(pcur+k<0||pcur+k>=n)return;pcur+=k;pgGo();d.ed=null}
 function move(e){const q=PH.getBoundingClientRect(),x=e.clientX,y=e.clientY,ic=d.ic;d.g.style.left=x-q.left-d.ox+'px';d.g.style.top=y-q.top-d.oy+'px';
 const ed=x<q.left+40?-1:x>q.right-40?1:0;if(ed!==d.ed){d.ed=ed;clearTimeout(d.et);if(ed)d.et=setTimeout(()=>edge(ed),450)}
 const dk=$('#dock'),dr=dk.getBoundingClientRect();let box;
-if(y>dr.top-8&&(dk.children.length<4||ic.parentNode==dk))box=dk;else{box=$$('.pg')[pcur];if(box.children.length>=20&&ic.parentNode!=box)return}
+if(y>dr.top-8&&(dk.children.length<4||ic.parentNode==dk))box=dk;else{box=$$('.pg')[pcur];if(!box)return;if(box.children.length>=20&&ic.parentNode!=box)return}
 const br=box.getBoundingClientRect(),list=[...box.children];
 const pos=c=>[br.left+c.offsetLeft+c.offsetWidth/2,br.top+c.offsetTop+c.offsetHeight/2];
 let best=1e9,bi=-1;list.forEach((c,i)=>{const[cx,cy]=pos(c),dd=Math.hypot(x-cx,y-cy);if(dd<best){best=dd;bi=i}});
@@ -1683,15 +1739,16 @@ if(!S.wl){S.wl=[{id:'w0',t:'pre',k:(S.wp&&PRE[S.wp])?S.wp:'default'}];(S.wps||[]
 const wpCur=()=>S.wl.find(x=>x.id==S.wc)||S.wl[0];
 if(S.wcl===undefined)S.wcl=S.wc;
 const wpCurL=()=>S.wl.find(x=>x.id==S.wcl)||wpCur();
-function wpApply(){const w=$('#wp'),x=$('#wpl');if(!x.firstChild)x.innerHTML=w.querySelector('svg').outerHTML.replace('id="wg"','id="wg2"').replace('url(#wg)','url(#wg2)');
+function wpApply(){try{lkApply()}catch(e){}
+const w=$('#wp'),x=$('#wpl');if(!x.firstChild)x.innerHTML=w.querySelector('svg').outerHTML.replace('id="wg"','id="wg2"').replace('url(#wg)','url(#wg2)');
 [[w,wpCur()],[x,wpCurL()]].forEach(([e,it])=>{e.style.background=wpBg(it);e.querySelector('svg').style.display=(it.t=='pre'&&it.k=='default')?'block':'none'})}
 function wSetT(id,tg){if(tg=='l')S.wcl=id;else if(tg=='h')S.wc=id;else{S.wc=id;S.wcl=id}sv();wpApply()}
 function shufTick(f){let ch=0;const now=Date.now();S.wl.forEach(it=>{if(it.t!='shuf')return;const q=it.f||'h',gap=q=='h'?36e5:q=='d'?864e5:0;if(f=='lock'?q=='l':(q!='l'&&now-(it.last||0)>=gap)){const n=pool(it).length;if(n>1){it.i=((it.i||0)+1+Math.floor(Math.random()*(n-1)))%n;it.last=now;ch=1}}});if(ch){sv();if(wpCur().t=='shuf'||wpCurL().t=='shuf')wpApply()}}
 new MutationObserver(()=>{if(PH.dataset.v=='lock')shufTick('lock')}).observe(PH,{attributes:true,attributeFilter:['data-v']});
 const GR=[[['#ff9f0a','M12 3.5l1.8 5.7 6.7 3.8v1.9l-6.7-2.1-.9 4.4 2.1 1.8v1.5L12 19.5l-3 1v-1.5l2.1-1.8-.9-4.4-6.7 2.1v-1.9l6.7-3.8z','機内モード','sw'],['#0a84ff','M3 9.5a13 13 0 0 1 18 0M6 13a8.5 8.5 0 0 1 12 0M9 16.3a4 4 0 0 1 6 0M12 19.5h.01','Wi-Fi','\u200b','wifi'],['#0a84ff','M7 7.5l10 9-5 4.5V3l5 4.5-10 9','Bluetooth','\u200b','bt'],['#34c759','M5 19v-3M10 19v-6M15 19v-9M20 19V5','モバイル通信','\u200b','cell'],['#34c759','M3.5 8h15v8h-15zM20.5 11v2','バッテリー','','bat']],
 [['#8e8e93','M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1','一般','','gen'],['#0a84ff','M12 3.5a1.8 1.8 0 1 0 0 3.6 1.8 1.8 0 0 0 0-3.6zM5 9l7 1 7-1M12 10v5l-3 5.5M12 15l3 5.5','アクセシビリティ'],['#8e8e93','M4 8h4l1.5-2h5L16 8h4v11H4zM12 11a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6z','カメラ','','cam'],['#8e8e93','M4 8h9M17 8h3M4 16h3M11 16h9M15 8a2 2 0 1 0 .01 0M9 16a2 2 0 1 0 .01 0','コントロールセンター'],['#1c1c1e','M4 6h16v12H4zM8 10v4M12 9v6M16 11v2','スタンバイ','','sby'],['#0a84ff','M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z','ホーム画面とアプリライブラリ','','hal'],['#0a84ff','M12 8a4 4 0 1 0 .01 0M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.2 5.2l1.8 1.8M17 17l1.8 1.8M18.8 5.2L17 7M7 17l-1.8 1.8','画面表示と明るさ','','disp'],['#8e8e93','M11 4a7 7 0 1 0 .01 0M16 16l4.5 4.5','検索','','srch'],['#32ade6','M12 4a2.6 2.6 0 1 0 .01 0M18 9a2.6 2.6 0 1 0 .01 0M6 9a2.6 2.6 0 1 0 .01 0M12 15a2.6 2.6 0 1 0 .01 0M12 8v3','壁紙','','wp']],
-[['#ff3b30','M6 17h12l-1.5-2.2V11a4.5 4.5 0 0 0-9 0v3.8zM10 20h4','通知','','ntf'],['#ff2d55','M4 10h3l4-3.2v10.4L7 14H4zM15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11','サウンドと触覚'],['#5e5ce6','M18.5 14.5A7 7 0 1 1 9.5 5.5a5.5 5.5 0 0 0 9 9z','集中モード'],['#5e5ce6','M7 4h10M7 20h10M8 4c0 5 8 5 8 10v6M16 4c0 5-8 5-8 10v6','スクリーンタイム','','sct']],
-[['#34c759','M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10v1.5M15 10v1.5M12 10v3.5h-1M9 16c1.7 1.3 4.3 1.3 6 0','Face IDとパスコード'],['#ff3b30','T:SOS','緊急SOS'],['#0a84ff','M12 3.5l7 3v5.5c0 4.2-3 7.4-7 8.5-4-1.1-7-4.3-7-8.5V6.5z','プライバシーとセキュリティ']],
+[['#ff3b30','M6 17h12l-1.5-2.2V11a4.5 4.5 0 0 0-9 0v3.8zM10 20h4','通知','','ntf'],['#ff2d55','M4 10h3l4-3.2v10.4L7 14H4zM15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11','サウンドと触覚','','snd'],['#5e5ce6','M18.5 14.5A7 7 0 1 1 9.5 5.5a5.5 5.5 0 0 0 9 9z','集中モード'],['#5e5ce6','M7 4h10M7 20h10M8 4c0 5 8 5 8 10v6M16 4c0 5-8 5-8 10v6','スクリーンタイム','','sct']],
+[['#34c759','M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10v1.5M15 10v1.5M12 10v3.5h-1M9 16c1.7 1.3 4.3 1.3 6 0','Face IDとパスコード','','fid'],['#ff3b30','T:SOS','緊急SOS']],
 [['linear-gradient(135deg,#7a5cff,#2f80ff)','M5 5h6v6H5zM13 5h6v6h-6zM5 13h6v6H5zM13 13h6v6h-6z','アプリ','','apps']]];
 const rowH=([c,g,l,v,k0])=>{const k=k0||(v==='sw'?'':'x:'+l);return `<div class="ir"${k?` data-k="${k}"`:''}><div class="ii" style="background:${c}">${g.startsWith('T:')?`<svg viewBox="0 0 24 24"><text x="12" y="15.5" text-anchor="middle" font-size="8.5" font-weight="800" fill="#fff" stroke="none">${g.slice(2)}</text></svg>`:`<svg viewBox="0 0 24 24"><path d="${g}"/></svg>`}</div><span class="il">${l}</span>${v==='sw'?'<span class="swc"><i></i></span>':v==='1'?'<b class="bdg0">1</b><span class="ich">›</span>':(v?`<span class="iv">${v}</span>`:'')+'<span class="ich">›</span>'}</div>`};
 $('#setm').innerHTML='<h1 class="ih">設定</h1><div class="ig"><div class="ir acr" id="acc"><div class="sa" id="accic"></div><div class="tx"><b id="accn"></b><span class="mu" id="accs"></span></div><span class="ich">›</span></div></div>'+GR.map(g=>`<div class="ig">${g.map(rowH).join('')}</div>`).join('')+'<div id="ssn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><b></b><span>スペルをチェックするか、新規検索をしてみてください。</span></div>';
@@ -1774,7 +1831,7 @@ const CAP=128*1048576;
 const NF={'c.':[',','.'],'d,':['.',','],'s,':['\u202f',','],'q.':['\u2019','.']};
 function fN(n,dec=0){const[g,d]=NF[S.nf||'c.']||NF['c.'];const[i,f]=Number(n).toFixed(dec).split('.');return i.replace(/\B(?=(\d{3})+(?!\d))/g,g)+(f?d+f:'')}
 const fB=b=>b<1024?fN(b)+' B':b<1048576?fN(b/1024)+' KB':(v=>fN(v,v%1?2:0)+' MB')(b/1048576);
-function phoneJS(){const L={ja:'ja-JP',en:'en-US',zh:'zh-CN',ko:'ko-KR',fr:'fr-FR',de:'de-DE',es:'es-ES',it:'it-IT',pt:'pt-BR'},ls=(S.lg||['ja']).map(c=>L[c]||c),o={language:ls[0],languages:ls,region:S.rg||'JP',calendar:S.cal||'gregory',temperature:S.tu||'C',units:S.un||'metric',weekStart:S.wk??0,dateFormat:S.df||'ymd/',numberFormat:S.nf||'c.',hour24:S.h24!==false,kb:kbCfg()};
+function phoneJS(){const L={ja:'ja-JP',en:'en-US',zh:'zh-CN',ko:'ko-KR',fr:'fr-FR',de:'de-DE',es:'es-ES',it:'it-IT',pt:'pt-BR'},ls=(S.lg||['ja']).map(c=>L[c]||c),o={language:ls[0],languages:ls,region:S.rg||'JP',calendar:S.cal||'gregory',temperature:S.tu||'C',units:S.un||'metric',weekStart:S.wk??0,dateFormat:S.df||'ymd/',numberFormat:S.nf||'c.',hour24:S.h24!==false,kb:kbEff()};
 return 'window.phoneSettings='+JSON.stringify(o).replace(/</g,'\\u003c')+';try{Object.defineProperty(navigator,"language",{get:function(){return window.phoneSettings.language},configurable:true});Object.defineProperty(navigator,"languages",{get:function(){return window.phoneSettings.languages},configurable:true})}catch(e){}'+';('+kbSetup.toString()+')(window,function(){return window.phoneSettings.kb})'}
 function devInfo(){if(S.dev)return S.dev;const R=n=>Math.floor(Math.random()*n),pk=a=>a[R(a.length)],hx=n=>Array.from({length:n},()=>'0123456789ABCDEF'[R(16)]).join(''),dg=n=>Array.from({length:n},()=>R(10)).join(''),al=n=>Array.from({length:n},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789'[R(34)]).join('');
 const lu=b=>{let t=0;for(let i=0;i<b.length;i++){let d=+b[b.length-1-i];if(i%2==0){d*=2;if(d>9)d-=9}t+=d}return String((10-t%10)%10)};
@@ -1789,11 +1846,19 @@ function reinstall(t,b,cb){const id=t-1000;if(!sb)return alert('アプリを再�
 sb.from('phone_apps').select('html').eq('id',id).eq('status','approved').single().then(({data,error})=>{ic&&ic.classList.remove('dling');if(error||!data||data.html==null)return alert('再ダウンロードに失敗しました');const r=loadX(id)||{id};try{localStorage.setItem('xa:'+id,JSON.stringify({...r,html:data.html}))}catch(e){return alert('この端末の保存容量が足りません')}delete S.ol[id];save();renderHome();if(cb)cb();else openApp(t,(b&&b.isConnected?b:null)||$('.ic[data-t="'+t+'"]')||PH)})}
 function appAct(a,t){const nm=NM[t]||'App';if(a=='del'){if(confirm('「'+nm+'」を削除しますか?\nこのアプリとデータがこのスマホから削除されます。この操作は取り消せません。')){removeApp(t);setNav('gst')}}else if(a=='off'){offload(t);setRr()}else if(a=='re')reinstall(t,null,()=>setRr())}
 function shutDown(){const sp=$('#slp');sp.classList.add('on');setTimeout(()=>{lockNow();setTimeout(()=>sp.classList.remove('on'),450)},650)}
-function pipTry(){if(!S.pip||PH.dataset.v!='app'||AP.dataset.k!='ext')return false;const t=S.open[0];if(!(t>=1000)||!VP[t-1000])return false;const f=$('#t'+t+' iframe');if(!f)return false;
-try{f.contentWindow.postMessage({xpip:'on'},'*')}catch(e){return false}
+let PHP=null;
+function phoPip(f,m){let d;try{d=f.contentDocument}catch(e){return false}if(!d)return false;
+if(m=='on'){if(PHP)return true;const v=[...d.querySelectorAll('video')].find(x=>!x.paused&&!x.ended);if(!v)return false;
+const st=d.createElement('style');st.textContent='[data-pipx]{display:none!important}[data-pipc]{position:static!important;transform:none!important;margin:0!important;padding:0!important;border:0!important;width:100vw!important;height:100vh!important;max-width:none!important;max-height:none!important;min-width:0!important;min-height:0!important;overflow:visible!important;background:#000!important;display:block!important;float:none!important}video[data-pipc]{object-fit:contain!important}html,body{overflow:hidden!important;background:#000!important;margin:0!important}';
+(d.head||d.documentElement).appendChild(st);PHP={st,v,els:[]};let n=v;
+while(n&&n!==d.documentElement){n.setAttribute('data-pipc','1');PHP.els.push(n);if(n.parentElement)[...n.parentElement.children].forEach(x=>{if(x!==n&&!x.hasAttribute('data-pipc')&&!/^(STYLE|SCRIPT|LINK|META)$/.test(x.tagName)){x.setAttribute('data-pipx','1');PHP.els.push(x)}});n=n.parentElement}
+return true}
+if(!PHP)return true;PHP.els.forEach(e=>{e.removeAttribute('data-pipc');e.removeAttribute('data-pipx')});PHP.st.remove();const v=PHP.v;PHP=null;if(m=='stop'){try{v.pause()}catch(e){}}return true}
+function pipTry(){if(S.pip===false||PH.dataset.v!='app'||AP.dataset.k!='ext')return false;const t=S.open[0];if(t==6){const f6=$('#t6 iframe');if(!f6||!phoPip(f6,'on'))return false}else{if(!(t>=1000)||!VP[t-1000])return false;const f=$('#t'+t+' iframe');if(!f)return false;
+try{f.contentWindow.postMessage({xpip:'on'},'*')}catch(e){return false}}
 PIP={t};if(!AP.style.getPropertyValue('--px'))AP.style.setProperty('--px',Math.max(4,PH.getBoundingClientRect().width-222)+'px');AP.classList.add('pip','open');S.view='home';PH.dataset.v='home';$('#sw').classList.remove('on');return true}
-function pipEnd(){if(!PIP)return;const f=$('#t'+PIP.t+' iframe');try{f&&f.contentWindow.postMessage({xpip:'off'},'*')}catch(e){}AP.classList.remove('pip');PIP=null}
-function pipKill(stop){if(!PIP)return;const t=PIP.t,f=$('#t'+t+' iframe');try{f&&f.contentWindow.postMessage({xpip:stop?'stop':'off'},'*')}catch(e){}AP.classList.remove('pip','open');PIP=null;S.open=S.open.filter(x=>x!=t);syncExt()}
+function pipEnd(){if(!PIP)return;const f=$('#t'+PIP.t+' iframe');try{if(PIP.t==6)phoPip(f,'off');else f&&f.contentWindow.postMessage({xpip:'off'},'*')}catch(e){}AP.classList.remove('pip');PIP=null}
+function pipKill(stop){if(!PIP)return;const t=PIP.t,f=$('#t'+t+' iframe');try{if(t==6)phoPip(f,stop?'stop':'off');else f&&f.contentWindow.postMessage({xpip:stop?'stop':'off'},'*')}catch(e){}AP.classList.remove('pip','open');PIP=null;S.open=S.open.filter(x=>x!=t);syncExt()}
 function pipOut(){const t=PIP.t;pipEnd();openApp(t,PH)}
 (()=>{const o=document.createElement('div');o.id='pipo';o.innerHTML='<button class="pipx" aria-label="閉じる">✕</button><button class="pipe" aria-label="拡大">⤢</button>';AP.append(o);let d=null;
 o.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const q=AP.getBoundingClientRect(),p=PH.getBoundingClientRect();d={x:e.clientX,y:e.clientY,l:q.left-p.left,t:q.top-p.top,m:0};o.setPointerCapture(e.pointerId)});
@@ -1801,7 +1866,7 @@ o.addEventListener('pointermove',e=>{if(!d)return;const dx=e.clientX-d.x,dy=e.cl
 const up=e=>{if(!d)return;const m=d.m;d=null;if(!m&&e.type=='pointerup'&&PIP)pipOut()};o.addEventListener('pointerup',up);o.addEventListener('pointercancel',up);
 o.querySelector('.pipx').onclick=()=>pipKill(1);o.querySelector('.pipe').onclick=()=>{if(PIP)pipOut()}})();
 PH.insertAdjacentHTML('beforeend','<div id="pwbar"></div><div id="pwsv"><div class="pwc"><b></b><p class="mu"></p><button data-pw="y">保存</button><button data-pw="n">今はしない</button></div></div>');
-function pwPos(){const v=window.visualViewport;$('#pwbar').style.bottom=(v?Math.max(0,innerHeight-v.height-v.offsetTop):0)+'px'}
+function pwPos(){const v=window.visualViewport,k=v?Math.max(0,innerHeight-v.height-v.offsetTop):0,ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform=='MacIntel'&&navigator.maxTouchPoints>1);$('#pwbar').style.bottom=((k>80&&ios)?k+66:k)+'px'}
 if(window.visualViewport){visualViewport.addEventListener('resize',pwPos);visualViewport.addEventListener('scroll',pwPos)}
 const pwBarHide=()=>$('#pwbar').classList.remove('on');
 function pwBar(){const b=$('#pwbar'),L=S.pwd||[];if(S.paf===false||!L.length||!PWF)return pwBarHide();const id=PWF.dataset.xid,a=[...L].sort((x,y)=>(y.aid==id)-(x.aid==id));b.innerHTML=a.map(x=>`<button data-pid="${E(x.id)}">🔑 ${E(x.u||'—')} <span style="color:#777;font-size:.85em">${E(x.app)}</span></button>`).join('');pwPos();b.classList.add('on')}
@@ -1843,8 +1908,8 @@ if(from>=0){e.setRangeText(rep,from,p,'end');e.dispatchEvent(new w.Event('input'
 w.addEventListener('message',e=>{const dd=e.data;if(dd&&dd.xkb&&e.source===w.parent&&e.source!==w){try{w.phoneSettings.kb=dd.xkb}catch(x){}all()}});
 return{apply:all}}
 const kbCfg=()=>({hap:false,snd:true,ac:true,sq:true,cap:true,dot:true,sp:true,dict:[],...(S.kb||{})});
-const KB=kbSetup(window,kbCfg);
-function kbPush(){const c=kbCfg();$$('iframe[data-xid]').forEach(f=>{try{f.contentWindow.postMessage({xkb:c},'*')}catch(e){}});KB.apply()}
+const kbEff=()=>{const c=kbCfg();return sdh().sil?Object.assign({},c,{snd:false}):c};const KB=kbSetup(window,kbEff);
+function kbPush(){const c=kbEff();$$('iframe[data-xid]').forEach(f=>{try{f.contentWindow.postMessage({xkb:c},'*')}catch(e){}});KB.apply()}
 function kbAdd(){const p=prompt('フレーズを入力してください');if(!p)return;const s=prompt('ショートカットを入力してください(空白なし)');if(!s||/\s/.test(s))return alert('ショートカットは空白なしで入力してください');S.kb={...kbCfg(),dict:[...kbCfg().dict,{p,s}]};sv();kbPush();setRr()}
 function bgOK(id){const m=S.bgm||'wc';if(m=='off')return false;if(S.bga&&S.bga[id]===false)return false;if(m=='w'&&netKind()=='cell')return false;return true}
 function bgSync(){const fg=(PH.dataset.v=='app'&&AP.dataset.k=='ext')?S.open[0]:(PIP?PIP.t:null);$$('iframe[data-xid]').forEach(f=>{const t=1000+(+f.dataset.xid),sus=(t!==fg&&!bgOK(f.dataset.xid))?'1':'0';if((f.dataset.sus||'0')!==sus){f.dataset.sus=sus;try{f.contentWindow.postMessage({xsus:+sus},'*')}catch(e){}}})}
@@ -1868,7 +1933,7 @@ const GEARP='M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 3v3M12 18v3M3 12h3M18 12h3M5.
 const GEN=[[['#8e8e93','M8 3.5h8a1.5 1.5 0 0 1 1.5 1.5v14a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 19V5A1.5 1.5 0 0 1 8 3.5zM11 17.5h2','情報','','ginfo'],['#8e8e93',GEARP,'ソフトウェアアップデート','','gsw'],['#8e8e93','M4 14h16v5H4zM4 14l2-6h12l2 6M16.5 16.5h.01','iPhoneストレージ','','gst']],
 [['#1c1c1e','M4 6h16v12H4zM11 12h7v5h-7z','ピクチャインピクチャ','','gpip']],
 [['#8e8e93','M5 12a7 7 0 0 1 12-5l2 2M19 5v4h-4M19 12a7 7 0 0 1-12 5l-2-2M5 19v-4h4','アプリのバックグラウンド更新','','gbg'],['#8e8e93','M3.5 7h17v10h-17zM7 10.5h.01M10 10.5h.01M13 10.5h.01M16 10.5h.01M8 14h8','キーボード','','gkb'],['#8e8e93','T:Aa','フォント','','gfont'],['#0a84ff','M12 3a9 9 0 1 0 .01 0M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18','言語と地域','','glang'],['#8e8e93','M9 15a4 4 0 1 1 3.4-1.9L20 20.5M16 17l2-2','自動入力とパスワード','','gpw'],['#0a84ff','M4 6.5h16v13H4zM4 10.5h16M8 4v4M16 4v4','日付と時刻','','gdt']]];
-const BKM={ginfo:'gen',gsw:'gen',gst:'gen',gpip:'gen',gfont:'gen',glang:'gen',gpw:'gen',gdt:'gen',gname:'ginfo',gfsys:'gfont',gfmy:'gfont',gfoth:'gfont',glad:'glang',glreg:'glang',glcal:'glang',gltmp:'glang',glunit:'glang',glwk:'glang',gldf:'glang',glnf:'glang',gpwl:'gpw',gbg:'gen',gbgm:'gbg',gkb:'gen',gkbu:'gkb',gen:'main',srch:'main',sct:'main',camvq:'cam',camkeep:'cam',ns:'disp',al:'disp',ts:'disp'};
+const BKM={ginfo:'gen',gsw:'gen',gst:'gen',gpip:'gen',gfont:'gen',glang:'gen',gpw:'gen',gdt:'gen',gname:'ginfo',gfsys:'gfont',gfmy:'gfont',gfoth:'gfont',glad:'glang',glreg:'glang',glcal:'glang',gltmp:'glang',glunit:'glang',glwk:'glang',gldf:'glang',glnf:'glang',gpwl:'gpw',gbg:'gen',gbgm:'gbg',gkb:'gen',gkbu:'gkb',gen:'main',srch:'main',sct:'main',camvq:'cam',camkeep:'cam',ns:'disp',al:'disp',ts:'disp',sndt:'snd',sndh:'snd',sndk:'snd',fidr:'fid',fidw:'fid'};
 function parentOf(n){n=String(n);if(BKM[n])return BKM[n];if(n.startsWith('xg:'))return ['xg:iOSバージョン','xg:保証期限切れ','xg:SEID'].includes(n)?'ginfo':'gen';if(n.startsWith('gsa:'))return 'gst';if(n.startsWith('sra:'))return 'srch';if(n.startsWith('sta:'))return 'sct';if(n.startsWith('ap:'))return 'apps';if(n.startsWith('gpwd:'))return 'gpwl';return 'main'}
 Object.assign(PGS,{
 gen:()=>hd('一般')+`<div class="ig gh"><div class="gi"><svg viewBox="0 0 24 24"><path d="${GEARP}"/></svg></div><b>一般</b><p class="mu">ソフトウェアアップデート、デバイスの言語、フォントなど、このスマホの全体的な設定や自分の好みの設定を管理します。</p></div>`+GEN.map(g=>`<div class="ig">${g.map(grow).join('')}</div>`).join('')+`<div class="ig"><div class="ir ni" data-shut="1" style="color:#0a84ff"><span class="il">システム終了</span></div></div>`,
@@ -1879,7 +1944,7 @@ gst:()=>{const a=appsInfo(),d=devInfo(),ap=a.reduce((x,y)=>x+y.app+y.data,0),use
 return hd('iPhoneストレージ')+`<div class="ig" style="padding:16px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><span>iPhone</span><span class="mu">使用済み: ${fB(used)} / ${fB(CAP)}</span></div><div class="sbar"><i style="width:${pc(ap)};background:#e84c4c"></i><i style="width:0;background:#f09a40"></i><i style="width:${pc(d.ios)};background:#aeaeb2"></i><i style="width:${pc(d.sysd)};background:#c7c7cc"></i></div><div class="sleg"><span><i style="background:#e84c4c"></i>アプリケーション</span><span><i style="background:#f09a40"></i>写真</span><span><i style="background:#aeaeb2"></i>iOS</span><span><i style="background:#c7c7cc"></i>システムデータ</span></div></div><div style="text-align:right;margin:0 8px 10px"><button class="nlk" data-a="gsort"><span>${lab}</span> ⇅</button></div>`+(a.length?`<div class="ig">${[...a].sort(srt).map(x=>`<div class="ir" data-go="gsa:${x.t}" style="min-height:64px"><div class="sti">${APPS[x.t].i}</div><div class="il">${E(x.n)}<div class="mu" style="font-size:.85em">${x.ol?'アプリは取り除かれています':'最後に使用した日: '+luT(x.lu)}</div></div><span class="iv">${fB(x.app+x.data)}</span><span class="ich">›</span></div>`).join('')}</div>`:`<div class="ig"><div class="ir ni"><span class="il mu">ダウンロードしたアプリはありません</span></div></div>`)},
 gsa:t=>{const id=t-1000,r=loadX(id);if(!r||!APPS[t])return hd('')+`<div class="ig"><div class="ir ni"><span class="il">このアプリはありません</span></div></div>`;const a=appsInfo().find(x=>x.t==t)||{app:0,data:0,ol:false};
 return hd(E(NM[t]))+`<div class="ig"><div class="ir" style="min-height:96px;gap:16px"><div class="sti" style="width:72px;height:72px">${APPS[t].i}</div><div class="il"><b>${E(NM[t])}</b><div class="mu">${E((S.xv||{})[id]||'')}</div><div class="mu">${E(r.subtitle||'')}</div></div></div></div><div class="ig">${row2('アプリのサイズ',fB(a.app))}${row2('書類とデータ',fB(a.data))}</div>`+(a.ol?`<div class="ig"><div class="ir ni" data-ap="re" data-t="${t}" style="justify-content:center;color:#0a84ff"><span>アプリを再インストール</span></div></div>`:`<div class="ig"><div class="ir ni" data-ap="off" data-t="${t}" style="justify-content:center;color:#0a84ff"><span>アプリを取り除く</span></div></div><p class="icp">この操作を行うとアプリのサイズ分の容量は解放されますが、その書類とデータは保持されます。アプリがまだダウンロード可能な場合は再インストールするとデータは元に戻ります。</p>`)+`<div class="ig"><div class="ir ni" data-ap="del" data-t="${t}" style="justify-content:center;color:#ff3b30"><span>アプリを削除</span></div></div><p class="icp">この操作を行うとこのアプリとそれに関連するすべてのデータがこのスマホから削除されます。この操作は取り消せません。</p>`},
-gpip:()=>hd('ピクチャインピクチャ')+`<div class="isx">ピクチャインピクチャ</div><div class="ig"><div class="ir ni"><span class="il">ピクチャインピクチャを自動的に開始</span>${swB('pip',S.pip)}</div></div><p class="icp">上にスワイプしてホーム画面に移動すると、アプリ内のビデオ再生は自動的にピクチャインピクチャで継続されます。</p>`,
+gpip:()=>hd('ピクチャインピクチャ')+`<div class="isx">ピクチャインピクチャ</div><div class="ig"><div class="ir ni"><span class="il">ピクチャインピクチャを自動的に開始</span>${swB('pip',S.pip!==false)}</div></div><p class="icp">上にスワイプしてホーム画面に移動すると、アプリ内のビデオ再生は自動的にピクチャインピクチャで継続されます。</p>`,
 gfont:()=>hd('フォント')+`<div class="ig">${rw('システムフォント','','gfsys')}${rw('マイフォント','','gfmy')}</div><p class="icp">デバイスで使用するためにあらかじめインストールされているフォントと追加したフォントを表示します。</p><div class="ig">${rw('その他のフォント','','gfoth')}</div><p class="icp">インストール可能な追加のフォントを表示します。インターネットからフォントを追加できます。</p>`,
 gfsys:()=>hd('システムフォント')+`<div class="ig">${SYSF.filter(f=>!f[0]||['sans','serif','mono'].includes(f[0])||hasF(f[2])).map(f=>`<div class="ir ni" data-fsel="${f[0]}"><span class="il" style="${f[2]?'font-family:'+f[2]:''}">${f[1]}</span>${(S.fnt||'')==f[0]?'<span style="color:#0a84ff;font-weight:700">✓</span>':''}</div>`).join('')}</div>`,
 gfmy:()=>{const L=S.fts||[];return hdR('マイフォント',FEDIT?'完了':'編集','fedit')+(L.length?`<div class="ig">${L.map(f=>`<div class="ir ni" data-fsel="my:${f.id}"><span class="il" style="font-family:'${f.f}'">${E(f.n)}</span>${FEDIT?`<button class="nlk" data-fdel="${f.id}" style="color:#ff3b30">削除</button>`:((S.fnt||'')=='my:'+f.id?'<span style="color:#0a84ff;font-weight:700">✓</span>':'')}</div>`).join('')}</div>`:`<div class="ig"><div class="ir ni"><span class="il mu">追加したフォントはありません</span></div></div>`)+`<div class="ig"><div class="ir ni" data-a="fadd" style="color:#0a84ff"><span class="il">フォントを追加…</span></div></div>`},
@@ -2306,7 +2371,7 @@ else if(k=='tt')S.tt=!S.tt;
 else if(k=='bold')S.bold=!S.bold;
 else if(k=='tilt'){S.tilt=!S.tilt;if(S.tilt&&window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission=='function'){try{if(await DeviceOrientationEvent.requestPermission()!='granted'){S.tilt=false;alert('モーションと画面の向きの許可が必要です')}}catch(x){S.tilt=false}}}
 else if(k.startsWith('kb.')){const kk=k.slice(3),c=kbCfg();S.kb={...c,[kk]:kk=='hap'?!c.hap:c[kk]===false};kbPush()}else if(k.startsWith('bg:')){const id=k.slice(3);S.bga??={};S.bga[id]=S.bga[id]===false;bgSync()}
-else if(k.startsWith('sb.')){const x=k.slice(3),c=sbc();S.sb={...c,[x]:c[x]?0:1}}else if(k=='ntg')S.nt0=S.nt0===false;else if(k=='nlk')S.nlk=S.nlk===false;else if(k=='hlb')S.hlb=!S.hlb;else if(k=='hsp')S.hsp=S.hsp===false;else if(k=='camon')S.cam=S.cam===false;else if(/^a[nl]:/.test(k)){const x=k[1]=='n'?'n':'l',t=+k.slice(3);S.ap=S.ap||{};const p=S.ap[t]=S.ap[t]||{};p[x]=p[x]===false;if(x=='n'&&p.n===false)S.ntl=(S.ntl||[]).filter(z=>z.t!=t)}else if(k.startsWith('sr.')){const x=k.slice(3);if(x.includes(':')){const[a,id]=x.split(':');S.sra??={};S.sra[id]={...srApp(+id),[a]:!srApp(+id)[a]}}else S.sr={...srC(),[x]:!srC()[x]}}else if(k.startsWith('cc.')){const x=k.slice(3);S.cc={...ccC(),[x]:!ccC()[x]}}else if(k=='pip')S.pip=!S.pip;else if(k=='paf')S.paf=S.paf===false;else if(k=='h24'){S.h24=S.h24===false;clk()}
+else if(k.startsWith('sb.')){const x=k.slice(3),c=sbc();S.sb={...c,[x]:c[x]?0:1}}else if(k=='ntg')S.nt0=S.nt0===false;else if(k=='nlk')S.nlk=S.nlk===false;else if(k=='hlb')S.hlb=!S.hlb;else if(k=='hsp')S.hsp=S.hsp===false;else if(k=='camon')S.cam=S.cam===false;else if(/^a[nl]:/.test(k)){const x=k[1]=='n'?'n':'l',t=+k.slice(3);S.ap=S.ap||{};const p=S.ap[t]=S.ap[t]||{};p[x]=p[x]===false;if(x=='n'&&p.n===false)S.ntl=(S.ntl||[]).filter(z=>z.t!=t)}else if(k.startsWith('sr.')){const x=k.slice(3);if(x.includes(':')){const[a,id]=x.split(':');S.sra??={};S.sra[id]={...srApp(+id),[a]:!srApp(+id)[a]}}else S.sr={...srC(),[x]:!srC()[x]}}else if(k.startsWith('cc.')){const x=k.slice(3);S.cc={...ccC(),[x]:!ccC()[x]}}else if(k=='pip')S.pip=S.pip===false;else if(k=='paf')S.paf=S.paf===false;else if(k=='h24'){S.h24=S.h24===false;clk()}
 else if(k=='ns.on'){S.ns={...(S.ns||{}),on:!(S.ns&&S.ns.on)}}
 else if(k=='ns.man'){const d=new Date();d.setDate(d.getDate()+1);d.setHours(7,0,0,0);const o=S.ns||{};S.ns={...o,man:o.man&&o.man>Date.now()?0:d.getTime()}}
 sv();theme();warmTint();applyTS();lnRender();sbyUp();libRender();pillUp();return setRr()}
@@ -2316,14 +2381,11 @@ if(c('[data-add]')){if(S.wl.length>=9)return alert('壁紙は9個までです。
 $('#setp').oninput=e=>{const T=e.target;if(T.id=='brs'){S.br=+T.value;bright()}else if(T.id=='tsr'){S.ts=+T.value;applyTS()}else if(T.id=='nsw'){S.ns={...(S.ns||{}),w:+T.value};warmTint()}};
 $('#setp').onchange=e=>{const T=e.target;if(T.id=='dnm'){S.dn=T.value.trim().slice(0,30)||'iPhone';sv();return}if(T.id=='brs'||T.id=='tsr'||T.id=='nsw')return sv();const k=T.dataset.hr;if(!k)return;
 if(k=='dk0'||k=='dk1'){S[k]=+T.value;theme()}else{S.ns={...(S.ns||{}),[k.slice(3)]:+T.value};warmTint()}sv();setRr()};
-$('#pwo').onclick=()=>{$('#pwf').hidden=!$('#pwf').hidden};
-$('#pwc').onclick=()=>{$('#pwf').hidden=true;$('#pw1').value=$('#pw2').value=''};
-$('#pws').onclick=async()=>{const a=$('#pw1').value,b=$('#pw2').value;if(!sb)return noSb();if(a.length<6)return alert('パスワードは6文字以上にしてください');if(a!==b)return alert('2つのパスワードが一致しません');
-const{error}=await sb.auth.updateUser({password:a});if(error)return alert('パスワードを保存できませんでした: '+error.message);$('#pw1').value=$('#pw2').value='';$('#pwf').hidden=true;alert('パスワードを保存しました。次回からこのパスワードでログインできます')};
+
 $$('button.tb').forEach(b=>b.onclick=()=>{S.theme=b.dataset.m;sv();theme()});
 wpApply();bright();warmTint();applyTS();idleArm();shufTick();
 setInterval(()=>{shufTick();warmTint();if(wpCur().t=='wx'||wpCurL().t=='wx')wpApply()},6e4);
-$('#pcset').onclick=PC.set;$('#pcoff').onclick=PC.off;PC.stat();
+plaApply();
 theme();
 (()=>{
 const CATS=['ゲーム','ツール','勉強','エンタメ','ソーシャル','ライフスタイル','ユーティリティ','その他'];
@@ -2653,7 +2715,7 @@ function camGate(){const f=$('#t7 iframe');if(!f)return;const on=S.view=='app'&&
 
 /* ===== 検索設定 ===== */
 const srC=()=>({hist:true,rel:true,imp:true,...(S.sr||{})}),srApp=t=>({s:true,g:true,...((S.sra||{})[t]||{})});
-const SETP=[['壁紙','wp'],['通知','ntf'],['カメラ','cam'],['一般','gen'],['画面表示と明るさ','disp'],['スクリーンタイム','sct'],['検索','srch'],['ホーム画面とアプリライブラリ','hal'],['スタンバイ','sby'],['キーボード','gkb'],['情報','ginfo'],['日付と時刻','gdt'],['ピクチャインピクチャ','gpip'],['アプリのバックグラウンド更新','gbg'],['フォント','gfont'],['言語と地域','glang']];
+const SETP=[['壁紙','wp'],['通知','ntf'],['カメラ','cam'],['一般','gen'],['画面表示と明るさ','disp'],['スクリーンタイム','sct'],['検索','srch'],['ホーム画面とアプリライブラリ','hal'],['スタンバイ','sby'],['キーボード','gkb'],['情報','ginfo'],['日付と時刻','gdt'],['ピクチャインピクチャ','gpip'],['サウンドと触覚','snd'],['Face IDとパスコード','fid'],['アプリのバックグラウンド更新','gbg'],['フォント','gfont'],['言語と地域','glang']];
 PGS.srch=()=>{const c=srC(),L=insA().sort(byN);return hd('検索')+`<div class="isx">検索と“調べる”</div><div class="ig"><div class="ir ni"><span class="il">検索履歴を表示</span>${swB('sr.hist',c.hist)}</div><div class="ir ni"><span class="il">関連コンテンツを表示</span>${swB('sr.rel',c.rel)}</div></div><p class="icp">ホーム画面で検索するときに、最近の検索や、関連する設定項目を表示します。</p><div class="ig"><div class="ir ni"><span class="il">検索結果の改善に協力</span>${swB('sr.imp',c.imp)}</div></div><p class="icp">オンにすると、検索結果をよく使うアプリ順に並べ替え、「Siriからの提案」にもよく使うアプリを表示します。</p><div class="ig">${L.map(t=>`<div class="ir" data-go="sra:${t}"><div class="sti">${APPS[t].i}</div><span class="il">${E(NM[t])}</span><span class="ich">›</span></div>`).join('')}</div>`};
 PGS.sra=t=>{if(!APPS[t])return hd('')+'<div class="ig"><div class="ir ni"><span class="il">このアプリはありません</span></div></div>';const a=srApp(t);return hd(E(NM[t]))+`<div class="isx">ホーム画面上</div><div class="ig"><div class="ir ni"><span class="il">検索で表示</span>${swB('sr.s:'+t,a.s)}</div><div class="ir ni"><span class="il">Appを提案</span>${swB('sr.g:'+t,a.g)}</div></div><p class="icp">「検索で表示」はホーム画面の検索結果に、「Appを提案」は検索画面の「Siriからの提案」に、このアプリを表示するかどうかを切り替えます。</p>`};
 function spot(){const c=srC();showAlo('<div class="alb2"><div class="als">'+SRCH+'<input id="spq" placeholder="検索" autocomplete="off"></div><div id="spr"></div></div>');
@@ -2688,7 +2750,7 @@ function stTop(){const L=insA().map(t=>[t,stTotal(t)]).filter(z=>z[1]>0).sort((a
 function stNtf(t){const k=dkey(new Date()),o=((S.sctn??={})[k]??={});o[t]=(o[t]||0)+1}
 const stMax=v=>[3600,7200,10800,21600,43200,64800,86400].find(x=>x>=v*1.05)||86400,stAx=v=>v>=3600?(v/3600)+'時間':(v/60)+'分';
 function stChart(cols,max,avg,g,ax){const bars=cols.map(c=>{const h=max?Math.min(100,c.tot/max*100):0,inner=c.gray?'<div style="height:100%;background:#d1d1d6"></div>':c.segs.map(s=>`<div style="height:${c.tot?s[1]/c.tot*100:0}%;background:${s[0]}"></div>`).join('');return `<div class="stcol"${c.k?` data-st="day:${c.k}"`:''}><div class="stbar"${c.tot>0?' data-z="1"':''} style="height:${h}%">${inner}</div></div>`}).join(''),ap=max?Math.min(100,avg/max*100):0;
-return `<div class="stg"><div class="stp">${bars}${avg>0?`<div class="stavg${g?' g':''}" style="bottom:${ap}%"></div>`:''}</div><div class="sty"><span style="top:0">${ax}</span>${avg>0?`<span class="stav" style="bottom:${ap}%;${g?'color:#34c759':''}">平均</span>`:''}<span style="bottom:0">0</span></div></div>`}
+return `<div class="stg"><div class="stp">${bars}${avg>0?`<div class="stavg${g?' g':''}" style="bottom:${ap}%"></div>`:''}</div><div class="sty"><span style="top:0">${ax}</span>${avg>0?`<span class="stav" style="bottom:clamp(18px,${ap}%,calc(100% - 18px));${g?'color:#34c759':''}">平均</span>`:''}<span style="bottom:0">0</span></div></div>`}
 const stAvg=days=>{const n=stToday(),el=days.filter(d=>d<=n);return el.length?el.reduce((a,d)=>a+stDayTot(dkey(d)),0)/el.length:0};
 const stCatsHtml=cm=>{const L=stOrd.map(c=>[c,cm[c]||0]).filter(z=>z[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,3);return L.length?`<div class="stcats">${L.map(z=>`<div><b style="color:${stCol(z[0])}">${stNm(z[0])}</b><span>${stFmt(z[1])}</span></div>`).join('')}</div>`:''};
 const stDlab=d=>{const t=stToday(),y=new Date(t.getFullYear(),t.getMonth(),t.getDate()-1),m=(d.getMonth()+1)+'月'+d.getDate()+'日',k=dkey(d);return k==dkey(t)?'今日、'+m:k==dkey(y)?'昨日、'+m:m+WD[d.getDay()]+'曜日'};
@@ -2710,8 +2772,16 @@ return hd('iPhone')+seg+card+`<div class="stup">${upd}</div>`+stList(range)};
 const stInfo=t=>{t=+t;if(t<1000)return{age:'4+',dev:'Apple'};const r=loadX(t-1000)||{};return{age:r.age||r.rating||'4+',dev:r.author||r.developer||r.dev||'このスマホのユーザー'}};
 PGS.sta=t=>{if(!APPS[t])return hd('')+'<div class="ig"><div class="ir ni"><span class="il">このアプリはありません</span></div></div>';const n=stToday(),wk=stWeek(ST.d),cols=wk.map(x=>{const k=dkey(x);return{tot:x>n?0:stAppSec(k,t),segs:[['#3b82f6',x>n?0:stAppSec(k,t)]]}}),mx=stMax(Math.max(1,...cols.map(c=>c.tot))),el=wk.filter(x=>x<=n),sum=cols.reduce((a,c)=>a+c.tot,0),avg=el.length?sum/el.length:0,nt=wk.reduce((a,x)=>a+(((S.sctn||{})[dkey(x)]||{})[t]||0),0),inf=stInfo(t),lim=S.stl&&S.stl[t];
 return hd(E(NM[t]))+`<div class="isx" style="margin-top:0">スクリーンタイム</div><div class="stc"><div class="stb">${stFmt(sum)}</div>${stChart(cols,mx,avg,1,stAx(mx))}<div class="stx w">${WD.split('').map(x=>`<span>${x}</span>`).join('')}</div><div class="sttot"><span>1日の平均</span><span>${stFmt(avg)}</span></div><div class="sttot"><span>通知</span><span>${nt}回</span></div></div><div class="isx">情報</div><div class="ig"><div class="ir"><div class="sti">${APPS[t].i}</div><span class="il"><b>${E(NM[t])}</b></span></div>${row2('カテゴリ',stNm(stCat(t)))}${row2('年齢制限指定',E(inf.age))}${row2('デベロッパ',E(inf.dev))}</div>`+(t==4?'':`<div class="isx">制限</div><div class="ig">${lim?`<div class="ir ni" data-st="lim:${t}"><span class="il">1日の制限時間</span><span class="iv">${stFmt(lim*60)}</span></div><div class="ir ni" data-st="limdel:${t}" style="color:#ff3b30"><span class="il">制限を削除</span></div>`:`<div class="ir ni" data-st="lim:${t}" style="color:#0a84ff"><span class="il">制限を追加</span></div>`}</div><p class="icp">制限時間に達すると、このアプリを開いたときに通知されます。</p>`)};
-function stShift(n){const d=new Date(ST.d);d.setDate(d.getDate()+n*(ST.m=='w'?7:1));if(stWeek(d)[0]>stToday()||d>stToday()&&ST.m!='w')return;ST.d=d;setRr()}
-{let sx=null;$('#setp').addEventListener('pointerdown',e=>{sx=(setCur=='sct'&&e.target.closest('.stc[data-sw2]'))?e.clientX:null});addEventListener('pointerup',e=>{if(sx==null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>60)stShift(dx>0?-1:1)});
+function stShift(n,fn){const o=ST.d,d=new Date(o.getFullYear(),o.getMonth(),o.getDate()+n*(ST.m=='w'?7:1));if(stWeek(d)[0]>stToday()||d>stToday()&&ST.m!='w'){fn&&fn(0);return}ST.d=d;fn?fn(1):setRr()}
+{let sx=null,sy=0,card=null,sw=0,pid=0;const W=()=>PH.clientWidth;
+$('#setp').addEventListener('pointerdown',e=>{card=(setCur=='sct'&&e.target.closest('.stc[data-sw2]'))||null;sx=card?e.clientX:null;sy=e.clientY;sw=0;pid=e.pointerId});
+addEventListener('pointermove',e=>{if(sx==null||!card||e.pointerId!=pid)return;const dx=e.clientX-sx;if(!sw&&Math.abs(dx)>10&&Math.abs(dx)>Math.abs(e.clientY-sy))sw=1;if(sw){card.style.transition='none';card.style.transform='translateX('+dx*.7+'px)';card.style.opacity=String(1-Math.min(.45,Math.abs(dx)/W()))}});
+const stFin=e=>{if(sx==null)return;const dx=e.clientX-sx,c=card;sx=null;card=null;if(!c||!c.isConnected)return;
+if(sw&&Math.abs(dx)>60&&e.type=='pointerup'){const dir=dx>0?-1:1;stShift(dir,ok=>{if(!ok){c.style.transition='transform .35s var(--sp),opacity .2s';c.style.transform='';c.style.opacity='';return}
+c.style.transition='transform .16s ease-in,opacity .16s';c.style.transform='translateX('+(dir>0?-W():W())+'px)';c.style.opacity='0';
+setTimeout(()=>{setRr();const n=$('#setp .stc[data-sw2]');if(n){n.style.transition='none';n.style.transform='translateX('+(dir>0?W()*.5:-W()*.5)+'px)';n.style.opacity='0';void n.offsetWidth;n.style.transition='transform .34s var(--e),opacity .34s';n.style.transform='';n.style.opacity=''}},160)})}
+else{c.style.transition='transform .35s var(--sp),opacity .2s';c.style.transform='';c.style.opacity=''}};
+addEventListener('pointerup',stFin);addEventListener('pointercancel',stFin);
 $('#setp').addEventListener('click',e=>{const s=e.target.closest('[data-st]');if(s){const v=s.dataset.st;if(v=='m:w'||v=='m:d'){ST.m=v[2];setRr()}else if(v.startsWith('day:')){const p=v.slice(4).split('-');ST.d=new Date(+p[0],+p[1]-1,+p[2]);setRr()}else if(v=='today'){ST.d=new Date();setRr()}else if(v=='cat'){ST.cat=ST.cat?0:1;setRr()}
 else if(v.startsWith('lim:')){const t=+v.slice(4),r=prompt('1日の制限時間(分)を入力してください',String((S.stl&&S.stl[t])||30));if(r===null)return;const m=Math.floor(+r);if(!(m>0&&m<=1440))return alert('1〜1440分で入力してください');S.stl??={};S.stl[t]=m;if(S.sti)delete S.sti[t];sv();setRr()}
 else if(v.startsWith('limdel:')){const t=+v.slice(7);if(S.stl)delete S.stl[t];sv();setRr()}return}
@@ -2741,7 +2811,7 @@ PGS.camvq=()=>{const c=ccC();return hd('ビデオ撮影')+`<div class="ig">${Obj
 PGS.camkeep=()=>{const c=ccC();return hd('設定を保持')+`<div class="ig"><div class="ir ni"><span class="il">カメラモード</span>${swB('cc.keepMode',c.keepMode)}</div><div class="ir ni"><span class="il">Live</span>${swB('cc.keepLive',c.keepLive)}</div></div><p class="icp">オンにした項目は、カメラを開き直しても前回の設定のままになります。</p>`};
 const ntT=ts=>{const d=new Date(ts),n=new Date(),hm=pad(d.getHours())+':'+pad(d.getMinutes()),dd=Math.floor((new Date(n).setHours(0,0,0,0)-new Date(d).setHours(0,0,0,0))/864e5);return dd<=0?hm:dd==1?'昨日 '+hm:dd<7?'日月火水木金土'[d.getDay()]+' '+hm:(d.getMonth()+1)+'/'+d.getDate()};
 const apOn=(t,x)=>!(S.ap&&S.ap[t]&&S.ap[t][x]===false);
-function pushNtf(t,ti,bd){try{stNtf(t)}catch(e){}if(S.nt0===false||!apOn(t,'n')||!APPS[t])return;S.ntl=S.ntl||[];S.ntl.unshift({id:rid(),t,ti:String(ti).slice(0,80),b:String(bd||'').slice(0,200),ts:Date.now()});S.ntl.length=Math.min(S.ntl.length,50);save();lnRender();sbyUp()}
+function pushNtf(t,ti,bd){try{stNtf(t)}catch(e){}if(S.nt0===false||!apOn(t,'n')||!APPS[t])return;S.ntl=S.ntl||[];S.ntl.unshift({id:rid(),t,ti:String(ti).slice(0,80),b:String(bd||'').slice(0,200),ts:Date.now()});S.ntl.length=Math.min(S.ntl.length,50);save();lnRender();sbyUp();try{sdTone();sdHap(12)}catch(e){}}
 function lnRender(){const w=$('#ln'),L=(S.ntl||[]).filter(n=>APPS[n.t]),on=S.nt0!==false&&S.nlk!==false&&L.length>0;w.hidden=!on;if(!on)return;
 $('#lnl').innerHTML=L.slice(0,4).map(n=>`<div class="nc" data-id="${n.id}"><div class="ncb"><span data-nop="${n.id}">オプション</span><span data-ndl="${n.id}">消去</span></div><div class="nci">${APPS[n.t].i}<div class="nx"><b>${E(n.ti)}</b><span>${E(n.b)}</span></div><em>${ntT(n.ts)}</em></div></div>`).join('')+(L.length>4?`<div class="nmo">他${L.length-4}件の通知</div>`:'')}
 (()=>{const w=$('#ln');let c=null,x0=null,y0,dx=0,dy=0;const rs=()=>{if(c){c.style.transition='';c.style.transform=''}};
@@ -2790,7 +2860,8 @@ const icH=t=>`<div class="ic2" data-t="${t}"><div class="ai">${APPS[t].i}</div><
 ALP.addEventListener('click',e=>{const a=e.target.closest('.ai[data-t],.alw[data-t]');if(a)return openApp(+a.dataset.t,a);const f=e.target.closest('.alt[data-f]');if(f){const g=LG[+f.dataset.f];if(g)showAlo(`<div class="alb2"><b>${E(g[0])}</b><div class="alg3">${g[1].map(icH).join('')}</div></div>`)}});
 ALP.addEventListener('input',e=>{if(e.target.id=='alq')libRender()});
 $('#hsp').onclick=spot;
-$('#alo').addEventListener('click',e=>{const a=e.target.closest('[data-t]');if(a){hideAlo();return openApp(+a.dataset.t,a)}if(!e.target.closest('input,.als,.alb2>b,.alg3'))hideAlo()});
+function closeAlo(){const a=document.activeElement;if(a&&a.blur)a.blur();requestAnimationFrame(()=>{hideAlo();scrollTo(0,0);PH.style.opacity='.999';requestAnimationFrame(()=>{PH.style.opacity='';scrollTo(0,0)});setTimeout(()=>scrollTo(0,0),350)})}
+$('#alo').addEventListener('click',e=>{const a=e.target.closest('[data-t]');if(a){hideAlo();return openApp(+a.dataset.t,a)}if(!e.target.closest('input,.als,.alb2>b,.alg3,.sphi,.sph,button'))closeAlo()});
 function pillUp(){const on=S.hsp!==false;$('#hsp').style.display=on?'flex':'none';$('#dots2').style.bottom=on?'calc(var(--w)*.275 + 72px)':''}
 const swr=(l,k,on)=>`<div class="ir ni"><span class="il">${l}</span>${swB(k,on)}</div>`,chk=(l,k,on)=>`<div class="ir ni" data-nd="${k}"><span class="il">${l}</span>${on?'<span style="color:#2563eb">✓</span>':''}</div>`;
 Object.assign(PGS,{
@@ -2806,7 +2877,7 @@ const delOK=t=>t>=1000&&!isOff(t);
 function delApp(t){if(confirm('「'+NM[t]+'」を削除しますか?\nこのアプリとデータがこのスマホから削除されます。この操作は取り消せません。'))removeApp(t)}
 const cmOut=e=>{if(!e.target.closest('#cm'))cmHide()};
 function cmHide(){const m=$('#cm');if(m)m.remove();removeEventListener('pointerdown',cmOut,true)}
-function ctxMenu(items,el){cmHide();const m=document.createElement('div');m.id='cm';m.innerHTML=items.map((it,i)=>`<div data-i="${i}"${it[2]?' class="dg"':''}>${it[0]}</div>`).join('');PH.append(m);
+function ctxMenu(items,el){cmHide();try{sdHap(10)}catch(e){}const m=document.createElement('div');m.id='cm';m.innerHTML=items.map((it,i)=>`<div data-i="${i}"${it[2]?' class="dg"':''}>${it[0]}</div>`).join('');PH.append(m);
 const q=PH.getBoundingClientRect(),r=el.getBoundingClientRect();let top=r.bottom-q.top+8;if(top+items.length*46>q.height-20)top=r.top-q.top-items.length*46-8;
 m.style.top=Math.max(8,top)+'px';m.style.left=Math.max(8,Math.min(q.width-208,r.left-q.left+r.width/2-100))+'px';
 m.onclick=e=>{const i=e.target.closest('[data-i]');if(!i)return;const f=items[+i.dataset.i][1];cmHide();f()};setTimeout(()=>addEventListener('pointerdown',cmOut,true),0)}
@@ -2881,6 +2952,149 @@ S.inst.forEach(t=>{if(!all().includes(t)&&!(S.lo&&S.lo[t]))S.hm.p[S.hm.p.length-
 renderHome();theme();save();
 }
 boot();
+
+/* ===== サウンドと触覚 / 消音モード ===== */
+let SAC=null;const sac=()=>{try{SAC=SAC||new (window.AudioContext||window.webkitAudioContext)();if(SAC.state=='suspended')SAC.resume()}catch(e){}return SAC};
+addEventListener('pointerdown',()=>{sac()},{once:true,passive:true});
+const TONES={rebound:['リバウンド',[[880,0,.09],[1320,.09,.16]]],chord:['和音',[[523,0,.5],[659,0,.5],[784,0,.5]]],bell:['ベル',[[1568,0,.4],[2093,0,.4]]],pop:['ポップ',[[660,0,.06],[990,.07,.1]]],glass:['グラス',[[1760,0,.45]]],none:['なし',[]]};
+const HAPN={always:'常に再生',sil:'消音モード時に再生',never:'再生しない'};
+function sdTone(k,force){const s=sdh();if(!force&&s.sil)return;const t=TONES[k||s.tone];if(!t||!t[1].length)return;const c=sac();if(!c)return;const v=Math.max(0,Math.min(1,s.vol/100))*.28;
+t[1].forEach(([f,at,d])=>{const o=c.createOscillator(),g=c.createGain(),t0=c.currentTime+at;o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.01);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.15);o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+.2)})}
+function sdHap(p,force){const s=sdh();if(!navigator.vibrate)return;if(!force){if(!s.sh)return}if(s.hap=='never')return;if(s.hap=='sil'&&!s.sil)return;try{navigator.vibrate(p||8)}catch(e){}}
+function sdLock(){const s=sdh();sdHap(10);if(s.sil||!s.lk)return;try{const c=sac(),o=c.createOscillator(),g=c.createGain(),n=c.currentTime;o.type='triangle';o.frequency.setValueAtTime(420,n);o.frequency.exponentialRampToValueAtTime(210,n+.06);g.gain.setValueAtTime(.12*s.vol/100+.02,n);g.gain.exponentialRampToValueAtTime(.0001,n+.09);o.connect(g);g.connect(c.destination);o.start();o.stop(n+.1)}catch(e){}}
+function silApply(){const s=sdh();PH.classList.toggle('sil',!!(s.sil&&s.sb))}
+silApply();
+const swX=(k,on)=>`<button class="swc${on?' on':''}" data-sx="sw:${k}" role="switch" aria-checked="${!!on}"><i></i></button>`;
+const kbSum=()=>{const c=kbCfg();return [c.snd?'サウンド':'',(c.hap&&navigator.vibrate)?'触覚':''].filter(Boolean).join('、')||'なし'};
+const SPK=(w)=>`<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="currentColor" style="color:var(--mu)"><path d="M4 10h3l4-3.2v10.4L7 14H4z"/></svg>`;
+const PCRQ=[[0,'すぐに'],[60,'1分後'],[300,'5分後'],[900,'15分後'],[3600,'1時間後'],[14400,'4時間後']];
+function plaApply(){const l=$('#lock');if(l)l.classList.toggle('noln',!!S.pass&&(S.pla||{}).ntf===false)}
+window.fidRr=()=>{if((setCur=='fid')&&!$('#setp').hidden)setRr()};
+Object.assign(PGS,{
+snd:()=>{const s=sdh(),vib=!!navigator.vibrate;
+return hd('サウンドと触覚')+`<div class="isx">消音モード</div><div class="ig"><div class="ir ni"><span class="il">消音モード</span>${swX('sil',s.sil)}</div><div class="ir ni"><span class="il">ステータスバーに表示</span>${swX('sb',s.sb)}</div></div><p class="icp">オンにすると、通知音・キーボードのサウンド・ロック時の音が再生されなくなります。</p>
+<div class="isx">通知音</div><div class="ig"><div class="ir ni brr">${SPK(16)}<input type="range" id="sdv" min="0" max="100" value="${s.vol}">${SPK(24)}</div>${vib?`<div class="ir ni" data-go="sndh"><span class="il">触覚</span><span class="iv">${HAPN[s.hap]}</span><span class="ich">›</span></div>`:''}</div>
+<div class="ig"><div class="ir ni" data-go="sndt"><span class="il">デフォルトの通知音</span><span class="iv">${(TONES[s.tone]||TONES.rebound)[0]}</span><span class="ich">›</span></div></div><p class="icp">アプリからの通知が届いたときの音と音量です。</p>
+<div class="ig"><div class="ir ni" data-go="sndk"><span class="il">キーボードのフィードバック</span><span class="iv">${kbSum()}</span><span class="ich">›</span></div><div class="ir ni"><span class="il">ロック時の音</span>${swX('lk',s.lk)}</div>${vib?`<div class="ir ni"><span class="il">システムの触覚</span>${swX('sh',s.sh)}</div>`:''}</div>${vib?'<p class="icp">システムコントロールと操作のために触覚を再生します。</p>':''}`},
+sndt:()=>{const s=sdh();return hd('デフォルトの通知音')+`<div class="isx">通知音</div><div class="ig">${Object.keys(TONES).map(k=>`<div class="ir ni" data-sx="tone:${k}"><span class="il">${TONES[k][0]}</span>${s.tone==k?'<span style="color:#2563eb">✓</span>':''}</div>`).join('')}</div>`},
+sndh:()=>{const s=sdh();return hd('触覚')+`<div class="ig">${Object.keys(HAPN).map(k=>`<div class="ir ni" data-sx="hap:${k}"><span class="il">${HAPN[k]}</span>${s.hap==k?'<span style="color:#2563eb">✓</span>':''}</div>`).join('')}</div>`},
+sndk:()=>{const c=kbCfg();return hd('キーボードのフィードバック')+`<div class="ig"><div class="ir ni"><span class="il">サウンド</span>${swX('kb.snd',c.snd)}</div>${navigator.vibrate?`<div class="ir ni"><span class="il">触覚</span>${swX('kb.hap',c.hap)}</div>`:''}</div>`},
+fid:()=>{const on=!!S.pass,rq=(PCRQ.find(z=>z[0]==(S.pcr||0))||PCRQ[0])[1],la=S.pla||{},login=!!(window.PCL&&PCL.uid());
+return hd('Face IDとパスコード')+(on?`<div class="ig"><div class="ir ni" data-fx="off" style="color:#0a84ff"><span class="il">パスコードをオフにする</span></div><div class="ir ni" data-fx="chg" style="color:#0a84ff"><span class="il">パスコードを変更</span></div></div>
+<div class="ig"><div class="ir ni" data-go="fidr"><span class="il">パスコードを要求</span><span class="iv">${rq}</span><span class="ich">›</span></div></div>
+<div class="isx">ロック中にアクセスを許可:</div><div class="ig"><div class="ir ni"><span class="il">通知センター</span>${swX('pla.ntf',la.ntf!==false)}</div></div>
+<div class="ig"><div class="ir ni"><span class="il">データを消去</span>${swX('pla.wipe',!!la.wipe)}</div></div><p class="icp">パスコードの入力に10回失敗すると、このスマホ内のアプリと設定のデータが消去されます。</p>`
+:`<div class="ig"><div class="ir ni" data-fx="chg" style="color:#0a84ff"><span class="il">パスコードをオンにする</span></div></div><p class="icp">パスコードをオンにすると、ロック画面を上にスライドしたときに6桁のパスコードの入力が必要になります。</p>`)
++(login?`<div class="isx">アカウント</div><div class="ig"><div class="ir ni" data-fx="pw"><span class="il">アカウントのパスワードを変更</span><span class="ich">›</span></div></div>`:'')},
+fidr:()=>hd('パスコードを要求')+`<div class="ig">${PCRQ.map(z=>`<div class="ir ni" data-fx="rq:${z[0]}"><span class="il">${z[1]}</span>${(S.pcr||0)==z[0]?'<span style="color:#2563eb">✓</span>':''}</div>`).join('')}</div>`,
+fidw:()=>hd('パスワードを変更')+`<div class="ig"><div class="ir ni"><input id="pw1" type="password" placeholder="新しいパスワード(6文字以上)" autocomplete="new-password" style="width:100%;border-radius:12px"></div><div class="ir ni"><input id="pw2" type="password" placeholder="もう一度入力" autocomplete="new-password" style="width:100%;border-radius:12px"></div></div><div class="ig"><div class="ir ni" data-fx="pws" style="color:#0a84ff"><span class="il">保存</span></div></div>`
+});
+$('#setp').addEventListener('click',async e=>{
+const x=e.target.closest('[data-sx]');
+if(x){const p=x.dataset.sx.split(':'),a=p[0],k=p[1],s=sdh();
+ if(a=='sw'){
+  if(k=='kb.snd'||k=='kb.hap'){const q=k.slice(3),c=kbCfg();S.kb=Object.assign({},c,{[q]:!c[q]});sv();kbPush()}
+  else if(k=='pla.ntf'){const o=S.pla||{};S.pla=Object.assign({},o,{ntf:o.ntf===false});sv();plaApply()}
+  else if(k=='pla.wipe'){const o=S.pla||{};if(!o.wipe&&!confirm('パスコードの入力に10回失敗すると、このスマホ内のアプリと設定のデータが消去されます。オンにしますか?'))return;S.pla=Object.assign({},o,{wipe:!o.wipe});S.pcf=0;sv()}
+  else{S.sdh=Object.assign({},s,{[k]:!s[k]});sv();if(k=='sil'){silApply();kbPush()}else if(k=='sb')silApply();else if(k=='sh'&&!s.sh)sdHap(14,1)}
+ }else if(a=='tone'){S.sdh=Object.assign({},s,{tone:k});sv();sdTone(k,1)}
+ else if(a=='hap'){S.sdh=Object.assign({},s,{hap:k});sv();sdHap(14,1)}
+ setRr();return}
+const f=e.target.closest('[data-fx]');
+if(f){const fx=f.dataset.fx;
+ if(fx=='off')PC.off();else if(fx=='chg')PC.set();else if(fx=='pw')setNav('fidw');
+ else if(fx.startsWith('rq:')){S.pcr=+fx.slice(3);sv();setNav('fid',1)}
+ else if(fx=='pws'){const a=$('#pw1').value,b=$('#pw2').value;if(!(window.PCL&&PCL.uid()))return alert('ログインしていません');if(!sb)return alert('サーバーに接続できません');if(a.length<6)return alert('パスワードは6文字以上にしてください');if(a!==b)return alert('2つのパスワードが一致しません');
+  const{error}=await sb.auth.updateUser({password:a});if(error)return alert('パスワードを保存できませんでした: '+error.message);alert('パスワードを保存しました。次回からこのパスワードでログインできます');setNav('fid',1)}}
+});
+$('#setp').addEventListener('input',e=>{if(e.target.id=='sdv')S.sdh=Object.assign({},sdh(),{vol:+e.target.value})});
+$('#setp').addEventListener('change',e=>{if(e.target.id=='sdv'){sv();sdTone(null,1)}});
+plaApply();
+
+/* ===== 設定・App Store: 左端から右スワイプで戻る ===== */
+(()=>{const z=document.createElement('div');z.id='edg';AP.append(z);const M=$('main');
+const can=()=>{if(PH.dataset.v!='app'||AP.dataset.k=='ext')return 0;if(S.tab==4)return setCur!='main';if(S.tab==5){const q=$('#sdl');return !!(q&&!q.hidden&&q.querySelector('#sbk2,#sbk3'))}return 0};
+const go=()=>{if(S.tab==4)setNav(parentOf(setCur),1);else{const q=$('#sdl'),b=q.querySelector('#sbk2')||q.querySelector('#sbk3');b&&b.click()}};
+const up=()=>{z.style.display=can()?'block':'none'};setInterval(up,250);new MutationObserver(up).observe(PH,{attributes:true,attributeFilter:['data-v']});
+let x0=0,dx=0,on=0;
+z.addEventListener('pointerdown',e=>{if(!can())return;on=1;x0=e.clientX;dx=0;try{z.setPointerCapture(e.pointerId)}catch(_){}M.style.transition='none'});
+z.addEventListener('pointermove',e=>{if(!on)return;dx=Math.max(0,e.clientX-x0);M.style.transform='translateX('+dx+'px)';M.style.opacity=String(1-Math.min(.5,dx/PH.clientWidth*.6))});
+const end=e=>{if(!on)return;on=0;const W=PH.clientWidth;M.style.transition='transform .22s var(--e),opacity .22s';
+if(dx>W*.28&&e.type=='pointerup'){M.style.transform='translateX('+W+'px)';M.style.opacity='0';setTimeout(()=>{M.style.transition='none';go();M.style.transform='translateX(-26%)';M.style.opacity='.4';void M.offsetWidth;M.style.transition='transform .26s var(--e),opacity .26s';M.style.transform='';M.style.opacity='';setTimeout(()=>{M.style.transition=''},300)},200)}
+else{M.style.transform='';M.style.opacity='';setTimeout(()=>{M.style.transition=''},260)}};
+z.addEventListener('pointerup',end);z.addEventListener('pointercancel',end)})();
+
+/* ===== アプリライブラリ ===== */
+// 何もない所を押す → キーボードを閉じてホーム画面へ
+ALP.addEventListener('click',e=>{if(e.target.closest('.ai,.alw,.alt,.alm,.als,#alq'))return;const q=$('#alq');if(q){q.blur();if(q.value){q.value='';libRender()}}scrollTo(0,0);pcur=Math.max(0,$$('.pg').length-1);pgGo()});
+// 長押ししたままドラッグ → ホーム画面へ移動して追加
+(()=>{let st=null;
+ALP.addEventListener('pointerdown',e=>{const a=e.target.closest('.ai[data-t]');if(!a||S.view!='home'){st=null;return}st={t:+a.dataset.t,x:e.clientX,y:e.clientY,lp:0,done:0};st.tm=setTimeout(()=>{if(st)st.lp=1},450)});
+addEventListener('pointermove',e=>{if(!st||st.done)return;const m=Math.hypot(e.clientX-st.x,e.clientY-st.y);
+if(!st.lp){if(m>10){clearTimeout(st.tm);st=null}return}
+if(m<8)return;st.done=1;clearTimeout(st.tm);cmHide();const t=st.t;
+try{ALP.dispatchEvent(new Event('pointercancel'))}catch(_){}
+if(S.lo)delete S.lo[t];
+const inFd=Object.values(S.fd||{}).some(F=>F.a.includes(t));
+if(!inFd&&!S.hm.p.some(a=>a.includes(t))&&!S.hm.d.includes(t)){const l=S.hm.p[S.hm.p.length-1];if(l.length<20)l.push(t);else S.hm.p.push([t])}
+save();renderHome();setEdit(1);
+const ic=$$('#home .pg .ic').find(x=>+x.dataset.t==t);if(ic)dragStart(ic,e)});
+const fin=()=>{if(st){clearTimeout(st.tm)}st=null};addEventListener('pointerup',fin);addEventListener('pointercancel',fin)})();
+
+/* ===== ロック画面: 壁紙一覧・カスタマイズ・ショートカット ===== */
+const LKF={sf:['標準','',''],rd:['丸ゴシック','"Hiragino Maru Gothic ProN","Zen Maru Gothic",ui-rounded,sans-serif','700'],mn:['明朝','"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif','600'],mo:['等幅','ui-monospace,Menlo,Consolas,monospace','600'],bk:['極太','-apple-system,"SF Pro Display",system-ui,sans-serif','900'],th:['細字','-apple-system,"SF Pro Display",system-ui,sans-serif','200']};
+const LKC={wh:['ホワイト',''],sw:['白','#fff'],yl:['イエロー','#ffe066'],pk:['ピンク','#ffb3d1'],bl:['ブルー','#9cd3ff'],gr:['グリーン','#a8f0c0'],bk:['ブラック','#111']};
+const lkDef=()=>({f:'sf',c:'wh',l:7,r:0});
+const lkCfg=id=>Object.assign(lkDef(),(S.lks||{})[id]||{});
+const lkGl=t=>t==7?'<svg width="26" height="26" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>':(t&&APPS[t]?`<div class="ai" style="width:38px">${APPS[t].i}</div>`:'');
+function lkApply(){const c=lkCfg(S.wcl),lt=$('#lt'),f=LKF[c.f]||LKF.sf,col=(LKC[c.c]||LKC.wh)[1];
+lt.style.fontFamily=f[1];lt.style.fontWeight=f[2];lt.style.color=col;lt.style.textShadow=c.c=='bk'?'none':'';
+[['l','#lbL'],['r','#lbR']].forEach(([k,q])=>{const b=$(q),t=c[k],ok=t&&APPS[t];b.style.display=ok?'':'none';b.innerHTML=ok?lkGl(t):''})}
+function lkShort(sd){const t=lkCfg(S.wcl)[sd];if(!t||!APPS[t])return;const b=$(sd=='l'?'#lbL':'#lbR'),go=()=>{PC.open();openApp(t,b)};if(S.pass&&pcNeed())PC.ask(go);else go()}
+const wpNm=w=>w.t=='pre'?((PRE[w.k]||{}).n||'壁紙'):({photo:'写真',shuf:'シャッフル',emoji:'絵文字',color:'カラー',wx:'天気',astro:'天文'})[w.t]||'壁紙';
+function lkCard(w){const c=lkCfg(w.id),f=LKF[c.f]||LKF.sf,col=(LKC[c.c]||LKC.wh)[1],n=new Date(),H=S.h24===false?(n.getHours()%12||12):n.getHours();
+const ts=(f[1]?`font-family:${f[1]};font-weight:${f[2]};`:'')+(col?`color:${col};`:'')+(c.c=='bk'?'text-shadow:none;':'');
+return `<div class="lkw" data-id="${E(w.id)}"><div class="lkp" style="background:${wpBg(w,1)}"><div class="d">${E(ldate(n))}</div><div class="t" style="${ts}">${H}:${pad(n.getMinutes())}</div></div><div class="lkl">${E(wpNm(w))}</div></div>`}
+function lkAdd(g,draw){const s=document.createElement('div');s.className='lksh';
+s.innerHTML=`<b>新しい壁紙</b><div class="lkr" data-k="photo"><span>写真から選ぶ</span><span></span><span>›</span></div><div class="lkr" data-k="color"><span>カラー</span><span></span><span>›</span></div><div class="lksub">プリセット</div><div class="lkpres">${Object.keys(PRE).map(k=>`<div class="lkpi" data-k="pre:${k}"><i style="background:${PRE[k].c}"></i><span>${E(PRE[k].n)}</span></div>`).join('')}</div><button class="lkcl" data-k="x">キャンセル</button>`;
+g.append(s);requestAnimationFrame(()=>s.classList.add('on'));
+const add=w=>{w.id='w'+Date.now().toString(36)+Math.floor(Math.random()*99);S.wl.push(w);sv();s.remove();draw(w.id)};
+s.onclick=e=>{const q=e.target.closest('[data-k]');if(!q)return;const v=q.dataset.k;
+if(v=='x')return s.remove();
+if(v.startsWith('pre:'))return add({t:'pre',k:v.slice(4)});
+if(v=='color'){const i=document.createElement('input');i.type='color';i.value='#4f8ba5';i.style.cssText='position:absolute;opacity:0;pointer-events:none';s.append(i);i.onchange=()=>add({t:'color',a:i.value,g:0});i.click();return}
+if(v=='photo'){const i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const m=1200,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);add({t:'photo',d:c.toDataURL('image/jpeg',.82)})};im.src=r.result};r.readAsDataURL(f)};i.click()}}}
+function lkGal(){if($('#lkg')||S.view!='lock')return;const g=document.createElement('div');g.id='lkg';g.style.setProperty('--ar',PH.clientWidth/PH.clientHeight);
+const mark=()=>{const c=$('#lkc');if(!c)return;const mid=c.scrollLeft+c.clientWidth/2;let best=null,bd=1e9;[...c.children].forEach(w=>{const d=Math.abs(w.offsetLeft+w.offsetWidth/2-mid);w.classList.remove('cur');if(d<bd){bd=d;best=w}});if(best){best.classList.add('cur');g._cur=best.dataset.id||null;const b=g.querySelector('[data-a=cu]');if(b)b.style.visibility=g._cur?'':'hidden'}};
+const draw=sel=>{g.innerHTML=`<div class="lkh"><button data-a="x">完了</button></div><div class="lkc" id="lkc">${S.wl.map(lkCard).join('')}<div class="lkw" data-a="add"><div class="lkp lkpn"><b>＋</b></div><div class="lkl">新規</div></div></div><div class="lkb"><button data-a="cu">カスタマイズ</button></div>`;
+const c=$('#lkc'),el=c.querySelector(`.lkw[data-id="${sel}"]`);c.addEventListener('scroll',mark);requestAnimationFrame(()=>{if(el)c.scrollLeft=el.offsetLeft+el.offsetWidth/2-c.clientWidth/2;mark()})};
+const close=(ap,cb)=>{if(ap&&g._cur)wSetT(g._cur,'l');g.classList.remove('on');setTimeout(()=>{g.remove();cb&&cb()},280)};
+g.onclick=e=>{const a=e.target.closest('[data-a]'),w=e.target.closest('.lkw');
+if(a){const k=a.dataset.a;if(k=='x')return close(1);if(k=='cu'&&g._cur){const id=g._cur;return close(1,()=>lkEdit(id))}if(k=='add')return lkAdd(g,draw);return}
+if(w&&w.dataset.id){if(w.classList.contains('cur'))close(1);else w.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})}};
+PH.append(g);draw(S.wcl);requestAnimationFrame(()=>g.classList.add('on'));sdHap(12)}
+function lkEdit(id){const w=S.wl.find(x=>x.id==id);if(!w||$('#lke'))return;let dr=lkCfg(id),side='l';const e=document.createElement('div');e.id='lke';
+e.innerHTML=`<div class="lkbg" style="background:${wpBg(w,1)}"></div><div class="lket"><button data-a="cancel">キャンセル</button><button data-a="reset">リセット</button></div><div class="lc"><div class="lke-d"></div><div class="lke-t" data-a="time"></div></div><button class="lb" data-a="l" style="left:11%"></button><button class="lb" data-a="r" style="right:11%"></button><button class="lkdn" data-a="done">完了</button><div class="lksh" id="lksh"></div>`;
+const sh=()=>e.querySelector('#lksh'),clock=()=>{const n=new Date();return (S.h24===false?(n.getHours()%12||12):n.getHours())+':'+pad(n.getMinutes())};
+const rd=()=>{const f=LKF[dr.f]||LKF.sf,col=(LKC[dr.c]||LKC.wh)[1],t=e.querySelector('.lke-t');e.querySelector('.lke-d').textContent=ldate(new Date());t.textContent=clock();t.style.fontFamily=f[1];t.style.fontWeight=f[2];t.style.color=col;t.style.textShadow=dr.c=='bk'?'none':'';
+['l','r'].forEach(k=>{const b=e.querySelector(`.lb[data-a=${k}]`),v=dr[k];b.classList.toggle('emp',!v);b.innerHTML=v?lkGl(v):'<span style="font-size:28px;line-height:1">＋</span>'})};
+const shTime=()=>{const q=sh();q.innerHTML=`<b>時間の表示</b><div class="lkrow">${Object.keys(LKF).map(k=>`<button class="lkchip${dr.f==k?' sel':''}" data-f="${k}" style="${LKF[k][1]?`font-family:${LKF[k][1]};font-weight:${LKF[k][2]}`:'font-weight:700'}">${LKF[k][0]}</button>`).join('')}</div><div class="lkrow">${Object.keys(LKC).map(k=>`<button class="lkdot${dr.c==k?' sel':''}" data-c="${k}" aria-label="${LKC[k][0]}" style="background:${LKC[k][1]||'rgba(255,255,255,.72)'}"></button>`).join('')}</div><div class="lkr" data-a="h24"><span>24時間表示</span><span></span><span class="lksw${S.h24!==false?' on':''}"></span></div><button class="lkcl" data-a="shx">閉じる</button>`;q.classList.add('on')};
+const shApp=k=>{side=k;const q=sh();q.innerHTML=`<b>${k=='l'?'左':'右'}のショートカット</b><div class="lkr" data-p="0"><span>なし</span><span></span><span>${!dr[k]?'✓':''}</span></div>${insA().sort(byN).map(t=>`<div class="lkr" data-p="${t}"><div class="ai" style="width:34px">${APPS[t].i}</div><span>${E(NM[t])}</span><span>${dr[k]==t?'✓':''}</span></div>`).join('')}<button class="lkcl" data-a="shx">閉じる</button>`;q.classList.add('on')};
+const fin=ok=>{if(ok){S.lks=Object.assign({},S.lks||{},{[id]:dr});sv();lkApply()}e.classList.remove('on');setTimeout(()=>e.remove(),280)};
+e.onclick=ev=>{const f=ev.target.closest('[data-f]'),c=ev.target.closest('[data-c]'),p=ev.target.closest('[data-p]'),a=ev.target.closest('[data-a]');
+if(f){dr.f=f.dataset.f;rd();shTime();return}if(c){dr.c=c.dataset.c;rd();shTime();return}
+if(p){dr[side]=+p.dataset.p;rd();sh().classList.remove('on');return}
+if(!a){if(!ev.target.closest('.lksh'))sh().classList.remove('on');return}
+const k=a.dataset.a;
+if(k=='time')shTime();else if(k=='l'||k=='r')shApp(k);else if(k=='h24'){S.h24=S.h24===false;sv();clk();rd();shTime()}else if(k=='shx')sh().classList.remove('on');
+else if(k=='reset'){dr=lkDef();rd();sh().classList.remove('on')}else if(k=='cancel')fin(0);else if(k=='done')fin(1)};
+PH.append(e);rd();requestAnimationFrame(()=>e.classList.add('on'))}
+// ロック画面を長押し → 壁紙一覧
+(()=>{const l=$('#lock');let tm=0,x0=0,y0=0;
+l.addEventListener('pointerdown',e=>{if(l.classList.contains('pc')||e.target.closest('.lb,#ln')||asleep)return;x0=e.clientX;y0=e.clientY;clearTimeout(tm);tm=setTimeout(()=>{tm=0;try{l.dispatchEvent(new Event('pointercancel'))}catch(_){}lkGal()},520)});
+addEventListener('pointermove',e=>{if(tm&&Math.hypot(e.clientX-x0,e.clientY-y0)>10){clearTimeout(tm);tm=0}});
+['pointerup','pointercancel'].forEach(t=>addEventListener(t,()=>{clearTimeout(tm);tm=0}))})();
+lkApply();
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
 const inEdit=e=>{const n=e.target&&e.target.nodeType==3?e.target.parentElement:e.target;return !!(n&&n.closest&&n.closest('input,textarea,[contenteditable="true"]'))};
 document.addEventListener('contextmenu',e=>{if(!inEdit(e))e.preventDefault()});
